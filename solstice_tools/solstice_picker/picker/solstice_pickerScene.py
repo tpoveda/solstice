@@ -18,6 +18,8 @@ except:
     from PySide.QtGui import *
     from PySide.QtCore import *
 
+import solstice_pickerButtons as btn
+
 class solstice_pickerScene(QGraphicsScene, object):
 
     """
@@ -30,6 +32,8 @@ class solstice_pickerScene(QGraphicsScene, object):
     def __init__(self, parent=None):
         super(solstice_pickerScene, self).__init__(parent=parent)
 
+        self._buttons = list()
+
         self.setDefaultSize()
 
     def setSize(self, width, height):
@@ -40,3 +44,8 @@ class solstice_pickerScene(QGraphicsScene, object):
 
     def getBoundingRect(self):
         return self.itemsBoundingRect()
+
+    def addButton(self):
+        newBtn = btn.solstice_fkButton()
+        self.addWidget(newBtn)
+        self._buttons.append(newBtn)

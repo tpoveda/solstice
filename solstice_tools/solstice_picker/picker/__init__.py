@@ -1,5 +1,7 @@
+import solstice_pickerColors
 import solstice_pickerUtils
-import solstice_pickerButton
+import solstice_pickerBaseButton
+import solstice_pickerButtons
 import solstice_pickerTab
 import solstice_pickerScene
 import solstice_pickerView
@@ -7,8 +9,10 @@ import solstice_picker
 import solstice_pickerWindow
 
 def _reload():
+    reload(solstice_pickerColors)
     reload(solstice_pickerUtils)
-    reload(solstice_pickerButton)
+    reload(solstice_pickerBaseButton)
+    reload(solstice_pickerButtons)
     reload(solstice_pickerTab)
     reload(solstice_pickerScene)
     reload(solstice_pickerView)

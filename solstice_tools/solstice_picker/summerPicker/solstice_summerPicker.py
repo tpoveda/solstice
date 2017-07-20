@@ -46,7 +46,6 @@ class solstice_summerPicker(window.solstice_pickerWindow, object):
 
         super(solstice_summerPicker, self).__init__('summerPicker', 'Solstice - Summer Picker', 'Summer')
 
-
     def initSetup(self):
         return True
     
@@ -60,8 +59,8 @@ class solstice_summerPicker(window.solstice_pickerWindow, object):
 
             self.setCharacterImage(os.path.join(imagesPath, 'summer_icon.png'))
 
-            summerBodyPicker = bodyPicker.solstice_summerBodyPicker(imagePath=os.path.join(imagesPath, 'pickerSummer_body.png'))
-            summerFacialPicker = facialPicker.solstice_summerFacialPicker(imagePath=os.path.join(imagesPath, 'pickerSummer_facial.png'))
+            self.bp = bodyPicker.solstice_summerBodyPicker(imagePath=os.path.join(imagesPath, 'pickerSummer_body.png'))
+            self.fp = facialPicker.solstice_summerFacialPicker(imagePath=os.path.join(imagesPath, 'pickerSummer_facial.png'))
 
             if self._fullWindow:
                 self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -71,14 +70,14 @@ class solstice_summerPicker(window.solstice_pickerWindow, object):
                 fullPickersLayout.setContentsMargins(5,5,5,5)
                 fullPickersLayout.setSpacing(2)
                 self.mainLayout.addLayout(fullPickersLayout)
-                for picker in [summerBodyPicker, summerFacialPicker]:
+                for picker in [self.bp, self.fp]:
                     fullPickersLayout.addWidget(picker)
 
             else:
                 self.charTab = QTabWidget()
                 self.mainLayout.addWidget(self.charTab)
-                self.charTab.addTab(summerBodyPicker, 'Body')
-                self.charTab.addTab(summerFacialPicker, 'Facial')
+                self.charTab.addTab(self.bp, 'Body')
+                self.charTab.addTab(self.fp, 'Facial')
 
     def setFullWindow(self, fullWindow):
         self._fullWindow = fullWindow

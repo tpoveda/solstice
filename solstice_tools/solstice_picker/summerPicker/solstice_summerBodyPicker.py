@@ -27,3 +27,5 @@ class solstice_summerBodyPicker(picker.solstice_picker):
     def __init__(self, imagePath=None, parent=None):
 
         super(solstice_summerBodyPicker, self).__init__(imagePath=imagePath, parent=parent)
+
+        self.addButton()

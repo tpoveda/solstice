@@ -21,8 +21,9 @@ except:
     from PySide.QtCore import *
     from shiboken import wrapInstance
 
-import solstice_pickerView
 import os
+
+import solstice_pickerView
 
 class solstice_picker(QWidget, object):
     def __init__(self, imagePath=None, parent=None):
@@ -51,3 +52,6 @@ class solstice_picker(QWidget, object):
 
     def view(self):
         return self.view
+
+    def addButton(self):
+        self.view.scene().addButton()

@@ -58,17 +58,47 @@ def setTool(name):
     cmds.setToolTo(toolContext)
 
 def getMayaWindow():
+
+    """
+    Returns an instance of the Maya main window
+    """
+
     mayaMainWindowPtr = OpenMayaUI.MQtUtil.mainWindow()
     return wrapInstance(long(mayaMainWindowPtr), QMainWindow)
 
 def getMayaAPIVersion():
+
+    """
+    Returns the Maya version
+    """
+
     return int(cmds.about(api=True))
+
+def pickerUndo(fn):
+
+    """
+    Undo functionality decorator for some actions of the picker
+    """
+
+    def wrapper(*args, **kwargs):
+        cmds.undoInfo(openChunk=True)
+        try:
+            ret = fn(*args, **kwargs)
+        finally:
+            cmds.undoInfo(closeChunk=True)
+        return ret
+    return wrapper
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
 # UTILITIES CLASSES
 
 class Splitter(QWidget, object):
+
+    """
+    Class to create simple splitters for the picker UI
+    """
+
     def __init__(self, text=None, shadow=True, color=(150, 150, 150)):
         super(Splitter, self).__init__()
 
