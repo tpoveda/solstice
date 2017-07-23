@@ -121,12 +121,12 @@ class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
         # Add character image
         self._charLbl = QLabel()
         self._charLbl.setAlignment(Qt.AlignCenter)
-        self.mainLayout.addWidget(self._charLbl)
+        #self.mainLayout.addWidget(self._charLbl)
 
         # Add character text label
         self._charTxtLbl = QLabel(self.charName)
         self._charTxtLbl.setAlignment(Qt.AlignCenter)
-        self.mainLayout.addWidget(self._charTxtLbl)
+        #self.mainLayout.addWidget(self._charTxtLbl)
 
         # TODO: Add dropdown menu with a list of all namespaces in the scene
 

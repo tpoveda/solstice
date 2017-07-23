@@ -1,0 +1,182 @@
+{
+  "fileType" : "pickerData",
+  "offset" : "12",
+  "pickerButtons" : [
+    {
+      "class":"solstice_fkButton",
+      "x":"8",
+      "y":"-75",
+      "text":"FK",
+      "radius" : "27",
+      "part" : "spine1",
+      "type" : "fk",
+      "name" : "spine2",
+      "parent":"spine1_fk_spine1_ctrl"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"8",
+      "y":"-51",
+      "text":"FK",
+      "radius" : "27",
+      "part" : "spine1",
+      "type" : "fk",
+      "name" : "spine1",
+      "parent":"spine1_fk_pelvis_ctrl"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"8",
+      "y":"-28",
+      "text":"FK",
+      "radius" : "27",
+      "part" : "spine1",
+      "type" : "fk",
+      "name" : "pelvis",
+      "parent":"spine1_fk_upperBody_ctrl"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"8",
+      "y":"-4 ",
+      "text":"FK",
+      "radius" : "27",
+      "part" : "spine1",
+      "type" : "fk",
+      "name" : "upperBody",
+      "parent":""
+    },
+
+    {
+      "class":"solstice_ikButton",
+      "x":"-12",
+      "y":"-12",
+      "text":"IK",
+      "radius" : "27",
+      "part" : "spine1",
+      "type" : "fk",
+      "name" : "spine0",
+      "parent":""
+    },
+
+    {
+      "class":"solstice_ikButton",
+      "x":"-12",
+      "y":"-40",
+      "text":"IK",
+      "radius" : "27",
+      "part" : "spine1",
+      "type" : "ik",
+      "name" : "spine1",
+      "parent":""
+    },
+
+    {
+      "class":"solstice_ikButton",
+      "x":"-12",
+      "y":"-66",
+      "text":"IK",
+      "radius" : "27",
+      "part" : "spine1",
+      "type" : "ik",
+      "name" : "spine2",
+      "parent":""
+    },
+
+    {
+      "class":"solstice_extraButton",
+      "x":"-43",
+      "y":"-55",
+      "text":"",
+      "fullname":"spine1_R_chestGeo_ctrl",
+      "radius":"4",
+      "width":"19",
+      "height":"21",
+      "part":"spine1",
+      "type":"extra"
+    },
+
+    {
+      "class":"solstice_extraButton",
+      "x":"43",
+      "y":"-55",
+      "text":"",
+      "fullname":"spine1_L_chestGeo_ctrl",
+      "radius":"4",
+      "width":"19",
+      "height":"21",
+      "part":"spine1",
+      "type":"extra"
+    },
+
+    {
+      "class":"solstice_extraButton",
+      "x":"0",
+      "y":"20",
+      "text":"",
+      "fullname":"spine1_C_bellyGeo_ctrl",
+      "radius":"4",
+      "width":"19",
+      "height":"21",
+      "part":"spine1",
+      "type":"extra"
+    },
+
+    {
+      "class":"solstice_moduleButton",
+      "x":"-10",
+      "y":"40",
+      "text":"SPINE",
+      "radius":"4",
+      "width":"40",
+      "height":"21",
+      "part":"spine1"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"0",
+      "y":"-118 ",
+      "text":"FK",
+      "radius" : "27",
+      "part" : "head1",
+      "type" : "fk",
+      "name" : "neck",
+      "parent":"spine1_ik_spine2_ctrl"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"0",
+      "y":"-140 ",
+      "text":"FK",
+      "radius" : "27",
+      "part" : "head1",
+      "type" : "fk",
+      "name" : "head",
+      "parent":"head1_fk_neck_ctrl"
+    },
+
+    {
+      "class":"solstice_moduleButton",
+      "x":"-25",
+      "y":"-232",
+      "text":"HEAD",
+      "radius":"4",
+      "width":"72",
+      "height":"21",
+      "part":"head1"
+    }
+
+  ],
+
+
+
+
+  "scriptButtons" : [
+
+  ]
+}

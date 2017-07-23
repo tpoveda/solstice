@@ -26,7 +26,7 @@ import os
 import solstice_pickerView
 
 class solstice_picker(QWidget, object):
-    def __init__(self, imagePath=None, parent=None):
+    def __init__(self, dataPath=None, imagePath=None, parent=None):
         super(solstice_picker, self).__init__(parent=parent)
 
         self.mainLayout = QVBoxLayout()
@@ -38,8 +38,12 @@ class solstice_picker(QWidget, object):
         if os.path.isfile(imagePath):
             checkedImagePath = imagePath
 
-        self.view = solstice_pickerView.solstice_pickerView(imagePath=checkedImagePath)
+        self.view = solstice_pickerView.solstice_pickerView(dataPath=dataPath, imagePath=checkedImagePath)
         self.mainLayout.addWidget(self.view)
+
+        reloadBtn = QPushButton('Reload')
+        reloadBtn.clicked.connect(self.view.scene().reloadData)
+        self.mainLayout.addWidget(reloadBtn)
 
     def setView(self, view):
         if not view:
@@ -55,3 +59,22 @@ class solstice_picker(QWidget, object):
 
     def addButton(self):
         self.view.scene().addButton()
+
+    def contextMenuEvent(self, event):
+
+        """
+        Show a global scene context menu
+        """
+
+        menu = QMenu(self)
+        exportPickerData = menu.addAction('Export Picker Data')
+        action = menu.exec_(self.mapToGlobal(event.pos()))
+        if action == exportPickerData:
+            self._exportPickerData()
+
+    def _exportPickerData(self):
+        print 'Exporting picker data ...'
+        self.view.scene().getJSONFile()
+
+    def reloadData(self):
+        self.view.scene().reloadData()

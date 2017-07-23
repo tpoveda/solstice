@@ -18,6 +18,10 @@ except:
     from PySide.QtGui import *
     from PySide.QtCore import *
 
+import weakref
+
+import maya.cmds as cmds
+
 import solstice_pickerColors as colors
 
 # Different states for the buttons
@@ -27,6 +31,8 @@ INNER, OUTER = 1, 2
 class solstice_pickerBaseButton(QPushButton, object):
 
     def __init__(self,
+                 x=0,
+                 y=0,
                  innerColor=colors.yellow,
                  outerColor=colors.blue,
                  glowColor=colors.red,
@@ -34,7 +40,9 @@ class solstice_pickerBaseButton(QPushButton, object):
                  control='',
                  enabled=True,
                  toggle=False,
-                 parent=None):
+                 parentCtrl=None,
+                 parent=None,
+                 btnInfo=None):
         super(solstice_pickerBaseButton, self).__init__(parent=parent)
 
         self._innerColor = innerColor
@@ -43,6 +51,15 @@ class solstice_pickerBaseButton(QPushButton, object):
         self._text = text
         self._toggle = toggle
         self._control = control
+        self._parentCtrl = parentCtrl
+        self._childCtrls = []
+        self._hierarchy = []
+        self._btnInfo = btnInfo
+
+        self._scene = None
+        self._contextMenu = None
+
+        self.move(x, y)
 
         self.setStyleSheet('background-color: rgba(0,0,0,0);')
 
@@ -79,6 +96,29 @@ class solstice_pickerBaseButton(QPushButton, object):
 
         self._brushClear = QBrush(QColor(0, 0, 0, 0))
         self._brushBorder = QBrush(QColor(9, 10, 12))
+
+    def addChild(self, btn):
+        self._childCtrls.append(weakref.ref(btn))
+
+    def getInfo(self):
+        return self._btnInfo
+
+    def setInfo(self, btnInfo):
+        self._btnInfo = btnInfo
+        self.move(btnInfo['x'], btnInfo['y'])
+        self._text = btnInfo['text']
+
+    def setControl(self, ctrl):
+        self._control = ctrl
+
+    def setParentControl(self, parentCtrl):
+        self._parentCtrl = parentCtrl
+
+    def scene(self):
+        return self._scene()
+
+    def setScene(self, scene):
+        self._scene = weakref.ref(scene)
 
     def _updateColorsInfo(self):
 
@@ -129,8 +169,6 @@ class solstice_pickerBaseButton(QPushButton, object):
         outerGradientSelected.setColorAt(0, self._outerColor.darker(500))
         outerGradientSelected.setColorAt(1, self._outerColor.darker(800))
         self._gradient[SELECTED][OUTER] = QBrush(outerGradientSelected)
-
-        print self._glowPens
 
     def _getCurrentGradientOffset(self):
 
@@ -243,3 +281,38 @@ class solstice_pickerBaseButton(QPushButton, object):
                 painter.drawPath(textPath)
                 painter.setPen(self._pensTextDisabled)
                 painter.drawText(x, y + offset, width, height, alignment, self._text)
+
+    def mousePressEvent(self, event):
+        super(solstice_pickerBaseButton, self).mousePressEvent(event)
+
+        if self._control != '' and self._control is not None:
+            modifiers = cmds.getModifiers()
+            shift = (modifiers & 1) > 0
+            ctrl = (modifiers & 4) > 0
+
+            cmds.select(self._control, add=shift, deselect=ctrl)
+
+    def mouseDoubleClickEvent(self, event):
+        super(solstice_pickerBaseButton, self).mouseDoubleClickEvent(event)
+        self._selectHierarchy()
+
+    def _selectHierarchy(self):
+        if len(self._hierarchy) > 0:
+            for btn in self._hierarchy:
+                if btn == self._control:
+                    pass
+                else:
+                    cmds.select(btn, add=True)
+
+    def updateHierarchy(self):
+        self._hierarchy = self.getHierarchy()
+
+    def getHierarchy(self):
+        hierarchy = [self._control]
+        if len(self._childCtrls) > 0:
+            for child in self._childCtrls:
+                hierarchy.extend(child().getHierarchy())
+        return hierarchy
+
+    def contextMenuEvent(self, event):
+        pass

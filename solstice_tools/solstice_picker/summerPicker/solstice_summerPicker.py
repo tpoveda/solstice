@@ -36,6 +36,7 @@ import solstice_summerFacialPicker as facialPicker
 
 # --------------------------------------------------------------------------------------------
 imagesPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'images')
+dataPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 # --------------------------------------------------------------------------------------------
 
 class solstice_summerPicker(window.solstice_pickerWindow, object):
@@ -43,11 +44,19 @@ class solstice_summerPicker(window.solstice_pickerWindow, object):
     def __init__(self, fullWindow=True):
 
         self._fullWindow = fullWindow
+        self._bodyPickerData = os.path.join(dataPath, 'summerBodyPickerData.json')
+        self._facialPickerData = os.path.join(dataPath, 'summerFacialPickerData.json')
 
         super(solstice_summerPicker, self).__init__('summerPicker', 'Solstice - Summer Picker', 'Summer')
 
     def initSetup(self):
         return True
+
+    def bodyPickerData(self):
+        return self._bodyPickerData
+
+    def facialPickerData(self):
+        return self._facialPickerData
     
     def toolUI(self):
 
@@ -59,8 +68,8 @@ class solstice_summerPicker(window.solstice_pickerWindow, object):
 
             self.setCharacterImage(os.path.join(imagesPath, 'summer_icon.png'))
 
-            self.bp = bodyPicker.solstice_summerBodyPicker(imagePath=os.path.join(imagesPath, 'pickerSummer_body.png'))
-            self.fp = facialPicker.solstice_summerFacialPicker(imagePath=os.path.join(imagesPath, 'pickerSummer_facial.png'))
+            self.bp = bodyPicker.solstice_summerBodyPicker(dataPath=self.bodyPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_body.png'))
+            self.fp = facialPicker.solstice_summerFacialPicker(dataPath=self.facialPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_facial.png'))
 
             if self._fullWindow:
                 self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -81,6 +90,9 @@ class solstice_summerPicker(window.solstice_pickerWindow, object):
 
     def setFullWindow(self, fullWindow):
         self._fullWindow = fullWindow
+
+    def reloadData(self):
+        self.bp.reloadData()
 
 def initPicker(fullWindow=True):
     solstice_summerPicker(fullWindow=fullWindow)

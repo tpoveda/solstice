@@ -28,10 +28,10 @@ class solstice_pickerView(QGraphicsView, object):
     View of the picker
     """
 
-    def __init__(self, imagePath=None, parent=None):
+    def __init__(self, dataPath=None, imagePath=None, parent=None):
         super(solstice_pickerView, self).__init__(parent=parent)
 
-        self.setScene(scene.solstice_pickerScene())
+        self.setScene(scene.solstice_pickerScene(dataPath=dataPath))
 
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -40,7 +40,7 @@ class solstice_pickerView(QGraphicsView, object):
         self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
 
         # Scale view in Y negative so position Y values works similar as Maya
-        self.scale(1, -1)
+        #self.scale(1, -1)
 
         brush = QBrush(QColor(70,70,70,255))
         self.setBackgroundBrush(brush)
@@ -54,16 +54,17 @@ class solstice_pickerView(QGraphicsView, object):
         if not imagePath:
             return
 
-        self._backgroundImage = QImage(imagePath).mirrored(False, True)
+        #self._backgroundImage = QImage(imagePath).mirrored(False, True)
+        self._backgroundImage = QImage(imagePath)
 
         width = self._backgroundImage.width()
         height = self._backgroundImage.height()
+
         self.scene().setSize(width, height)
 
         self.fitSceneToContent()
 
     def fitSceneToContent(self, keepAspectRatio=False):
-        sceneRect = self.scene().getBoundingRect()
 
         if keepAspectRatio:
             self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)

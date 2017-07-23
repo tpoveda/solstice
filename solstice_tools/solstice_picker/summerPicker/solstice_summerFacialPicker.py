@@ -24,5 +24,5 @@ except:
 from ..picker import solstice_picker as picker
 
 class solstice_summerFacialPicker(picker.solstice_picker):
-    def __init__(self, imagePath=None, parent=None):
-        super(solstice_summerFacialPicker, self).__init__(imagePath=imagePath, parent=parent)
+    def __init__(self,dataPath=None, imagePath=None, parent=None):
+        super(solstice_summerFacialPicker, self).__init__(dataPath=dataPath, imagePath=imagePath, parent=parent)
