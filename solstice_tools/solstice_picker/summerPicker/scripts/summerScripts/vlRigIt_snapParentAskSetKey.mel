@@ -1,0 +1,51 @@
+global proc vlRigIt_snapParentAskSetKey(string $object, int $parent, int $oldParent, string $parentsEnumString)
+{
+    // return values:    1 - create key on current frame, with current value
+    //                   2 - create key on previous frame with previous value, and on current frame with current value
+    //                   3 - do not create key
+    //                   4 - cancel
+    
+	int $keyframeExists = `keyframe -query -keyframeCount ($object + ".parent")`;
+	int $autoKeyframeStatus = `autoKeyframe -q -state`;
+	
+	string $parentsEnumList[]; tokenize $parentsEnumString ":" $parentsEnumList;
+	
+	if (!$keyframeExists){
+        string $dialog = `confirmDialog -title "No Keyframes found on this control."
+            -message ("Snapping parent from \"" + $parentsEnumList[$oldParent] + "\" to \"" + $parentsEnumList[$parent] + "\"\n" +  
+                        "No keyframes are set on this control yet. Do you want to set one?                    \n\n" + 
+                        "Options are:\n" +
+                        "1. Just change value (don't set any keyframe)\n" + 
+                        "2. On current frame, with current value (keyframe, but no change)\n" + 
+                        "3. On previous frame with previous value, on current frame with new value.\n" + 
+                        "4. Cancel")
+            -button "   1. Just change   "
+            -button "  2. Current Frame  "
+            -button " 3. Prev and Current "
+            -button "    4. Cancel       "
+            -defaultButton "   1. Just change   "
+            -cancelButton "    4. Cancel       " -dismissString "    4. Cancel       "`;
+            switch ($dialog){
+                case "   1. Just change   ":
+                    vlRigIt_snapParent ($object , $parent , $oldParent);
+                    break;
+                case "  2. Current Frame  ":
+                    setKeyframe { ($object + ".parent") };
+                    break;
+                case " 3. Prev and Current ":
+                    int $currentTime = `currentTime -q`;
+                    setKeyframe -t ( $currentTime -1) -v $oldParent { ($object + ".parent") };
+                    vlRigIt_snapParent ($object , $parent , $oldParent);
+                    setKeyframe -t ( $currentTime ) -v $parent { ($object + ".parent") };
+                    break;
+                case "    4. Cancel       ":
+                    break;
+                }
+        }
+    else{
+        vlRigIt_snapParent ($object , $parent , $oldParent);
+        if ($autoKeyframeStatus){
+            setKeyframe { ($object + ".parent") };
+        }
+    }
+}

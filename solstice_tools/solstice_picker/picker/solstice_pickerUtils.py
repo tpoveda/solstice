@@ -150,3 +150,34 @@ class Splitter(QWidget, object):
         secondLine.setStyleSheet(styleSheet)
 
         self.layout().addWidget(secondLine)
+
+def getMirrorControl(ctrlName):
+    oldSide = None
+    newSide = None
+    sidesList = ['l', 'r', 'L', 'R']
+    sideFormats = []
+    for side in sidesList:
+        sideFormats.append('_{0}_'.format(side))
+        sideFormats.append('{0}_'.format(side))
+        sideFormats.append('_{0}'.format(side))
+        sideFormats.append('{0}'.format(side))
+
+    for format in sideFormats:
+        if format in ctrlName:
+            for side in sidesList:
+                if side in format:
+                    oldSide = side
+                    break
+
+    if oldSide is None:
+        return
+
+    if oldSide == 'l' or oldSide == 'L':
+        newSide = 'R'
+    elif newSide == 'r' or oldSide == 'R':
+        newSide = 'L'
+
+    if newSide is None:
+        return
+
+    return ctrlName.replace(oldSide, newSide)

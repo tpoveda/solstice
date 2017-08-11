@@ -23,6 +23,7 @@ import weakref
 import maya.cmds as cmds
 
 import solstice_pickerColors as colors
+import solstice_pickerUtils as utils
 
 # Different states for the buttons
 NORMAL, DOWN, DISABLED, SELECTED = 1, 2, 3, 4
@@ -55,6 +56,7 @@ class solstice_pickerBaseButton(QPushButton, object):
         self._childCtrls = []
         self._hierarchy = []
         self._btnInfo = btnInfo
+        self._gizmo = ''
 
         self._scene = None
         self._contextMenu = None
@@ -119,6 +121,9 @@ class solstice_pickerBaseButton(QPushButton, object):
 
     def setScene(self, scene):
         self._scene = weakref.ref(scene)
+
+    def setGizmo(self, gizmo):
+        self._gizmo = gizmo
 
     def _updateColorsInfo(self):
 
@@ -292,10 +297,14 @@ class solstice_pickerBaseButton(QPushButton, object):
 
             cmds.select(self._control, add=shift, deselect=ctrl)
 
+            if self._gizmo != '':
+                utils.setTool(self._gizmo)
+
     def mouseDoubleClickEvent(self, event):
         super(solstice_pickerBaseButton, self).mouseDoubleClickEvent(event)
         self._selectHierarchy()
 
+    @utils.pickerUndo
     def _selectHierarchy(self):
         if len(self._hierarchy) > 0:
             for btn in self._hierarchy:
@@ -303,6 +312,69 @@ class solstice_pickerBaseButton(QPushButton, object):
                     pass
                 else:
                     cmds.select(btn, add=True)
+
+    @utils.pickerUndo
+    def _resetControl(self):
+        for axis in ['x', 'y', 'z']:
+            for xform in ['t', 'r', 's']:
+                try:
+                    newVal = 0.0
+                    if xform == 's':
+                        newVal = 1.0
+                    cmds.setAttr(self._control + '.' + xform + axis, newVal)
+                except:
+                    pass
+
+    @utils.pickerUndo
+    def _mirrorControl(self):
+
+        mirrorCtrl = utils.getMirrorControl(self._control)
+        if mirrorCtrl is None:
+            return
+        newXForm = {}
+        for xform in ['t', 'r', 's']:
+            newXForm[xform] = {}
+            for axis in ['x', 'y', 'z']:
+                newXForm[xform][axis] = cmds.getAttr(self._control+'.'+xform+axis)
+
+        for xform, value in newXForm.items():
+            for axis, xformValue in value.items():
+                try:
+                    cmds.setAttr(mirrorCtrl + '.' + xform+axis, xformValue)
+                except:
+                    pass
+
+    @utils.pickerUndo
+    def _flipControl(self):
+
+        mirrorCtrl = utils.getMirrorControl(self._control)
+        if mirrorCtrl is None:
+            return
+
+        origXForm = {}
+        mirrorXForm = {}
+
+        for xform in ['t', 'r', 's']:
+            origXForm[xform] = {}
+            for axis in ['x', 'y', 'z']:
+                origXForm[xform][axis] = cmds.getAttr(self._control+'.'+xform+axis)
+        for xform in ['t', 'r', 's']:
+            mirrorXForm[xform] = {}
+            for axis in ['x', 'y', 'z']:
+                mirrorXForm[xform][axis] = cmds.getAttr(mirrorCtrl+'.'+xform+axis)
+
+        for xform, value in origXForm.items():
+            for axis, xformValue in value.items():
+                try:
+                    cmds.setAttr(mirrorCtrl + '.' + xform+axis, xformValue)
+                except:
+                    pass
+        for xform, value in mirrorXForm.items():
+            for axis, xformValue in value.items():
+                try:
+                    cmds.setAttr(self._control + '.' + xform+axis, xformValue)
+                except:
+                    pass
 
     def updateHierarchy(self):
         self._hierarchy = self.getHierarchy()

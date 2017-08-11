@@ -1,0 +1,19 @@
+// -------------------------------------------------------------------------------------
+// 11- Select module controls for contextualMenuBuilder
+// -------------------------------------------------------------------------------------
+global proc vlRigIt_selectModuleControls(string $allSelectedItemsString){
+
+	string $allSelectedItems[] = stringToStringArray( $allSelectedItemsString, ",");
+	string $controls[];
+	
+	//vlRigIt_getControlsFromModuleList
+	for ($item in $allSelectedItems){
+		string $module[]; $module[0] = `vlRigIt_getModuleFromControl ($item)`;
+		string $moduleCtrls[] = `vlRigIt_getControlsFromModuleList $module`;
+		$controls = `stringArrayCatenate $controls $moduleCtrls`;
+	}
+
+	if (size($controls)){
+		select $controls;
+	}
+}

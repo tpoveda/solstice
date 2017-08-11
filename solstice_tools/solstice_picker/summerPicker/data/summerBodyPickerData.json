@@ -11,7 +11,8 @@
       "part" : "spine1",
       "type" : "fk",
       "name" : "spine2",
-      "parent":"spine1_fk_spine1_ctrl"
+      "parent":"spine1_fk_spine1_ctrl",
+      "gizmo" : "rotate"
     },
 
     {
@@ -23,7 +24,8 @@
       "part" : "spine1",
       "type" : "fk",
       "name" : "spine1",
-      "parent":"spine1_fk_pelvis_ctrl"
+      "parent":"spine1_fk_pelvis_ctrl",
+      "gizmo" : "rotate"
     },
 
     {
@@ -35,7 +37,8 @@
       "part" : "spine1",
       "type" : "fk",
       "name" : "pelvis",
-      "parent":"spine1_fk_upperBody_ctrl"
+      "parent":"spine1_fk_upperBody_ctrl",
+      "gizmo" : "rotate"
     },
 
     {
@@ -47,7 +50,8 @@
       "part" : "spine1",
       "type" : "fk",
       "name" : "upperBody",
-      "parent":""
+      "parent":"",
+      "gizmo" : "rotate"
     },
 
     {
@@ -59,7 +63,8 @@
       "part" : "spine1",
       "type" : "fk",
       "name" : "spine0",
-      "parent":""
+      "parent":"",
+      "gizmo" : "move"
     },
 
     {
@@ -71,7 +76,8 @@
       "part" : "spine1",
       "type" : "ik",
       "name" : "spine1",
-      "parent":""
+      "parent":"",
+      "gizmo" : "move"
     },
 
     {
@@ -83,7 +89,8 @@
       "part" : "spine1",
       "type" : "ik",
       "name" : "spine2",
-      "parent":""
+      "parent":"",
+      "gizmo" : "move"
     },
 
     {
@@ -96,7 +103,8 @@
       "width":"19",
       "height":"21",
       "part":"spine1",
-      "type":"extra"
+      "type":"extra",
+      "gizmo" : "move"
     },
 
     {
@@ -109,7 +117,8 @@
       "width":"19",
       "height":"21",
       "part":"spine1",
-      "type":"extra"
+      "type":"extra",
+      "gizmo" : "move"
     },
 
     {
@@ -122,7 +131,8 @@
       "width":"19",
       "height":"21",
       "part":"spine1",
-      "type":"extra"
+      "type":"extra",
+      "gizmo" : "move"
     },
 
     {
@@ -145,7 +155,8 @@
       "part" : "head1",
       "type" : "fk",
       "name" : "neck",
-      "parent":"spine1_ik_spine2_ctrl"
+      "parent":"spine1_ik_spine2_ctrl",
+      "gizmo" : "rotate"
     },
 
     {
@@ -157,7 +168,8 @@
       "part" : "head1",
       "type" : "fk",
       "name" : "head",
-      "parent":"head1_fk_neck_ctrl"
+      "parent":"head1_fk_neck_ctrl",
+      "gizmo" : "rotate"
     },
 
     {
@@ -169,14 +181,205 @@
       "width":"72",
       "height":"21",
       "part":"head1"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"45",
+      "y":"-120 ",
+      "text":"FK",
+      "radius" : "35",
+      "part" : "arm1",
+      "side" : "L",
+      "type" : "fk",
+      "name" : "shoulder",
+      "mirror" : "True",
+      "gizmo" : "rotate"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"72",
+      "y":"-90",
+      "text":"FK",
+      "radius" : "35",
+      "part" : "arm1",
+      "side" : "L",
+      "type" : "fk",
+      "name" : "arm",
+      "parent":"L_arm1_fk_shoulder_ctrl",
+      "mirror" : "True",
+      "gizmo" : "rotate"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"120",
+      "y":"-35",
+      "text":"FK",
+      "radius" : "35",
+      "part" : "arm1",
+      "side" : "L",
+      "type" : "fk",
+      "name" : "elbow",
+      "parent":"L_arm1_fk_arm_ctrl",
+      "mirror" : "True",
+      "gizmo" : "rotate"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"172",
+      "y":"9",
+      "text":"FK",
+      "radius" : "35",
+      "part" : "arm1",
+      "side" : "L",
+      "type" : "fk",
+      "name" : "wrist",
+      "parent":"L_arm1_fk_elbow_ctrl",
+      "mirror" : "True",
+      "gizmo" : "rotate"
+    },
+
+    {
+      "class":"solstice_pinButton",
+      "x":"138",
+      "y":"-60",
+      "radius" : "30",
+      "part" : "arm1",
+      "side" : "L",
+      "name" : "bow",
+      "mirror" : "True",
+      "gizmo" : "move"
+    },
+
+    {
+      "class":"solstice_moduleButton",
+      "x":"171",
+      "y":"-111",
+      "text":"L_ARM",
+      "radius":"4",
+      "width":"79",
+      "height":"21",
+      "part":"arm1",
+      "side":"L"
+    },
+
+    {
+      "class":"solstice_mirrorButton",
+      "x":"171",
+      "y":"-94",
+      "text":"MIRROR",
+      "radius":"4",
+      "width":"48",
+      "height":"21",
+      "part":"arm1",
+      "side":"L"
+    },
+
+    {
+      "class":"solstice_flipButton",
+      "x":"215",
+      "y":"-94",
+      "text":"FLIP",
+      "radius":"4",
+      "width":"35",
+      "height":"21",
+      "part":"arm1",
+      "side":"L"
+    },
+
+    {
+      "class":"solstice_ikSwitchButton",
+      "x":"171",
+      "y":"-77",
+      "text":"IK",
+      "radius":"4",
+      "width":"48",
+      "height":"21",
+      "part":"arm1",
+      "side":"L"
+    },
+
+    {
+      "class":"solstice_keyPartButton",
+      "x":"215",
+      "y":"-77",
+      "text":"KEY",
+      "radius":"4",
+      "width":"35",
+      "height":"21",
+      "part":"arm1",
+      "side":"L"
+    },
+
+    {
+      "class":"solstice_moduleButton",
+      "x":"-213",
+      "y":"-128",
+      "text":"R_ARM",
+      "radius":"4",
+      "width":"79",
+      "height":"21",
+      "part":"arm1",
+      "side":"R"
+    },
+
+    {
+      "class":"solstice_mirrorButton",
+      "x":"-182",
+      "y":"-111",
+      "text":"MIRROR",
+      "radius":"4",
+      "width":"48",
+      "height":"21",
+      "part":"arm1",
+      "side":"L"
+    },
+
+    {
+      "class":"solstice_flipButton",
+      "x":"-213",
+      "y":"-111",
+      "text":"FLIP",
+      "radius":"4",
+      "width":"35",
+      "height":"21",
+      "part":"arm1",
+      "side":"L"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"25",
+      "y":"50",
+      "text":"FK",
+      "radius" : "35",
+      "part" : "leg1",
+      "side" : "L",
+      "type" : "fk",
+      "name" : "legOffset",
+      "parent":"",
+      "mirror" : "True",
+      "gizmo" : "move"
+    },
+
+    {
+      "class":"solstice_fkButton",
+      "x":"25",
+      "y":"50",
+      "text":"test",
+      "radius" : "35",
+      "part" : "leg1",
+      "side" : "L",
+      "type" : "fk",
+      "name" : "legOffset",
+      "parent":"",
+      "mirror" : "True",
+      "gizmo" : "move"
     }
 
-  ],
-
-
-
-
-  "scriptButtons" : [
 
   ]
 }

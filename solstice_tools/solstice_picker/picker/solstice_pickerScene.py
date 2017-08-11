@@ -21,6 +21,7 @@ except:
 
 import os
 import json
+from copy import deepcopy
 
 import solstice_pickerButtons as btn
 
@@ -51,6 +52,8 @@ class solstice_pickerScene(QGraphicsScene, object):
         if self._dataPath is not '' and self._dataPath is not None:
             if os.path.isfile(self._dataPath):
                 self.loadData(self._dataPath)
+
+        self.update()
 
 
     def setSize(self, width, height):
@@ -117,33 +120,40 @@ class solstice_pickerScene(QGraphicsScene, object):
 
         # print self.getPartControls('spine1')
 
-    def _createButton(self, btnData, offset):
+    def _createButton(self, btnData, offset=0):
 
 
         btnInfo = self._getButtonInfo(btnData, offset)
-
-        # ---------------------------------------------------------------
-
-        if btnInfo['mirror'] != '':
-            btnInfo = self._getMirrorButtonInfo(btnInfo, offset)
-
-        # ---------------------------------------------------------------
-
         newBtn = getattr(btn, btnInfo['class'])()
         newBtn.setInfo(btnInfo)
         self.addButton(newBtn)
+
+        # ---------------------------------------------------------------
+
+        if btnInfo['mirror'] != '' and btnInfo['mirror'] != None:
+            newInfo = deepcopy(btnInfo)
+            mirrorBtnInfo = self._getMirrorButtonInfo(newInfo, offset)
+            newMirrorBtn = getattr(btn, mirrorBtnInfo['class'])()
+            newMirrorBtn.setInfo(mirrorBtnInfo)
+            self.addButton(newMirrorBtn)
 
     def getSideControls(self, side='M'):
         if self._parts.has_key(side):
             return self._parts[side]
 
-    def getPartControls(self, type):
+    def getPartControls(self, type, side='', asButtons=False):
         controls = []
         for btn in self._buttons:
             btnInfo = btn.getInfo()
             if btnInfo.get('part'):
                 if btnInfo['part'] == type:
-                    controls.append(btn._control)
+                    if side != '':
+                        print btnInfo['side']
+                        if btnInfo['side'] == side:
+                            if asButtons:
+                                controls.append(btn)
+                            else:
+                                controls.append(btn._control)
         return controls
 
     def _getButtonControl(self, side, part, type, name, fullname=''):
@@ -184,6 +194,7 @@ class solstice_pickerScene(QGraphicsScene, object):
         btnName = 'default'
         btnWidth = 30
         btnHeight = 15
+        btnGizmo = ''
 
         if btnData.get('class'):
             btnClassName = btnData['class']
@@ -215,6 +226,8 @@ class solstice_pickerScene(QGraphicsScene, object):
             btnWidth = int(btnData['width'])
         if btnData.get('height'):
             btnHeight = int(btnData['height'])
+        if btnData.get('gizmo'):
+            btnGizmo = btnData['gizmo']
 
 
         btnCtrl = self._getButtonControl(btnSide, btnPart, btnType, btnName, fullname=btnFullname)
@@ -236,38 +249,39 @@ class solstice_pickerScene(QGraphicsScene, object):
         btnInfo['name'] = btnName
         btnInfo['width'] = btnWidth
         btnInfo['height'] = btnHeight
+        btnInfo['gizmo'] = btnGizmo
 
         return btnInfo
 
-    def _getMirrorButtonInfo(self, btnInfo, offset):
+    def _getMirrorButtonInfo(self, btnInfo, offset=0):
 
-        btnMirrorCtrl = btnInfo['mirror']
-        mirrorBtnInfo = None
-        for newBtn in self._dataButtons:
-            btInf = self._getButtonInfo(newBtn, offset)
-            if btInf['control'] != '':
-                if btInf['control'] == btnMirrorCtrl:
-                    mirrorBtnInfo = btInf
-                    break
+        newBtnInfo = btnInfo
 
-        if mirrorBtnInfo is not None:
-            btnInfo['class'] = mirrorBtnInfo['class']
-            btnInfo['fullname'] = mirrorBtnInfo['fullname']
-            btnInfo['x'] = ((mirrorBtnInfo['x'] + offset + 22 + (btnInfo['offset'])) * -1)
-            btnInfo['y'] = mirrorBtnInfo['y']
-            btnInfo['radius'] = mirrorBtnInfo['radius']
-            btnInfo['text'] = mirrorBtnInfo['text']
-            btnInfo['control'] = mirrorBtnInfo['control']
-            if btnInfo['control'] != '':
-                btnInfo['control'] = btnInfo['control'].replace('L_', 'R_')
-                btnInfo['side'] = mirrorBtnInfo['side'].replace('L', 'R')
-                btnInfo['part'] = mirrorBtnInfo['part']
-                btnInfo['name'] = mirrorBtnInfo['name']
-            btnInfo['parent'] = mirrorBtnInfo['parent']
-            if btnInfo['parent'] != '':
-                btnInfo['parent'] = btnInfo['child'].replace('L_', 'R_')
-            btnInfo['width'] = mirrorBtnInfo['width']
-            btnInfo['height'] = mirrorBtnInfo['height']
+        if btnInfo['side'] == '' or btnInfo['side'] == None:
+            return
 
-        return btnInfo
+        if btnInfo['control'] == '' or btnInfo['control'] == '':
+            return
+
+        newSide = None
+        currSide = btnInfo['side']
+        for side in ['l', 'r', 'L', 'R']:
+            if currSide in ['_{0}_'.format(side), '{0}_'.format(side), '_{0}'.format(side), '{0}'.format(side)]:
+                newSide = side
+                break
+
+        if newSide == 'l' or newSide == 'L':
+            newSide = 'R'
+        elif newSide == 'r' or newSide == 'R':
+            newSide = 'L'
+
+        newBtnInfo['fullname'] = btnInfo['fullname'].replace(currSide, newSide)
+        newBtnInfo['x'] = ((btnInfo['x'] + offset + 22 + (btnInfo['offset'])) * -1)
+        if btnInfo['control'] != '':
+            newBtnInfo['control'] = btnInfo['control'].replace(currSide, newSide)
+            newBtnInfo['side'] = newSide
+        if btnInfo['parent'] != '':
+            newBtnInfo['parent'] = btnInfo['parent'].replace(currSide, newSide)
+
+        return newBtnInfo
 
