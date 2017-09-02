@@ -21,10 +21,9 @@ import zipfile
 def sLog(text):
     return '| Solstice Tools | => {}'.format(text)
 
-
 def updateTools(ui=False):
     tempPath = tempfile.mkdtemp()
-    mayaPath = os.path.join(os.path.expanduser("~"), 'maya')
+    mayaPath = os.path.join(os.path.expanduser("~/Documents"), 'maya')
     if not os.path.exists(mayaPath):
         print(sLog('ERROR: Maya Documents Path {} does not exist. Check that Maya is installed on your system!'))
     toolsFile = 'solstice_tools.zip'
@@ -60,7 +59,7 @@ def updateTools(ui=False):
         unzipFile(solsticeToolsInstallPath, mayaPath, removeSubfolders=['solstice_tools'])
 
 
-# ====================================================================================================================
+# ================================================================================================================================================================
 
 def downloadFile(filename, destination):
     print(sLog('Downloading file {} to temporary folder -> {}'.format(os.path.basename(filename), destination)))
@@ -100,7 +99,6 @@ def unzipFile(filename, destination, removeFirst=True, removeSubfolders=None):
         print(sLog('Unzip completed!'))
     except Exception as e:
         raise e
-
 
 if __name__ == '__main__':
     updateTools()

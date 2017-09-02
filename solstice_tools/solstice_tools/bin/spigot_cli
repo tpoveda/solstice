@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import sys
+from optparse import OptionParser
+from spigot import SpigotClient, SpigotImporter
+
+def main():
+    parser = OptionParser()
+    parser.add_option("--interactive", action="store_true", dest="interactive", help="Run in interactive mode", default=False)
+    parser.add_option("--run_tests", action="store_true", dest="run_tests", help="Run in tests", default=False)
+    parser.add_option("--host", action="store", dest="host", help="Host", default="10.0.2.3")
+    parser.add_option("--port", action="store", dest="port", help="Port", default=14002)
+
+    (options, args) = parser.parse_args()
+
+    print "Running with options:", options
+    print
+
+    if options.interactive:
+        with SpigotClient(host=options.host, port=options.port) as cli:
+            while True:
+                print cli.execute(
+                    command_action = unicode(raw_input("Command Action [%s]" % args[0]) or args[0]),
+                    command_name = unicode(raw_input("Command Name [%s]" % args[1]) or args[1]),
+                    payload = unicode(raw_input("JSON Payload [%s]" % args[2]) or args[2])
+                )
+    elif options.run_tests:
+
+        from some_mod import MyModule
+        print MyModule().sayHi()
+
+        from some_package.some_other_mod import MyOtherModule as Bob
+        print Bob().sayHi()
+
+    else:
+        print SpigotClient(host=options.host, port=options.port).execute(*args)
+
+if __name__ == "__main__":
+    exit_status = main()
+    sys.exit(exit_status)
