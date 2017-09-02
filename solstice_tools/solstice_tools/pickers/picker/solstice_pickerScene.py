@@ -9,7 +9,6 @@ ______________________________________________________________________
 Customized picker for Solstice characters
 ______________________________________________________________________
 ==================================================================="""
-from PySide2.QtWidgets import QPushButton
 
 try:
     from PySide2.QtGui import *
@@ -22,8 +21,10 @@ except:
 import os
 import json
 from copy import deepcopy
+import imp
 
 import solstice_pickerButtons as btn
+import solstice_pickerBaseButton as baseButton
 
 class solstice_pickerScene(QGraphicsScene, object):
 
@@ -34,19 +35,27 @@ class solstice_pickerScene(QGraphicsScene, object):
     __DEFAULT_SCENE_WIDTH__ = 100
     __DEFAULT_SCENE_HEIGHT__ = 200
 
-    def __init__(self, dataPath=None, parent=None):
+    def __init__(self, dataPath=None, namespace='', parent=None):
         super(solstice_pickerScene, self).__init__(parent=parent)
 
         self._dataPath = dataPath
         self._buttons = list()
         self._dataButtons = None
         self._parts = dict()
+        self._namespace = namespace
 
         self.setDefaultSize()
 
         self.reloadData()
 
     def reloadData(self):
+
+        """
+        Reloads the data of the picker
+        """
+
+        # TODO: Check why if takes so much time to reload (when doing multiple times)
+
         self.clear()
 
         if self._dataPath is not '' and self._dataPath is not None:
@@ -55,6 +64,8 @@ class solstice_pickerScene(QGraphicsScene, object):
 
         self.update()
 
+    def setNamespace(self, namespace):
+        self._namespace = namespace
 
     def setSize(self, width, height):
 
@@ -122,9 +133,8 @@ class solstice_pickerScene(QGraphicsScene, object):
 
     def _createButton(self, btnData, offset=0):
 
-
         btnInfo = self._getButtonInfo(btnData, offset)
-        newBtn = getattr(btn, btnInfo['class'])()
+        newBtn = eval('btn.'+btnInfo['class']+'.'+btnInfo['class']+'()')
         newBtn.setInfo(btnInfo)
         self.addButton(newBtn)
 
@@ -133,7 +143,7 @@ class solstice_pickerScene(QGraphicsScene, object):
         if btnInfo['mirror'] != '' and btnInfo['mirror'] != None:
             newInfo = deepcopy(btnInfo)
             mirrorBtnInfo = self._getMirrorButtonInfo(newInfo, offset)
-            newMirrorBtn = getattr(btn, mirrorBtnInfo['class'])()
+            newMirrorBtn = newBtn = eval('btn.'+mirrorBtnInfo['class']+'.'+mirrorBtnInfo['class']+'()')
             newMirrorBtn.setInfo(mirrorBtnInfo)
             self.addButton(newMirrorBtn)
 
@@ -276,7 +286,7 @@ class solstice_pickerScene(QGraphicsScene, object):
             newSide = 'L'
 
         newBtnInfo['fullname'] = btnInfo['fullname'].replace(currSide, newSide)
-        newBtnInfo['x'] = ((btnInfo['x'] + offset + 22 + (btnInfo['offset'])) * -1)
+        newBtnInfo['x'] = ((btnInfo['x'] + offset + 15 + (btnInfo['offset'])) * -1)
         if btnInfo['control'] != '':
             newBtnInfo['control'] = btnInfo['control'].replace(currSide, newSide)
             newBtnInfo['side'] = newSide

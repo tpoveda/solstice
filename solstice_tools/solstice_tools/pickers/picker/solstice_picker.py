@@ -45,6 +45,9 @@ class solstice_picker(QWidget, object):
         reloadBtn.clicked.connect(self.view.scene().reloadData)
         self.mainLayout.addWidget(reloadBtn)
 
+    def setNamespace(self, namespace):
+        self.view.scene().setNamespace(namespace)
+
     def setView(self, view):
         if not view:
             return

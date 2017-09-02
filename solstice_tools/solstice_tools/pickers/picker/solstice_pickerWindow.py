@@ -103,6 +103,18 @@ class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().setSpacing(0)
 
+        # Menu bar
+        menubarWidget = QWidget()
+        menubarLayout = QVBoxLayout()
+        menubarWidget.setLayout(menubarLayout)
+        menubar = QMenuBar()
+        settingsFile = menubar.addMenu('Settings')
+        exitAction = QAction('Solstice', menubarWidget)
+        settingsFile.addAction(exitAction)
+        exitAction.triggered.connect(self.test)
+        menubarLayout.addWidget(menubar)
+        self.layout().addWidget(menubarWidget)
+
         # Add a scrollbar
         self.scrollArea = QScrollArea()
         self.scrollArea.setFocusPolicy(Qt.NoFocus)
@@ -118,6 +130,16 @@ class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
         self._mainWidget.setLayout(self.mainLayout)
         self.scrollArea.setWidget(self._mainWidget)
 
+        namespaceLayout = QHBoxLayout()
+        namespaceLayout.setContentsMargins(5, 5, 5, 5)
+        namespaceLayout.setSpacing(2)
+        namespaceLbl = QLabel('Charater namespace: ')
+        namespaceLbl.setMaximumWidth(115)
+        self.namespace = QComboBox()
+        namespaceLayout.addWidget(namespaceLbl)
+        namespaceLayout.addWidget(self.namespace)
+        self.mainLayout.addLayout(namespaceLayout)
+
         # Add character image
         self._charLbl = QLabel()
         self._charLbl.setAlignment(Qt.AlignCenter)
@@ -128,7 +150,17 @@ class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
         self._charTxtLbl.setAlignment(Qt.AlignCenter)
         #self.mainLayout.addWidget(self._charTxtLbl)
 
-        # TODO: Add dropdown menu with a list of all namespaces in the scene
+        self.updateNamespaces()
+
+    def test(self):
+        print 'Solstice'
+
+    def updateNamespaces(self):
+        currNamespaces = cmds.namespaceInfo(listOnlyNamespaces=True, recurse=True)
+        for ns in currNamespaces:
+            if ns not in ['UI', 'shared']:
+                self.namespace.addItem(ns)
+        self.namespace.setCurrentIndex(0)
 
     def setCharacterText(self, text):
 
@@ -208,11 +240,12 @@ class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
         def run2016():
             self.setObjectName(self.pickerName)
             self.show(dockable=True, area='right', floating=False)
-            self._raise()
+            self.raise_()
             self.setDockableParameters(width=420)
             self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
             #self.setMinimumWidth(420)
             #self.setMaximumWidth(600)
+            self.setMaximumWidth(800)
 
         def run2017():
             self.setObjectName(self.pickerName)
@@ -223,6 +256,7 @@ class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
             cmds.workspaceControl(workspaceControlName, e=True, ttc=['AttributeEditor', -1], wp='preferred', mw=420)
             self.raise_()
             self.setDockableParameters(width=420)
+            self.setMaximumWidth(800)
 
         if pickerUtils.getMayaAPIVersion() < self.__class__.MAYA2017:
             run2016()

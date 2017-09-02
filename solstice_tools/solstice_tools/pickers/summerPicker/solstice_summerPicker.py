@@ -88,6 +88,12 @@ class solstice_summerPicker(window.solstice_pickerWindow, object):
                 self.charTab.addTab(self.bp, 'Body')
                 self.charTab.addTab(self.fp, 'Facial')
 
+            self.updatePickers()
+
+    def updatePickers(self):
+        for picker in [self.bp, self.fp]:
+            picker.setNamespace(self.namespace.currentText())
+
     def setFullWindow(self, fullWindow):
         self._fullWindow = fullWindow
 

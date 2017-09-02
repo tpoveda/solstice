@@ -28,10 +28,10 @@ class solstice_pickerView(QGraphicsView, object):
     View of the picker
     """
 
-    def __init__(self, dataPath=None, imagePath=None, parent=None):
+    def __init__(self, dataPath=None, imagePath=None, namespace='', parent=None):
         super(solstice_pickerView, self).__init__(parent=parent)
 
-        self.setScene(scene.solstice_pickerScene(dataPath=dataPath))
+        self.setScene(scene.solstice_pickerScene(dataPath=dataPath, namespace=namespace))
 
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
