@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<solstice_shelf>
+    <!-- Basic Solstice Project Scripts -->
+    <shelfItem icon="update.png" cmds="from solstice_config import solstice_updater; reload(solstice_updater); solstice_updater.updateTools(True);" ann="Auto Update Solstice Tools" label="Update"/>
+    <shelfItem icon="setProject.png" cmds="from solstice_config import solstice_main; reload(solstice_main); solstice_main.updateSolsticeProject();" ann="Auto Setup Solstice Project" label="Project"/>
+    <shelfItem icon="" cmds="" ann="Separator" label=""/>
+    <!-- Utility Scripts -->
+    <shelfItem icon="txtLinker.png" cmds="from solstice_utilities import solstice_texturesRelinker; reload(solstice_texturesRelinker); solstice_texturesRelinker.initUI();" ann="Solstice Textures Relinker Tool" label="TXT"/>
+    <shelfItem icon="sanityCheck.png" cmds="from solstice_utilities import solstice_sanityCheck; reload(solstice_sanityCheck); solstice_sanityCheck.sanityCheck(True);" ann="Solstice Sanity Check Tool" label="SCHK"/>
+</solstice_shelf>

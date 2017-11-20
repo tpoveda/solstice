@@ -1,0 +1,224 @@
+// **************************************************************************
+//
+// SCRIPT NAME: vl_contextualMenuBuilder
+// 
+// VERSION: 003
+// LAST MODIFIED: 16.5.2014
+// BY: Vincenzo Leombruno - vincleombruno@gmail.com
+//
+//
+// RELEASE NOTES:
+// 003 - minor changes
+// 002 - Re-organized and re-named. Some functions have been taken-out to be used in other contexts
+// 001 -  
+//----------------------------------------------------OLD vlRigIt()
+// 004 - added SelectModuleControls to contextualMenu
+// 003 - detects if selected controls are involved in fkIk switch and
+//       creates the needed subMenus 
+// 002 - works on modified setup for snaps (snap parent)
+// 001 - BeeAndBird modified vlRigIt_contextualMenuBuilder// 
+//
+// USAGE NOTES:
+// Builds contextual menu for vlRigIt autorig. Use ALT+SHIFT+RMB to display it
+//
+// **************************************************************************
+
+global proc vl_contextualMenuBuilder()
+{
+    vl_contextualMenuBuilderDoIt;
+    scriptJob -event "modelEditorChanged" "vl_contextualMenuBuilderDoIt()";
+
+}
+global proc vl_contextualMenuBuilderDoIt()
+{
+
+	string $checkModelPanels[] = `getPanel -type modelPanel`;
+	for ($i=0;$i<size($checkModelPanels);$i++){
+		vl_contextualMenu_initializeMM($checkModelPanels[$i], ($i+1));
+	}
+}	
+
+
+//#####################################################
+
+global proc vl_contextualMenu_initializeMM(string $panelName, int $panelNumber)
+
+{
+	string $oldParentLayout = `setParent -q`;		
+	string $popupMenuName = ("vl_contextualMenu" + $panelNumber);
+	if( `popupMenu -exists $popupMenuName` ) {
+		deleteUI $popupMenuName;
+	}
+	
+	string $modelPanelParent = `modelEditor -q -parent $panelName`;
+	if ($modelPanelParent != ""){
+		popupMenu
+			-alt 1
+			-sh 1
+			-button 3
+			-mm 1
+			-parent ($modelPanelParent + "|" + $panelName)
+			-pmc ("vl_contextualMenu_command(\"" + $popupMenuName + "\")")
+			$popupMenuName;		
+		popupMenu -e -markingMenu 1 $popupMenuName;
+	}
+	setParent $oldParentLayout;
+}
+
+
+//#####################################################
+global proc vl_contextualMenu_command(string $parentPopupMenu)
+{
+	string $objectUnderPointerT;
+	string $objectUnderPointerS;
+	string $objectUnderPointerType;
+	
+	string $allSelectedItems[] = `ls -sl -l`;
+	string $allSelectedItemsString = stringArrayToString( $allSelectedItems, ",");
+	
+	if (!`dagObjectHit -mn $parentPopupMenu`) {
+		string $leadObject[] = `ls -sl -tail 1 -typ "transform" -typ "shape"`;
+		if (size($leadObject) > 0) {
+			$objectUnderPointerT = $leadObject[0];
+			string $objectUnderPointerSL[] = `listRelatives -s -pa $objectUnderPointerT`;
+			if (`size $objectUnderPointerSL`==0){
+				$objectUnderPointerS = "";
+				$objectUnderPointerType = "nullType";
+			}
+			else{
+				$objectUnderPointerS = $objectUnderPointerSL[0];
+				$objectUnderPointerType = `objectType $objectUnderPointerS`;
+			}			
+			vl_contextualMenuItems($parentPopupMenu, $objectUnderPointerT, $objectUnderPointerS, $objectUnderPointerType, $allSelectedItemsString);
+		}else{
+			//Nothing selected, nothing under the cursor
+			popupMenu -e -deleteAllItems $parentPopupMenu;
+			menuItem -parent $parentPopupMenu -l "No objects under cursor...";
+		}
+	}
+		
+	else{
+		popupMenu -e -deleteAllItems $parentPopupMenu;
+		//let's fill the menu by default maya created items
+		dagObjectHit -mn $parentPopupMenu;
+		string $oldMenuItems[] = `popupMenu -q -itemArray $parentPopupMenu`;
+		string $objSelectCmd;
+		for ($i=0;$i<size($oldMenuItems);$i++){
+			if (!`menuItem -q -divider $oldMenuItems[$i]`){
+				if (`menuItem -q -l $oldMenuItems[$i]` == "Select"){
+					$objSelectCmd = `menuItem -q -c $oldMenuItems[$i]`;
+					break;
+				}				
+			}
+		}
+		string $tokes[]; tokenize $objSelectCmd $tokes;
+		$objectUnderPointerT = $tokes[size($tokes)-1];
+		string $objectUnderPointerSL[] = `listRelatives -s -pa $objectUnderPointerT`;
+		$objectUnderPointerS = $objectUnderPointerSL[0];
+		$objectUnderPointerType = `objectType $objectUnderPointerS`;
+		vl_contextualMenuItems($parentPopupMenu, $objectUnderPointerT, $objectUnderPointerS, $objectUnderPointerType, $allSelectedItemsString);
+	}
+	
+	
+	//VLRIGIT2_______________________________________________	
+	//vlRigIt2_contextualMenuItems($parentPopupMenu, $objectUnderPointerT);
+}
+
+//#####################################################
+global proc vl_contextualMenuItems(string $parentPopupMenu, string $transform, string $shape, string $objectUnderPointerType, string $allSelectedItemsString)
+{
+	popupMenu -e -deleteAllItems $parentPopupMenu;
+	string $objectShortName;
+	string $buffer[]; tokenize $transform "|" $buffer;
+	$objectShortName = $buffer[size($buffer)-1];
+	
+    string $connL[] = `listConnections -type "transform" -s 0 -d 1 ($transform + ".message")`;
+    string $fkIkSwitcher;
+    if (`size ($connL )`){
+        $fkIkSwitcher = $connL[0];
+    }
+
+
+	//COMMON___________________________________________________	
+	//_________________________________________________________
+
+	setParent -m $parentPopupMenu;
+	menuItem -l ($objectShortName + "...");
+	menuItem -divider 1;
+	menuItem -divider 1;
+	menuItem -divider 1;
+
+	string $allSelectedItems[] = stringToStringArray( $allSelectedItemsString, ",");
+    int $singleObj = 0;
+    int $isSingleTransform = 0;
+    if (`size($allSelectedItems)` == 1){
+        $singleObj = 1;
+        if (`objectType $allSelectedItems[0]` == "transform"){
+            $isSingleTransform = 1;
+        }
+    }
+    
+	//Looks inside $allSelectedItemsString to find at least 1 item connected to a vl_rigIt module.
+    //If found, enables "Select Module Controls" menuItem
+	int $exists = 0;
+	for ($item in $allSelectedItems){
+        if (! catchQuiet (`listConnections -d on -s on ($item + ".message")`) ){
+            string $connections[] = `listConnections -d on -s on ($item + ".message")`;
+            if (size($connections)){
+                $exists = 1;
+            }
+        }
+	}
+	menuItem -l "Select Module Controls" -enable $exists -c ("vlRigIt_selectModuleControls(\"" + $allSelectedItemsString + "\")");
+	menuItem -divider 1;
+    
+	menuItem -l "Reset Object(s) Transforms" -c ("vl_resetTransformations(\"" + $allSelectedItemsString + "\")");
+	menuItem -l "Reset Object(s) Attributes to Default Values" -c ("vl_resetAttributes(\"" + $allSelectedItemsString + "\")");
+	menuItem -divider 1;
+	menuItem -divider 1;
+	menuItem -l "GraphEditor" -c "GraphEditor";
+		
+	//PARENT___________________________________________________	
+	//_________________________________________________________
+		if (`attributeExists "parent" $transform`){
+		
+		    int $oldParent = `getAttr ($transform + ".parent")`;
+			string $parentsEnumStrings[] = `attributeQuery -node $transform -listEnum "parent"`;
+			string $parentsEnumString = $parentsEnumStrings[0];
+			string $parentsEnumList[]; tokenize $parentsEnumString ":" $parentsEnumList;
+			
+			string $radialPosition[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+			
+			string $setKeyParent = `menuItem -radialPosition "S" -parent $parentPopupMenu -l "KEY  parent"
+			            -c ("setKeyframe { \"" + $transform + ".parent\" }")`;
+
+			string $setParentToMenu = `menuItem -radialPosition "SE" -subMenu 1 -parent $parentPopupMenu -l "Set  parent  to: "`;
+			for ($i=0;$i<size($parentsEnumList);$i++){
+				menuItem -p $setParentToMenu -l $parentsEnumList[$i]
+						 -radialPosition $radialPosition[$i]
+						 -c ("vlRigIt_snapParentAskSetKey(\"" + $transform + "\"," + $i + "," + $oldParent + ", \"" + $parentsEnumString + "\")");
+			}
+			setParent -m $parentPopupMenu;
+	}
+		
+	//FK_IK____________________________________________________	
+	//_________________________________________________________
+	if (`attributeExists "FK_IK" $fkIkSwitcher`){
+		
+		float $fkIk_status = `getAttr ($fkIkSwitcher + ".FK_IK")`;
+		string $modes[] = {"FK", "IK"};
+
+		string $setKeyFKIK = `menuItem -radialPosition "NW" -parent $parentPopupMenu -l "KEY   \"FK_IK\""
+			            -c ("setKeyframe { \"" + $fkIkSwitcher + ".FK_IK\" }")`;
+		string $setParentToMenu = `menuItem	-radialPosition "N" 
+											-parent $parentPopupMenu
+											-l ("Switch to:   " + $modes[!$fkIk_status])
+											-c ("vlRigIt_snap_ikFk(\"" + $fkIkSwitcher + "\", " + (!$fkIk_status)  + ")")`;
+		setParent -m $parentPopupMenu;
+	}	
+}
+//#####################################################
+
+evalDeferred ("vl_contextualMenuBuilder()");
+scriptJob -event NewSceneOpened ("vl_contextualMenuBuilder()");
+

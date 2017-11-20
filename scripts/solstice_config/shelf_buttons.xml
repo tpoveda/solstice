@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<solstice_shelf>
-    <shelfItem icon="" cmds="from solstice_config import solstice_updater; solstice_updater.updateTools(True);" ann="Auto Update Solstice Tools" label="Update"/>
-    <shelfItem icon="" cmds="from solstice_config import solstice_main; solstice_main.updateSolsticeProject();" ann="Auto Setup Solstice Project" label="Project"/>
-    <shelfItem icon="" cmds="" ann="Separator" label=""/>
-</solstice_shelf>
