@@ -2,11 +2,11 @@
 # # -*- coding: utf-8 -*-
 #
 # """ ==================================================================
-# Script Name: solstice_fkButton.py
+# Script Name: solstice_toggleButton.py
 # by Tomás Poveda
 # Custom button used by the picker of Solstice Short Film
 # ______________________________________________________________________
-# Button classes for FK picker buttons
+# Base class used to create a toggle behaviour button
 # ______________________________________________________________________
 # ==================================================================="""
 
@@ -21,15 +21,19 @@ except:
 from .. import solstice_pickerColors as colors
 from .. import solstice_pickerBaseButton as baseBtn
 
-class solstice_fkButton(baseBtn.solstice_pickerBaseButton, object):
+class solstice_toggleButton(baseBtn.solstice_pickerBaseButton, object):
+
+    toggleOn = Signal()
+    toggleOff = Signal()
+
     def __init__(
-            self, x=0, y=0, text='', control='', parentCtrl='', radius=30, btnInfo=None, parent=None):
+            self, x=0, y=0, text='', control='', parentCtrl='', radius=30, btnInfo=None, parent=None, onText='ON', offText='OFF'):
 
         btnText = text
         if text == '' or text == None:
             btnText = 'FK'
 
-        super(solstice_fkButton, self).__init__(
+        super(solstice_toggleButton, self).__init__(
             x=x,
             y=y,
             text=btnText,
@@ -39,38 +43,47 @@ class solstice_fkButton(baseBtn.solstice_pickerBaseButton, object):
             innerColor=colors.blue,
             btnInfo=btnInfo,
             parent=parent,
-            buttonShape=baseBtn.solstice_pickerButtonShape.circular
+            buttonShape=baseBtn.solstice_pickerButtonShape.roundedSquare
         )
 
+        self._onText = text if onText == '' else onText
+        self._offText = offText
+
     def setInfo(self, btnInfo):
-        super(solstice_fkButton, self).setInfo(btnInfo)
+        super(solstice_toggleButton, self).setInfo(btnInfo)
 
         self.setControl(btnInfo['control'])
-        self.setParentControl(btnInfo['parent'])
+        self.setRadius(btnInfo['radius'])
         self.setWidth(btnInfo['width'])
         self.setHeight(btnInfo['height'])
-        self.setRadius(btnInfo['radius'])
         self.setGizmo(btnInfo['gizmo'])
         self.setPart(btnInfo['part'])
         self.setSide(btnInfo['side'])
-        self.setFkIkControl(btnInfo['FKIKControl'])
         if btnInfo['color'] != None:
             self.setInnerColor(btnInfo['color'])
         if btnInfo['glowColor'] != None:
             self.setGlowColor(btnInfo['glowColor'])
 
-    def contextMenuEvent(self, event):
-        menu = QMenu()
-        selectHierarchyAction = menu.addAction('Select Hierarchy')
-        resetControlAction = menu.addAction('Reset Control')
-        mirrorControlAction = menu.addAction('Mirror Control')
-        flipControlAction = menu.addAction('Flip Control')
-        action = menu.exec_(self.mapToGlobal(event.pos()))
-        if action == selectHierarchyAction:
-            self._selectHierarchy()
-        elif action == resetControlAction:
-            self._resetControl()
-        elif action == mirrorControlAction:
-            self._mirrorControl()
-        elif action == flipControlAction:
-            self._flipControl()
+    def mousePressEvent(self, event):
+
+        self._pressed = not self._pressed
+        self.repaint()
+
+        self.toggleOn.emit() if self._pressed == True else self.toggleOff.emit()
+
+    def _getCurrentGradientOffset(self):
+
+        """
+        Returns a correct gradient color and offset depending of the state of the button
+        """
+
+        gradient = self._gradient[baseBtn.NORMAL]
+        offset = 0
+        if self._pressed:
+            gradient = self._gradient[baseBtn.DOWN]
+            offset = 1
+        return gradient, offset
+
+    def paintEvent(self, event):
+        super(solstice_toggleButton, self).paintEvent(event)
+        self._text = self._onText if self._pressed == True else self._offText

@@ -10,13 +10,27 @@ Base class for picker parts
 ______________________________________________________________________
 ==================================================================="""
 
+try:
+    from PySide2.QtGui import *
+    from PySide2.QtCore import *
+    from PySide2.QtWidgets import *
+except:
+    from PySide.QtGui import *
+    from PySide.QtCore import *
+
 import maya.cmds as cmds
 import maya.mel as mel
+
 from solstice_pickerButtons import solstice_ikButton
 from solstice_pickerButtons import solstice_fkButton
 
-class solstice_pickerPart(object):
+class solstice_pickerPart(QObject, object):
+
+    fkSignal = Signal()
+    ikSignal = Signal()
+
     def __init__(self, name, side):
+        super(solstice_pickerPart, self).__init__()
         self._name = name
         self._side = side
         self._buttons = list()
@@ -52,12 +66,16 @@ class solstice_pickerPart(object):
             mel.eval('vlRigIt_snap_ikFk("{}","{}")'.format(self.getControlGroup(), 0))
             [btn.setVisible(False) for btn in self.getIKButtons()]
             [btn.setVisible(True) for btn in self.getFKButtons()]
+            print 'Setting fk ....'
+            self.fkSignal.emit()
 
     def setIK(self):
         if self.hasFKIK():
             mel.eval('vlRigIt_snap_ikFk("{}","{}")'.format(self.getControlGroup(), 1))
-        [btn.setVisible(False) for btn in self.getFKButtons()]
-        [btn.setVisible(True) for btn in self.getIKButtons()]
+            [btn.setVisible(False) for btn in self.getFKButtons()]
+            [btn.setVisible(True) for btn in self.getIKButtons()]
+            print 'Setting ik .....'
+            self.ikSignal.emit()
 
     def getControlGroup(self):
         return self.getControls()[0].controlGroup

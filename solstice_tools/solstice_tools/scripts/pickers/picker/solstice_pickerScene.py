@@ -133,6 +133,7 @@ class solstice_pickerScene(QGraphicsScene, object):
 
         partFound.addButton(newBtn)
 
+        newBtn.postCreation()
 
     def loadData(self, path):
 

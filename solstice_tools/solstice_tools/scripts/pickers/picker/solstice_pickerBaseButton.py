@@ -308,6 +308,7 @@ class solstice_pickerBaseButton(QPushButton, object):
         """
         Set the radius of the button
         """
+
         self._radius = radius
 
         if self._shape == solstice_pickerButtonShape.circular:
@@ -415,15 +416,6 @@ class solstice_pickerBaseButton(QPushButton, object):
         """
         Returns a correct gradient color and offset depending of the state of the button
         """
-
-        # if self._toggle:
-        #     if self._pressed:
-        #         gradient = self._gradient[DOWN]
-        #         offset = 1
-        #     else:
-        #         gradient = self._gradient[NORMAL]
-        #         offset = 0
-        # else:
         gradient = self._gradient[NORMAL]
         offset = 0
         if self.isDown():
@@ -718,10 +710,11 @@ class solstice_pickerBaseButton(QPushButton, object):
 
         super(solstice_pickerBaseButton, self).contextMenuEvent(event)
 
-# ================================================================================================
+    def postCreation(self):
 
-class solstice_pickerToogleButton(solstice_pickerBaseButton, object):
-    def __init__(self):
-        super(solstice_pickerBaseButton, self).__init__()
+        """
+        This method is called after the button is addded to the picker scene
+        Override in custom buttons
+        """
 
-# ================================================================================================
+        pass

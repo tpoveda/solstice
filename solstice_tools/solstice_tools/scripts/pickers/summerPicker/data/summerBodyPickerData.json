@@ -298,75 +298,65 @@
         "solstice_keyFkIkButton":
         [
           {
-            "x": "175",
+            "x": "212",
             "y": "-90",
             "radius": "2",
             "side":"L",
             "height":"20",
-            "width":"78",
-            "text":"KEY FK/IK",
+            "width":"40",
+            "text":"KEY",
             "color":[100,100,100],
             "glowColor":[255,255,255]
           },
 
           {
-            "x": "-209",
+            "x": "-208",
             "y": "-107",
             "radius": "2",
             "side":"R",
             "height":"20",
-            "width":"78",
-            "text":"KEY FK/IK",
+            "width":"35",
+            "text":"KEY",
             "color":[100,100,100],
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_ikToFkSwitcherButton":
+        "solstice_fkIkSwitcherButton":
         [
           {
             "x": "175",
-            "y": "-73",
+            "y": "-90",
             "radius": "2",
             "side":"L",
             "height":"20",
             "width":"40",
-            "text":"IK > FK",
             "color":[100,100,100],
             "glowColor":[255,255,255]
           },
           {
-            "x": "-209",
-            "y": "-90",
+            "x": "-175",
+            "y": "-107",
             "radius": "2",
             "side":"R",
             "height":"20",
             "width":"40",
-            "text":"IK > FK",
             "color":[100,100,100],
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_fkToIkSwitcherButton":
+        "solstice_gimbalButton":
         [
           {
-            "x": "212",
-            "y": "-73",
+            "x": "124",
+            "y": "50",
             "radius": "2",
+            "name": "arm_gimbalHelper",
+            "type":"ik",
+            "gizmo": "rotate",
             "side":"L",
             "height":"20",
-            "width":"40",
-            "text":"FK > IK",
-            "color":[100,100,100],
-            "glowColor":[255,255,255]
-          },
-          {
-            "x": "-172",
-            "y": "-90",
-            "radius": "2",
-            "side":"R",
-            "height":"20",
-            "width":"40",
-            "text":"FK > IK",
+            "width":"45",
+            "text":"GIMBAL",
             "color":[100,100,100],
             "glowColor":[255,255,255]
           }
@@ -658,6 +648,80 @@
         ],
         "solstice_ikButton":
         [
+        ],
+        "solstice_moduleButton":
+        [
+          {
+            "x": "107",
+            "y": "142",
+            "radius": "2",
+            "side":"L",
+            "height":"20",
+            "width":"70",
+            "text":"L_LEG",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          },
+          {
+            "x": "-157",
+            "y": "142",
+            "radius": "2",
+            "side":"R",
+            "height":"20",
+            "width":"70",
+            "text":"R_LEG",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          }
+        ],
+        "solstice_keyFkIkButton":
+        [
+          {
+            "x": "145",
+            "y": "160",
+            "radius": "2",
+            "side":"L",
+            "height":"20",
+            "width":"40",
+            "text":"KEY",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          },
+
+          {
+            "x": "-158",
+            "y": "160",
+            "radius": "2",
+            "side":"R",
+            "height":"20",
+            "width":"40",
+            "text":"KEY",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          }
+        ],
+        "solstice_fkIkSwitcherButton":
+        [
+          {
+            "x": "107",
+            "y": "160",
+            "radius": "2",
+            "side":"L",
+            "height":"20",
+            "width":"40",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          },
+          {
+            "x": "-120",
+            "y": "160",
+            "radius": "2",
+            "side":"R",
+            "height":"20",
+            "width":"40",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          }
         ]
       }
     }
