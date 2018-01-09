@@ -24,6 +24,7 @@ except:
 import os
 import maya.cmds as cmds
 import solstice_pickerView
+import solstice_pickerCommands as commands
 
 class solstice_picker(QWidget, object):
     def __init__(self, dataPath=None, imagePath=None, parent=None):
@@ -77,10 +78,24 @@ class solstice_picker(QWidget, object):
         """
 
         menu = QMenu(self)
-        exportPickerData = menu.addAction('Export Picker Data')
+        exportPickerDataAction = menu.addAction('Export Picker Data')
+        menu.addSeparator()
+        selectGlobalAction = menu.addAction('Select Global Control')
+        selectAllControlsAction = menu.addAction('Select All Controls')
+        selectBodyControlsAction = menu.addAction('Select Body Controls')
+        selectFaceControlsAction = menu.addAction('Select Face Controls')
+
         action = menu.exec_(self.mapToGlobal(event.pos()))
-        if action == exportPickerData:
+        if action == exportPickerDataAction:
             self._exportPickerData()
+        elif action == selectGlobalAction:
+            commands.selectGlobalControl()
+        elif action == selectAllControlsAction:
+            commands.selectAllControls()
+        elif action == selectBodyControlsAction:
+            commands.selectBodyControls()
+        elif action == selectFaceControlsAction:
+            commands.selectFaceControls()
 
     def mousePressEvent(self, event):
         super(solstice_picker, self).mousePressEvent(event)

@@ -350,13 +350,15 @@
             "x": "124",
             "y": "50",
             "radius": "2",
-            "name": "arm_gimbalHelper",
+            "name": "wrist_gimbalHelper",
             "type":"ik",
             "gizmo": "rotate",
             "side":"L",
             "height":"20",
+            "mirror":"True",
             "width":"45",
             "text":"GIMBAL",
+            "offset":[15, 0],
             "color":[100,100,100],
             "glowColor":[255,255,255]
           }
@@ -695,7 +697,7 @@
             "side":"R",
             "height":"20",
             "width":"40",
-            "text":"KEY",
+            "text":"TEST",
             "color":[100,100,100],
             "glowColor":[255,255,255]
           }
@@ -721,6 +723,89 @@
             "width":"40",
             "color":[100,100,100],
             "glowColor":[255,255,255]
+          }
+        ],
+        "solstice_commandButton":
+        [
+          {
+            "x": "-271",
+            "y": "-230",
+            "height":"20",
+            "width": "50",
+            "radius": "2",
+            "text":"GLOBAL",
+            "color":[100,100,100],
+            "command":"import pickers.picker.solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+          {
+            "x": "-220",
+            "y": "-230",
+            "height":"20",
+            "width": "50",
+            "radius": "2",
+            "text":"MAIN",
+            "color":[100,100,100],
+            "command":"import pickers.picker.solstice_pickerCommands as cmds; cmds.selectMainControl()"
+          },
+          {
+            "x": "-170",
+            "y": "-230",
+            "height":"20",
+            "width": "90",
+            "radius": "2",
+            "text":"ALL",
+            "color":[100,100,100],
+            "command":"import pickers.picker.solstice_pickerCommands as cmds; cmds.selectAllControls()"
+          },
+          {
+            "x": "-271",
+            "y": "-212",
+            "height":"20",
+            "width": "50",
+            "radius": "2",
+            "text":"BODY",
+            "color":[100,100,100],
+            "command":"import pickers.picker.solstice_pickerCommands as cmds; cmds.selectBodyControls()"
+          },
+          {
+            "x": "-220",
+            "y": "-212",
+            "height":"20",
+            "width": "50",
+            "radius": "2",
+            "text":"FACE",
+            "color":[100,100,100],
+            "command":"import pickers.picker.solstice_pickerCommands as cmds; cmds.selectFaceControls()"
+          },
+          {
+            "x": "-170",
+            "y": "-212",
+            "height":"20",
+            "width": "90",
+            "radius": "2",
+            "text":"DYNAMIC",
+            "color":[100,100,100],
+            "command":"import pickers.picker.solstice_pickerCommands as cmds; cmds.selectDynamicControl()"
+          },
+          {
+            "x": "-266",
+            "y": "-195",
+            "height":"20",
+            "width": "90",
+            "radius": "2",
+            "text":"KEY SELECTED",
+            "color":[100,100,100],
+            "command":"import pickers.picker.solstice_pickerCommands as cmds; cmds.setKeyframe()"
+          },
+          {
+            "x": "-170",
+            "y": "-195",
+            "height":"20",
+            "width": "90",
+            "radius": "2",
+            "text":"CLEAR SELECTION",
+            "color":[100,100,100],
+            "command":"import pickers.picker.solstice_pickerCommands as cmds; cmds.clearSelection()"
           }
         ]
       }

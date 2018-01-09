@@ -18,13 +18,9 @@ except:
     from PySide.QtGui import *
     from PySide.QtCore import *
 
+
+from functools import partial
 import maya.cmds as cmds
-
-from .. import solstice_pickerColors as colors
-from .. import solstice_pickerBaseButton as baseBtn
-import solstice_toggleButton as toggle
-from .. import solstice_pickerUtils as utils
-
 import solstice_toggleStateButton as toggleState
 
 class solstice_gimbalButton(toggleState.solstice_toggleStateButton, object):
@@ -44,20 +40,49 @@ class solstice_gimbalButton(toggleState.solstice_toggleStateButton, object):
             offText=offText
         )
 
+
+    def setInfo(self, btnInfo):
+        super(solstice_gimbalButton, self).setInfo(btnInfo)
+
+        self.onOffPos = [btnInfo['x']+6, btnInfo['y']+17]
+
+
     def updateState(self):
 
         """
         Update current state of the toggle button
         """
 
-        fkIkState = self.getPart().getFKIK(asText=True)
-        if fkIkState == 'IK':
-            self._control = self._control.replace('fk', 'ik')
-        else:
-            self._control = self._control.replace('ik', 'fk')
+        self.onOffBtn.move(self.onOffPos[0], self.onOffPos[1])
 
-    def updateGimbalVisibility(self):
-        print 'hola'
+        parts = ['', '']
+        if 'arm' in str(self.getPart().name):
+            parts = ['wrist', 'arm']
+        elif 'leg' in str(self.getPart().name):
+            parts = ['ankle', 'foot']
+
+        fkIkState = self.getPart().getFKIK(asText=True)
+        print(self._control)
+        if fkIkState == 'IK':
+            if 'ik' in self._control:
+                self._control = self._control.replace('ik_'+parts[0], 'ik_'+parts[1])
+            else:
+                self._control = self._control.replace('fk_'+parts[0], 'ik_'+parts[1])
+        else:
+            if 'ik' in self._control:
+                self._control = self._control.replace('ik_'+parts[0], 'fk_'+parts[0])
+            else:
+                self._control = self._control.replace('ik_'+parts[1], 'fk_'+parts[0])
+
+        print(self._control)
+
+
+    def updateGimbalVisibility(self, isEnabled):
+
+        self.updateState()
+        ctrl = self._control.replace('_gimbalHelper', '')
+        cmds.setAttr(ctrl+'.gimbalHelper', isEnabled)
+
 
     def mousePressEvent(self, event):
 
@@ -75,6 +100,5 @@ class solstice_gimbalButton(toggleState.solstice_toggleStateButton, object):
 
         self.updateState()
 
-        print 'holaaa'
-        self.onOffBtn.toggleOn.connect(self.updateGimbalVisibility)
-        self.onOffBtn.toggleOff.connect(self.updateGimbalVisibility)
+        self.onOffBtn.toggleOn.connect(partial(self.updateGimbalVisibility, True))
+        self.onOffBtn.toggleOff.connect(partial(self.updateGimbalVisibility, False))

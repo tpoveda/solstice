@@ -8,6 +8,7 @@ import solstice_pickerScene
 import solstice_pickerView
 import solstice_picker
 import solstice_pickerWindow
+import solstice_pickerCommands
 
 def _reload():
     reload(solstice_pickerColors)
@@ -21,3 +22,4 @@ def _reload():
     reload(solstice_pickerView)
     reload(solstice_picker)
     reload(solstice_pickerWindow)
+    reload(solstice_pickerCommands)

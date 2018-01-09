@@ -36,7 +36,7 @@ class solstice_pickerView(QGraphicsView, object):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setResizeAnchor(self.AnchorViewCenter)
-        self.setRenderHints(QPainter.HighQualityAntialiasing | QPainter.SmoothPixmapTransform)
+        self.setRenderHints(QPainter.SmoothPixmapTransform | QPainter.TextAntialiasing)
         self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
 
         # Scale view in Y negative so position Y values works similar as Maya

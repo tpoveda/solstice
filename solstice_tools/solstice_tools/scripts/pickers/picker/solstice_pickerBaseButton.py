@@ -21,10 +21,12 @@ except:
 import os
 
 import maya.cmds as cmds
+import maya.mel as mel
 import maya.utils as mayaUtils
 
 import solstice_pickerColors as colors
 import solstice_pickerUtils as utils
+import solstice_pickerCommands as commands
 
 class solstice_pickerButtonShape(object):
     circular = 'circular',
@@ -225,6 +227,17 @@ class solstice_pickerBaseButton(QPushButton, object):
         """
 
         self._fkIkControl = fkIkCtrl
+
+
+    def setCommand(self, command):
+
+        """
+        Set the Python command to execute when the button is pressed
+        :param command: str, python command
+        """
+
+        self._command = command
+        
 
     def setInnerColor(self, innerColor):
 
@@ -542,6 +555,17 @@ class solstice_pickerBaseButton(QPushButton, object):
                     cmds.setAttr(self._control + '.' + xform + axis, xformValue)
                 except:
                     pass
+
+
+    @utils.pickerUndo
+    def _resetControlAtributes(self):
+
+        """
+        Reset the attributes of the control
+        """
+
+        commands.resetAttributes(self._control)
+
 
     # ---------------------------------------------------------------------------------------------------------
     # ===== OVERRIDE METHODS

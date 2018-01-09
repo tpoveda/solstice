@@ -13,6 +13,7 @@ import solstice_toggleButton
 import solstice_fkIkSwitcherButton
 import solstice_toggleStateButton
 import solstice_gimbalButton
+import solstice_commandButton
 
 def _reload():
     reload(solstice_extraButton)
@@ -30,3 +31,4 @@ def _reload():
     reload(solstice_fkIkSwitcherButton)
     reload(solstice_toggleStateButton)
     reload(solstice_gimbalButton)
+    reload(solstice_commandButton)

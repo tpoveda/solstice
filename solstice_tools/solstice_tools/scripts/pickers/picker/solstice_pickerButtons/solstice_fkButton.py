@@ -65,6 +65,7 @@ class solstice_fkButton(baseBtn.solstice_pickerBaseButton, object):
         resetControlAction = menu.addAction('Reset Control')
         mirrorControlAction = menu.addAction('Mirror Control')
         flipControlAction = menu.addAction('Flip Control')
+        resetControlAttributes = menu.addAction('Reset Control Attributes')
         action = menu.exec_(self.mapToGlobal(event.pos()))
         if action == selectHierarchyAction:
             self._selectHierarchy()
@@ -74,3 +75,5 @@ class solstice_fkButton(baseBtn.solstice_pickerBaseButton, object):
             self._mirrorControl()
         elif action == flipControlAction:
             self._flipControl()
+        elif action == resetControlAttributes:
+            self._resetControlAtributes()

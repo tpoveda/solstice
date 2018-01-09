@@ -44,6 +44,9 @@ class solstice_fkIkSwitcherButton(toggle.solstice_toggleButton, object):
         self.toggleOff.connect(self.switchToFk)
 
     def switchToFk(self):
+
+        # TODO If gimbal control is selected select its fk control
+
         self.getPart().setFK()
         sel = cmds.ls(sl=True)
         if len(sel) > 0:
@@ -51,11 +54,14 @@ class solstice_fkIkSwitcherButton(toggle.solstice_toggleButton, object):
             fkIkCtrl = self.getPart().getButtonByName(currCtrl)
             if len(fkIkCtrl) > 0:
                 fkIkCtrl = fkIkCtrl[0].getFkIkControl()
-                if cmds.objExists(fkIkCtrl):
+                if fkIkCtrl and cmds.objExists(fkIkCtrl):
                     cmds.select(fkIkCtrl, r=True)
                     utils.setTool('rotate')
 
     def switchToIk(self):
+
+        # TODO If gimbal control is selected select its ik control
+
         self.getPart().setIK()
         sel = cmds.ls(sl=True)
         if len(sel) > 0:
@@ -63,7 +69,7 @@ class solstice_fkIkSwitcherButton(toggle.solstice_toggleButton, object):
             fkIkCtrl = self.getPart().getButtonByName(currCtrl)
             if len(fkIkCtrl) > 0:
                 fkIkCtrl = fkIkCtrl[0].getFkIkControl()
-                if cmds.objExists(fkIkCtrl):
+                if fkIkCtrl and cmds.objExists(fkIkCtrl):
                     cmds.select(fkIkCtrl, r=True)
                     utils.setTool('move')
 
@@ -90,5 +96,14 @@ class solstice_fkIkSwitcherButton(toggle.solstice_toggleButton, object):
         self.updateState()
         self.getPart().fkSignal.connect(self.updateState)
         self.getPart().ikSignal.connect(self.updateState)
+
+
+    def getInfo(self):
+
+        """
+        Override this to avoid problem with module selection (Check workaround for this)
+        """
+
+        return None
 
 

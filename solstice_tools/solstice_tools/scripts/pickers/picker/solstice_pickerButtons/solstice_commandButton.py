@@ -2,11 +2,11 @@
 # # -*- coding: utf-8 -*-
 #
 # """ ==================================================================
-# Script Name: solstice_ikButton.py
+# Script Name: solstice_commandButton.py
 # by Tomás Poveda
 # Custom button used by the picker of Solstice Short Film
 # ______________________________________________________________________
-# Button classes for IK picker buttons
+# Button classes for buttons that executes commands
 # ______________________________________________________________________
 # ==================================================================="""
 
@@ -20,28 +20,28 @@ except:
 
 from .. import solstice_pickerColors as colors
 from .. import solstice_pickerBaseButton as baseBtn
+from .. import solstice_pickerUtils as utils
 
-class solstice_ikButton(baseBtn.solstice_pickerBaseButton, object):
+
+class solstice_commandButton(baseBtn.solstice_pickerBaseButton, object):
     def __init__(
             self, x=0, y=0, text='', control='', parentCtrl='', radius=30, btnInfo=None, parent=None):
 
-        btnText = text
-        if text == '' or text == None:
-            btnText = 'IK'
-
-        super(solstice_ikButton, self).__init__(
+        super(solstice_commandButton, self).__init__(
             x=x,
             y=y,
-            text=btnText,
+            text=text,
             control=control,
             parentCtrl=parentCtrl,
             radius=radius,
-            innerColor=colors.yellow,
+            innerColor=colors.blue,
             btnInfo=btnInfo,
-            parent=parent)
+            parent=parent,
+            buttonShape=baseBtn.solstice_pickerButtonShape.roundedSquare
+        )
 
     def setInfo(self, btnInfo):
-        super(solstice_ikButton, self).setInfo(btnInfo)
+        super(solstice_commandButton, self).setInfo(btnInfo)
 
         self.setControl(btnInfo['control'])
         self.setParentControl(btnInfo['parent'])
@@ -52,24 +52,17 @@ class solstice_ikButton(baseBtn.solstice_pickerBaseButton, object):
         self.setPart(btnInfo['part'])
         self.setSide(btnInfo['side'])
         self.setFkIkControl(btnInfo['FKIKControl'])
+        self.setCommand(btnInfo['command'])
         if btnInfo['color'] != None:
             self.setInnerColor(btnInfo['color'])
+        if btnInfo['glowColor'] != None:
+            self.setGlowColor(btnInfo['glowColor'])
 
-    def contextMenuEvent(self, event):
-        menu = QMenu()
-        selectHierarchyAction = menu.addAction('Select Hierarchy')
-        resetControlAction = menu.addAction('Reset Control')
-        mirrorControlAction = menu.addAction('Mirror Control')
-        flipControlAction = menu.addAction('Flip Control')
-        resetControlAttributes = menu.addAction('Reset Control Attributes')
-        action = menu.exec_(self.mapToGlobal(event.pos()))
-        if action == selectHierarchyAction:
-            self._selectHierarchy()
-        elif action == resetControlAction:
-            self._resetControl()
-        elif action == mirrorControlAction:
-            self._mirrorControl()
-        elif action == flipControlAction:
-            self._flipControl()
-        elif action == resetControlAttributes:
-            self._resetControlAtributes()
+
+    @utils.pickerUndo
+    def executeCommand(self):
+        print('Executing command ...')
+        exec(self._command)
+
+    def mousePressEvent(self, event):
+        self.executeCommand()

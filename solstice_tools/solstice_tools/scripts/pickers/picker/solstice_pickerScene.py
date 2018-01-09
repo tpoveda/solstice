@@ -207,7 +207,7 @@ class solstice_pickerScene(QGraphicsScene, object):
         controls = []
         for btn in self._buttons:
             btnInfo = btn.getInfo()
-            if btnInfo.get('part'):
+            if btnInfo and btnInfo.get('part'):
                 if btnInfo['part'] == type:
                     if side != '':
                         if btnInfo['side'] == side:
@@ -276,6 +276,7 @@ class solstice_pickerScene(QGraphicsScene, object):
         btnColor = None
         btnGlowColor = None
         btnFKIKControl = ''
+        btnCommand = ''
 
         if btnData.get('class'):
             btnClassName = btnData['class']
@@ -313,6 +314,8 @@ class solstice_pickerScene(QGraphicsScene, object):
             btnGlowColor = btnData['glowColor']
         if btnData.get('FKIKControl'):
             btnFKIKControl = btnData['FKIKControl']
+        if btnData.get('command'):
+            btnCommand = btnData['command']
 
         btnCtrl = self._getButtonControl(btnSide, btnPart, btnType, btnName, fullname=btnFullname)
 
@@ -337,6 +340,7 @@ class solstice_pickerScene(QGraphicsScene, object):
         btnInfo['color'] = btnColor
         btnInfo['glowColor'] = btnGlowColor
         btnInfo['FKIKControl'] = btnFKIKControl
+        btnInfo['command'] = btnCommand
 
         return btnInfo
 
