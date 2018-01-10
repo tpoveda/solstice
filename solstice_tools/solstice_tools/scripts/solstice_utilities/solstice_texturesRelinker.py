@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# # -*- coding: utf-8 -*-
+#
+# """ ==================================================================
+# Script Name: solstice_texturesRelinker.py
+# by Tomas Poveda
+# Tool used by textures artists to relink textures path
+# ______________________________________________________________________
+# ==================================================================="""
+
 try:
     from PySide2.QtGui import *
     from PySide2.QtCore import *
@@ -8,40 +18,10 @@ except:
     from PySide.QtCore import *
     from shiboken import wrapInstance
 
-import os
-
-import maya.OpenMayaUI as OpenMayaUI
-import pymel.core as pm
 import maya.cmds as cmds
 
-# -------------------------------------------------------------------------------------------------
-
-def _getMayaWindow():
-    """
-    Return the Maya main window widget as a Python object
-    :return: Maya Window
-    """
-
-    ptr = OpenMayaUI.MQtUtil.mainWindow()
-    if ptr is not None:
-        return wrapInstance(long(ptr), QMainWindow)
-
-def solstice_undo(fn):
-
-    """
-    Simple undo wrapper. Use @solstice_undo above the function to wrap it.
-    @param fn: function to wrap
-    @return wrapped function
-    """
-
-    def wrapper(*args, **kwargs):
-        cmds.undoInfo(openChunk=True)
-        try:
-            ret = fn(*args, **kwargs)
-        finally:
-            cmds.undoInfo(closeChunk=True)
-        return ret
-    return wrapper
+from solstice_decorators import solstice_undo
+from solstice_utils import _getMayaWindow
 
 # -------------------------------------------------------------------------------------------------
 
@@ -49,7 +29,7 @@ class solstice_texturesRelinker(QMainWindow, object):
     def __init__(self):
         super(solstice_texturesRelinker, self).__init__(_getMayaWindow())
 
-        winName = 'solstice_texturesRelinker_dialog'
+        winName = 'solstice_texturesRelinker_window'
 
         # Check if this UI is already open. If it is then delete it before  creating it anew
         if cmds.window(winName, exists=True):
@@ -59,7 +39,7 @@ class solstice_texturesRelinker(QMainWindow, object):
 
         # Set the dialog object name, window title and size
         self.setObjectName(winName)
-        self.setWindowTitle('Solstice Tools - Textures Relinker')
+        self.setWindowTitle('Solstice Tools - Textures Relinker - v1.1')
         #self.setFixedSize(QSize(1200, 780))
 
         self.customUI()
@@ -72,6 +52,7 @@ class solstice_texturesRelinker(QMainWindow, object):
             msgBox.setText('Solstice environment variables are not setup correctly! Make sure you have Solstice Tools intalled and restart Maya!')
             msgBox.exec_()
             return
+
         self.show()
 
     def customUI(self):

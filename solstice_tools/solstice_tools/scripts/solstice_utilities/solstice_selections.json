@@ -1,0 +1,20 @@
+{
+  "selections":
+  [
+    {
+      "name":"Animation",
+      "image":"",
+      "type":"animation"
+    },
+    {
+      "name":"Cloth",
+      "image":"",
+      "type":"cloth simulation"
+    },
+    {
+      "name":"Groom",
+      "image":"",
+      "type":"groom simulation"
+    }
+  ]
+}

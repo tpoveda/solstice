@@ -3,7 +3,7 @@
 #
 # """ ==================================================================
 # Script Name: solstice_fkIkSwitcherButton.py
-# by Tomás Poveda
+# by Tomas Poveda
 # Custom button used by the picker of Solstice Short Film
 # ______________________________________________________________________
 # Button used to fkIk switch (all in one button)
