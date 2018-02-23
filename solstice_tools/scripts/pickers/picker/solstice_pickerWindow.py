@@ -21,79 +21,52 @@ except:
     from PySide.QtCore import *
     from shiboken import wrapInstance
 
-# Import standard Python modules
 from functools import partial
 import os
+import weakref
 
-# Import Maya command modules
 import maya.cmds as cmds
 import maya.mel as mel
-
-# Import UI module of the Python Maya API
-# We use this module to access to the memory pointer of the main Maya window
-from maya import OpenMayaUI as OpenMayaUI
-
-# Import modules to ensure UI dockable behavior inside Maya for our picker window
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
-# Import custom modules
 import solstice_pickerUtils as pickerUtils
 
 # Global variable that stores current opened picker
 global window_picker
 
-class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
 
-    MAYA2014 = 201400
-    MAYA2015 = 201500
-    MAYA2016 = 201600
-    MAYA2016_5 = 201650
-    MAYA2017 = 201700
+class Solstice_PickerWindow(QWidget, object):
 
-    def __init__(self, pickerName, pickerTitle, charName):
+    instances = list()
+
+    def __init__(self, pickerName, pickerTitle, charName, parent=None):
 
         """
         Constructor
         """
 
-        # Before starting, we remove any instance of this window
-        self._deleteInstances()
+        super(Solstice_PickerWindow, self).__init__(parent)
 
-        super(solstice_pickerWindow, self).__init__(parent=pickerUtils.getMayaWindow())
-
-        self.pickerName = pickerName
+        Solstice_PickerWindow._deleteInstances()
+        self.__class__.instances.append(weakref.proxy(self))
         self.pickerTitle = pickerTitle
-        self.charName = charName
 
-        cmds.select(clear=True)
+        self.window_name = pickerName
+        self.ui = parent
+
+        self.charName = charName
 
         if not self.initSetup():
             self.close()
             return
-        
-        self._createUI()
+
+        cmds.select(clear=True)
+
         self.toolUI()
 
         global window_picker
         window_picker = self
-    
-    def _createUI(self):
-        
-        """
-        Method initializes the UI
-        """
 
-        # ===================== DOCKABLE WINDOW FUNCTIONALITY ====================== #
-        mayaMainWindowPtr = OpenMayaUI.MQtUtil.mainWindow()
-        self.mayaMainWindow = wrapInstance(long(mayaMainWindowPtr), QMainWindow)
-        self.setObjectName(self.pickerName)                                     # This name must be unique to ensure that the tool is deleted correctly
-        self.setWindowFlags(Qt.Tool)
-        self.setAttribute(Qt.WA_DeleteOnClose)
-        self.setWindowTitle(self.pickerTitle)
-
-        cmds.select(clear=True)
-
-        self._run()
 
     def initSetup(self):
 
@@ -110,16 +83,12 @@ class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
         pickerUtils.loadScript('vl_resetAttributes.mel')
         pickerUtils.loadScript('vl_contextualMenuBuilder.mel')
 
+
     def toolUI(self):
 
         """
         Function where all the UI of the picker is loaded
         """
-
-        # Set initial widget and layout
-        self.setLayout(QVBoxLayout())
-        self.layout().setContentsMargins(0, 0, 0, 0)
-        self.layout().setSpacing(0)
 
         # Menu bar
         menubarWidget = QWidget()
@@ -129,16 +98,16 @@ class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
         settingsFile = menubar.addMenu('Settings')
         exitAction = QAction('Solstice', menubarWidget)
         settingsFile.addAction(exitAction)
-        exitAction.triggered.connect(self.test)
+        # exitAction.triggered.connect(self.test)
         menubarLayout.addWidget(menubar)
-        self.layout().addWidget(menubarWidget)
+        self.parent().layout().addWidget(menubarWidget)
 
         # Add a scrollbar
         self.scrollArea = QScrollArea()
         self.scrollArea.setFocusPolicy(Qt.NoFocus)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.layout().addWidget(self.scrollArea)
+        self.parent().layout().addWidget(self.scrollArea)
 
         # Add main tab
         self._mainWidget = QWidget()
@@ -170,9 +139,6 @@ class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
 
         self.updateNamespaces()
 
-    def test(self):
-        print 'Solstice'
-
     def updateNamespaces(self):
         currNamespaces = cmds.namespaceInfo(listOnlyNamespaces=True, recurse=True)
         for ns in currNamespaces:
@@ -198,85 +164,18 @@ class solstice_pickerWindow(MayaQWidgetDockableMixin, QDialog):
             charPixmap = QPixmap(imagePath)
             self._charLbl.setPixmap(charPixmap.scaled(100,100, Qt.KeepAspectRatio))
 
-    def dockCloseEventTriggered(self):
+    @staticmethod
+    def _deleteInstances():
+        for ins in Solstice_PickerWindow.instances:
+            try:
+                ins.setParent(None)
+                ins.deleteLater()
+            except:
+                # Ignore the fact that the actual parent has already been deleted by Maya ...
+                pass
 
-        """
-        If the tool is in floating window mode, when the window is closed this method will be called
-        """
+            Solstice_PickerWindow.instances.remove(ins)
+            del ins
 
-        self._deleteInstances()
-
-    def close(self):
-
-        """
-        Method that is called when we want to close the application and close the application
-        in a way or other depending if the tool is docked or not
-        """
-
-        if self.dockWidget:
-            cmds.deleteUI(self.dockName)
-        else:
-            QDialog.close(self)
-        self.dockWidget = self.dockName = None
-
-    def _deleteInstances(self):
-
-        """
-        Deletes any created instance of this class
-        """
-
-        def delete2016():
-            # Loop through all the child elmenents of the main Maya window
-            for obj in pickerUtils.getMayaWindow().children():
-                if str(type(obj)) == "<class 'maya.app.general.mayaMixin.MayaQDockWidget'>":
-                    # We compare the name of those elements with the name of our tool
-                    if obj.widget().__class__.__name__ == self.__class__.__name__:
-                        # If there is any match, we delete that instance
-                        obj.setParent(None)
-                        obj.deleteLater()
-        
-        def delete2017():
-            # Loop through all the child elements of the main Maya window
-            for obj in pickerUtils.getMayaWindow().children():
-                if str(type(obj)) == "<class '{}.{}'>".format(os.path.splitext(os.path.basename(__file__)[0]), self.__class__.__name__):
-                    if obj.__class__.__name__ == self.pickerName:
-                        obj.setParent(None)
-                        obj.deleteLater()
-
-        if pickerUtils.getMayaAPIVersion() < self.__class__.MAYA2017:
-            delete2016()
-        else:
-            delete2017()
-
-    def _deleteControl(self, control):
-        if cmds.workspaceControl(control, query=True, exists=True):
-            cmds.workspaceControl(control, e=True, close=True)
-            cmds.deleteUI(control, control=True)
-
-    def _run(self):
-        
-        def run2016():
-            self.setObjectName(self.pickerName)
-            self.show(dockable=True, area='right', floating=False)
-            self.raise_()
-            self.setDockableParameters(width=420)
-            self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
-            #self.setMinimumWidth(420)
-            #self.setMaximumWidth(600)
-            self.setMaximumWidth(800)
-
-        def run2017():
-            self.setObjectName(self.pickerName)
-            # _deleteInstances() function does not remove the workspace control, so we have to remove it manually
-            workspaceControlName = self.objectName() + 'WorkspaceControl'
-            self._deleteControl(workspaceControlName)
-            self.show(dockable=True, area='right', floating=False)
-            cmds.workspaceControl(workspaceControlName, e=True, ttc=['AttributeEditor', -1], wp='preferred', mw=420)
-            self.raise_()
-            self.setDockableParameters(width=420)
-            self.setMaximumWidth(800)
-
-        if pickerUtils.getMayaAPIVersion() < self.__class__.MAYA2017:
-            run2016()
-        else:
-            run2017()
+    def run(self):
+        return self

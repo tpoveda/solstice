@@ -47,19 +47,17 @@ def init_solstice_tools():
         except ImportError as e:
             print('Impossible to import {} module'.format(mod_name))
             print(e)
-        # try:
-        mod = sys.modules[mod_name]
-        imported_mods = list()
-        for importer, mod_name, is_pkg in pkgutil.iter_modules(mod.__path__):
-            mod_name = '{0}.{1}'.format(mod.__name__, mod_name)
-            imported_mod = importlib.import_module(mod_name)
-            imported_mods.append(imported_mod)
-        print('Module {} initialized'.format(mod_name))
-        # except:
-        #     continue
+        try:
+            mod = sys.modules[mod_name]
+            imported_mods = list()
+            for importer, mod_name, is_pkg in pkgutil.iter_modules(mod.__path__):
+                mod_name = '{0}.{1}'.format(mod.__name__, mod_name)
+                imported_mod = importlib.import_module(mod_name)
+                imported_mods.append(imported_mod)
+            print('Module {} initialized'.format(mod_name))
+        except:
+            continue
 
 def init():
     reload_all()
     init_solstice_tools()
-    # from solstice_tools.scripts import userSetup
-    # reload(userSetup)

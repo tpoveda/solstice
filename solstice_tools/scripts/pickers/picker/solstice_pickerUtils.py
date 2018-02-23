@@ -23,14 +23,9 @@ except:
 
 import os
 
-# Import necessary modules
 import maya.cmds as cmds
 import maya.mel as mel
-
-# Import UI module of the Python Maya API
-# We use this module to access to the memory pointer of the main Maya window
 from maya import OpenMayaUI as OpenMayaUI
-from maya.OpenMayaUI import MQtUtil
 
 # --------------------------------------------------------------------------------------------
 scriptsPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'scripts')
@@ -69,8 +64,8 @@ def getMayaWindow():
     Returns an instance of the Maya main window
     """
 
-    mayaMainWindowPtr = OpenMayaUI.MQtUtil.mainWindow()
-    return wrapInstance(long(mayaMainWindowPtr), QMainWindow)
+    maya_main_window_ptr = OpenMayaUI.MQtUtil.mainWindow()
+    return wrapInstance(long(maya_main_window_ptr), QWidget)
 
 def getMayaAPIVersion():
 
@@ -199,3 +194,21 @@ def getMirrorControl(ctrlName):
         return
 
     return ctrlName.replace(oldSide, newSide)
+
+
+def dock_window(pickerName, pickerTitle, charName, dialog_class):
+    try:
+        cmds.deleteUI(pickerName)
+    except:
+        pass
+
+    main_control = cmds.workspaceControl(pickerName, ttc=["AttributeEditor", -1], iw=300, mw=True, wp='preferred', label=pickerTitle)
+
+    control_widget = OpenMayaUI.MQtUtil.findControl(pickerName)
+    control_wrap = wrapInstance(long(control_widget), QWidget)
+    control_wrap.setAttribute(Qt.WA_DeleteOnClose)
+    win = dialog_class(pickerName, pickerTitle, charName, control_wrap)
+
+    cmds.evalDeferred(lambda *args: cmds.workspaceControl(main_control, e=True, rs=True))
+
+    return win.run()

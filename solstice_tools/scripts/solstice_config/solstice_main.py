@@ -20,7 +20,7 @@ def runAtMayaStart(updateProject=False):
     print(sLog('Checking for Solstice Tools updates ...'))
     try:
         import solstice_updater as s_updater
-        s_updater.updateTools(ui=True)
+        s_updater.updateTools()
     except Exception as e:
         print str(e)
 
