@@ -35,11 +35,7 @@ class solstice_picker(QWidget, object):
         self.mainLayout.setSpacing(0)
         self.setLayout(self.mainLayout)
 
-        checkedImagePath = None
-        if os.path.isfile(imagePath):
-            checkedImagePath = imagePath
-
-        self.view = solstice_pickerView.solstice_pickerView(dataPath=dataPath, imagePath=checkedImagePath)
+        self.view = solstice_pickerView.solstice_pickerView(dataPath=dataPath, imagePath=imagePath)
         self.mainLayout.addWidget(self.view)
 
         bottomLayout = QHBoxLayout()

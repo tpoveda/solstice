@@ -14,10 +14,12 @@ try:
     from PySide2.QtGui import *
     from PySide2.QtCore import *
     from PySide2.QtWidgets import *
+    from PySide2.QtSvg import *
     from shiboken2 import wrapInstance
 except:
     from PySide.QtGui import *
     from PySide.QtCore import *
+    from PySide.QtSvg import *
     from shiboken import wrapInstance
 
 import solstice_pickerScene as scene
@@ -45,7 +47,8 @@ class solstice_pickerView(QGraphicsView, object):
         brush = QBrush(QColor(70,70,70,255))
         self.setBackgroundBrush(brush)
         self._backgroundImage = None
-        self.setBackgroundImage(imagePath)
+        if imagePath:
+            self.setBackgroundImage(imagePath)
 
     def backgroundImage(self):
         return self._backgroundImage
@@ -54,15 +57,20 @@ class solstice_pickerView(QGraphicsView, object):
         if not imagePath:
             return
 
-        #self._backgroundImage = QImage(imagePath).mirrored(False, True)
-        self._backgroundImage = QImage(imagePath)
+        self._backgroundImage = QGraphicsSvgItem(imagePath)
+        self._backgroundImage.setZValue(-1)
+        self.scene().addItem(self._backgroundImage)
 
-        width = self._backgroundImage.width()
-        height = self._backgroundImage.height()
+        width = self._backgroundImage.boundingRect().size().width()
+        height = self._backgroundImage.boundingRect().size().height()
+
+        print('width: ', width)
+        print('height: ', height)
 
         self.scene().setSize(width, height)
-
         self.fitSceneToContent()
+
+        self._backgroundImage.moveBy(-width*0.5, -height*0.5)
 
     def fitSceneToContent(self, keepAspectRatio=False):
 
@@ -76,9 +84,9 @@ class solstice_pickerView(QGraphicsView, object):
 
     def drawBackground(self, painter ,rect):
         result = QGraphicsView.drawBackground(self, painter, rect)
-        if not self._backgroundImage:
-            return result
-        painter.drawImage(self.sceneRect(), self._backgroundImage, QRectF(self._backgroundImage.rect()))
+        # if not self._backgroundImage:
+        #     return result
+        # painter.drawImage(self.sceneRect(), self._backgroundImage, QRectF(self._backgroundImage.rect()))
 
     def clear(self):
         oldScene = self.scene()

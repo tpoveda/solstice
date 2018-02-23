@@ -15,12 +15,10 @@ try:
     from PySide2.QtGui import *
     from PySide2.QtCore import *
     from PySide2.QtWidgets import *
-    from PySide2.QtSvg import *
     from shiboken2 import wrapInstance
 except:
     from PySide.QtGui import *
     from PySide.QtCore import *
-    from PySide.QtSvg import *
     from shiboken import wrapInstance
 
 
@@ -72,7 +70,7 @@ class Solstice_SummerPicker(window.Solstice_PickerWindow, object):
 
             self.setCharacterImage(os.path.join(imagesPath, 'summer_icon.png'))
             #
-            self.bp = bodyPicker.solstice_summerBodyPicker(dataPath=self.bodyPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_body.png'))
+            self.bp = bodyPicker.solstice_summerBodyPicker(dataPath=self.bodyPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_body.svg'))
             self.fp = facialPicker.solstice_summerFacialPicker(dataPath=self.facialPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_facial.png'))
 
             if self._fullWindow:
@@ -95,8 +93,9 @@ class Solstice_SummerPicker(window.Solstice_PickerWindow, object):
             self.updatePickers()
 
     def updatePickers(self):
-        for picker in [self.bp, self.fp]:
-            picker.setNamespace(self.namespace.currentText())
+        pass
+        # for picker in [self.bp, self.fp]:
+        #     picker.setNamespace(self.namespace.currentText())
 
     def setFullWindow(self, fullWindow):
         self._fullWindow = fullWindow
