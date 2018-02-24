@@ -85,8 +85,6 @@ class solstice_fkIkSwitcherButton(toggle.solstice_toggleButton, object):
         else:
             self.pressed = False
 
-        print 'Updating FKIKSwitcherButtonState ...'
-
     def postCreation(self):
 
         """

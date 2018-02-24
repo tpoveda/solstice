@@ -53,7 +53,6 @@ class Solstice_mainWindow(QtWidgets.QMainWindow):
         self.defaultImageFile = self.pipeImagesPath + 'ToolsBG2.png'
         
         self.bgImagePixmap = QtGui.QPixmap(self.defaultImageFile)
-        print self.defaultImageFile
         self.scaledBgImagePixmap = self.bgImagePixmap.scaled(self.windowSize)
         self.bgImageLabel.setPixmap(self.scaledBgImagePixmap)
         self.defaultIcon = self.pipeImagesPath +'solsticeIcon.png'
@@ -105,12 +104,8 @@ class Solstice_mainWindow(QtWidgets.QMainWindow):
         
     def setBgImage(self,img='None'):
 
-        print img
         if img == 'None':
-            print img
-
             img = QtWidgets.QFileDialog.getOpenFileName(self,"Open Image", self.pathRootDir , "Image Files (*.png)")[0]
-            print img
             if not img:
                 print 'image not changed.'
             else:

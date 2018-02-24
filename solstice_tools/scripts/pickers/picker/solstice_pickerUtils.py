@@ -164,36 +164,46 @@ class Splitter(QWidget, object):
 
         self.layout().addWidget(secondLine)
 
-def getMirrorControl(ctrlName):
-    oldSide = None
-    newSide = None
-    sidesList = ['l', 'r', 'L', 'R']
-    sideFormats = []
-    for side in sidesList:
-        sideFormats.append('_{0}_'.format(side))
-        sideFormats.append('{0}_'.format(side))
-        sideFormats.append('_{0}'.format(side))
-        sideFormats.append('{0}'.format(side))
+def getMirrorControl(ctrl_name):
 
-    for format in sideFormats:
-        if format in ctrlName:
-            for side in sidesList:
+    old_side = None
+    new_side = None
+    sides_list = ['l', 'r', 'L', 'R']
+    side_formats = []
+    for side in sides_list:
+        side_formats.append('{0}_'.format(side))
+        side_formats.append('_{0}_'.format(side))
+        side_formats.append('_{0}'.format(side))
+
+    # If the control name, we do not take in accout namespace
+    name_parts = ctrl_name.rpartition(':')
+    namespace = None
+    if len(name_parts) > 1:
+        namespace = name_parts[0]
+    ctrl_name = name_parts[2]
+
+    for format in side_formats:
+        if format in ctrl_name:
+            for side in sides_list:
                 if side in format:
-                    oldSide = side
+                    old_side = side
                     break
 
-    if oldSide is None:
+    if old_side is None:
         return
 
-    if oldSide == 'l' or oldSide == 'L':
-        newSide = 'R'
-    elif newSide == 'r' or oldSide == 'R':
-        newSide = 'L'
+    if old_side == 'l' or old_side == 'L':
+        new_side = 'R'
+    elif new_side == 'r' or old_side == 'R':
+        new_side = 'L'
 
-    if newSide is None:
+    if new_side is None:
         return
 
-    return ctrlName.replace(oldSide, newSide)
+    if namespace:
+        return namespace + ':' + ctrl_name.replace(old_side, new_side)
+    else:
+        return ctrl_name.replace(old_side, new_side)
 
 
 def dock_window(pickerName, pickerTitle, charName, dialog_class):

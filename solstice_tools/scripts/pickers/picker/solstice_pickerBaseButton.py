@@ -379,10 +379,10 @@ class solstice_pickerBaseButton(QPushButton, object):
         # NOTE: If the system fails with a maximum recursion error check that the parent
         # name is corret and not is equal as the name of the control
 
-        hierarchy = [self._control]
+        hierarchy = [self.control]
         if len(self._childCtrls) > 0:
             for child in self._childCtrls:
-                if child == self._control:
+                if child == self.control:
                     continue
                 hierarchy.extend(child.getHierarchy())
         return hierarchy
@@ -476,7 +476,7 @@ class solstice_pickerBaseButton(QPushButton, object):
 
         if len(self._hierarchy) > 0:
             for btn in self._hierarchy:
-                if btn == self._control:
+                if btn == self.control:
                     pass
                 else:
                     window_picker = solstice_pickerWindow.window_picker
@@ -497,7 +497,7 @@ class solstice_pickerBaseButton(QPushButton, object):
                     newVal = 0.0
                     if xform == 's':
                         newVal = 1.0
-                    cmds.setAttr(self._control + '.' + xform + axis, newVal)
+                    cmds.setAttr(self.control + '.' + xform + axis, newVal)
                 except:
                     pass
 
@@ -508,19 +508,22 @@ class solstice_pickerBaseButton(QPushButton, object):
         Mirror control attributes from one side to another
         """
 
-        mirrorCtrl = utils.getMirrorControl(self._control)
-        if mirrorCtrl is None:
+        mirror_ctrl = utils.getMirrorControl(self.control)
+
+        print(mirror_ctrl)
+
+        if mirror_ctrl is None:
             return
         newXForm = {}
         for xform in ['t', 'r', 's']:
             newXForm[xform] = {}
             for axis in ['x', 'y', 'z']:
-                newXForm[xform][axis] = cmds.getAttr(self._control + '.' + xform + axis)
+                newXForm[xform][axis] = cmds.getAttr(self.control + '.' + xform + axis)
 
         for xform, value in newXForm.items():
             for axis, xformValue in value.items():
                 try:
-                    cmds.setAttr(mirrorCtrl + '.' + xform + axis, xformValue)
+                    cmds.setAttr(mirror_ctrl + '.' + xform + axis, xformValue)
                 except:
                     pass
 
@@ -531,7 +534,7 @@ class solstice_pickerBaseButton(QPushButton, object):
         Flip control attributes between sides
         """
 
-        mirrorCtrl = utils.getMirrorControl(self._control)
+        mirrorCtrl = utils.getMirrorControl(self.control)
         if mirrorCtrl is None:
             return
 
@@ -541,7 +544,7 @@ class solstice_pickerBaseButton(QPushButton, object):
         for xform in ['t', 'r', 's']:
             origXForm[xform] = {}
             for axis in ['x', 'y', 'z']:
-                origXForm[xform][axis] = cmds.getAttr(self._control + '.' + xform + axis)
+                origXForm[xform][axis] = cmds.getAttr(self.control + '.' + xform + axis)
         for xform in ['t', 'r', 's']:
             mirrorXForm[xform] = {}
             for axis in ['x', 'y', 'z']:
@@ -556,7 +559,7 @@ class solstice_pickerBaseButton(QPushButton, object):
         for xform, value in mirrorXForm.items():
             for axis, xformValue in value.items():
                 try:
-                    cmds.setAttr(self._control + '.' + xform + axis, xformValue)
+                    cmds.setAttr(self.control + '.' + xform + axis, xformValue)
                 except:
                     pass
 
@@ -568,8 +571,7 @@ class solstice_pickerBaseButton(QPushButton, object):
         Reset the attributes of the control
         """
 
-        commands.resetAttributes(self._control)
-
+        commands.resetAttributes(self.control)
 
     # ---------------------------------------------------------------------------------------------------------
     # ===== OVERRIDE METHODS
@@ -705,20 +707,19 @@ class solstice_pickerBaseButton(QPushButton, object):
                 if self._gizmo != '':
                     utils.setTool(self._gizmo)
             else:
-                newName = ''
                 for side in ['L', 'R']:
-                    if side+'_' in self._control:
+                    if side+'_' in self.control:
                         self._control = self._control.replace(side+'_', '')
-                        splits = self._control.split('_')
-                        newName = splits[0] + '_'+side
+                        splits = self.control.split('_')
+                        new_name = splits[0] + '_'+side
                         for i in xrange(len(splits)):
                             if i==0: continue
-                            newName += '_' + splits[i]
-                            if cmds.objExists(newName):
-                                self._control = newName
+                            new_name += '_' + splits[i]
+                            if cmds.objExists(new_name):
+                                self._control = new_name
                                 cmds.select(self.control, add=shift, deselect=ctrl)
                                 return
-                print 'Could not select control {0} because it does not exists in the scene'.format(self._control)
+                print 'Could not select control {0} because it does not exists in the scene'.format(self.control)
 
     def mouseDoubleClickEvent(self, event):
 

@@ -57,4 +57,3 @@ class solstice_selectButton(baseBtn.solstice_pickerBaseButton, object):
 
     def mousePressEvent(self, event):
         super(solstice_selectButton, self).mousePressEvent(event)
-        print self.control

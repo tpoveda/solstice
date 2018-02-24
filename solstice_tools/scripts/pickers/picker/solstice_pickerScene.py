@@ -230,7 +230,6 @@ class solstice_pickerScene(QGraphicsScene, object):
     def getPartFkIkState(self, type, side=''):
         partCtrlGrp = self.getPartControlGroup(type=type, side=side)
         if cmds.objExists(partCtrlGrp):
-            print partCtrlGrp
             if cmds.attributeQuery('FK_IK', node=partCtrlGrp, exists=True):
                 return cmds.getAttr(partCtrlGrp+'.FK_IK')
 
@@ -241,8 +240,11 @@ class solstice_pickerScene(QGraphicsScene, object):
         else:
             if type == '':
                 if side != '':
-                    if side != '' and part != '' and name != '':
-                        return '{0}_{1}_{2}_ctrl'.format(side, part, name)
+                    if side != '' and name != '':
+                        if part != '':
+                            return '{0}_{1}_{2}_ctrl'.format(side, part, name)
+                        else:
+                            return '{0}_{1}_ctrl'.format(side, name)
                 else:
                     if part != '' and name != '':
                         return '{0}_{1}_ctrl'.format(part, name)
@@ -354,28 +356,45 @@ class solstice_pickerScene(QGraphicsScene, object):
         if btnInfo['control'] == '' or btnInfo['control'] == '':
             return
 
-        newSide = None
-        currSide = btnInfo['side']
-        for side in ['l', 'r', 'L', 'R']:
-            if currSide in ['_{0}_'.format(side), '{0}_'.format(side), '_{0}'.format(side), '{0}'.format(side)]:
-                newSide = side
+        available_sides = list()
+        saved_side = btnInfo['side']
+        for side in ['L', 'R']:
+            for currSide in ['_{0}_'.format(side), '{0}_'.format(side), '_{0}'.format(side)]:
+                available_sides.append(currSide)
+            if btnInfo['side'] == side:
+                if btnInfo['side'] == 'l' or btnInfo['side'] == 'L':
+                    saved_side = 'R'
+                elif btnInfo['side'] == 'r' or btnInfo['side'] == 'R':
+                    saved_side = 'L'
+
+        curr_side = None
+        valid_side = None
+        for side in available_sides:
+            if side in btnInfo['control']:
+                curr_side = side
                 break
 
-        if newSide == 'l' or newSide == 'L':
-            newSide = 'R'
-        elif newSide == 'r' or newSide == 'R':
-            newSide = 'L'
+        if curr_side is None:
+            return
 
-        newBtnInfo['fullname'] = btnInfo['fullname'].replace(currSide, newSide)
+        if 'l' in curr_side or 'L' in curr_side:
+            valid_side = curr_side.replace('l', 'r').replace('L', 'R')
+        elif 'r' in curr_side or 'R' in curr_side:
+            valid_side = curr_side.replace('r', 'l').replace('R', 'L')
+
+        if valid_side is None:
+            return
+
+        newBtnInfo['fullname'] = btnInfo['fullname'].replace(curr_side, valid_side)
         newBtnInfo['x'] = ((btnInfo['x'] + offset + 15 + (btnInfo['offset'][0])) * -1)
         newBtnInfo['y'] = newBtnInfo['y'] + btnInfo['offset'][1]
         if btnInfo['control'] != '':
-            newBtnInfo['control'] = btnInfo['control'].replace(currSide, newSide)
-            newBtnInfo['side'] = newSide
+            newBtnInfo['control'] = btnInfo['control'].replace(curr_side, valid_side)
+            newBtnInfo['side'] = saved_side
         if btnInfo['parent'] != '':
-            newBtnInfo['parent'] = btnInfo['parent'].replace(currSide, newSide)
+            newBtnInfo['parent'] = btnInfo['parent'].replace(curr_side, valid_side)
         if btnInfo['FKIKControl'] != '':
-            newBtnInfo['FKIKControl'] = btnInfo['FKIKControl'].replace(currSide, newSide)
+            newBtnInfo['FKIKControl'] = btnInfo['FKIKControl'].replace(curr_side, valid_side)
 
         return newBtnInfo
 

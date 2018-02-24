@@ -65,5 +65,6 @@ def _select_control(ctrl_name, replace=True):
         ctrl = '{0}:{1}'.format(window_picker.namespace.currentText(), ctrl_name)
     else:
         ctrl = ctrl_name
+
     if cmds.objExists(ctrl):
         cmds.select(ctrl, replace=replace, add=not replace)

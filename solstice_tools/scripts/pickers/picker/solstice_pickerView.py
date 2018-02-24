@@ -58,19 +58,17 @@ class solstice_pickerView(QGraphicsView, object):
             return
 
         self._backgroundImage = QGraphicsSvgItem(imagePath)
+
         self._backgroundImage.setZValue(-1)
         self.scene().addItem(self._backgroundImage)
 
         width = self._backgroundImage.boundingRect().size().width()
         height = self._backgroundImage.boundingRect().size().height()
-
-        print('width: ', width)
-        print('height: ', height)
+        self._backgroundImage.moveBy(-width*0.5, -height*0.5)
 
         self.scene().setSize(width, height)
         self.fitSceneToContent()
 
-        self._backgroundImage.moveBy(-width*0.5, -height*0.5)
 
     def fitSceneToContent(self, keepAspectRatio=False):
 

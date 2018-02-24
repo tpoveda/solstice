@@ -61,7 +61,7 @@ class solstice_commandButton(baseBtn.solstice_pickerBaseButton, object):
 
     @utils.pickerUndo
     def executeCommand(self):
-        print('Executing command {}'.format(self._command))
+        # print('Executing command {}'.format(self._command))
         exec(self._command)
 
     def mousePressEvent(self, event):
