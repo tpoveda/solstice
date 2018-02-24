@@ -14,6 +14,7 @@ import solstice_fkIkSwitcherButton
 import solstice_toggleStateButton
 import solstice_gimbalButton
 import solstice_commandButton
+import solstice_keySpaceSwitchButton
 
 def _reload():
     reload(solstice_extraButton)
@@ -32,3 +33,4 @@ def _reload():
     reload(solstice_toggleStateButton)
     reload(solstice_gimbalButton)
     reload(solstice_commandButton)
+    reload(solstice_keySpaceSwitchButton)

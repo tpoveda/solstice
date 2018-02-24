@@ -69,11 +69,11 @@
         "solstice_moduleButton":
         [
           {
-            "x": "-19",
+            "x": "-18",
             "y": "-228",
             "radius": "2",
-            "height":"20",
-            "width":"68",
+            "height":"19",
+            "width":"65",
             "text":"HEAD",
             "color":[100,100,100],
             "glowColor":[255,255,255]
@@ -273,8 +273,8 @@
         "solstice_moduleButton":
         [
           {
-            "x": "175",
-            "y": "-107",
+            "x": "180",
+            "y": "-90",
             "radius": "2",
             "side":"L",
             "height":"20",
@@ -285,11 +285,11 @@
           },
           {
             "x": "-209",
-            "y": "-124",
+            "y": "-108",
             "radius": "2",
             "side":"R",
             "height":"20",
-            "width":"78",
+            "width":"75",
             "text":"R_ARM",
             "color":[100,100,100],
             "glowColor":[255,255,255]
@@ -298,8 +298,8 @@
         "solstice_keyFkIkButton":
         [
           {
-            "x": "212",
-            "y": "-90",
+            "x": "218",
+            "y": "-72",
             "radius": "2",
             "side":"L",
             "height":"20",
@@ -311,7 +311,7 @@
 
           {
             "x": "-208",
-            "y": "-107",
+            "y": "-89",
             "radius": "2",
             "side":"R",
             "height":"20",
@@ -324,8 +324,8 @@
         "solstice_fkIkSwitcherButton":
         [
           {
-            "x": "175",
-            "y": "-90",
+            "x": "180",
+            "y": "-72",
             "radius": "2",
             "side":"L",
             "height":"20",
@@ -335,7 +335,7 @@
           },
           {
             "x": "-175",
-            "y": "-107",
+            "y": "-89",
             "radius": "2",
             "side":"R",
             "height":"20",
@@ -347,8 +347,8 @@
         "solstice_gimbalButton":
         [
           {
-            "x": "124",
-            "y": "50",
+            "x": "122",
+            "y": "56",
             "radius": "2",
             "name": "wrist_gimbalHelper",
             "type":"ik",
@@ -358,9 +358,137 @@
             "mirror":"True",
             "width":"45",
             "text":"GIMBAL",
-            "offset":[15, 0],
+            "offset":[15, 1],
             "color":[100,100,100],
             "glowColor":[255,255,255]
+          }
+        ],
+        "solstice_keySpaceSwitchButton":
+        [
+          {
+            "x": "241",
+            "y": "16",
+            "radius": "2",
+            "side":"L",
+            "height":"20",
+            "width":"96",
+            "text":"KEY",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          },
+           {
+            "x": "-308",
+            "y": "-6",
+            "radius": "2",
+            "side":"R",
+            "height":"20",
+            "width":"96",
+            "text":"KEY",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          }
+        ],
+        "solstice_commandButton":
+        [
+          {
+            "x": "242",
+            "y": "-22",
+            "height":"20",
+            "width": "32",
+            "radius": "2",
+            "text":"Main",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+          {
+            "x": "272",
+            "y": "-22",
+            "height":"20",
+            "width": "32",
+            "radius": "2",
+            "text":"World",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+           {
+            "x": "303",
+            "y": "-22",
+            "height":"20",
+            "width": "34",
+            "radius": "2",
+            "text":"Pelvis",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+           {
+            "x": "242",
+            "y": "-4",
+            "height":"22",
+            "width": "32",
+            "radius": "2",
+            "text":"Head",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+          {
+            "x": "272",
+            "y": "-4",
+            "height":"22",
+            "width": "65",
+            "radius": "2",
+            "text":"Object",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+          {
+            "x": "-307",
+            "y": "-44",
+            "height":"20",
+            "width": "32",
+            "radius": "2",
+            "text":"Main",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+          {
+            "x": "-276",
+            "y": "-44",
+            "height":"20",
+            "width": "32",
+            "radius": "2",
+            "text":"World",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+           {
+            "x": "-246",
+            "y": "-44",
+            "height":"20",
+            "width": "34",
+            "radius": "2",
+            "text":"Pelvis",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+           {
+            "x": "-245",
+            "y": "-26",
+            "height":"22",
+            "width": "32",
+            "radius": "2",
+            "text":"Head",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+          {
+            "x": "-308",
+            "y": "-26",
+            "height":"22",
+            "width": "65",
+            "radius": "2",
+            "text":"Object",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
           }
         ]
       },
@@ -605,6 +733,7 @@
             "type":"fk",
             "gizmo": "rotate",
             "side":"L",
+            "text":"FK",
             "mirror":"True",
             "color":[255,0,0]
           },
@@ -616,6 +745,7 @@
             "type":"fk",
             "gizmo": "rotate",
             "side":"L",
+            "text":"FK",
             "mirror":"True",
             "color":[255,0,0],
             "offset": [-2,0],
@@ -629,6 +759,7 @@
             "type":"fk",
             "gizmo": "rotate",
             "side":"L",
+            "text":"FK",
             "mirror":"True",
             "color":[255,0,0],
             "offset": [-6,0],
@@ -642,6 +773,7 @@
             "type":"fk",
             "gizmo": "rotate",
             "side":"L",
+            "text":"FK",
             "mirror":"True",
             "color":[255,0,0],
             "offset": [-6,0],
@@ -654,23 +786,23 @@
         "solstice_moduleButton":
         [
           {
-            "x": "107",
-            "y": "142",
+            "x": "109",
+            "y": "152",
             "radius": "2",
             "side":"L",
             "height":"20",
-            "width":"70",
+            "width":"78",
             "text":"L_LEG",
             "color":[100,100,100],
             "glowColor":[255,255,255]
           },
           {
-            "x": "-157",
-            "y": "142",
+            "x": "-169",
+            "y": "152",
             "radius": "2",
             "side":"R",
             "height":"20",
-            "width":"70",
+            "width":"78",
             "text":"R_LEG",
             "color":[100,100,100],
             "glowColor":[255,255,255]
@@ -679,8 +811,8 @@
         "solstice_keyFkIkButton":
         [
           {
-            "x": "145",
-            "y": "160",
+            "x": "147",
+            "y": "170",
             "radius": "2",
             "side":"L",
             "height":"20",
@@ -691,13 +823,13 @@
           },
 
           {
-            "x": "-158",
-            "y": "160",
+            "x": "-169",
+            "y": "170",
             "radius": "2",
             "side":"R",
             "height":"20",
             "width":"40",
-            "text":"TEST",
+            "text":"KEY",
             "color":[100,100,100],
             "glowColor":[255,255,255]
           }
@@ -705,8 +837,8 @@
         "solstice_fkIkSwitcherButton":
         [
           {
-            "x": "107",
-            "y": "160",
+            "x": "109",
+            "y": "170",
             "radius": "2",
             "side":"L",
             "height":"20",
@@ -715,12 +847,56 @@
             "glowColor":[255,255,255]
           },
           {
-            "x": "-120",
-            "y": "160",
+            "x": "-131",
+            "y": "170",
             "radius": "2",
             "side":"R",
             "height":"20",
             "width":"40",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          }
+        ],
+        "solstice_gimbalButton":
+        [
+          {
+            "x": "58",
+            "y": "185",
+            "radius": "2",
+            "name": "wrist_gimbalHelper",
+            "type":"ik",
+            "gizmo": "rotate",
+            "side":"L",
+            "height":"20",
+            "mirror":"True",
+            "width":"45",
+            "text":"GIMBAL",
+            "offset":[17, -1],
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          }
+        ],
+        "solstice_keySpaceSwitchButton":
+        [
+          {
+            "x": "110",
+            "y": "225",
+            "radius": "2",
+            "side":"L",
+            "height":"20",
+            "width":"128",
+            "text":"KEY",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          },
+           {
+            "x": "-219",
+            "y": "228",
+            "radius": "2",
+            "side":"R",
+            "height":"20",
+            "width":"128",
+            "text":"KEY",
             "color":[100,100,100],
             "glowColor":[255,255,255]
           }
@@ -734,27 +910,27 @@
             "width": "50",
             "radius": "2",
             "text":"GLOBAL",
-            "color":[100,100,100],
+            "color":[182,255,241],
             "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
           },
           {
-            "x": "-220",
+            "x": "-221",
             "y": "-230",
             "height":"20",
-            "width": "50",
+            "width": "55",
             "radius": "2",
             "text":"MAIN",
-            "color":[100,100,100],
+            "color":[182,255,241],
             "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectMainControl()"
           },
           {
-            "x": "-170",
+            "x": "-165",
             "y": "-230",
             "height":"20",
-            "width": "90",
+            "width": "95",
             "radius": "2",
             "text":"ALL",
-            "color":[100,100,100],
+            "color":[182,255,241],
             "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectAllControls()"
           },
           {
@@ -764,48 +940,128 @@
             "width": "50",
             "radius": "2",
             "text":"BODY",
-            "color":[100,100,100],
+            "color":[182,255,241],
             "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectBodyControls()"
           },
           {
-            "x": "-220",
+            "x": "-221",
             "y": "-212",
             "height":"20",
-            "width": "50",
+            "width": "55",
             "radius": "2",
             "text":"FACE",
-            "color":[100,100,100],
+            "color":[182,255,241],
             "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectFaceControls()"
           },
           {
-            "x": "-170",
+            "x": "-165",
             "y": "-212",
             "height":"20",
-            "width": "90",
+            "width": "95",
             "radius": "2",
             "text":"DYNAMIC",
-            "color":[100,100,100],
+            "color":[182,255,241],
             "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectDynamicControl()"
           },
           {
-            "x": "-266",
+            "x": "-270",
             "y": "-195",
             "height":"20",
-            "width": "90",
+            "width": "105",
             "radius": "2",
             "text":"KEY SELECTED",
-            "color":[100,100,100],
+            "color":[252,0,66],
             "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.setKeyframe()"
           },
           {
-            "x": "-170",
+            "x": "-165",
             "y": "-195",
             "height":"20",
-            "width": "90",
+            "width": "95",
             "radius": "2",
             "text":"CLEAR SELECTION",
-            "color":[100,100,100],
+            "color":[0,255,182],
             "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.clearSelection()"
+          },
+           {
+            "x": "110",
+            "y": "207",
+            "height":"20",
+            "width": "32",
+            "radius": "2",
+            "text":"Main",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+          {
+            "x": "140",
+            "y": "207",
+            "height":"20",
+            "width": "32",
+            "radius": "2",
+            "text":"World",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+           {
+            "x": "170",
+            "y": "207",
+            "height":"20",
+            "width": "34",
+            "radius": "2",
+            "text":"Pelvis",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+           {
+            "x": "201",
+            "y": "206",
+            "height":"22",
+            "width": "37",
+            "radius": "2",
+            "text":"Object",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+          {
+            "x": "-219",
+            "y": "208",
+            "height":"20",
+            "width": "32",
+            "radius": "2",
+            "text":"Main",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+          {
+            "x": "-190",
+            "y": "208",
+            "height":"20",
+            "width": "32",
+            "radius": "2",
+            "text":"World",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+           {
+            "x": "-160",
+            "y": "209",
+            "height":"20",
+            "width": "34",
+            "radius": "2",
+            "text":"Pelvis",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+          },
+           {
+            "x": "-128",
+            "y": "208",
+            "height":"22",
+            "width": "37",
+            "radius": "2",
+            "text":"Object",
+            "color":[100,100,100],
+            "command":"from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
           }
         ]
       }

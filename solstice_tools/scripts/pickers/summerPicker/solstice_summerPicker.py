@@ -71,7 +71,7 @@ class Solstice_SummerPicker(window.Solstice_PickerWindow, object):
             self.setCharacterImage(os.path.join(imagesPath, 'summer_icon.png'))
             #
             self.bp = bodyPicker.solstice_summerBodyPicker(dataPath=self.bodyPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_body.svg'))
-            self.fp = facialPicker.solstice_summerFacialPicker(dataPath=self.facialPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_facial.png'))
+            self.fp = facialPicker.solstice_summerFacialPicker(dataPath=self.facialPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_facial.svg'))
 
             if self._fullWindow:
                 self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)

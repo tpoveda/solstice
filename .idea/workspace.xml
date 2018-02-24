@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f2c1a1a5-c0ef-4607-abef-97b02641319f" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_picker.py" afterPath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_picker.py" />
-      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerView.py" afterPath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerView.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_keySpaceSwitchButton.py" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/__init__.py" afterPath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/__init__.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerBodyPickerData.json" afterPath="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerBodyPickerData.json" />
       <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/images/pickerSummer_body.svg" afterPath="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/images/pickerSummer_body.svg" />
       <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py" afterPath="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py" />
     </list>
@@ -21,24 +23,14 @@
     <fileColor scope="Non-Project Files (Material Palenight)" color="2f2e43" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.3366033">
+    <splitter split-orientation="horizontal" split-proportion="0.7982833">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="solstice_pickers.py" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_pickers.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="222">
-                  <caret line="115" column="13" lean-forward="true" selection-start-line="115" selection-start-column="13" selection-end-line="115" selection-end-column="13" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_summerPicker.py" pinned="false" current-in-tab="false">
+          <file leaf-file-name="solstice_summerPicker.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="180">
-                  <caret line="70" column="56" lean-forward="false" selection-start-line="70" selection-start-column="56" selection-end-line="72" selection-end-column="114" />
+                <state relative-caret-position="546">
+                  <caret line="80" column="61" lean-forward="true" selection-start-line="80" selection-start-column="61" selection-end-line="80" selection-end-column="61" />
                   <folding>
                     <element signature="e#766#795#0" expanded="true" />
                   </folding>
@@ -46,56 +38,32 @@
               </provider>
             </entry>
           </file>
+          <file leaf-file-name="solstice_summerFacialPicker.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerFacialPicker.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="546">
+                  <caret line="26" column="8" lean-forward="false" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="8" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
           <file leaf-file-name="solstice_utils.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_utils.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="47">
-                  <caret line="41" column="0" lean-forward="true" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
+                <state relative-caret-position="819">
+                  <caret line="41" column="0" lean-forward="false" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="solstice_summerBodyPicker.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerBodyPicker.py">
+          <file leaf-file-name="solstice_pickerCommands.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerCommands.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="357">
-                  <caret line="17" column="28" lean-forward="false" selection-start-line="17" selection-start-column="28" selection-end-line="17" selection-end-column="28" />
+                <state relative-caret-position="457">
+                  <caret line="54" column="25" lean-forward="false" selection-start-line="54" selection-start-column="25" selection-end-line="54" selection-end-column="25" />
                   <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_picker.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_picker.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="126">
-                  <caret line="21" column="0" lean-forward="false" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-                  <folding>
-                    <element signature="e#721#730#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_pickerView.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerView.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="173">
-                  <caret line="60" column="42" lean-forward="false" selection-start-line="60" selection-start-column="42" selection-end-line="60" selection-end-column="42" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_main.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_main.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="375">
-                  <caret line="19" column="53" lean-forward="false" selection-start-line="19" selection-start-column="53" selection-end-line="19" selection-end-column="53" />
-                  <folding>
-                    <element signature="e#0#9#0" expanded="true" />
-                  </folding>
                 </state>
               </provider>
             </entry>
@@ -103,8 +71,8 @@
           <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/solstice_tools/__init__.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="117">
-                  <caret line="47" column="68" lean-forward="true" selection-start-line="47" selection-start-column="68" selection-end-line="47" selection-end-column="68" />
+                <state relative-caret-position="903">
+                  <caret line="47" column="68" lean-forward="false" selection-start-line="47" selection-start-column="68" selection-end-line="47" selection-end-column="68" />
                   <folding>
                     <element signature="e#0#9#0" expanded="true" />
                   </folding>
@@ -115,12 +83,12 @@
         </leaf>
       </split-first>
       <split-second>
-        <leaf>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file leaf-file-name="solstice_pickerWindow.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerWindow.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="118">
-                  <caret line="89" column="22" lean-forward="true" selection-start-line="89" selection-start-column="22" selection-end-line="89" selection-end-column="22" />
+                <state relative-caret-position="0">
+                  <caret line="89" column="22" lean-forward="false" selection-start-line="89" selection-start-column="22" selection-end-line="89" selection-end-column="22" />
                   <folding>
                     <element signature="e#729#758#0" expanded="true" />
                   </folding>
@@ -128,13 +96,97 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="solstice_pickerUtils.py" pinned="false" current-in-tab="true">
+          <file leaf-file-name="solstice_pickerUtils.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerUtils.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="306">
+                <state relative-caret-position="548">
                   <caret line="204" column="114" lean-forward="false" selection-start-line="204" selection-start-column="114" selection-end-line="204" selection-end-column="114" />
                   <folding>
                     <element signature="e#765#774#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="solstice_pickerScene.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerScene.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="-2016">
+                  <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="solstice_summerBodyPicker.py" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerBodyPicker.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="525">
+                  <caret line="25" column="46" lean-forward="false" selection-start-line="25" selection-start-column="46" selection-end-line="25" selection-end-column="46" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="summerBodyPickerData.json" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerBodyPickerData.json">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="310">
+                  <caret line="1036" column="22" lean-forward="false" selection-start-line="1036" selection-start-column="22" selection-end-line="1036" selection-end-column="22" />
+                  <folding>
+                    <element signature="n#!!block;n#head1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+                    <element signature="n#!!block;n#spine1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+                    <element signature="e#4657#6026#0" expanded="false" />
+                    <element signature="e#6065#6416#0" expanded="false" />
+                    <element signature="e#6459#7027#0" expanded="false" />
+                    <element signature="e#7684#8195#0" expanded="false" />
+                    <element signature="e#8238#8683#0" expanded="false" />
+                    <element signature="n#!!block;n#finger1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+                    <element signature="n#!!block;n#finger2#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+                    <element signature="n#!!block;n#finger3#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+                    <element signature="n#!!block;n#finger4#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+                    <element signature="e#18906#20305#0" expanded="false" />
+                    <element signature="e#20344#20355#0" expanded="false" />
+                    <element signature="e#20398#20965#0" expanded="false" />
+                    <element signature="e#21009#21573#0" expanded="false" />
+                    <element signature="e#21622#22133#0" expanded="false" />
+                    <element signature="e#22176#22622#0" expanded="false" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="solstice_keySpaceSwitchButton.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_keySpaceSwitchButton.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="751">
+                  <caret line="56" column="43" lean-forward="false" selection-start-line="56" selection-start-column="43" selection-end-line="56" selection-end-column="43" />
+                  <folding>
+                    <element signature="e#703#727#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/__init__.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="753">
+                  <caret line="36" column="0" lean-forward="true" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
+                  <folding>
+                    <element signature="e#0#27#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="solstice_pickerBaseButton.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerBaseButton.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="762">
+                  <caret line="49" column="21" lean-forward="false" selection-start-line="49" selection-start-column="17" selection-end-line="49" selection-end-column="21" />
+                  <folding>
+                    <element signature="e#677#686#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -153,8 +205,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Reload</find>
-      <find>self._toggle</find>
       <find>btnInfo</find>
       <find>SELECT</find>
       <find>Reset Control</find>
@@ -163,7 +213,6 @@
       <find>Export</find>
       <find>resetAttributes</find>
       <find>fkik</find>
-      <find>gimbal</find>
       <find>ON</find>
       <find>GIMBAL</find>
       <find>imbal</find>
@@ -183,6 +232,9 @@
       <find>updateTools</find>
       <find>__init_</find>
       <find>dock_</find>
+      <find>HEAD</find>
+      <find>fk</find>
+      <find>gimbal</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -191,10 +243,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/solstice_tools/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/__init__.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_fkButton.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/solstice_tools/scripts/pickers/picker/solstice_commands.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/solstice_tools/scripts/pickers/summerPicker/solstice_summerCommands.py" />
         <option value="$PROJECT_DIR$/solstice_tools/solstice_tools/scripts/pickers/picker/__init__.py" />
         <option value="$PROJECT_DIR$/solstice_tools/solstice_tools/scripts/pickers/picker/solstice_picker.py" />
         <option value="$PROJECT_DIR$/solstice_tools/solstice_tools/scripts/pickers/picker/solstice_pickerBaseButton.py" />
@@ -222,7 +270,6 @@
         <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_pipeline/solstice_tools_local_installer.py" />
         <option value="$PROJECT_DIR$/solstice_tools/bin/spigot.py" />
         <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_texturesRelinker.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerBodyPickerData.json" />
         <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_toggleButton.py" />
         <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerCommands.py" />
         <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_moduleButton.py" />
@@ -238,10 +285,15 @@
         <option value="$PROJECT_DIR$/solstice_tools/__init__.py" />
         <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_main.py" />
         <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerWindow.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py" />
         <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_picker.py" />
         <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerView.py" />
         <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerUtils.py" />
+        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_keySpaceSwitchButton.py" />
+        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_spaceSwitchButton.py" />
+        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/__init__.py" />
+        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerBodyPicker.py" />
+        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerBodyPickerData.json" />
+        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py" />
       </list>
     </option>
   </component>
@@ -275,7 +327,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -306,13 +357,32 @@
               <item name="solstice" type="462c0819:PsiDirectoryNode" />
               <item name="solstice_tools" type="462c0819:PsiDirectoryNode" />
               <item name="scripts" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_config" type="462c0819:PsiDirectoryNode" />
+              <item name="pickers" type="462c0819:PsiDirectoryNode" />
+              <item name="picker" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="solstice" type="b2602c69:ProjectViewProjectNode" />
+              <item name="solstice" type="462c0819:PsiDirectoryNode" />
+              <item name="solstice_tools" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+              <item name="pickers" type="462c0819:PsiDirectoryNode" />
+              <item name="picker" type="462c0819:PsiDirectoryNode" />
+              <item name="solstice_pickerButtons" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="solstice" type="b2602c69:ProjectViewProjectNode" />
+              <item name="solstice" type="462c0819:PsiDirectoryNode" />
+              <item name="solstice_tools" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+              <item name="pickers" type="462c0819:PsiDirectoryNode" />
+              <item name="summerPicker" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
       <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -446,19 +516,19 @@
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297414" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.14224137" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15052083" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Maya Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297414" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32873806" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32343584" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32343584" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Key Promoter X" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -484,7 +554,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="41" />
+      <option name="time" value="42" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="MAYACHARM_DEBUG_CONFIGURATION">
@@ -503,42 +573,10 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_libs/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_libs/solstice_assets.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="33" lean-forward="false" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3173678282298877592.py" />
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_fkButton.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1309">
-          <caret line="77" column="0" lean-forward="true" selection-start-line="77" selection-start-column="0" selection-end-line="78" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_libs/solstice_alembic.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="8" column="72" lean-forward="false" selection-start-line="8" selection-start-column="72" selection-end-line="8" selection-end-column="72" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_decorators.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="693">
           <caret line="35" column="0" lean-forward="false" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
-          <folding>
-            <element signature="e#630#639#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -546,9 +584,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="693">
           <caret line="63" column="59" lean-forward="false" selection-start-line="63" selection-start-column="59" selection-end-line="63" selection-end-column="59" />
-          <folding>
-            <element signature="e#690#736#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -568,7 +603,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="336">
           <caret line="16" column="21" lean-forward="true" selection-start-line="16" selection-start-column="21" selection-end-line="16" selection-end-column="21" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -604,7 +638,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="342">
           <caret line="19" column="31" lean-forward="true" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -612,15 +645,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="294">
           <caret line="14" column="4" lean-forward="false" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerScene.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-378">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -628,9 +652,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#13#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -638,7 +659,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -646,24 +666,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="462">
           <caret line="34" column="35" lean-forward="false" selection-start-line="34" selection-start-column="14" selection-end-line="34" selection-end-column="35" />
-          <folding>
-            <element signature="e#691#772#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerBodyPickerData.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="737" column="96" lean-forward="false" selection-start-line="737" selection-start-column="73" selection-end-line="737" selection-end-column="96" />
-          <folding>
-            <element signature="n#!!block;n#head1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="n#!!block;n#spine1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="n#!!block;n#finger1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="n#!!block;n#finger2#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="n#!!block;n#finger3#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="n#!!block;n#finger4#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -671,17 +673,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="399">
           <caret line="25" column="43" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerCommands.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="667">
-          <caret line="64" column="81" lean-forward="false" selection-start-line="62" selection-start-column="4" selection-end-line="64" selection-end-column="81" />
-          <folding>
-            <element signature="e#503#527#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -692,21 +683,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerBaseButton.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="609">
-          <caret line="29" column="39" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_gimbalButton.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="563">
           <caret line="89" column="0" lean-forward="false" selection-start-line="89" selection-start-column="0" selection-end-line="89" selection-end-column="0" />
-          <folding>
-            <element signature="e#706#735#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -714,7 +694,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="741">
           <caret line="284" column="4" lean-forward="false" selection-start-line="284" selection-start-column="4" selection-end-line="284" selection-end-column="4" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -722,9 +701,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2541">
           <caret line="130" column="118" lean-forward="true" selection-start-line="130" selection-start-column="118" selection-end-line="130" selection-end-column="118" />
-          <folding>
-            <element signature="e#507#516#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -732,9 +708,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="483">
           <caret line="23" column="8" lean-forward="false" selection-start-line="23" selection-start-column="8" selection-end-line="23" selection-end-column="8" />
-          <folding>
-            <element signature="e#441#522#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -742,7 +715,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="231">
           <caret line="11" column="17" lean-forward="true" selection-start-line="11" selection-start-column="17" selection-end-line="11" selection-end-column="17" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -750,9 +722,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-761">
           <caret line="105" column="33" lean-forward="true" selection-start-line="105" selection-start-column="33" selection-end-line="105" selection-end-column="33" />
-          <folding>
-            <element signature="e#435#444#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -760,7 +729,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-17">
           <caret line="20" column="5" lean-forward="true" selection-start-line="20" selection-start-column="5" selection-end-line="20" selection-end-column="5" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -768,9 +736,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2268">
           <caret line="108" column="20" lean-forward="false" selection-start-line="108" selection-start-column="20" selection-end-line="108" selection-end-column="20" />
-          <folding>
-            <element signature="e#255#291#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -783,96 +748,39 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="377">
           <caret line="255" column="0" lean-forward="false" selection-start-line="255" selection-start-column="0" selection-end-line="255" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp7975426883060355141.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp7975426883060355141.py" />
     <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#32#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="19" column="53" lean-forward="false" selection-start-line="19" selection-start-column="53" selection-end-line="19" selection-end-column="53" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/solstice_tools/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="117">
-          <caret line="47" column="68" lean-forward="true" selection-start-line="47" selection-start-column="68" selection-end-line="47" selection-end-column="68" />
+        <state relative-caret-position="903">
+          <caret line="47" column="68" lean-forward="false" selection-start-line="47" selection-start-column="68" selection-end-line="47" selection-end-column="68" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerBodyPicker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="17" column="28" lean-forward="false" selection-start-line="17" selection-start-column="28" selection-end-line="17" selection-end-column="28" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_picker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="21" column="0" lean-forward="false" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-          <folding>
-            <element signature="e#721#730#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerView.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="173">
-          <caret line="60" column="42" lean-forward="false" selection-start-line="60" selection-start-column="42" selection-end-line="60" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="70" column="56" lean-forward="false" selection-start-line="70" selection-start-column="56" selection-end-line="72" selection-end-column="114" />
-          <folding>
-            <element signature="e#766#795#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="47">
-          <caret line="41" column="0" lean-forward="true" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
+        <state relative-caret-position="819">
+          <caret line="41" column="0" lean-forward="false" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerWindow.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="118">
-          <caret line="89" column="22" lean-forward="true" selection-start-line="89" selection-start-column="22" selection-end-line="89" selection-end-column="22" />
+        <state relative-caret-position="0">
+          <caret line="89" column="22" lean-forward="false" selection-start-line="89" selection-start-column="22" selection-end-line="89" selection-end-column="22" />
           <folding>
             <element signature="e#729#758#0" expanded="true" />
           </folding>
@@ -881,7 +789,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerUtils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
+        <state relative-caret-position="548">
           <caret line="204" column="114" lean-forward="false" selection-start-line="204" selection-start-column="114" selection-end-line="204" selection-end-column="114" />
           <folding>
             <element signature="e#765#774#0" expanded="true" />
@@ -891,9 +799,151 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_pickers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="222">
-          <caret line="115" column="13" lean-forward="true" selection-start-line="115" selection-start-column="13" selection-end-line="115" selection-end-column="13" />
+        <state relative-caret-position="499">
+          <caret line="107" column="39" lean-forward="true" selection-start-line="107" selection-start-column="39" selection-end-line="107" selection-end-column="39" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerBaseButton.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="762">
+          <caret line="49" column="21" lean-forward="false" selection-start-line="49" selection-start-column="17" selection-end-line="49" selection-end-column="21" />
+          <folding>
+            <element signature="e#677#686#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerScene.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2016">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_keySpaceSwitchButton.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="751">
+          <caret line="56" column="43" lean-forward="false" selection-start-line="56" selection-start-column="43" selection-end-line="56" selection-end-column="43" />
+          <folding>
+            <element signature="e#703#727#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_spaceSwitchButton.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="9" column="66" lean-forward="false" selection-start-line="9" selection-start-column="66" selection-end-line="9" selection-end-column="66" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="753">
+          <caret line="36" column="0" lean-forward="true" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerBodyPickerData.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="310">
+          <caret line="1036" column="22" lean-forward="false" selection-start-line="1036" selection-start-column="22" selection-end-line="1036" selection-end-column="22" />
+          <folding>
+            <element signature="n#!!block;n#head1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+            <element signature="n#!!block;n#spine1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+            <element signature="e#4657#6026#0" expanded="false" />
+            <element signature="e#6065#6416#0" expanded="false" />
+            <element signature="e#6459#7027#0" expanded="false" />
+            <element signature="e#7684#8195#0" expanded="false" />
+            <element signature="e#8238#8683#0" expanded="false" />
+            <element signature="n#!!block;n#finger1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+            <element signature="n#!!block;n#finger2#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+            <element signature="n#!!block;n#finger3#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+            <element signature="n#!!block;n#finger4#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+            <element signature="e#18906#20305#0" expanded="false" />
+            <element signature="e#20344#20355#0" expanded="false" />
+            <element signature="e#20398#20965#0" expanded="false" />
+            <element signature="e#21009#21573#0" expanded="false" />
+            <element signature="e#21622#22133#0" expanded="false" />
+            <element signature="e#22176#22622#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerView.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="772">
+          <caret line="60" column="42" lean-forward="false" selection-start-line="60" selection-start-column="42" selection-end-line="60" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="19" column="53" lean-forward="false" selection-start-line="19" selection-start-column="53" selection-end-line="19" selection-end-column="53" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerCommands.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="457">
+          <caret line="54" column="25" lean-forward="false" selection-start-line="54" selection-start-column="25" selection-end-line="54" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_keyFkIkButton.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="37" column="28" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="59" selection-end-column="70" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerFacialPicker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="546">
+          <caret line="26" column="8" lean-forward="false" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_picker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-103">
+          <caret line="28" column="6" lean-forward="false" selection-start-line="28" selection-start-column="6" selection-end-line="28" selection-end-column="6" />
+          <folding>
+            <element signature="e#721#730#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerBodyPicker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="25" column="46" lean-forward="false" selection-start-line="25" selection-start-column="46" selection-end-line="25" selection-end-column="46" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="546">
+          <caret line="80" column="61" lean-forward="true" selection-start-line="80" selection-start-column="61" selection-end-line="80" selection-end-column="61" />
+          <folding>
+            <element signature="e#766#795#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
