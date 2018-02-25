@@ -9,14 +9,15 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from solstice_tools.scripts.solstice_config import solstice_update_utils as utils
-
-import maya.utils as mutils
+try:
+    from solstice_config import solstice_update_utils as utils
+except:
+    from solstice_tools.scripts.solstice_config import solstice_update_utils as utils
 
 def sLog(text):
     return '| Solstice Tools | => {}'.format(text)
 
-def updateTools(ui=False, stopAtEnd=False):
+def updateTools(ui=False, stopAtEnd=False, progress_bar=None):
 
     if ui:
         import solstice_updater_ui
@@ -24,7 +25,7 @@ def updateTools(ui=False, stopAtEnd=False):
         solstice_updater_ui.initUI()
         return
 
-    utils.updateTools()
+    utils.updateTools(progress_bar=progress_bar)
     if stopAtEnd:
         input('solstice_tools setup is finished! Press a key to continue ...')
 

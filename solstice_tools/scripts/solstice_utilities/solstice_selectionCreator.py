@@ -26,8 +26,8 @@ import maya.cmds as cmds
 
 from solstice_decorators import solstice_undo
 from solstice_utils import _getMayaWindow, readJSON
-from solstice_tools.scripts.solstice_gui import solstice_splitters
-from solstice_tools.scripts.solstice_libs import solstice_naming
+from solstice_gui import solstice_splitters
+from solstice_libs import solstice_naming
 
 class solstice_selectionCreator(QMainWindow, object):
     def __init__(self):

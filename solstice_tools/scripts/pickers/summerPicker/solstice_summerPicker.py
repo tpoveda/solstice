@@ -27,8 +27,8 @@ from functools import partial
 import os
 
 # Import custom modules
-from solstice_tools.scripts.pickers.picker import solstice_pickerWindow as window
-from solstice_tools.scripts.pickers.picker import solstice_pickerUtils as utils
+from pickers.picker import solstice_pickerWindow as window
+from pickers.picker import solstice_pickerUtils as utils
 import solstice_summerBodyPicker as  bodyPicker
 import solstice_summerFacialPicker as facialPicker
 
@@ -69,33 +69,49 @@ class Solstice_SummerPicker(window.Solstice_PickerWindow, object):
             super(Solstice_SummerPicker, self).toolUI()
 
             self.setCharacterImage(os.path.join(imagesPath, 'summer_icon.png'))
-            #
-            # self.bp = bodyPicker.solstice_summerBodyPicker(dataPath=self.bodyPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_body.svg'))
-            self.fp = facialPicker.solstice_summerFacialPicker(dataPath=self.facialPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_facial.svg'))
+            self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
-            if self._fullWindow:
-                self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-                self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-
-                fullPickersLayout = QHBoxLayout()
-                fullPickersLayout.setContentsMargins(5,5,5,5)
-                fullPickersLayout.setSpacing(2)
-                self.mainLayout.addLayout(fullPickersLayout)
-                for picker in [self.bp, self.fp]:
-                    fullPickersLayout.addWidget(picker)
-
-            else:
-                self.charTab = QTabWidget()
-                self.mainLayout.addWidget(self.charTab)
-                # self.charTab.addTab(self.bp, 'Body')
-                self.charTab.addTab(self.fp, 'Facial')
-                # self.charTab.setCurrentIndex(1)
-
+            self.load_pickers(fullwindow=self._fullWindow)
             self.updatePickers()
 
+    def load_pickers(self, fullwindow=False):
+
+        super(Solstice_SummerPicker, self).load_pickers(fullwindow=fullwindow)
+
+        try:
+            if self.bp:
+                self.bp.setParent(None)
+                self.bp.deleteLater()
+            if self.fp:
+                self.fp.setParent(None)
+                self.fp.deleteLater()
+            if self.pickers_layout:
+                self.pickers_layout.setParent(None)
+                self.pickers_layout.deleteLater()
+        except:
+            pass
+
+        self.pickers_layout = QHBoxLayout()
+        self.pickers_layout.setContentsMargins(5, 5, 5, 5)
+        self.pickers_layout.setSpacing(2)
+        self.mainLayout.addLayout(self.pickers_layout)
+
+        self.bp = bodyPicker.solstice_summerBodyPicker(dataPath=self.bodyPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_body.svg'))
+        self.fp = facialPicker.solstice_summerFacialPicker(dataPath=self.facialPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_facial.svg'))
+
+        if fullwindow:
+            for picker in [self.bp, self.fp]:
+                self.pickers_layout.addWidget(picker)
+        else:
+            self.charTab = QTabWidget()
+            self.pickers_layout.addWidget(self.charTab)
+            self.charTab.addTab(self.bp, 'Body')
+            self.charTab.addTab(self.fp, 'Facial')
+            # self.charTab.setCurrentIndex(1)
+
     def updatePickers(self):
-        # for picker in [self.bp, self.fp]:
-        for picker in [self.fp]:
+        for picker in [self.bp, self.fp]:
             picker.setNamespace(self.namespace.currentText())
 
     def setFullWindow(self, fullWindow):

@@ -10,8 +10,8 @@
 # ______________________________________________________________________
 # ===================================================================""
 
-# import win32gui
-# from win32com.shell import shell, shellcon
+import win32gui
+from win32com.shell import shell, shellcon
 from subprocess import check_call
 from subprocess import check_output
 import shutil
@@ -83,7 +83,8 @@ def cleanInstallation():
 
 
 def getSolsticeToolsFolder():
-    solstice_tools_pidl, flags = shell.SHILCreateFromPath("E:\Solstice\solstice\solstice_tools\solstice_tools", 0)
+    solstice_tools_def_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    solstice_tools_pidl, flags = shell.SHILCreateFromPath(solstice_tools_def_dir, 0)
     pidl, display_name, image_list = shell.SHBrowseForFolder (
       win32gui.GetDesktopWindow (),
         solstice_tools_pidl,

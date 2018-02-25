@@ -18,8 +18,8 @@ except:
     from PySide.QtGui import *
     from PySide.QtCore import *
 
-from solstice_tools.scripts.pickers.picker import solstice_pickerColors as colors
-from solstice_tools.scripts.pickers.picker import solstice_pickerBaseButton as baseBtn
+from pickers.picker import solstice_pickerColors as colors
+from pickers.picker import solstice_pickerBaseButton as baseBtn
 
 class solstice_toggleButton(baseBtn.solstice_pickerBaseButton, object):
 

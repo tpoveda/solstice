@@ -24,10 +24,9 @@ except:
 from functools import partial
 import os
 import weakref
+from functools import partial
 
 import maya.cmds as cmds
-import maya.mel as mel
-from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
 import solstice_pickerUtils as pickerUtils
 
@@ -96,8 +95,8 @@ class Solstice_PickerWindow(QWidget, object):
         menubarWidget.setLayout(menubarLayout)
         menubar = QMenuBar()
         settingsFile = menubar.addMenu('Settings')
-        exitAction = QAction('Solstice', menubarWidget)
-        settingsFile.addAction(exitAction)
+        self.fullscreen_action = QAction('FullScreen', menubarWidget, checkable=True)
+        settingsFile.addAction(self.fullscreen_action)
         # exitAction.triggered.connect(self.test)
         menubarLayout.addWidget(menubar)
         self.parent().layout().addWidget(menubarWidget)
@@ -122,9 +121,12 @@ class Solstice_PickerWindow(QWidget, object):
         namespaceLayout.setSpacing(2)
         namespaceLbl = QLabel('Charater namespace: ')
         namespaceLbl.setMaximumWidth(115)
+        reload_namespaces_btn = QPushButton('Reload')
+        reload_namespaces_btn.setMaximumWidth(50)
         self.namespace = QComboBox()
         namespaceLayout.addWidget(namespaceLbl)
         namespaceLayout.addWidget(self.namespace)
+        namespaceLayout.addWidget(reload_namespaces_btn)
         self.mainLayout.addLayout(namespaceLayout)
 
         # Add character image
@@ -136,6 +138,10 @@ class Solstice_PickerWindow(QWidget, object):
         self._charTxtLbl = QLabel(self.charName)
         self._charTxtLbl.setAlignment(Qt.AlignCenter)
         #self.mainLayout.addWidget(self._charTxtLbl)
+
+        reload_namespaces_btn.clicked.connect(self.updateNamespaces)
+
+        self.fullscreen_action.toggled.connect(partial(self.load_pickers))
 
         self.updateNamespaces()
 
@@ -163,6 +169,9 @@ class Solstice_PickerWindow(QWidget, object):
         if os.path.isfile(imagePath):
             charPixmap = QPixmap(imagePath)
             self._charLbl.setPixmap(charPixmap.scaled(100,100, Qt.KeepAspectRatio))
+
+    def load_pickers(self, fullwindow=False):
+        pass
 
     @staticmethod
     def _deleteInstances():

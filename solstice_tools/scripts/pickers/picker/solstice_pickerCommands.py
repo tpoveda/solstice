@@ -13,7 +13,7 @@ ______________________________________________________________________
 import maya.cmds as cmds
 import maya.mel as mel
 
-from solstice_tools.scripts.pickers.picker import solstice_pickerWindow
+from pickers.picker import solstice_pickerWindow
 
 # TODO: Take in account namespaces
 

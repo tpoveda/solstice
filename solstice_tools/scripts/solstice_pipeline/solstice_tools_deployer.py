@@ -11,8 +11,8 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-# import win32gui
-# from win32com.shell import shell, shellcon
+import win32gui
+from win32com.shell import shell, shellcon
 import compileall
 import subprocess
 import tempfile
@@ -22,16 +22,16 @@ import os
 import re
 from string import zfill
 from distutils.dir_util import copy_tree
+
+import solstice_tools_deployer_utils as utils
+
 numbers = re.compile('\d+')
 
 def deploySolsticeTools():
+
     folderPath = getSolsticeToolsFolder()
     if not os.path.exists(folderPath):
         print 'ERROR: Path {} does not exists! Aborting deployment ...'.format(folderPath)
-        return
-    settingsFile = os.path.join(folderPath, 'settings.json')
-    if not os.path.isfile(settingsFile):
-        print 'ERROR: File {} does not exists. Aborting deployment ...!'.format(settingsFile)
         return
 
     moduleFile = os.path.join(folderPath, 'modules', 'solstice_tools.mod')
@@ -47,9 +47,7 @@ def deploySolsticeTools():
     if not os.path.exists(solsticeToolsTempPath):
         os.makedirs(solsticeToolsTempPath)
 
-    with open(settingsFile, 'r') as fl:
-        setupInfo = json.loads(fl.read())
-    currVersion = setupInfo.get('version')
+    currVersion = utils.get_last_solstice_tools_version(as_int=False)
     if not currVersion:
         print 'ERROR: settings.json is not accessible. Aborting deployment ...!'
 
@@ -68,8 +66,6 @@ def deploySolsticeTools():
     shutil.move(newModulesPath, tempPath)
 
     newVersion = incrementVersion(currVersion)
-    with open(newSettingsPath, 'wb') as fl:
-        fl.write(json.dumps({'version': newVersion}, ensure_ascii=False))
 
     compilePythonFiles(tempPath)
     cleanPythonFiles(tempPath)
@@ -87,6 +83,15 @@ def deploySolsticeTools():
         os.makedirs(versionFolderPath)
     shutil.move(zipFile, os.path.join(versionFolderPath, os.path.basename(zipFile)))
 
+    # Create settings.json file
+    last_version_dict = dict()
+    last_version_dict['version'] = newVersion
+    setup_file = os.path.join(folderPath, 'settings.json')
+    with open(setup_file, 'w') as fl:
+        json.dump(last_version_dict, fl)
+    fl.close()
+
+
     print 'Solstice_tools deployed succesfully with version {}'.format(newVersion)
 
     try:
@@ -95,7 +100,9 @@ def deploySolsticeTools():
         pass
 
 def getSolsticeToolsFolder():
-    solstice_tools_pidl, flags = shell.SHILCreateFromPath("E:\Solstice\solstice\solstice_tools\solstice_tools", 0)
+
+    solstice_tools_def_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    solstice_tools_pidl, flags = shell.SHILCreateFromPath(solstice_tools_def_dir, 0)
     pidl, display_name, image_list = shell.SHBrowseForFolder (
       win32gui.GetDesktopWindow (),
         solstice_tools_pidl,

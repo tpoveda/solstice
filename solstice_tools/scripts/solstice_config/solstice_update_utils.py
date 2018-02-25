@@ -19,14 +19,17 @@ import os
 import json
 import time
 
-import maya.cmds as cmds
+try:
+    import maya.cmds as cmds
+except:
+    pass
 
 numbers = re.compile('\d+')
 
 def sLog(text):
     return '| Solstice Tools | => {}'.format(text)
 
-def downloadFile(filename, destination):
+def downloadFile(filename, destination, progress_bar=None):
     print(sLog('Downloading file {} to temporary folder -> {}'.format(os.path.basename(filename), destination)))
     try:
         dstFolder = os.path.dirname(destination)
@@ -44,26 +47,33 @@ def downloadFile(filename, destination):
         data = urllib2.urlopen(req)
         # with open(destination, 'ab') as dstFile:
         #     dstFile.write(data.read())
-        chunk_read(response=data, destination=destination, report_hook=chunk_report)
+        chunk_read(response=data, destination=destination, report_hook=chunk_report, progress_bar=progress_bar)
+
+
     except Exception as e:
         raise e
     if os.path.exists(destination):
-        print(sLog('Files installed succesfully!'))
+        print(sLog('Files downloaded succesfully!'))
         return True
     else:
-        print(sLog('Error when downloaded files.'))
+        print(sLog('Error when downloading files.'))
         return False
 
 
-def chunk_report(bytes_so_far, chunk_size, total_size):
+def chunk_report(bytes_so_far, chunk_size, total_size, progres_bar=None):
     percent = float(bytes_so_far) / total_size
     percent = round(percent*100, 2)
+    if progres_bar:
+        try:
+            cmds.progressBar(progres_bar, edit=True, progress=percent)
+        except:
+            pass
     print("Downloaded %d of %d bytes (%0.2f%%)\r" % (bytes_so_far, total_size, percent))
     if bytes_so_far >= total_size:
         print('\n')
 
 
-def chunk_read(response, destination, chunk_size=8192, report_hook=None):
+def chunk_read(response, destination, chunk_size=8192, report_hook=None, progress_bar=None):
 
     with open(destination, 'ab') as dst_file:
         total_size = response.info().getheader('Content-Length').strip()
@@ -76,7 +86,7 @@ def chunk_read(response, destination, chunk_size=8192, report_hook=None):
             if not chunk:
                 break
             if report_hook:
-                report_hook(bytes_so_far, chunk_size, total_size)
+                report_hook(bytes_so_far, chunk_size, total_size, progress_bar)
     dst_file.close()
     return bytes_so_far
 
@@ -108,28 +118,30 @@ def getVersion(s):
         return lastoccr
     return None
 
-def updateTools(get_versions=False):
+def updateTools(get_versions=False, progress_bar=None):
 
     temp_path = tempfile.mkdtemp()
     maya_path = os.path.join(os.path.expanduser("~/"), 'maya')
     if not os.path.exists(maya_path):
+        maya_path = os.path.join(os.path.expanduser("~/Documents"), 'maya')
+    if not os.path.exists(maya_path):
         print(sLog('ERROR: Maya Documents Path {} does not exist. Check that Maya is installed on your system!'.format(maya_path)))
+        return
     tools_file = 'solstice_tools.zip'
     repo_url = 'http://cgart3d.com/solstice_tools/'
     setup_file = '{}setup.json'.format(repo_url)
     setup_path = os.path.join(temp_path, 'setup.json')
-    if not downloadFile(setup_file, setup_path):
-        raise Exception(sLog(
-            'ERROR: setup.json is not accessible. It was nos possible to install solstice_tools. Check your internet connection and retry'))
+    if not downloadFile(setup_file, setup_path, progress_bar=progress_bar):
+        raise Exception(sLog('ERROR: setup.json is not accessible. It was nos possible to install solstice_tools. Check your internet connection and retry'))
     with open(setup_path, 'r') as fl:
         setup_info = json.loads(fl.read())
     last_version = setup_info.get('lastVersion')
     if not last_version:
         raise Exception(sLog('ERROR: Last version uploaded is not available. Try again later!'))
-    print(sLog('Last solstice_tools uplodaded version is {}'.format(last_version)))
+    last_version_value = getVersion(last_version)
+    print(sLog('Last solstice_tools deployed version is {}'.format(last_version)))
     solstice_tools_path = os.path.join(maya_path, 'solstice_tools', 'settings.json')
-    print(sLog('Checking current solstice_tools installed version on: {}'.format(solstice_tools_path)))
-
+    # print(sLog('Checking current solstice_tools installed version on: {}'.format(solstice_tools_path)))
     try:
         if os.path.isfile(solstice_tools_path):
             with open(solstice_tools_path, 'r') as fl:
@@ -139,7 +151,6 @@ def updateTools(get_versions=False):
                 raise Exception(sLog('ERROR: Installed version impossible to get ...'))
             print(sLog('Current installed version: {}'.format(install_version)))
 
-            last_version_value = getVersion(last_version)
             installed_version = getVersion(install_version)
 
             if installed_version and last_version_value <= installed_version:
@@ -149,7 +160,8 @@ def updateTools(get_versions=False):
             if get_versions:
                 return last_version_value, installed_version
         else:
-            pass
+            if get_versions:
+                return last_version_value, None
     except Exception as e:
         print(sLog('Error while retriving solstice_tools version. Check your Internet connection or contact Solstice TD!'))
         print(e)
@@ -162,7 +174,7 @@ def updateTools(get_versions=False):
     solstice_tools_zip_file = '{}{}/{}'.format(repo_url, last_version, tools_file)
     solstice_tools_install_path = os.path.join(temp_path, last_version, tools_file)
     print '----------> ', solstice_tools_zip_file
-    if not downloadFile(solstice_tools_zip_file, solstice_tools_install_path):
+    if not downloadFile(solstice_tools_zip_file, solstice_tools_install_path, progress_bar=progress_bar):
         raise Exception(sLog(
             'ERROR: Impossible to access solstice_tools.zip. It was nos possible to install solstice_tools. Check your internet connection and retry'))
     print(sLog('Installing solstice_tools on: {}'.format(maya_path)))
@@ -173,6 +185,9 @@ def updateTools(get_versions=False):
     print(sLog('solstice_tools {} installed succesfully!'.format(last_version)))
     print '=' * 150
 
-    cmds.confirmDialog(title='Solstice Tools', message='Solstice Tools installed successfully! Please restart Maya')
+    try:
+        cmds.confirmDialog(title='Solstice Tools', message='Solstice Tools installed successfully! Please restart Maya')
+    except:
+        pass
 
     return None, None

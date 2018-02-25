@@ -24,10 +24,10 @@ import maya.cmds as cmds
 import maya.mel as mel
 import maya.utils as mayaUtils
 
-from solstice_tools.scripts.pickers.picker import solstice_pickerColors as colors
-from solstice_tools.scripts.pickers.picker import solstice_pickerUtils as utils
-from solstice_tools.scripts.pickers.picker import solstice_pickerCommands as commands
-from solstice_tools.scripts.pickers.picker import solstice_pickerWindow
+from pickers.picker import solstice_pickerColors as colors
+from pickers.picker import solstice_pickerUtils as utils
+from pickers.picker import solstice_pickerCommands as commands
+from pickers.picker import solstice_pickerWindow
 
 class solstice_pickerButtonShape(object):
     circular = 'circular',

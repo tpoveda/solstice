@@ -21,8 +21,8 @@ except:
 
 from functools import partial
 import maya.cmds as cmds
-from solstice_tools.scripts.pickers.picker.solstice_pickerButtons import solstice_toggleStateButton as toggleState
-from solstice_tools.scripts.pickers.picker import solstice_pickerWindow
+from pickers.picker.solstice_pickerButtons import solstice_toggleStateButton as toggleState
+from pickers.picker import solstice_pickerWindow
 
 class solstice_gimbalButton(toggleState.solstice_toggleStateButton, object):
     def __init__(
@@ -63,7 +63,7 @@ class solstice_gimbalButton(toggleState.solstice_toggleStateButton, object):
             parts = ['ankle', 'foot']
 
         fkIkState = self.getPart().getFKIK(asText=True)
-        print(self._control)
+
         if fkIkState == 'IK':
             if 'ik' in self._control:
                 self._control = self._control.replace('ik_'+parts[0], 'ik_'+parts[1])
@@ -74,8 +74,6 @@ class solstice_gimbalButton(toggleState.solstice_toggleStateButton, object):
                 self._control = self._control.replace('ik_'+parts[0], 'fk_'+parts[0])
             else:
                 self._control = self._control.replace('ik_'+parts[1], 'fk_'+parts[0])
-
-        print(self._control)
 
 
     def updateGimbalVisibility(self, isEnabled):
@@ -103,6 +101,7 @@ class solstice_gimbalButton(toggleState.solstice_toggleStateButton, object):
         super(solstice_gimbalButton, self).postCreation()
 
         self.updateState()
-
-        self.onOffBtn.toggleOn.connect(partial(self.updateGimbalVisibility, True))
-        self.onOffBtn.toggleOff.connect(partial(self.updateGimbalVisibility, False))
+        #
+        # TODO: Check why this signal connect makes Maya crash
+        # self.onOffBtn.toggleOn.connect(partial(self.updateGimbalVisibility, True))
+        # self.onOffBtn.toggleOff.connect(partial(self.updateGimbalVisibility, False))

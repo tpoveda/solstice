@@ -1,0 +1,20 @@
+=========================================
+ SOLSTICE TOOLS
+=========================================
+
+Version 6.0 - Changelog
+----------------------------------------------------------------------------------
+
+- Updated Solstice Tools Updater Tool with a new UI
+- Added changelog system to Solstice Tools Updater Tool
+- Simplified Picker Docked Window implementation
+- Added Gimbal Button for Pickers
+- Added FKIK functionality for the picker
+- Added basic facial picker functionality for pickers
+- First version of Summer Picker completed
+- Added Solstice Picker Tool
+- Solstice Tool code refactorization
+- Improved Solstice Tools Deploy System
+- Added first WIP version of the Alembic Exporter Tool
+- Added first WIP version of the Selection Set Creator Tool
+                                                          

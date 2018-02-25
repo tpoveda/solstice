@@ -128,7 +128,7 @@ def init():
     print '\n'
 
     try:
-        cmds.evalDeferred('from solstice_tools.scripts.solstice_config import solstice_main; solstice_main.runAtMayaStart()')
+        cmds.evalDeferred('from solstice_config import solstice_main; solstice_main.runAtMayaStart()')
     except Exception as e:
         print(sLog('ERROR: Main Solstice function failed!'))
         print str(e)

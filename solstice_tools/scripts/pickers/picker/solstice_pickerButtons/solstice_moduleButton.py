@@ -21,9 +21,9 @@ except:
 import maya.cmds as cmds
 import maya.mel as mel
 
-from solstice_tools.scripts.pickers.picker import solstice_pickerColors as colors
-from solstice_tools.scripts.pickers.picker import solstice_pickerBaseButton as baseBtn
-from solstice_tools.scripts.pickers.picker import solstice_pickerWindow
+from pickers.picker import solstice_pickerColors as colors
+from pickers.picker import solstice_pickerBaseButton as baseBtn
+from pickers.picker import solstice_pickerWindow
 
 class solstice_moduleButton(baseBtn.solstice_pickerBaseButton, object):
     def __init__(self,

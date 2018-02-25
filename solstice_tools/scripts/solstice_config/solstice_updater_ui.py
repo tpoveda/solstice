@@ -10,6 +10,7 @@ except:
 
 import maya.OpenMayaUI as OpenMayaUI
 import maya.cmds as cmds
+import maya.mel as mel
 import solstice_updater
 
 import threading
@@ -19,8 +20,7 @@ import os
 import json
 import time
 
-from solstice_tools.scripts.solstice_config import solstice_update_utils as utils
-
+from solstice_config import solstice_update_utils as utils
 
 class solstice_updater_ui(QDialog, object):
     def __init__(self):
@@ -75,40 +75,86 @@ class solstice_updater_ui(QDialog, object):
         self.updateBtn = QPushButton('Update')
         #self.updateBtn.setEnabled(False)
 
+        self.changelog_btn = QPushButton('Changelog')
+        self.changelog_btn.setMaximumWidth(60)
+
         frameLayout.addLayout(installVersionLayout)
         frameLayout.addLayout(lastVersionLayout)
         frameLayout.addWidget(divider(None))
         frameLayout.addWidget(self.progress_text)
         frameLayout.addWidget(divider(None))
-        frameLayout.addWidget(self.updateBtn)
+
+        bottom_layout = QHBoxLayout()
+        bottom_layout.setContentsMargins(2,2,2,2)
+        bottom_layout.setSpacing(2)
+        frameLayout.addLayout(bottom_layout)
+
+        bottom_layout.addWidget(self.updateBtn)
+        bottom_layout.addWidget(self.changelog_btn)
 
         self.updateBtn.clicked.connect(self._update)
+        self.changelog_btn.clicked.connect(show_changelog)
 
         self._check_versions()
 
     def _check_versions(self):
         last_version, installed_version = utils.updateTools(get_versions=True)
-        if last_version and installed_version:
-            print(last_version)
-            print(installed_version)
+
+        if installed_version:
             self.versionLbl.setText(str(installed_version))
+        else:
+            self.versionLbl.setText('Not installed')
+
+        if last_version:
             self.lastVersion.setText(str(last_version))
 
-            last_version_value = utils.getVersion(last_version)
+        last_version_value = utils.getVersion(last_version)
+
+        if last_version and installed_version:
             installed_version_value = utils.getVersion(installed_version)
             if last_version_value > installed_version_value:
                 self.progress_text.setText('NEW VERSION AVAILABLE!')
                 self.updateBtn.setEnabled(True)
+                self.changelog_btn.setEnabled(True)
             else:
                 self.progress_text.setText('SOLSTICE TOOLS ARE UP-TO-DATE!')
                 self.updateBtn.setEnabled(False)
+                self.changelog_btn.setEnabled(True)
         else:
-            self.progress_text.setText('Solstice tools installed succesfully!')
+            self.progress_text.setText('SOLSTICE TOOLS ARE NOT INSTALLED!')
+            self.updateBtn.setEnabled(True)
+            self.changelog_btn.setEnabled(False)
+
+        changelog_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), 'changelog.txt')
+        if not os.path.isfile(changelog_file_path):
+            self.changelog_btn.setEnabled(False)
 
     def _update(self):
         self.close()
-        solstice_updater.updateTools()
+        gMainProgressBar = mel.eval('$tmp = $gMainProgressBar')
+        cmds.progressBar(gMainProgressBar, edit=True, beginProgress=True, isInterruptable=False, status='Downloading Solstice Tools ...', maxValue=100)
+        solstice_updater.updateTools(progress_bar=gMainProgressBar)
+        cmds.progressBar(gMainProgressBar, edit=True, endProgress=True)
         # self._check_versions()
+
+def show_changelog():
+
+    changelog_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), 'changelog.txt')
+    if not os.path.isfile(changelog_file_path):
+        print(utils.sLog('Changelog file not found!'))
+        return
+
+    changelog_file = QFile(changelog_file_path)
+    line = ''
+    if changelog_file.open(QIODevice.ReadOnly | QIODevice.Text):
+        file_stream = QTextStream(changelog_file)
+        while not file_stream.atEnd():
+            line = line + file_stream.readLine() + '\n'
+
+    changelog_win = QMessageBox()
+    changelog_win.setWindowTitle('Solstice Tools - Changelog')
+    changelog_win.setText(line)
+    changelog_win.exec_()
 
 
 def divider(parent):

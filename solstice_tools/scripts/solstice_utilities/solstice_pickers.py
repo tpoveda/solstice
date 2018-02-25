@@ -93,7 +93,7 @@ class solstice_pickers(QMainWindow, object):
 
     def open_picker(self, character_name):
 
-        command = 'from solstice_tools.scripts.pickers import {0}Picker;reload({0}Picker);{0}Picker.solstice_{0}Picker.initPicker(fullWindow=False)'.format(character_name)
+        command = 'from pickers import {0}Picker;reload({0}Picker);{0}Picker.solstice_{0}Picker.initPicker(fullWindow=False)'.format(character_name)
         try:
             exec(command)
         except:
