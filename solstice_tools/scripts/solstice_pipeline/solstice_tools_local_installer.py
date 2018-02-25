@@ -18,12 +18,17 @@ from distutils.dir_util import copy_tree
 
 def copySolsticeTools():
 
-    origFolder = getFolder("E:\Solstice\solstice\solstice_tools\solstice_tools")
+    solstice_tools_def_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    origFolder = getFolder(solstice_tools_def_dir)
     if not os.path.exists(origFolder):
         print 'ERROR: Path {} does not exists! Aborting copy ...'.format(origFolder)
         return
 
-    toFolder = getFolder("C:\\Users\\tomi_\\Documents\\maya\\solstice_tools")
+    maya_path = os.path.join(os.path.expanduser("~/"), 'maya')
+    if not os.path.exists(maya_path):
+        maya_path = os.path.join(os.path.expanduser("~/Documents"), 'maya')
+    solstice_tools_maya_dir = os.path.join(maya_path, 'solstice_tools')
+    toFolder = getFolder(solstice_tools_maya_dir)
     if not os.path.exists(toFolder):
         print 'ERROR: Path {} does not exists! Aborting copy ...'.format(toFolder)
         return

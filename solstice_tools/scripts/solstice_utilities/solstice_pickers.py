@@ -96,7 +96,8 @@ class solstice_pickers(QMainWindow, object):
         command = 'from pickers import {0}Picker;reload({0}Picker);{0}Picker.solstice_{0}Picker.initPicker(fullWindow=False)'.format(character_name)
         try:
             exec(command)
-        except:
+        except Exception as e:
+            print(str(e))
             QMessageBox.information(self, "{0} Picker".format(character_name.capitalize()), '{0} Picker is not created yet, wait for future updates!'.format(character_name.capitalize()))
 
     def open_anim_picker(self):

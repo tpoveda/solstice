@@ -23,7 +23,6 @@ except:
 
 
 # Import standard Python modules
-from functools import partial
 import os
 
 # Import custom modules

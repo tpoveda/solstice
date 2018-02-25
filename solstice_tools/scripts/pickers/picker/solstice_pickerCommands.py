@@ -18,7 +18,7 @@ from pickers.picker import solstice_pickerWindow
 # TODO: Take in account namespaces
 
 def selectGlobalControl():
-    _select_control('main_set')
+    _select_control('global_ctrl')
 
 
 def selectMainControl():
