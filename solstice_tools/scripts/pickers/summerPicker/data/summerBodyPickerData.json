@@ -268,6 +268,35 @@
             "mirror":"True",
             "color":[255,255,0],
             "FKIKControl":"L_arm1_fk_wrist_ctrl"
+          },
+          {
+            "x": "130",
+            "y": "-28",
+            "radius": "27",
+            "name": "armPV",
+            "type":"ik",
+            "gizmo": "move",
+            "side":"L",
+            "text":"IK",
+            "mirror":"True",
+            "color":[255,255,0],
+            "FKIKControl":"L_arm1_fk_wrist_ctrl"
+          }
+        ],
+        "solstice_extraButton":
+        [
+           {
+            "x": "115",
+            "y": "0",
+            "radius": "5",
+             "height": "20",
+             "width": "20",
+            "name": "bow",
+            "offset":[-8, 0],
+            "gizmo": "move",
+            "side":"L",
+            "mirror":"True",
+            "color":[255,0,0]
           }
         ],
         "solstice_moduleButton":
@@ -782,6 +811,19 @@
         ],
         "solstice_ikButton":
         [
+          {
+            "x": "34",
+            "y": "215",
+            "radius": "27",
+            "name": "leg",
+            "type":"ik",
+            "gizmo": "move",
+            "side":"L",
+            "text":"IK",
+            "mirror":"True",
+            "color":[255,255,0],
+            "FKIKControl":"L_leg1_fk_ankle_ctrl"
+          }
         ],
         "solstice_moduleButton":
         [

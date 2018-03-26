@@ -4,8 +4,7 @@
 # """ ==================================================================
 # Script Name: solstice_pickers.py
 # by Tomas Poveda
-# Tool that allows to select the picker you want to open
-# ______________________________________________________________________# ______________________________________________________________________
+#  Tool that allows to select the picker you want to open
 # ==================================================================="""
 
 import os
@@ -40,7 +39,7 @@ class solstice_pickers(QMainWindow, object):
 
             # Set the dialog object name, window title and size
         self.setObjectName(win_name)
-        self.setWindowTitle('Solstice Pickers - v.1.0')
+        self.setWindowTitle('Solstice Pickers - v.1.1')
         self.customUI()
         self.show()
 

@@ -29,6 +29,7 @@ from pickers.picker import solstice_pickerUtils as utils
 from pickers.picker import solstice_pickerCommands as commands
 from pickers.picker import solstice_pickerWindow
 
+
 class solstice_pickerButtonShape(object):
     circular = 'circular',
     roundedSquare = 'roundedSquare'

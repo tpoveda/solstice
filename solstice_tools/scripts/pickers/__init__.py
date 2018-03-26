@@ -1,6 +1,7 @@
 import picker
 import summerPicker
 import winterPicker
+import springPicker
 
 def _reload():
     reload(picker)
@@ -9,3 +10,5 @@ def _reload():
     summerPicker._reload()
     reload(winterPicker)
     winterPicker._reload()
+    reload(springPicker)
+    springPicker._reload()

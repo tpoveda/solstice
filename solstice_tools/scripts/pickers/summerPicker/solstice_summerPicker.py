@@ -31,6 +31,11 @@ from pickers.picker import solstice_pickerUtils as utils
 import solstice_summerBodyPicker as  bodyPicker
 import solstice_summerFacialPicker as facialPicker
 
+import solstice_studiolibrarymaya
+solstice_studiolibrarymaya.registerItems()
+solstice_studiolibrarymaya.enableMayaClosedEvent()
+import solstice_studiolibrarymaya.mayalibrarywidget
+
 # --------------------------------------------------------------------------------------------
 imagesPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'images')
 dataPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -99,6 +104,10 @@ class Solstice_SummerPicker(window.Solstice_PickerWindow, object):
         self.bp = bodyPicker.solstice_summerBodyPicker(dataPath=self.bodyPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_body.svg'))
         self.fp = facialPicker.solstice_summerFacialPicker(dataPath=self.facialPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_facial.svg'))
 
+        pose_widget_cls = solstice_studiolibrarymaya.mayalibrarywidget.MayaLibraryWidget
+        self.pose_widget = solstice_studiolibrarymaya.mayalibrarywidget.MayaLibraryWidget.instance()
+
+
         if fullwindow:
             for picker in [self.bp, self.fp]:
                 self.pickers_layout.addWidget(picker)
@@ -107,6 +116,7 @@ class Solstice_SummerPicker(window.Solstice_PickerWindow, object):
             self.pickers_layout.addWidget(self.charTab)
             self.charTab.addTab(self.bp, 'Body')
             self.charTab.addTab(self.fp, 'Facial')
+            self.charTab.addTab(self.pose_widget, 'Pose Library')
             # self.charTab.setCurrentIndex(1)
 
     def updatePickers(self):
