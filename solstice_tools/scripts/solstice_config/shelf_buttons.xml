@@ -9,4 +9,5 @@
     <!-- Utility Scripts -->
     <shelfItem icon="txtLinker.png" cmds="from solstice_utilities import solstice_texturesRelinker; reload(solstice_texturesRelinker); solstice_texturesRelinker.initUI();" ann="Solstice Textures Relinker Tool" label=""/>
     <shelfItem icon="sanityCheck.png" cmds="from solstice_utilities import solstice_sanityCheck; reload(solstice_sanityCheck); solstice_sanityCheck.sanityCheck(True);" ann="Solstice Sanity Check Tool" label=""/>
+    <shelfItem icon="snow.png" cmds="from solstice_utilities import solstice_snowcreator; reload(solstice_snowcreator); solstice_snowcreator.initUI();" ann="Solstice Snow Creator" label=""/>
 </solstice_shelf>

@@ -26,7 +26,7 @@ LOGGER = logging.getLogger('solstice_tools')
 def sLog(text):
     return '| Solstice Tools | => {}'.format(text)
 
-def init():
+def init(update=True):
     print '-'*100
     print '*'*100
     print '='*100
@@ -127,13 +127,14 @@ def init():
     print '-'*100
     print '\n'
 
-    try:
-        cmds.evalDeferred('from solstice_config import solstice_main; solstice_main.runAtMayaStart()')
-    except Exception as e:
-        print(sLog('ERROR: Main Solstice function failed!'))
-        print str(e)
-        print '\n'
-    return
+    if update:
+        try:
+            cmds.evalDeferred('from solstice_config import solstice_main; solstice_main.runAtMayaStart()')
+        except Exception as e:
+            print(sLog('ERROR: Main Solstice function failed!'))
+            print str(e)
+            print '\n'
+        return
 
 def passMsgToMainThread(jsonMsg):
     maya.utils.executeInMainThreadWithResult(handleMessage, jsonMsg)

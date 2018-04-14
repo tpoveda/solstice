@@ -36,6 +36,8 @@ solstice_studiolibrarymaya.registerItems()
 solstice_studiolibrarymaya.enableMayaClosedEvent()
 import solstice_studiolibrarymaya.mayalibrarywidget
 
+import  solstice_studiolibrary.librarywidget
+
 # --------------------------------------------------------------------------------------------
 imagesPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'images')
 dataPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -104,8 +106,18 @@ class Solstice_SummerPicker(window.Solstice_PickerWindow, object):
         self.bp = bodyPicker.solstice_summerBodyPicker(dataPath=self.bodyPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_body.svg'))
         self.fp = facialPicker.solstice_summerFacialPicker(dataPath=self.facialPickerData(), imagePath=os.path.join(imagesPath, 'pickerSummer_facial.svg'))
 
-        pose_widget_cls = solstice_studiolibrarymaya.mayalibrarywidget.MayaLibraryWidget
-        self.pose_widget = solstice_studiolibrarymaya.mayalibrarywidget.MayaLibraryWidget.instance()
+        self.pose_widget = solstice_studiolibrary.librarywidget.LibraryWidget.instance()
+        solstice_project_folder = os.environ.get('SOLSTICE_PROJECT')
+        if solstice_project_folder and os.path.exists(solstice_project_folder):
+            solstice_assets = os.path.join(solstice_project_folder, 'Assets')
+            if os.path.exists(solstice_assets):
+                self.pose_widget.setPath(solstice_assets)
+                anims = os.path.join(solstice_assets, 'AnimationLibrary')
+                print(anims)
+                if os.path.exists(anims):
+                    self.pose_widget.setPath(anims)
+            else:
+                self.pose_widget.setPath(solstice_project_folder)
 
 
         if fullwindow:
