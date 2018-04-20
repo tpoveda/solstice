@@ -15,9 +15,11 @@ from Qt.QtCore import *
 from Qt.QtWidgets import *
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer
-from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_artella_utils, solstice_artella_classes
+from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser
+from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_artella_utils
 from resources import solstice_resource
+
+from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_browser_utils
 
 
 class Pipelinizer(solstice_windows.Window, object):
@@ -97,16 +99,16 @@ class Pipelinizer(solstice_windows.Window, object):
         categories_layout.setSpacing(0)
         categories_widget.setLayout(categories_layout)
 
-        tree_widget = QWidget()
-        tree_layout = QHBoxLayout()
-        tree_layout.setContentsMargins(0, 0, 0, 0)
-        tree_layout.setSpacing(0)
-        tree_widget.setLayout(tree_layout)
+        asset_viewer_widget = QWidget()
+        asset_viewer_layout = QHBoxLayout()
+        asset_viewer_layout.setContentsMargins(0, 0, 0, 0)
+        asset_viewer_layout.setSpacing(0)
+        asset_viewer_widget.setLayout(asset_viewer_layout)
 
-        tab_widget.addTab(categories_widget, 'Categories')
-        tab_widget.addTab(tree_widget, '   Folders   ')
+        tab_widget.addTab(categories_widget, 'Asset Manager')
+        tab_widget.addTab(asset_viewer_widget, ' Asset Viewer ')
 
-        # ================== Categoriew widget
+        # ================== Asset Manager Widget
         main_categories_menu_layout = QHBoxLayout()
         main_categories_menu_layout.setContentsMargins(0, 0, 0, 0)
         main_categories_menu_layout.setSpacing(0)
@@ -130,20 +132,29 @@ class Pipelinizer(solstice_windows.Window, object):
             categories_buttons[category] = QPushButton(category)
             categories_menu_layout.addWidget(categories_buttons[category])
 
-        # ================== Folder widget
-        tree_views_splitter = QSplitter(Qt.Horizontal)
-        tree_layout.addWidget(tree_views_splitter)
+        # ================== Asset Viewer Widget
+        asset_viewer_splitter = QSplitter(Qt.Horizontal)
+        asset_viewer_layout.addWidget(asset_viewer_splitter)
 
-        tree_model = QFileSystemModel()
-        tree_model.setRootPath(self.get_solstice_project_path())
-        tree_view = QTreeView()
-        tree_view.setModel(tree_model)
-        tree_view.setRootIndex(tree_model.index(self.get_solstice_project_path()))
-        tree_views_splitter.addWidget(tree_view)
+        artella_server_widget = QWidget()
+        artella_server_layout = QHBoxLayout()
+        artella_server_layout.setContentsMargins(0, 0, 0, 0)
+        artella_server_layout.setSpacing(0)
+        artella_server_layout.setAlignment(Qt.AlignTop)
+        artella_server_widget.setLayout(artella_server_layout)
+        artella_server_browser = solstice_assetbrowser.AssetBrowser(title='Artella Server Data')
+        artella_server_layout.addWidget(artella_server_browser)
+        asset_viewer_splitter.addWidget(artella_server_widget)
 
-        list_view = QListView()
-        list_view.setMinimumWidth(150)
-        tree_views_splitter.addWidget(list_view)
+        local_data_widget = QWidget()
+        local_data_layout = QHBoxLayout()
+        local_data_layout.setContentsMargins(0, 0, 0, 0)
+        local_data_layout.setSpacing(0)
+        local_data_layout.setAlignment(Qt.AlignTop)
+        local_data_widget.setLayout(local_data_layout)
+        local_data_browser = solstice_assetbrowser.AssetBrowser(title='       Local Data      ')
+        local_data_layout.addWidget(local_data_browser)
+        asset_viewer_splitter.addWidget(local_data_widget)
 
         # =================================================================================================
 
@@ -239,11 +250,14 @@ def run():
     reload(solstice_maya_utils)
     reload(solstice_artella_classes)
     reload(solstice_artella_utils)
+    reload(solstice_browser_utils)
+    reload(solstice_qt_utils)
     reload(solstice_resource)
     reload(solstice_user)
     reload(solstice_grid)
     reload(solstice_asset)
     reload(solstice_assetviewer)
+    reload(solstice_assetbrowser)
 
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()

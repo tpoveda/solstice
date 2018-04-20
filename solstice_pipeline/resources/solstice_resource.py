@@ -13,6 +13,35 @@ import os
 from Qt.QtGui import *
 
 from solstice_gui import solstice_pixmap
+from solstice_utils import solstice_qt_utils, solstice_browser_utils
+
+
+def generate_resources_file(generate_qr_file=True):
+    """
+    Loop through Solstice resources adn generates a QR file with all of them
+    :param generate_qr_file: bool, True if you want to generate the QR file
+    """
+
+    res_file_name = 'solstice_resources'
+
+    res_folder = os.path.dirname(os.path.abspath(__file__))
+    res_out_folder = res_folder
+    if not os.path.exists(res_folder):
+        raise RuntimeError('Resources folder {0} does not exists!'.format(res_folder))
+
+    res_folders = solstice_browser_utils.get_sub_folders(res_folder)
+    res_folders = [os.path.join(res_folder, x) for x in res_folders]
+    res_folders = [x for x in res_folders if os.path.exists(x)]
+
+    qrc_file = os.path.join(res_folder, res_file_name + '.qrc')
+    qrc_py_file = os.path.join(res_out_folder, res_file_name + '.py')
+
+    if generate_qr_file:
+        solstice_qt_utils.create_qrc_file(res_folders, qrc_file)
+    if not os.path.isfile(qrc_file):
+        return
+
+    solstice_qt_utils.create_python_qrc_file(qrc_file, qrc_py_file)
 
 
 def get(*args):
@@ -48,6 +77,15 @@ def pixmap(*args, **kwargs):
     """
 
     return Resource().pixmap(*args, **kwargs)
+
+def gui(*args, **kwargs):
+    """
+    Returns QWidget loaded from .ui file
+    :param name: str, name of the UI file
+    :return:
+    """
+
+    return Resource().ui(*args, **kwargs)
 
 
 class Resource(object):
@@ -108,4 +146,11 @@ class Resource(object):
 
         return p
 
+    def ui(self, name):
+        """
+        Returns a QWidget loaded from .ui file
+        :param name: str, name of the ui file you want to load
+        :return: QWidget
+        """
 
+        return solstice_qt_utils.ui_loader(ui_file=self.get('uis', name + '.ui'))

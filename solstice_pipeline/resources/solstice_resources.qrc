@@ -1,0 +1,39 @@
+<RCC>
+	<qresource prefix="fonts">
+	</qresource>
+	<qresource prefix="icons">
+		<file alias="abcexporter">icons/abcexporter.png</file>
+		<file alias="importer">icons/importer.png</file>
+		<file alias="picker">icons/picker.png</file>
+		<file alias="pipeline">icons/pipeline.png</file>
+		<file alias="progress_bar_1">icons/progress_bar_1.png</file>
+		<file alias="progress_bar_2">icons/progress_bar_2.png</file>
+		<file alias="progress_bar_3">icons/progress_bar_3.png</file>
+		<file alias="progress_bar_4">icons/progress_bar_4.png</file>
+		<file alias="project">icons/project.png</file>
+		<file alias="sanitycheck">icons/sanityCheck.png</file>
+		<file alias="scatter">icons/scatter.png</file>
+		<file alias="search">icons/search.png</file>
+		<file alias="shaders">icons/shaders.png</file>
+		<file alias="snow">icons/snow.png</file>
+		<file alias="tagger">icons/tagger.png</file>
+		<file alias="thumb_loading_1">icons/thumb_loading_1.png</file>
+		<file alias="thumb_loading_2">icons/thumb_loading_2.png</file>
+		<file alias="thumb_loading_3">icons/thumb_loading_3.png</file>
+		<file alias="thumb_loading_4">icons/thumb_loading_4.png</file>
+		<file alias="txtrelinker">icons/txtrelinker.png</file>
+		<file alias="update">icons/update.png</file>
+	</qresource>
+	<qresource prefix="images">
+		<file alias="no_user">images/no_user.png</file>
+		<file alias="solstice_pipeline">images/solstice_pipeline.png</file>
+		<file alias="solstice_pipeline_logo">images/solstice_pipeline_logo.png</file>
+		<file alias="spring_image">images/spring_image.png</file>
+		<file alias="summer_image">images/summer_image.png</file>
+		<file alias="winter_image">images/winter_image.png</file>
+	</qresource>
+	<qresource prefix="uis">
+		<file alias="browser">uis/browser.ui</file>
+		<file alias="browser_header">uis/browser_header.ui</file>
+	</qresource>
+</RCC>
