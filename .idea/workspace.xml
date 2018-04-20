@@ -2,11 +2,417 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f2c1a1a5-c0ef-4607-abef-97b02641319f" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_snowcreator.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/dictionaries/Tomi.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_launcher/solstice_launcher.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_launcher/solstice_launcher_utils.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_launcher/solstice_maya_utils.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_asset.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_assetviewer.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_color.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_containerwidget.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_grid.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_icon.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_pixmap.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_user.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_classes.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_image_utils.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_python_utils.py" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py" afterPath="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py" />
-      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/shelf_buttons.xml" afterPath="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/shelf_buttons.xml" />
-      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_initializer.py" afterPath="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_initializer.py" />
+      <change beforePath="$PROJECT_DIR$/_config.yml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/icons/picker.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/icons/sanityCheck.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/icons/setProject.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/icons/txtLinker.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/icons/update.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/images/spring_image.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/images/summer_image.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/images/winter_image.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/cmds.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/database.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/.studiolibrary/database.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/Pixar/download (12).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/Pixar/download (15).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/Pixar/images (13).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/Pixar/images (4).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/VFX/download (2).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/VFX/download (3).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/VFX/download (4).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/VFX/download (5).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/VFX/download (6).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/VFX/download (7).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/VFX/download (8).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/VFX/download.jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/animated/food dance.gif" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/animated/fruit fit.gif" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/download (10).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/download (13).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/download (14).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/download (16).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/download (17).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/download (18).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/download (19).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/download (7).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/download (8).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/download (9).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/icons/ic_filter_vintage_white_48dp.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/icons/ic_flare_white_48dp.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/icons/ic_flash_auto_white_48dp.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/icons/ic_healing_white_48dp.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/icons/ic_leak_remove_white_48dp.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/icons/ic_movie_creation_white_48dp.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/icons/ic_movie_filter_white_48dp.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/icons/ic_nature_people_white_48dp.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/icons/ic_tag_faces_white_48dp.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (1).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (10).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (11).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (12).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (14).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (15).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (16).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (17).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (18).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (19).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (2).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (20).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (21).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (22).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (23).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (24).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (3).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (5).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (6).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (7).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (8).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images (9).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/images.jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/download (1).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/download (20).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/download.jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/images (1).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/images (2).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/images (3).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/images (4).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/images (5).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/images (6).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/images (7).jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/data/images/minimalist/images.jpg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/example1.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/example2.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/example3.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/example4.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/examples/example5.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/folderitem.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/libraryitem.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/librarywidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/main.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/animation.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/attribute.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/decorators.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/gui/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/gui/framerangemenu.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/gui/modelpanelwidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/gui/thumbnailcapturedialog.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/gui/thumbnailcapturemenu.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/matchnames.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/mirrortable.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/namespace.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/node.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/playblast.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/pose.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/readme.md" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/scriptjob.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/selectionset.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tempdir.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/anim.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/animation.anim" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/pose.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/sphere.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_anim.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_bake_connected.anim/animation.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_bake_connected.anim/animation.mb" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_bake_connected.anim/pose.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_bake_connected.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_load_insert.anim/animation.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_load_insert.anim/animation.mb" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_load_insert.anim/pose.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_load_replace.anim/animation.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_load_replace.anim/animation.mb" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_load_replace.anim/pose.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_load_replace_completely.anim/animation.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_load_replace_completely.anim/animation.mb" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_load_replace_completely.anim/pose.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_mirror_tables.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_non_unique_names.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_non_unique_names.pose" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_older_version.anim/.studioLibrary/record.dict" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_older_version.anim/animation.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_older_version.anim/pose.dict" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_older_version.dict" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_pose.ma" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_pose.pose" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/data/test_poseplugin.pose/.studiolibrary/record.dict" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/run.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/test_anim.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/test_attribute.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/test_base.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/test_match.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/test_mirrortable.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/test_pose.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/tests/test_utils.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/transferobject.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_mutils/utils.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/animitem.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/basecreatewidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/baseitem.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/basepreviewwidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/main.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/mayalibrarywidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/mirroritem.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/poseitem.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/readme.md" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/animation.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/arrow.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/insert.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/insertConnect.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/lock.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/mafileicon.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/mbfileicon.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/merge.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/mergeConnect.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/mirrortable.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/mirrortable2.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/pose.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/poseIcon.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/replace.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/replaceCompletely.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/replaceConnect.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/selectionSet.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/selectionSet2.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/thumbnail.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/icons/thumbnail2.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/ui/AnimCreateWidget.ui" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/ui/AnimPreviewWidget.ui" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/ui/MirrorCreateWidget.ui" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/ui/MirrorPreviewWidget.ui" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/ui/PoseCreateWidget.ui" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/ui/PosePreviewWidget.ui" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/ui/SetsCreateWidget.ui" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/resource/ui/SetsPreviewWidget.ui" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/setsitem.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/setsmenu.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/actions/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/actions/separatoraction.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/actions/slideraction.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/cmds.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/color.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/decorators.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/icon.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/imagesequence.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/menu.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/pixmap.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/css/default.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/add.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/add_32pt.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/branch_closed_black.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/branch_closed_white.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/branch_open_black.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/branch_open_white.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/broken_image.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/cache.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/cancel.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/check_box_checked_black.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/check_box_checked_white.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/check_box_unchecked_black.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/check_box_unchecked_white.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/circle.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/cog.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/critical.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/cross.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/delete.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/drop_arrow_black.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/drop_arrow_white.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/error.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/folder.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/folder_14pt.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/folder_open.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/groupby.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/image.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/info.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/lock.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/question.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/radio_button_checked_black.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/radio_button_checked_white.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/radio_button_unchecked_black.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/radio_button_unchecked_white.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/refresh.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/search.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/settings.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/sortby.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/tag.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/thumbnail.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/view_all.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/view_compact.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/view_settings.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/warning.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/resource/icons/warning2.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/stylesheet.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/theme.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/vendor/Qt.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/vendor/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/combinedwidget/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/combinedwidget/combineditemdelegate.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/combinedwidget/combineditemviewmixin.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/combinedwidget/combinedlistview.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/combinedwidget/combinedtreewidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/combinedwidget/combinedwidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/combinedwidget/combinedwidgetitem.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/combinedwidget/combinedwidgetitemgroup.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/menubarwidget/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/menubarwidget/menubarwidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/messagebox.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/searchwidget/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/searchwidget/searchfilter.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/searchwidget/searchwidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/statuswidget/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/statuswidget/statuswidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/toastwidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/treewidget/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/treewidget/treewidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/treewidget/treewidgetitem.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/studioqt/theme.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/packages/studioqt/widgets/treewidget/treewidgetitem.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/add.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/delete.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/folder.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/folder_item.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/icon.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/icon_black.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/icon_black_on_white.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/icon_blue_on_white.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/icon_white.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/icon_white_256.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/icon_white_and_blue.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/icon_white_on_black.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/icon_white_on_blue.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/logo_transparent_256px.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/externals/solstice_studiolibrary/resource/icons/thumbnail.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/scripts/vlRigIt_getControlsFromModuleList.mel" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/scripts/vlRigIt_getModuleFromControl.mel" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/scripts/vlRigIt_selectModuleControls.mel" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/scripts/vlRigIt_snapParent.mel" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/scripts/vlRigIt_snapParentAskSetKey.mel" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/scripts/vlRigIt_snap_ikFk.mel" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/scripts/vl_contextualMenuBuilder.mel" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/scripts/vl_resetAttributes.mel" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/scripts/vl_resetTransformations.mel" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_picker.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerBaseButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_commandButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_extraButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_fkButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_fkIkSwitcherButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_flipButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_gimbalButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_ikButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_keyButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_keyFkIkButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_keySpaceSwitchButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_mirrorButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_moduleButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_pinButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_selectButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_toggleButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerButtons/solstice_toggleStateButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerColors.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerCommands.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerPart.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerScene.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerTab.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerUtils.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerView.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/picker/solstice_pickerWindow.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/springPicker/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/summerPicker/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/summerPicker/data/summerBodyPickerData.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/summerPicker/data/summerFacialPickerData.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/summerPicker/images/pickerSummer_body.svg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/summerPicker/images/pickerSummer_facial.svg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/summerPicker/solstice_summerBodyPicker.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/summerPicker/solstice_summerFacialPicker.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/summerPicker/solstice_summerPicker.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/test_picker.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/winterPicker/__init__.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/winterPicker/data/winterBodyPickerData.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/winterPicker/data/winterFacialPickerData.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/winterPicker/images/pickerWinter_body.svg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/winterPicker/images/pickerWinter_facial.svg" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/winterPicker/solstice_winterBodyPicker.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/winterPicker/solstice_winterFacialPicker.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/pickers/winterPicker/solstice_winterPicker.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_config/get_deps.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_config/maya_utils.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_config/shelf_buttons.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_config/solstice_initializer.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_config/solstice_main.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_config/solstice_update_utils.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_config/solstice_updater.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_config/solstice_updater_ui.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_config/spigot.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_gui/solstice_listWidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_gui/solstice_mainWindow.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_gui/solstice_pushButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_gui/solstice_splitters.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_libs/solstice_alembic.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_libs/solstice_assets.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_libs/solstice_naming.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_pipeline/solstice_tools_deployer.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_pipeline/solstice_tools_deployer_utils.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_pipeline/solstice_tools_installer.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_pipeline/solstice_tools_local_installer.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_tools/solstice_assetmanager.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_tools/solstice_decorators.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_tools/solstice_instanciator.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_tools/solstice_pickers.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_tools/solstice_sanityCheck.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_tools/solstice_selections.json" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_tools/solstice_snowcreator.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_tools/solstice_tagger.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_tools/solstice_texturesRelinker.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_utilities/solstice_utils.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/scripts/userSetup.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/__init__.py" afterPath="$PROJECT_DIR$/solstice_pipeline/__init__.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/changelog.txt" afterPath="$PROJECT_DIR$/solstice_pipeline/changelog.txt" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/externals/animschool_picker/mac/AnimSchoolPicker.bundle" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/externals/animschool_picker/win/AnimSchoolPicker.mll" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/icons/AnimSchoolLogoIcon.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/modules/solstice_tools.mod" afterPath="$PROJECT_DIR$/solstice_pipeline/modules/solstice_tools.mod" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/__init__.py" afterPath="$PROJECT_DIR$/solstice_launcher/solstice_artella_utils.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/externals/Qt.py" afterPath="$PROJECT_DIR$/solstice_pipeline/externals/Qt.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/vendor/__init__.py" afterPath="$PROJECT_DIR$/solstice_launcher/solstice_config.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/externals/solstice_studiolibrary/packages/solstice_studioqt/widgets/__init__.py" afterPath="$PROJECT_DIR$/solstice_launcher/solstice_console.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_flipButton.py" afterPath="$PROJECT_DIR$/solstice_launcher/solstice_download_utils.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_keyButton.py" afterPath="$PROJECT_DIR$/solstice_launcher/solstice_environment.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_mirrorButton.py" afterPath="$PROJECT_DIR$/solstice_launcher/solstice_updater.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_pinButton.py" afterPath="$PROJECT_DIR$/solstice_pipeline/resources/solstice_resource.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/solstice_animation/__init__.py" afterPath="$PROJECT_DIR$/solstice_pipeline/externals/__init__.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/__init__.py" afterPath="$PROJECT_DIR$/solstice_pipeline/resources/__init__.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/solstice_wrappers/solstice_listWidget.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/solstice_wrappers/solstice_mainWindow.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/scripts/solstice_wrappers/solstice_pushButton.py" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/solstice_tools/settings.json" afterPath="$PROJECT_DIR$/solstice_pipeline/settings.json" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -15,6 +421,9 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/solstice$Python27.coverage" NAME="Python27 Coverage Results" MODIFIED="1524004659139" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/solstice_launcher" />
+  </component>
   <component name="FileColors">
     <fileColor scope="Non-Project Files (Material Default)" color="2E3C43" />
     <fileColor scope="Non-Project Files (Material Darker)" color="323232" />
@@ -22,123 +431,29 @@
     <fileColor scope="Non-Project Files (Material Palenight)" color="2f2e43" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.8713487">
+    <splitter split-orientation="horizontal" split-proportion="0.4922312">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="solstice_summerPicker.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py">
+          <file leaf-file-name="solstice_pipelinizer.py" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_pipelinizer.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1869">
-                  <caret line="97" column="0" lean-forward="false" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
+                <state relative-caret-position="23">
+                  <caret line="162" column="27" lean-forward="true" selection-start-line="162" selection-start-column="27" selection-end-line="162" selection-end-column="27" />
                   <folding>
-                    <element signature="e#766#775#0" expanded="true" />
+                    <element signature="e#400#409#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="solstice_snowcreator.py" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_snowcreator.py">
+          <file leaf-file-name="solstice_artella_classes.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_classes.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1827">
-                  <caret line="87" column="57" lean-forward="false" selection-start-line="87" selection-start-column="57" selection-end-line="87" selection-end-column="57" />
+                <state relative-caret-position="100">
+                  <caret line="72" column="0" lean-forward="true" selection-start-line="72" selection-start-column="0" selection-end-line="72" selection-end-column="0" />
                   <folding>
-                    <element signature="e#718#742#0" expanded="true" />
+                    <element signature="e#416#425#0" expanded="true" />
                   </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="shelf_buttons.xml" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/shelf_buttons.xml">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="252">
-                  <caret line="12" column="17" lean-forward="false" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="17" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="userSetup.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/userSetup.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="210">
-                  <caret line="11" column="43" lean-forward="false" selection-start-line="11" selection-start-column="43" selection-end-line="11" selection-end-column="43" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_initializer.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_initializer.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="2499">
-                  <caret line="128" column="0" lean-forward="false" selection-start-line="128" selection-start-column="0" selection-end-line="128" selection-end-column="0" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="summerBodyPickerData.json" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerBodyPickerData.json">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1155">
-                  <caret line="786" column="26" lean-forward="false" selection-start-line="786" selection-start-column="21" selection-end-line="786" selection-end-column="26" />
-                  <folding>
-                    <element signature="n#!!block;n#head1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-                    <element signature="n#!!block;n#spine1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-                    <element signature="n#!!block;n#arm1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-                    <element signature="e#7792#8356#0" expanded="false" />
-                    <element signature="e#8405#8916#0" expanded="false" />
-                    <element signature="e#9455#10017#0" expanded="false" />
-                    <element signature="e#10061#13358#0" expanded="false" />
-                    <element signature="n#!!block;n#finger1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-                    <element signature="n#!!block;n#finger2#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-                    <element signature="n#!!block;n#finger3#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-                    <element signature="n#!!block;n#finger5#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_pickers.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_pickers.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="315">
-                  <caret line="17" column="38" lean-forward="false" selection-start-line="17" selection-start-column="38" selection-end-line="17" selection-end-column="38" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_picker.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_picker.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="714">
-                  <caret line="37" column="54" lean-forward="false" selection-start-line="37" selection-start-column="54" selection-end-line="37" selection-end-column="54" />
-                  <folding>
-                    <element signature="e#721#730#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_pickerWindow.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerWindow.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1995">
-                  <caret line="102" column="0" lean-forward="false" selection-start-line="102" selection-start-column="0" selection-end-line="102" selection-end-column="0" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_pickerView.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerView.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="672">
-                  <caret line="32" column="8" lean-forward="false" selection-start-line="32" selection-start-column="8" selection-end-line="32" selection-end-column="8" />
-                  <folding />
                 </state>
               </provider>
             </entry>
@@ -147,57 +462,37 @@
       </split-first>
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="solstice_main.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_main.py">
+          <file leaf-file-name="solstice_artella_utils.py" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_utils.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="399">
-                  <caret line="21" column="19" lean-forward="false" selection-start-line="21" selection-start-column="19" selection-end-line="21" selection-end-column="19" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/externals/solstice_studiolibrary/__init__.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1512">
-                  <caret line="73" column="62" lean-forward="false" selection-start-line="73" selection-start-column="49" selection-end-line="73" selection-end-column="62" />
+                <state relative-caret-position="441">
+                  <caret line="222" column="25" lean-forward="false" selection-start-line="222" selection-start-column="25" selection-end-line="222" selection-end-column="25" />
                   <folding>
-                    <element signature="e#707#716#0" expanded="true" />
+                    <element signature="e#414#423#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="mayalibrarywidget.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/mayalibrarywidget.py">
+          <file leaf-file-name="solstice_python_utils.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_python_utils.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="357">
-                  <caret line="23" column="72" lean-forward="false" selection-start-line="23" selection-start-column="50" selection-end-line="23" selection-end-column="72" />
+                <state relative-caret-position="737">
+                  <caret line="38" column="12" lean-forward="false" selection-start-line="38" selection-start-column="12" selection-end-line="38" selection-end-column="12" />
                   <folding>
-                    <element signature="e#650#661#0" expanded="true" />
+                    <element signature="e#360#369#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="librarywidget.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/externals/solstice_studiolibrary/librarywidget.py">
+          <file leaf-file-name="solstice_maya_utils.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_maya_utils.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="9240">
-                  <caret line="451" column="0" lean-forward="false" selection-start-line="451" selection-start-column="0" selection-end-line="451" selection-end-column="0" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_tagger.py" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_tagger.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="21">
-                  <caret line="70" column="37" lean-forward="false" selection-start-line="70" selection-start-column="37" selection-end-line="70" selection-end-column="37" />
+                <state relative-caret-position="1806">
+                  <caret line="87" column="35" lean-forward="false" selection-start-line="87" selection-start-column="35" selection-end-line="87" selection-end-column="35" />
                   <folding>
-                    <element signature="e#726#735#0" expanded="true" />
+                    <element signature="e#393#416#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -216,36 +511,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>_select_control</find>
-      <find>Could not</find>
-      <find>getMirrorC</find>
-      <find>parent</find>
-      <find>mirror</find>
-      <find>mirrorControl</find>
-      <find>Executing comma</find>
-      <find>_getButtonControl</find>
-      <find>Charater</find>
-      <find>MAIN</find>
-      <find>Settings</find>
-      <find>Reload</find>
-      <find>EYES</find>
-      <find>expanduser</find>
-      <find>from solstice_tools.scripts</find>
-      <find>from solstice_tools.scripts.</find>
-      <find>setup.json</find>
-      <find>full</find>
-      <find>solstice_summerBodyTab</find>
-      <find>GLOBAL</find>
-      <find>is not created</find>
-      <find>maya_path</find>
-      <find>solstic</find>
-      <find>QTabW</find>
-      <find>IK</find>
-      <find>import solstice_initi</find>
       <find>updateSolsticeProject</find>
       <find>solstice_initializer</find>
       <find>runAtMayaStart</find>
       <find>setPath</find>
+      <find>spigot</find>
+      <find>__path__</find>
+      <find>buil</find>
+      <find>build</find>
+      <find>get_maya_versions_executable_mapping_from_path</find>
+      <find>logger.debug</find>
+      <find>sp.</find>
+      <find>bin</find>
+      <find>create_config</find>
+      <find>close_all_artel</find>
+      <find>self._console</find>
+      <find>logger.</find>
+      <find>ERROR</find>
+      <find>updater.self</find>
+      <find>QMessageBox.information</find>
+      <find>chunk_report</find>
+      <find>def</find>
+      <find>console</find>
+      <find>logger</find>
+      <find>get_system_config_directory</find>
+      <find>get_syst</find>
+      <find>config.get</find>
+      <find>confi</find>
+      <find>def traverse_path_for_valid_application_paths(self, top_path):</find>
+      <find>traverse_path_for_valid_application_paths</find>
+      <find>UPDATE_ARTELLA_PATHS</find>
     </findStrings>
     <replaceStrings>
       <replace>from</replace>
@@ -261,57 +556,57 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_texturesRelinker.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/update_utils.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/__init__.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_main.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_keySpaceSwitchButton.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_spaceSwitchButton.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/__init__.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerBodyPicker.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_gui/solstice_mainWindow.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerView.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_fkIkSwitcherButton.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_wrappers/solstice_mainWindow.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_selectButton.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_commandButton.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerScene.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_picker.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_pipeline/solstice_tools_deployer_utils.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_pipeline/solstice_tools_installer.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_update_utils.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_selectionCreator.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerUtils.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_moduleButton.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_gimbalButton.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_toggleButton.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerFacialPickerData.json" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_updater.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/__init__.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_updater_ui.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_pipeline/solstice_tools_deployer.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerWindow.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/solstice_winterBodyPicker.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/solstice_winterFacialPicker.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/__init__.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/__init__.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/solstice_winterPicker.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerCommands.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_pipeline/solstice_tools_local_installer.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/__init__.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/springPicker/__init__.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerBaseButton.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/userSetup.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_assetmanager.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_instanciator.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerBodyPickerData.json" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/data/winterBodyPickerData.json" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_pickers.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/externals/solstice_studiolibrary/librarywidget.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_initializer.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py" />
-        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_config/shelf_buttons.xml" />
         <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_snowcreator.py" />
+        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_scatter.py" />
+        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_assetmanager.py" />
+        <option value="$PROJECT_DIR$/solstice_tools/scripts/solstice_pipeline/solstice_pipeline.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/modules/solstice_tools.mod" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_utilities/solstice_qt.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_utilities/solstice_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_utilities/solstice_qt_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_utilities/solstice_maya_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_pipeline/solstice_pipeline.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/gui/__init__.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_gui/__init__.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/utils/solstice_maya_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/utils/solstice_qt_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/utils/solstice_logger.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_utils/__init__.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice.log" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_utils/logger.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_utils/solstice_logger.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_managers/solstice_window_manager.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_utils/solstice_qt_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_gui/solstice_windows.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_tools/solstice_pipelinizer.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/scripts/solstice_utils/solstice_artella_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/__init__.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_launcher.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/utils.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/solstice_artella_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/solstice_download_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/solstice_updater.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/solstice_environment.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/solstice_maya.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/solstice_console.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/solstice_config.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/solstice_launcher_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/solstice_launcher.py" />
+        <option value="$PROJECT_DIR$/solstice_launcher/solstice_maya_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_maya_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_color.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_pixmap.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_icon.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/resources/solstice_resource.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_python_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_containerwidget.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_grid.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_assetviewer.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_user.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_asset.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_classes.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_utils.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_pipelinizer.py" />
       </list>
     </option>
   </component>
@@ -320,6 +615,13 @@
   <component name="JsGulpfileManager">
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="LogFilters">
+    <option name="FILTER_ERRORS" value="false" />
+    <option name="FILTER_WARNINGS" value="false" />
+    <option name="FILTER_INFO" value="true" />
+    <option name="FILTER_DEBUG" value="true" />
+    <option name="CUSTOM_FILTER" />
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-8" />
@@ -345,7 +647,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -356,47 +657,44 @@
             <path>
               <item name="solstice" type="b2602c69:ProjectViewProjectNode" />
               <item name="solstice" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_tools" type="462c0819:PsiDirectoryNode" />
+              <item name="solstice_pipeline" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="solstice" type="b2602c69:ProjectViewProjectNode" />
               <item name="solstice" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_tools" type="462c0819:PsiDirectoryNode" />
-              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+              <item name="solstice_pipeline" type="462c0819:PsiDirectoryNode" />
+              <item name="solstice_utils" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="solstice" type="b2602c69:ProjectViewProjectNode" />
-              <item name="solstice" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_tools" type="462c0819:PsiDirectoryNode" />
-              <item name="scripts" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_config" type="462c0819:PsiDirectoryNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
             </path>
             <path>
               <item name="solstice" type="b2602c69:ProjectViewProjectNode" />
-              <item name="solstice" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_tools" type="462c0819:PsiDirectoryNode" />
-              <item name="scripts" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_utilities" type="462c0819:PsiDirectoryNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="&lt; Maya 2017 &gt;" type="70bed36:NamedLibraryElementNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scratches" />
       <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/solstice_tools/scripts" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/solstice_launcher/solstice_launcher.py" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/solstice/solstice_pipeline/solstice_tools/solstice_pipelinizer.py" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\solstice\solstice_tools" />
-      <recent name="E:\Solstice\solstice\solstice_tools\solstice_tools\scripts\solstice_utilities" />
-      <recent name="E:\Solstice\solstice\solstice_tools\solstice_tools\scripts\solstice_config" />
-      <recent name="E:\Solstice\solstice\solstice_tools\solstice_tools\scripts" />
-      <recent name="E:\Solstice\solstice\solstice_tools\solstice_tools\scripts\pickers\picker" />
+      <recent name="D:\solstice\solstice_launcher" />
+      <recent name="D:\solstice\solstice_pipeline" />
+      <recent name="D:\solstice\solstice_pipeline\scripts" />
+      <recent name="D:\solstice\solstice_pipeline\scripts\solstice_tools" />
+      <recent name="D:\solstice\solstice_pipeline\images" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -411,10 +709,11 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="MayaCharm Debugger.Maya 2017">
     <configuration name="Maya 2017" type="MAYACHARM_DEBUG_CONFIGURATION" factoryName="MayaCharm Debug Config Factory">
-      <option name="ScriptFilePath" value="" />
+      <option name="ScriptFilePath" value="D:\solstice\solstice_launcher\solstice_launcher.py" />
       <option name="ScriptCodeText" value="" />
+      <option name="ExecutionType" value="FILE" />
       <option name="Host" value="" />
       <option name="Port" value="60059" />
       <option name="IsRedirectOutput" value="true" />
@@ -427,6 +726,25 @@
       <option name="Port" value="60059" />
       <option name="IsRedirectOutput" value="true" />
       <option name="IsSuspend" value="true" />
+    </configuration>
+    <configuration name="Python27" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Python27\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/solstice_launcher" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="solstice" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/solstice_launcher/solstice_launcher.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
     </configuration>
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -493,6 +811,10 @@
       <option name="_new_target" value="&quot;.&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
     </configuration>
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="MayaCharm Debugger.Maya 2017" />
+      <item index="1" class="java.lang.String" itemvalue="Python.Python27" />
+    </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
@@ -516,19 +838,19 @@
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297414" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.14224137" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32979852" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16197917" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
-      <window_info id="Maya Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Maya Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32979852" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32343584" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Key Promoter X" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.45387062" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Key Promoter X" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -536,17 +858,57 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32873806" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
     </layout>
+    <layout-to-restore>
+      <window_info id="Key Promoter X" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297414" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.14224137" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32979852" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16197917" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="Maya Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32979852" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32873806" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.45387062" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+    </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.log" />
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/solstice_pipeline/scripts/solstice_managers/solstice_window_manager.py</url>
+          <line>39</line>
+          <option name="timeStamp" value="71" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/solstice_launcher/solstice_maya_utils.py</url>
+          <line>51</line>
+          <option name="timeStamp" value="101" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -554,382 +916,452 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="45" />
+      <option name="time" value="111" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="MAYACHARM_DEBUG_CONFIGURATION">
-        <watch expression="self._control" language="Python" />
-        <watch expression="self.objectName()" language="Python" />
+        <watch expression="mod" language="Python" />
+        <watch expression="mod.__file__" language="Python" />
+        <watch expression="pkgutil.iter_modules(os.path.dirname(mod.__file__))" language="Python" />
+        <watch expression="os.path.dirname(os.path.abspath(__file__))" language="Python" />
+      </configuration>
+      <configuration name="PythonConfigurationType">
+        <watch expression="config.get(cfg.SolsticeConfig.INSTALL)" language="Python" />
       </configuration>
     </watches-manager>
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="watch">
       <expression>
-        <expression-string>self.objectName()</expression-string>
+        <expression-string>os.path.dirname(os.path.abspath(__file__))</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>os.path.join(self.dirname(), *args)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>config.get(cfg.SolsticeConfig.INSTALL)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>pkgutil.iter_modules(os.path.dirname(mod.__file__))</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>mod.__file__</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>mod.__path__</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>mod</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>w.objectName()</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>w.objectName() == window.objectName()</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>window.objectName()</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerButtons/solstice_toggleButton.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="21" column="28" lean-forward="false" selection-start-line="21" selection-start-column="28" selection-end-line="21" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerFacialPickerData.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1230">
-          <caret line="958" column="74" lean-forward="false" selection-start-line="958" selection-start-column="74" selection-end-line="958" selection-end-column="74" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_pipeline/solstice_tools_installer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="29" column="39" lean-forward="false" selection-start-line="29" selection-start-column="39" selection-end-line="29" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_updater_ui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="18" column="9" lean-forward="false" selection-start-line="18" selection-start-column="9" selection-end-line="18" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_pipeline/solstice_tools_deployer_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1572">
-          <caret line="89" column="20" lean-forward="false" selection-start-line="89" selection-start-column="20" selection-end-line="89" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_updater.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="12" column="53" lean-forward="false" selection-start-line="12" selection-start-column="32" selection-end-line="12" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/solstice_winterFacialTab.py" />
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerBodyPicker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
-          <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/solstice_winterFacialPicker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="567">
-          <caret line="27" column="45" lean-forward="false" selection-start-line="27" selection-start-column="45" selection-end-line="27" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/solstice_winterBodyPicker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="567">
-          <caret line="27" column="48" lean-forward="false" selection-start-line="27" selection-start-column="48" selection-end-line="27" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerBodyTab.py" />
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/solstice_winterBodyTab.py" />
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="7" column="33" lean-forward="true" selection-start-line="7" selection-start-column="33" selection-end-line="7" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="7" column="25" lean-forward="false" selection-start-line="7" selection-start-column="25" selection-end-line="7" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerFacialPicker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="9" column="29" lean-forward="false" selection-start-line="9" selection-start-column="29" selection-end-line="9" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/data/summerFacialPickerData.json" />
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/solstice_winterPicker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1764">
-          <caret line="90" column="0" lean-forward="false" selection-start-line="90" selection-start-column="0" selection-end-line="90" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_pipeline/solstice_tools_deployer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2163">
-          <caret line="115" column="24" lean-forward="false" selection-start-line="115" selection-start-column="24" selection-end-line="115" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_update_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2457">
-          <caret line="125" column="75" lean-forward="false" selection-start-line="123" selection-start-column="4" selection-end-line="125" selection-end-column="75" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_pipeline/solstice_tools_local_installer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="26" column="34" lean-forward="false" selection-start-line="26" selection-start-column="34" selection-end-line="26" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/springPicker/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="1" column="8" lean-forward="false" selection-start-line="1" selection-start-column="8" selection-end-line="1" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="13" column="26" lean-forward="false" selection-start-line="13" selection-start-column="26" selection-end-line="13" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerCommands.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="609">
-          <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="7" column="26" lean-forward="true" selection-start-line="7" selection-start-column="26" selection-end-line="7" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="41" column="41" lean-forward="false" selection-start-line="41" selection-start-column="25" selection-end-line="41" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerColors.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp7514860478677061512.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/__init__.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3215256334809158382.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerBaseButton.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp7081891071379420237.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="18" column="31" lean-forward="false" selection-start-line="18" selection-start-column="31" selection-end-line="18" selection-end-column="31" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/spigot.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp2331263871712526612.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="101">
-          <caret line="30" column="0" lean-forward="false" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerUtils.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3157929998115310033.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4557">
-          <caret line="221" column="57" lean-forward="false" selection-start-line="221" selection-start-column="41" selection-end-line="221" selection-end-column="57" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_assetmanager.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp1116214701554095598.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="840">
-          <caret line="42" column="51" lean-forward="false" selection-start-line="42" selection-start-column="51" selection-end-line="42" selection-end-column="51" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_instanciator.py">
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_qt_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="567">
-          <caret line="29" column="76" lean-forward="false" selection-start-line="29" selection-start-column="76" selection-end-line="29" selection-end-column="76" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="8" selection-end-column="72" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/winterPicker/data/winterBodyPickerData.json">
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_windows.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="436">
-          <caret line="832" column="20" lean-forward="false" selection-start-line="832" selection-start-column="20" selection-end-line="832" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerView.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="672">
-          <caret line="32" column="8" lean-forward="false" selection-start-line="32" selection-start-column="8" selection-end-line="32" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_pickerWindow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1995">
-          <caret line="102" column="0" lean-forward="false" selection-start-line="102" selection-start-column="0" selection-end-line="102" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/externals/studiolibrary/__init__.py" />
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/externals/studiolibrary/librarywidget.py" />
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/picker/solstice_picker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="714">
-          <caret line="37" column="54" lean-forward="false" selection-start-line="37" selection-start-column="54" selection-end-line="37" selection-end-column="54" />
+        <state relative-caret-position="-450">
+          <caret line="45" column="18" lean-forward="true" selection-start-line="45" selection-start-column="18" selection-end-line="45" selection-end-column="18" />
           <folding>
-            <element signature="e#721#730#0" expanded="true" />
+            <element signature="e#371#385#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_pickers.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp8477703423853247960.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3262258583472682530.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Autodesk/Maya2017/bin/python27.zip!/ntpath.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="211">
+          <caret line="115" column="0" lean-forward="false" selection-start-line="115" selection-start-column="0" selection-end-line="115" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp4256915789803078658.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/scripts/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/solstice_maya_utils.py" />
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_logger.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="576">
+          <caret line="45" column="63" lean-forward="false" selection-start-line="45" selection-start-column="63" selection-end-line="45" selection-end-column="63" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/redisServer.dump.json" />
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/solstice_artella_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2751">
+          <caret line="140" column="69" lean-forward="false" selection-start-line="140" selection-start-column="69" selection-end-line="140" selection-end-column="69" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/solstice_download_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1051">
+          <caret line="22" column="15" lean-forward="false" selection-start-line="22" selection-start-column="15" selection-end-line="22" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Python27/Lib/ConfigParser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="196">
+          <caret line="373" column="0" lean-forward="false" selection-start-line="373" selection-start-column="0" selection-end-line="373" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/pathlib2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="1188" column="0" lean-forward="false" selection-start-line="1188" selection-start-column="0" selection-end-line="1188" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/solstice_console.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1030">
+          <caret line="21" column="0" lean-forward="false" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/solstice_launcher_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3192">
+          <caret line="164" column="8" lean-forward="false" selection-start-line="164" selection-start-column="8" selection-end-line="164" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/solstice_maya_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="966">
+          <caret line="46" column="20" lean-forward="false" selection-start-line="46" selection-start-column="20" selection-end-line="46" selection-end-column="20" />
+          <folding>
+            <element signature="e#390#407#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/solstice_config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="457">
+          <caret line="107" column="0" lean-forward="false" selection-start-line="107" selection-start-column="0" selection-end-line="107" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/solstice_updater.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="315">
-          <caret line="17" column="38" lean-forward="false" selection-start-line="17" selection-start-column="38" selection-end-line="17" selection-end-column="38" />
-          <folding />
+          <caret line="24" column="19" lean-forward="false" selection-start-line="24" selection-start-column="6" selection-end-line="24" selection-end-column="19" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/data/summerBodyPickerData.json">
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/solstice_environment.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1155">
-          <caret line="786" column="26" lean-forward="false" selection-start-line="786" selection-start-column="21" selection-end-line="786" selection-end-column="26" />
+        <state relative-caret-position="-2231">
+          <caret line="91" column="14" lean-forward="false" selection-start-line="91" selection-start-column="8" selection-end-line="91" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_maya_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1806">
+          <caret line="87" column="35" lean-forward="false" selection-start-line="87" selection-start-column="35" selection-end-line="87" selection-end-column="35" />
           <folding>
-            <element signature="n#!!block;n#head1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="n#!!block;n#spine1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="n#!!block;n#arm1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="e#7792#8356#0" expanded="false" />
-            <element signature="e#8405#8916#0" expanded="false" />
-            <element signature="e#9455#10017#0" expanded="false" />
-            <element signature="e#10061#13358#0" expanded="false" />
-            <element signature="n#!!block;n#finger1#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="n#!!block;n#finger2#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="n#!!block;n#finger3#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
-            <element signature="n#!!block;n#finger5#0;n#!!block;n#parts#0;n#!!block;n#pickerButtons#0;n#!!top" expanded="false" />
+            <element signature="e#393#416#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://C:/Program Files/Autodesk/Maya2017/devkit/other/pymel/extras/completion/py/PySide2/QtWidgets.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3555238740900309252.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="10924" column="8" lean-forward="false" selection-start-line="10924" selection-start-column="8" selection-end-line="10924" selection-end-column="8" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3220619196213359077.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_launcher/solstice_launcher.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="195" column="16" lean-forward="false" selection-start-line="195" selection-start-column="16" selection-end-line="195" selection-end-column="16" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/externals/solstice_studiolibrary/__init__.py">
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_managers/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/resources/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1512">
-          <caret line="73" column="62" lean-forward="false" selection-start-line="73" selection-start-column="49" selection-end-line="73" selection-end-column="62" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_color.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1344">
+          <caret line="64" column="0" lean-forward="true" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_pixmap.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="268">
+          <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
           <folding>
-            <element signature="e#707#716#0" expanded="true" />
+            <element signature="e#377#399#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/externals/solstice_studiolibrary/packages/solstice_studiolibrarymaya/mayalibrarywidget.py">
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_icon.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="23" column="72" lean-forward="false" selection-start-line="23" selection-start-column="50" selection-end-line="23" selection-end-column="72" />
+        <state relative-caret-position="315">
+          <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
           <folding>
-            <element signature="e#650#661#0" expanded="true" />
+            <element signature="e#398#420#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/externals/solstice_studiolibrary/librarywidget.py">
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9240">
-          <caret line="451" column="0" lean-forward="false" selection-start-line="451" selection-start-column="0" selection-end-line="451" selection-end-column="0" />
+        <state relative-caret-position="667">
+          <caret line="43" column="13" lean-forward="false" selection-start-line="40" selection-start-column="51" selection-end-line="43" selection-end-column="13" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/userSetup.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp4620511277483075826.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="11" column="43" lean-forward="false" selection-start-line="11" selection-start-column="43" selection-end-line="11" selection-end-column="43" />
-          <folding />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_initializer.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3405182319509422561.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2499">
-          <caret line="128" column="0" lean-forward="false" selection-start-line="128" selection-start-column="0" selection-end-line="128" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/pickers/summerPicker/solstice_summerPicker.py">
+    <entry file="jar://C:/Program Files/Autodesk/Maya2017/bin/python27.zip!/atexit.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1869">
-          <caret line="97" column="0" lean-forward="false" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
+        <state relative-caret-position="157">
+          <caret line="36" column="0" lean-forward="false" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3095948695128136332.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/resources/solstice_resource.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="155">
+          <caret line="103" column="0" lean-forward="false" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
           <folding>
-            <element signature="e#766#775#0" expanded="true" />
+            <element signature="e#377#386#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/solstice_main.py">
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_python_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="21" column="19" lean-forward="false" selection-start-line="21" selection-start-column="19" selection-end-line="21" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_tagger.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="70" column="37" lean-forward="false" selection-start-line="70" selection-start-column="37" selection-end-line="70" selection-end-column="37" />
+        <state relative-caret-position="737">
+          <caret line="38" column="12" lean-forward="false" selection-start-line="38" selection-start-column="12" selection-end-line="38" selection-end-column="12" />
           <folding>
-            <element signature="e#726#735#0" expanded="true" />
+            <element signature="e#360#369#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_config/shelf_buttons.xml">
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_image_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_containerwidget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="924">
+          <caret line="44" column="47" lean-forward="true" selection-start-line="44" selection-start-column="47" selection-end-line="44" selection-end-column="47" />
+          <folding>
+            <element signature="e#384#407#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_grid.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="966">
+          <caret line="46" column="0" lean-forward="true" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
+          <folding>
+            <element signature="e#386#409#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_assetviewer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
-          <caret line="12" column="17" lean-forward="false" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="17" />
+          <caret line="12" column="0" lean-forward="true" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_tools/scripts/solstice_utilities/solstice_snowcreator.py">
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_asset.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1827">
-          <caret line="87" column="57" lean-forward="false" selection-start-line="87" selection-start-column="57" selection-end-line="87" selection-end-column="57" />
+        <state relative-caret-position="289">
+          <caret line="19" column="35" lean-forward="true" selection-start-line="19" selection-start-column="35" selection-end-line="19" selection-end-column="35" />
           <folding>
-            <element signature="e#718#742#0" expanded="true" />
+            <element signature="e#394#417#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_user.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="205">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding>
+            <element signature="e#372#395#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="441">
+          <caret line="222" column="25" lean-forward="false" selection-start-line="222" selection-start-column="25" selection-end-line="222" selection-end-column="25" />
+          <folding>
+            <element signature="e#414#423#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_classes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="100">
+          <caret line="72" column="0" lean-forward="true" selection-start-line="72" selection-start-column="0" selection-end-line="72" selection-end-column="0" />
+          <folding>
+            <element signature="e#416#425#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_pipelinizer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="23">
+          <caret line="162" column="27" lean-forward="true" selection-start-line="162" selection-start-column="27" selection-end-line="162" selection-end-column="27" />
+          <folding>
+            <element signature="e#400#409#0" expanded="true" />
           </folding>
         </state>
       </provider>
