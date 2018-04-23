@@ -219,3 +219,15 @@ def create_qrc_file(src_paths, dst_file):
             f.close()
         except RuntimeError:
             f.close()
+
+
+def safe_delete_later(widget):
+    """
+    Calsl the deleteLater method on the given widget, but only
+    in the necessary Qt environment
+    :param widget: QWidget
+    """
+
+    from Qt import __binding__
+    if __binding__ in ('PySide', 'PyQt4'):
+        widget.deleteLater()

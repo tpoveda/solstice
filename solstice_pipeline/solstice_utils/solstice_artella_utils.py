@@ -215,19 +215,25 @@ def get_status(filepath):
     :return: str
     """
 
-    if os.path.exists(filepath):
-        uri = get_cms_uri(filepath)
+    uri = get_cms_uri(filepath)
 
-        spigot = get_spigot_client()
-        rsp = spigot.execute(command_action='do', command_name='status', payload=uri)
-        if isinstance(rsp, basestring):
-            rsp = json.loads(rsp)
+    spigot = get_spigot_client()
+    rsp = spigot.execute(command_action='do', command_name='status', payload=uri)
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
 
-        status_metadata = classes.ArtellaStatusMetaData(metadata_path=filepath, status_dict=rsp)
+    if 'data' in rsp:
+        if '_latest'in rsp['data']:
+            status_metadata = classes.ArtellaAssetMetaData(metadata_path=filepath, status_dict=rsp)
+            return status_metadata
 
-        return status_metadata
+        status_metadata = classes.ArtellaDirectoryMetaData(metadata_path=filepath, status_dict=rsp)
+    else:
+        status_metadata = classes.ArtellaHeaderMetaData(header_dict=rsp['meta'])
 
-    # return artella.getStatus(filepath)
+    return status_metadata
+
+# return artella.getStatus(filepath)
 
 
 def get_cms_uri_current_file():

@@ -12,6 +12,7 @@ import os
 import ast
 from tempfile import mkstemp
 from shutil import move
+import json
 
 
 iters = [list, tuple, set, frozenset]
@@ -122,3 +123,50 @@ def strips(text, remove):
         'bar'
     """
     return rstrips(lstrips(text, remove), remove)
+
+
+def get_folders_from_path(path):
+    """
+    Gets a list of sub folders in the given path
+    :param path: str
+    :return: list<str>
+    """
+
+    folders = list()
+    while True:
+        path, folder = os.path.split(path)
+        if folder != '':
+            folders.append(folder)
+        else:
+            if path != '':
+                folders.append(path)
+            break
+    folders.reverse()
+
+    return folders
+
+
+def read_json(filename):
+    """
+    Loads data of JSON as dict
+    :param filename: str, name of the JSON file to load
+    """
+
+    data = dict()
+    if os.path.exists(filename):
+        with open(filename, 'r') as f:
+            data = json.load(f)
+    return data
+
+
+def write_json(filename, data):
+    """
+    Writes data into JSON file
+    :param filename: str, name of the JSON file to write
+    :param data: str, data to write into JSON file
+    """
+
+    if not data:
+        return
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=4)

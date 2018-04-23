@@ -11,6 +11,8 @@
 import os
 
 import pathlib2
+import treelib
+
 from Qt.QtCore import *
 from Qt.QtWidgets import *
 
@@ -20,6 +22,7 @@ from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_
 from resources import solstice_resource
 
 from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_browser_utils
+from solstice_gui import solstice_label, solstice_breadcrumb, solstice_navigationwidget, solstice_filelistwidget
 
 
 class Pipelinizer(solstice_windows.Window, object):
@@ -34,7 +37,7 @@ class Pipelinizer(solstice_windows.Window, object):
 
         self._projects = None
         super(Pipelinizer, self).__init__(name=name, parent=parent, **kwargs)
-        self.load_projects()
+        # self.load_projects()
 
     def custom_ui(self):
         super(Pipelinizer, self).custom_ui()
@@ -46,6 +49,7 @@ class Pipelinizer(solstice_windows.Window, object):
         self.main_layout.addLayout(title_layout)
 
         self.logo_view = QGraphicsView()
+        self.logo_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.logo_view.setMaximumHeight(100)
         logo_scene = QGraphicsScene()
         logo_scene.setSceneRect(QRectF(0, 0, 2000, 100))
@@ -64,10 +68,11 @@ class Pipelinizer(solstice_windows.Window, object):
         user_icon.move(1100, 0)
         user_icon.setStyleSheet("QWidget{background: transparent;}");
         logo_scene.addWidget(user_icon)
-
+        #
         title_layout.addWidget(self.logo_view)
 
         top_menu_layout = QGridLayout()
+        top_menu_layout.setAlignment(Qt.AlignTop)
         self.main_layout.addLayout(top_menu_layout)
         artella_project_btn = QToolButton()
         artella_project_btn.setText('Artella')
@@ -80,16 +85,8 @@ class Pipelinizer(solstice_windows.Window, object):
         top_menu_layout.addWidget(project_folder_btn, 0, 1, 1, 1, Qt.AlignCenter)
         top_menu_layout.addWidget(settings_btn, 0, 2, 1, 1, Qt.AlignCenter)
 
-        top_layout = QHBoxLayout()
-        top_layout.setContentsMargins(2, 2, 2, 2)
-        top_layout.setSpacing(2)
-        self._projects_btn = QPushButton('No Project')
-        self._projects_btn.setMinimumHeight(30)
-        self._projects_btn.setMenu(None)
-        top_layout.addWidget(self._projects_btn)
-        self.main_layout.addLayout(top_layout)
-
         tab_widget = QTabWidget()
+        tab_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         tab_widget.setMinimumHeight(330)
         self.main_layout.addWidget(tab_widget)
 
@@ -122,15 +119,20 @@ class Pipelinizer(solstice_windows.Window, object):
         categories_menu.setLayout(categories_menu_layout)
         main_categories_menu_layout.addWidget(categories_menu)
 
-        self._asset_viewer = solstice_assetviewer.AssetViewer()
+        self._asset_viewer = solstice_assetviewer.AssetViewer(assets_path=self.get_solstice_assets_path())
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         main_categories_menu_layout.addWidget(self._asset_viewer)
 
+        categories_btn_group = QButtonGroup(self)
+        categories_btn_group.setExclusive(True)
         categories = ['All', 'Background Elements', 'Characters', 'Props', 'Sets']
         categories_buttons = dict()
         for category in categories:
-            categories_buttons[category] = QPushButton(category)
-            categories_menu_layout.addWidget(categories_buttons[category])
+            new_btn = QPushButton(category)
+            categories_buttons[category] = new_btn
+            categories_buttons[category].setCheckable(True)
+            categories_menu_layout.addWidget(new_btn)
+            categories_btn_group.addButton(new_btn)
 
         # ================== Asset Viewer Widget
         asset_viewer_splitter = QSplitter(Qt.Horizontal)
@@ -140,7 +142,7 @@ class Pipelinizer(solstice_windows.Window, object):
         artella_server_layout = QHBoxLayout()
         artella_server_layout.setContentsMargins(0, 0, 0, 0)
         artella_server_layout.setSpacing(0)
-        artella_server_layout.setAlignment(Qt.AlignTop)
+        # artella_server_layout.setAlignment(Qt.AlignTop)
         artella_server_widget.setLayout(artella_server_layout)
         artella_server_browser = solstice_assetbrowser.AssetBrowser(title='Artella Server Data')
         artella_server_layout.addWidget(artella_server_browser)
@@ -150,37 +152,56 @@ class Pipelinizer(solstice_windows.Window, object):
         local_data_layout = QHBoxLayout()
         local_data_layout.setContentsMargins(0, 0, 0, 0)
         local_data_layout.setSpacing(0)
-        local_data_layout.setAlignment(Qt.AlignTop)
+        # local_data_layout.setAlignment(Qt.AlignTop)
         local_data_widget.setLayout(local_data_layout)
-        local_data_browser = solstice_assetbrowser.AssetBrowser(title='       Local Data      ')
+        local_data_browser = solstice_assetbrowser.AssetBrowser(title='       Local Data      ', root_path=self.get_solstice_assets_path())
         local_data_layout.addWidget(local_data_browser)
         asset_viewer_splitter.addWidget(local_data_widget)
 
         # =================================================================================================
 
-        self.get_assets_by_category()
+        #self.get_assets_by_category()
 
-    def get_assets_by_category(self, category='Sets//S_BG_01_gardenWinter_SnowHigh'):
+    def get_assets_by_category(self, category='Characters', only_assets=True):
         """
         Gets a list of assets of a specific category
         :param category: str
+        :param only_assets: bool
         :return: list<str>
         """
 
-        ppath = self.get_solstice_assets_path()
-        status = solstice_artella_utils.get_status(ppath)
+        assets_path = self.get_solstice_assets_path()
+        chars_path = os.path.join(assets_path, category)
+        st = solstice_artella_utils.get_status(chars_path)
 
-        for ref_name, ref_data in status.references.items():
-            print(ref_name)
+        tree = treelib.Tree()
+        root = tree.create_node(chars_path, data=st)
 
+        def get_assets(parent_node):
+            if hasattr(parent_node.data, 'references'):
+                for ref_name, ref_data in parent_node.data.references.items():
+                    status = solstice_artella_utils.get_status(ref_data.path)
+                    if type(status) == solstice_artella_classes.ArtellaDirectoryMetaData:
+                        node=tree.create_node(ref_data.path, parent=parent_node, data=status)
+                        get_assets(parent_node=node)
+                    elif type(status) == solstice_artella_classes.ArtellaAssetMetaData:
+                        working_path = os.path.join(ref_data.path, '__working__')
+                        status = solstice_artella_utils.get_status(working_path)
+                        node = tree.create_node(ref_data.path, parent=parent_node, data=status)
+                        if not only_assets:
+                            get_assets(parent_node=node)
+                    else:
+                        tree.create_node(ref_data.path, parent=parent_node, data=status)
 
-        # solstice_assets_path = self.get_solstice_assets_path()
+        get_assets(root)
+        tree.show()
+        return tree
+
         # category_folder = os.path.join(solstice_assets_path, category)
         # if not os.path.exists(category_folder):
         #     # TODO: Add messagebox to answer the user if they want to syncrhonize the category folder
         #     print('Category folder does not exists! Trying to retrieve it!')
         #     solstice_artella_utils.synchronize_path(category_folder)
-
 
     def load_projects(self):
         self._projects_btn.setMenu(None)
@@ -214,8 +235,15 @@ class Pipelinizer(solstice_windows.Window, object):
         Returns Solstice Project path
         :return: str
         """
+        env_var = os.environ.get('SOLSTICE_PROJECT', None)
+        if env_var is None:
+            cls.update_solstice_project_path()
 
-        return os.environ.get('SOLSTICE_PROJECT', None)
+        env_var = os.environ.get('SOLSTICE_PROJECT', None)
+        if env_var is None:
+            raise RuntimeError('Solstice Project not setted up properly. Is Artella running? Contact TD!')
+
+        return os.environ.get('SOLSTICE_PROJECT')
 
     @classmethod
     def get_solstice_assets_path(cls):
@@ -258,6 +286,10 @@ def run():
     reload(solstice_asset)
     reload(solstice_assetviewer)
     reload(solstice_assetbrowser)
+    reload(solstice_label)
+    reload(solstice_breadcrumb)
+    reload(solstice_navigationwidget)
+    reload(solstice_filelistwidget)
 
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()

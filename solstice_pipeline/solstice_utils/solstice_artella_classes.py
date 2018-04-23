@@ -11,17 +11,23 @@
 
 import os
 import solstice_pipeline as sp
-import json
 
 
 class ArtellaHeaderMetaData(object):
     def __init__(self, header_dict):
 
-        self._content_length = header_dict['content_length']
-        self._date = header_dict['date']
-        self._status = header_dict['status']
-        self._content_type = header_dict['content_type']
+        self._container_uri = header_dict['container_uri'] if 'container_uri' in header_dict else None
+        self._content_length = header_dict['content_length'] if 'content_length' in header_dict else 0
+        self._date = header_dict['date'] if 'date' in header_dict else None
+        self._status = header_dict['status'] if 'status' in header_dict else None
+        self._content_type = header_dict['content_type'] if 'content_type' in header_dict else None
         self._type = header_dict['type']
+        self._file_path = header_dict['file_path'] if 'file_path' in header_dict else None
+        self._workspace_name = header_dict['workspace_name'] if 'workspace_name' in header_dict else None
+
+    @property
+    def container_uri(self):
+        return self._container_uri
 
     @property
     def content_length(self):
@@ -43,13 +49,45 @@ class ArtellaHeaderMetaData(object):
     def type(self):
         return self._type
 
+    @property
+    def file_path(self):
+        return self._file_path
+
+    @property
+    def workspace_name(self):
+        return self._workspace_name
+
+
+class ArtellaAssetMetaData(object):
+    def __init__(self, metadata_path, status_dict):
+
+        self._path = metadata_path
+        self._metadata_header = ArtellaHeaderMetaData(header_dict=status_dict['meta'])
+
+        self.__latest = status_dict['data']['_latest']
+        self._latest_ = status_dict['data']['latest']
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def _latest(self):
+        return self.__latest
+
+    @property
+    def latest(self):
+        return self._latest_
+
 
 class ArtellaReferencesMetaData(object):
     def __init__(self, ref_name, ref_path, ref_dict):
-
-        self._name = ref_name
+        self._name = ref_name.split('/')[-1]
         self._path = os.path.join(ref_path, ref_name)
-        self._is_directory = ref_dict['is_directory']
+
+        self._is_directory = ref_dict['is_directory'] if 'is_directory' in ref_dict else False
+        self._maximum_version = ref_dict['maximum_version'] if 'maximum_version' in ref_dict else None
+        self._relative_path = ref_dict['relative_path'] if 'relative_path' in ref_dict else None
 
     @property
     def name(self):
@@ -64,7 +102,7 @@ class ArtellaReferencesMetaData(object):
         return self._is_directory
 
 
-class ArtellaStatusMetaData(object):
+class ArtellaDirectoryMetaData(object):
     def __init__(self, metadata_path, status_dict):
 
         self._path = metadata_path
