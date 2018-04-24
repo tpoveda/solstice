@@ -17,6 +17,7 @@ import maya.cmds as cmds
 
 import solstice_pipeline as sp
 from solstice_utils import solstice_qt_utils, solstice_maya_utils
+from resources import solstice_resource
 
 
 def dock_window(window_class):
@@ -75,6 +76,37 @@ class Window(QMainWindow, object):
             self.main_layout.setSpacing(0)
             self.main_widget.setLayout(self.main_layout)
             self.setCentralWidget(self.main_widget)
+
+            title_layout = QHBoxLayout()
+            title_layout = QHBoxLayout()
+            title_layout.setContentsMargins(0, 0, 0, 0)
+            title_layout.setSpacing(0)
+            title_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+            self.main_layout.addLayout(title_layout)
+
+            self.logo_view = QGraphicsView()
+            self.logo_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            self.logo_view.setMaximumHeight(100)
+            self._logo_scene = QGraphicsScene()
+            self._logo_scene.setSceneRect(QRectF(0, 0, 2000, 100))
+            self.logo_view.setScene(self._logo_scene)
+            self.logo_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            self.logo_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            self.logo_view.setFocusPolicy(Qt.NoFocus)
+
+            title_background_pixmap = solstice_resource.pixmap(name='solstice_pipeline', extension='png')
+            self._logo_scene.addPixmap(title_background_pixmap)
+            title_layout.addWidget(self.logo_view)
+
+    def set_logo(self, logo_file_name, extension='png', offset=(930, 0)):
+        solstice_logo_pixmap = solstice_resource.pixmap(name=logo_file_name, extension=extension)
+        solstice_logo = self._logo_scene.addPixmap(solstice_logo_pixmap)
+        solstice_logo.setOffset(offset[0], offset[1])
+
+    def resizeEvent(self, event):
+        # TODO: Take the width from the QGraphicsView not hardcoded :)
+        self.logo_view.centerOn(1000, 0)
+        return super(Window, self).resizeEvent(event)
 
     @classmethod
     def run(cls):

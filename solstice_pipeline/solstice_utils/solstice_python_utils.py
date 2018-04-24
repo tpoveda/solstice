@@ -9,6 +9,7 @@
 # ==================================================================="""
 
 import os
+import re
 import ast
 from tempfile import mkstemp
 from shutil import move
@@ -170,3 +171,14 @@ def write_json(filename, data):
         return
     with open(filename, 'w') as f:
         json.dump(data, f, indent=4)
+
+
+def camel_case_to_string(camel_case_string):
+    """
+    Converts a camel case string to a normal one
+    testPath --> test Path
+    :param camel_case_string: str
+    :return: str
+    """
+
+    return re.sub("([a-z])([A-Z])", "\g<1> \g<2>", camel_case_string)

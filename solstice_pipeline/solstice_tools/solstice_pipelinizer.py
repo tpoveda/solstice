@@ -9,20 +9,22 @@
 # ==================================================================="""
 
 import os
+from functools import partial
 
 import pathlib2
 import treelib
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
+from Qt.QtGui import *
 
 import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser
-from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_artella_utils
+from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_artella_utils, solstice_image
 from resources import solstice_resource
 
 from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_browser_utils
-from solstice_gui import solstice_label, solstice_breadcrumb, solstice_navigationwidget, solstice_filelistwidget
+from solstice_gui import solstice_label, solstice_breadcrumb, solstice_navigationwidget, solstice_filelistwidget, solstice_splitters
 
 
 class Pipelinizer(solstice_windows.Window, object):
@@ -42,34 +44,18 @@ class Pipelinizer(solstice_windows.Window, object):
     def custom_ui(self):
         super(Pipelinizer, self).custom_ui()
 
-        title_layout = QHBoxLayout()
-        title_layout.setContentsMargins(0, 0, 0, 0)
-        title_layout.setSpacing(0)
-        title_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
-        self.main_layout.addLayout(title_layout)
+        self.set_logo('solstice_pipeline_logo')
 
-        self.logo_view = QGraphicsView()
-        self.logo_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.logo_view.setMaximumHeight(100)
-        logo_scene = QGraphicsScene()
-        logo_scene.setSceneRect(QRectF(0, 0, 2000, 100))
-        self.logo_view.setScene(logo_scene)
-        self.logo_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.logo_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.logo_view.setFocusPolicy(Qt.NoFocus)
+        self._current_asset = None
 
-        title_background_pixmap = solstice_resource.pixmap(name='solstice_pipeline', extension='png')
-        solstice_logo_pixmap = solstice_resource.pixmap(name='solstice_pipeline_logo', extension='png')
-        title_background = logo_scene.addPixmap(title_background_pixmap)
-        solstice_logo = logo_scene.addPixmap(solstice_logo_pixmap)
-        solstice_logo.setOffset(930, 0)
+        self._toolbar = QToolBar('Tools', self)
+        self._toolbar.setAllowedAreas(Qt.RightToolBarArea | Qt.LeftToolBarArea | Qt.BottomToolBarArea)
+        self.addToolBar(Qt.RightToolBarArea, self._toolbar)
 
         user_icon = solstice_user.UserWidget(name='Summer', role='Director')
         user_icon.move(1100, 0)
         user_icon.setStyleSheet("QWidget{background: transparent;}");
-        logo_scene.addWidget(user_icon)
-        #
-        title_layout.addWidget(self.logo_view)
+        self._logo_scene.addWidget(user_icon)
 
         top_menu_layout = QGridLayout()
         top_menu_layout.setAlignment(Qt.AlignTop)
@@ -96,14 +82,14 @@ class Pipelinizer(solstice_windows.Window, object):
         categories_layout.setSpacing(0)
         categories_widget.setLayout(categories_layout)
 
-        asset_viewer_widget = QWidget()
-        asset_viewer_layout = QHBoxLayout()
-        asset_viewer_layout.setContentsMargins(0, 0, 0, 0)
-        asset_viewer_layout.setSpacing(0)
-        asset_viewer_widget.setLayout(asset_viewer_layout)
+        asset_browser_widget = QWidget()
+        asset_browser_layout = QHBoxLayout()
+        asset_browser_layout.setContentsMargins(0, 0, 0, 0)
+        asset_browser_layout.setSpacing(0)
+        asset_browser_widget.setLayout(asset_browser_layout)
 
-        tab_widget.addTab(categories_widget, 'Asset Manager')
-        tab_widget.addTab(asset_viewer_widget, ' Asset Viewer ')
+        tab_widget.addTab(categories_widget, 'Assets Manager')
+        tab_widget.addTab(asset_browser_widget, ' Assets Browser ')
 
         # ================== Asset Manager Widget
         main_categories_menu_layout = QHBoxLayout()
@@ -119,24 +105,49 @@ class Pipelinizer(solstice_windows.Window, object):
         categories_menu.setLayout(categories_menu_layout)
         main_categories_menu_layout.addWidget(categories_menu)
 
-        self._asset_viewer = solstice_assetviewer.AssetViewer(assets_path=self.get_solstice_assets_path())
-        self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        main_categories_menu_layout.addWidget(self._asset_viewer)
+        asset_splitter = QSplitter(Qt.Horizontal)
+        main_categories_menu_layout.addWidget(asset_splitter)
 
-        categories_btn_group = QButtonGroup(self)
-        categories_btn_group.setExclusive(True)
+        self._asset_viewer = solstice_assetviewer.AssetViewer(assets_path=self.get_solstice_assets_path(), update_asset_info_fn=self._update_asset_info)
+        self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        asset_splitter.addWidget(self._asset_viewer)
+
+        self._info_asset_widget = QWidget()
+        self._info_asset_widget.setVisible(False)
+        info_asset_layout = QVBoxLayout()
+        info_asset_layout.setContentsMargins(5, 5, 5, 5)
+        info_asset_layout.setSpacing(5)
+        self._info_asset_widget.setLayout(info_asset_layout)
+        self._info_asset_widget.setMinimumWidth(200)
+        asset_splitter.addWidget(self._info_asset_widget)
+
+        self._categories_btn_group = QButtonGroup(self)
+        self._categories_btn_group.setExclusive(True)
         categories = ['All', 'Background Elements', 'Characters', 'Props', 'Sets']
         categories_buttons = dict()
         for category in categories:
             new_btn = QPushButton(category)
+            new_btn.toggled.connect(partial(self._update_items, category))
             categories_buttons[category] = new_btn
             categories_buttons[category].setCheckable(True)
             categories_menu_layout.addWidget(new_btn)
-            categories_btn_group.addButton(new_btn)
+            self._categories_btn_group.addButton(new_btn)
+        categories_buttons['All'].setChecked(True)
 
-        # ================== Asset Viewer Widget
+        self._asset_info_lbl = solstice_splitters.Splitter('')
+        self._asset_icon = QLabel()
+        self._asset_icon.setPixmap(solstice_resource.pixmap('empty_file', category='icons').scaled(200, 200, Qt.KeepAspectRatio))
+        self._asset_icon.setAlignment(Qt.AlignCenter)
+        self._asset_description = QTextEdit()
+        self._asset_description.setReadOnly(True)
+        info_asset_layout.addWidget(self._asset_info_lbl)
+        info_asset_layout.addWidget(self._asset_icon)
+        info_asset_layout.addLayout(solstice_splitters.SplitterLayout())
+        info_asset_layout.addWidget(self._asset_description)
+
+        # ================== Asset Browser Widget
         asset_viewer_splitter = QSplitter(Qt.Horizontal)
-        asset_viewer_layout.addWidget(asset_viewer_splitter)
+        asset_browser_layout.addWidget(asset_viewer_splitter)
 
         artella_server_widget = QWidget()
         artella_server_layout = QHBoxLayout()
@@ -161,6 +172,27 @@ class Pipelinizer(solstice_windows.Window, object):
         # =================================================================================================
 
         #self.get_assets_by_category()
+
+    def _update_items(self, category, flag):
+        self._current_asset = None
+        self._info_asset_widget.setVisible(False)
+        self._asset_viewer.update_items(category)
+
+    def _update_asset_info(self, asset=None):
+
+        if self._current_asset:
+            self._current_asset.toggle_asset_menu()
+        self._current_asset = asset
+
+        if asset:
+            self._info_asset_widget.setVisible(True)
+            self._asset_info_lbl.set_text(asset.name)
+            if asset.icon is not None and asset.icon != '':
+                self._asset_icon.setPixmap(QPixmap.fromImage(solstice_image.base64_to_image(asset.icon, image_format=asset.icon_format)).scaled(300, 300, Qt.KeepAspectRatio))
+            self._asset_description.setText(asset.description)
+
+        else:
+            self._info_asset_widget.setVisible(False)
 
     def get_assets_by_category(self, category='Characters', only_assets=True):
         """
@@ -260,25 +292,13 @@ class Pipelinizer(solstice_windows.Window, object):
             sp.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
             return None
 
-    # def resizeEvent(self, event):
-    #     Pipelinizer.resizeEvent(self, event)
-    #
-    #     # TODO: Take the width from the QGraphicsView not hardcoded :)
-    #     self.logo_view.centerOn(1000, 0)
-
-        # opt = QStyleOptionSlider()
-        # self.logo_view.horizontalScrollBar().initStyleOption(opt)
-        # style = self.logo_view.horizontalScrollBar().style()
-        # handle = style.subControlRect(style.CC_ScrollBar, opt, style.SC_ScrollBarSlider)
-        # sliderPos = handle.center()
-        # self.logo_view.horizontalScrollBar().setValue((1800 * 0.5) - sliderPos.x() * 0.5)
-
 def run():
     reload(solstice_python_utils)
     reload(solstice_maya_utils)
     reload(solstice_artella_classes)
     reload(solstice_artella_utils)
     reload(solstice_browser_utils)
+    reload(solstice_image)
     reload(solstice_qt_utils)
     reload(solstice_resource)
     reload(solstice_user)
@@ -290,6 +310,7 @@ def run():
     reload(solstice_breadcrumb)
     reload(solstice_navigationwidget)
     reload(solstice_filelistwidget)
+    reload(solstice_splitters)
 
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()

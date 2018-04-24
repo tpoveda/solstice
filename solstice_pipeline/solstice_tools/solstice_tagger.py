@@ -66,6 +66,8 @@ class SolsticeTagger(solstice_windows.Window, object):
     def custom_ui(self):
         super(SolsticeTagger, self).custom_ui()
 
+        self.set_logo('solstice_tagger_logo')
+
         self._error_pixmap = solstice_resource.pixmap('error', category='icons').scaled(QSize(24, 24))
         self._warning_pixmap = solstice_resource.pixmap('warning', category='icons').scaled(QSize(24, 24))
         self._ok_pixmap = solstice_resource.pixmap('ok', category='icons').scaled(QSize(24, 24))

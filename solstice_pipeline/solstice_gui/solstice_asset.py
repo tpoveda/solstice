@@ -14,31 +14,33 @@ from Qt.QtCore import *
 from Qt.QtWidgets import *
 from Qt.QtGui import *
 
-
-class ArtellaAsset(object):
-    def __init__(self):
-        pass
+from solstice_utils import solstice_image as img
 
 
 class AssetWidget(QWidget, object):
-    def __init__(self, asset_name='New_Asset', asset_path=None, asset_image=None, asset_category=None, parent=None):
+
+    def __init__(self, name='New_Asset', path=None, category=None, icon=None, icon_format=None, preview=None, preview_format=None, description='', simple_mode=False, parent=None):
         super(AssetWidget, self).__init__(parent=parent)
 
-        self._name = asset_name
-        self._asset_path = asset_path
-        self._category = asset_category
+        self._name = name
+        self._asset_path = path
+        self._category = category
+        self._description = description
+        self._icon_format = icon_format
+        self._preview_format = preview_format
+        self._simple_mode = simple_mode
 
-        if asset_image == '' or asset_image is None:
-            self._image = None
+        if icon == '' or icon is None:
+            self._icon = None
         else:
-            self._image = asset_image.encode('utf-8')
-        if self._image is None:
-            self._image = QImage(os.path.join(asset_path, 'icon.png'))
+            self._icon = icon.encode('utf-8')
+        if preview == '' or preview is None:
+            self._preview = None
+        else:
+            self._preview = preview.encode('utf-8')
 
         self.setMaximumWidth(160)
         self.setMaximumHeight(200)
-
-        print(asset_path)
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -46,8 +48,8 @@ class AssetWidget(QWidget, object):
         self.setLayout(main_layout)
 
         self._asset_btn = QPushButton('', self)
-        if self._image:
-            self._asset_btn.setIcon(QPixmap.fromImage(self._image))
+        if self._icon:
+            self._asset_btn.setIcon(QPixmap.fromImage(img.base64_to_image(self._icon, image_format=icon_format)))
             self._asset_btn.setIconSize(QSize(150, 150))
         self._asset_label = QLabel(self._name)
         self._asset_label.setAlignment(Qt.AlignCenter)
@@ -62,9 +64,48 @@ class AssetWidget(QWidget, object):
         instance_btn = QPushButton('I')
         asset_menu_layout.addWidget(instance_btn)
 
-        self._asset_btn.clicked.connect(self.toggle_asset_menu)
+        if not self._simple_mode:
+            self._asset_btn.clicked.connect(self.toggle_asset_menu)
 
         self._asset_menu_widget.setVisible(False)
 
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def icon(self):
+        return self._icon
+
+    @property
+    def icon_format(self):
+        return self._icon_format
+
+    @property
+    def preview(self):
+        return self._preview
+
+    @property
+    def preview_format(self):
+        return self._preview_format
+
+    @property
+    def category(self):
+        return self._category
+
+    @property
+    def description(self):
+        return self._description
+
+    @property
+    def simple_mode(self):
+        return self._simple_mode
+
     def toggle_asset_menu(self):
+        if self._simple_mode:
+            return
         self._asset_menu_widget.setVisible(not self._asset_menu_widget.isVisible())

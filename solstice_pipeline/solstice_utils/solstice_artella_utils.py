@@ -118,7 +118,6 @@ def launch_artella_app():
     else:
         artella_app_file = get_artella_app() + '.exe'
 
-    print(artella_app_file)
     if os.path.isfile(artella_app_file):
         subprocess.call([artella_app_file])
 
