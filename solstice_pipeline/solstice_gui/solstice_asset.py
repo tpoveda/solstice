@@ -8,8 +8,6 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-import os
-
 from Qt.QtCore import *
 from Qt.QtWidgets import *
 from Qt.QtGui import *
@@ -19,7 +17,7 @@ from solstice_utils import solstice_image as img
 
 class AssetWidget(QWidget, object):
 
-    def __init__(self, name='New_Asset', path=None, category=None, icon=None, icon_format=None, preview=None, preview_format=None, description='', simple_mode=False, parent=None):
+    def __init__(self, name='New_Asset', path=None, category=None, icon=None, icon_format=None, preview=None, preview_format=None, description='', simple_mode=False, checkable=False, parent=None):
         super(AssetWidget, self).__init__(parent=parent)
 
         self._name = name
@@ -29,7 +27,7 @@ class AssetWidget(QWidget, object):
         self._icon_format = icon_format
         self._preview_format = preview_format
         self._simple_mode = simple_mode
-
+        self._checkable = checkable
         if icon == '' or icon is None:
             self._icon = None
         else:
@@ -60,6 +58,8 @@ class AssetWidget(QWidget, object):
         self._asset_menu_widget.setLayout(asset_menu_layout)
         for widget in [self._asset_btn, self._asset_menu_widget, self._asset_label]:
             main_layout.addWidget(widget)
+
+        self._asset_btn.setCheckable(self._checkable)
 
         instance_btn = QPushButton('I')
         asset_menu_layout.addWidget(instance_btn)

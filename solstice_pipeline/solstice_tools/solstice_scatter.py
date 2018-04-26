@@ -49,7 +49,7 @@ class ScatterContext(object):
             undoMode='step')
 
         print('Dragger context created ....')
-        
+
 
     def _on_press(self):
         print('Pressing')
@@ -110,7 +110,8 @@ class SolsticeScatter(solstice_windows.Window, object):
         self._asset_viewer = solstice_assetviewer.AssetViewer(
             assets_path=solstice_pipelinizer.Pipelinizer.get_solstice_assets_path(),
             update_asset_info_fn=None,
-            simple_assets=True)
+            simple_assets=True,
+            checkable_assets=True)
         self._asset_viewer.setColumnCount(2)
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         main_categories_menu_layout.addWidget(self._asset_viewer)

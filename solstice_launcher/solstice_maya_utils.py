@@ -40,15 +40,15 @@ def launch_maya(exec_, args, console):
 
     maya = subprocess.Popen([exec_])
 
-    while True:
-        time.sleep(2)
-
-        maya.poll()
-        watched.check()
-        if maya.returncode is not None:
-            if not maya.returncode == 0:
-                maya = subprocess.Popen(cmd)
-            else:
-                watched.stop()
-                break
+    # while True:
+    #     time.sleep(2)
+    #
+    #     maya.poll()
+    #     watched.check()
+    #     if maya.returncode is not None:
+    #         if not maya.returncode == 0:
+    #             maya = subprocess.Popen(cmd)
+    #         else:
+    #             watched.stop()
+    #             break
 

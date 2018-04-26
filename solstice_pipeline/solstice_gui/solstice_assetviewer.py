@@ -17,15 +17,15 @@ from Qt.QtWidgets import *
 import solstice_grid
 import solstice_asset
 from solstice_utils import solstice_python_utils as utils
-from solstice_utils import solstice_artella_utils as artella
 
 
 class AssetViewer(solstice_grid.GridWidget, object):
-    def __init__(self, assets_path, update_asset_info_fn, simple_assets=False, parent=None):
+    def __init__(self, assets_path, update_asset_info_fn, simple_assets=False, checkable_assets=False, parent=None):
         super(AssetViewer, self).__init__(parent=parent)
 
         self._assets_paths = assets_path
         self._simple_assets = simple_assets
+        self._checkable_assets = checkable_assets
         self._items = dict()
         self._update_asset_info_fn = update_asset_info_fn
 
@@ -36,6 +36,16 @@ class AssetViewer(solstice_grid.GridWidget, object):
         self.verticalHeader().hide()
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
+
+        # self.setStyleSheet(
+        #     """
+        #     QTableView::item::selected
+        #     {
+        #         background-color: red;
+        #         color: blue;
+        #     }
+        #     """
+        # )
 
         self.update_items()
 
@@ -76,7 +86,8 @@ class AssetViewer(solstice_grid.GridWidget, object):
                                 preview=asset_data['asset']['preview'],
                                 preview_format=asset_data['asset']['preview_format'],
                                 description=asset_data['asset']['description'],
-                                simple_mode=self._simple_assets
+                                simple_mode=self._simple_assets,
+                                checkable=self._checkable_assets
                             )
                             if self._update_asset_info_fn:
                                 new_asset._asset_btn.clicked.connect(partial(self._update_asset_info_fn, new_asset))
@@ -93,7 +104,8 @@ class AssetViewer(solstice_grid.GridWidget, object):
                                     preview=asset_data['asset']['preview'],
                                     preview_format=asset_data['asset']['preview_format'],
                                     description=asset_data['asset']['description'],
-                                    simple_mode=self._simple_assets
+                                    simple_mode=self._simple_assets,
+                                    checkable=self._checkable_assets
                                 )
                                 if self._update_asset_info_fn:
                                     new_asset._asset_btn.clicked.connect(partial(self._update_asset_info_fn, new_asset))

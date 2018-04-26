@@ -2,7 +2,10 @@
   <dictionary name="Tomi">
     <words>
       <w>artella</w>
+      <w>attrs</w>
       <w>proc</w>
+      <w>shaders</w>
+      <w>sshader</w>
     </words>
   </dictionary>
 </component>

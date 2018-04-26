@@ -88,8 +88,15 @@ class Pipelinizer(solstice_windows.Window, object):
         asset_browser_layout.setSpacing(0)
         asset_browser_widget.setLayout(asset_browser_layout)
 
+        sequences_widget = QWidget()
+        sequences_layout = QVBoxLayout()
+        sequences_layout.setContentsMargins(0, 0, 0, 0)
+        sequences_layout.setSpacing(0)
+        sequences_widget.setLayout(sequences_layout)
+
         tab_widget.addTab(categories_widget, 'Assets Manager')
         tab_widget.addTab(asset_browser_widget, ' Assets Browser ')
+        tab_widget.addTab(sequences_widget, 'Sequences Manager')
 
         # ================== Asset Manager Widget
         main_categories_menu_layout = QHBoxLayout()

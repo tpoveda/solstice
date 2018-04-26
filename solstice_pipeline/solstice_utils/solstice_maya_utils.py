@@ -93,3 +93,43 @@ def pass_message_to_main_thread(message_handler, *args):
     """
 
     utils.executeInMainThreadWithResult(message_handler, *args)
+
+
+def get_upstream_nodes(node):
+    """
+    Return a list with all upstream nodes of the given Maya node
+    :param node: str, name of the node
+    :return: lsitzstr>
+    """
+
+    upstream_nodes = list()
+    upstream_nodes.append(node)
+    incoming_nodes = cmds.listConnections(node, source=True, destination=False)
+    if incoming_nodes:
+        for n in incoming_nodes:
+            upstream_nodes.extend(get_upstream_nodes(n))
+        return upstream_nodes
+    else:
+        return upstream_nodes
+
+
+def delete_all_incoming_nodes(node):
+    """
+    Delete all incoming nodes from the given Maya node
+    :param node: str
+    :param attrs: list<str>
+    """
+
+    upstream_nodes = list()
+    upstream_nodes_clean = list()
+    connections = cmds.listConnections(node, source=True, destination=False)
+    if connections:
+        for node in connections:
+            upstream_nodes.extend(get_upstream_nodes(node))
+
+        for node in upstream_nodes:
+            if node not in upstream_nodes_clean:
+                upstream_nodes_clean.append(node)
+
+        for node in upstream_nodes_clean:
+            cmds.delete(node)
