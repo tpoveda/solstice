@@ -210,10 +210,14 @@ class SolsticeTagger(solstice_windows.Window, object):
         save_info_btn = QPushButton('Save')
         self.main_layout.addWidget(save_info_btn)
 
+
         # ================================================================================
 
         save_info_btn.clicked.connect(self._save)
+        self._description_text.textChanged.connect(partial(self.update_tag_data_info, 'description', None, None))
         self._new_tagger_node_btn.clicked.connect(self._create_metadata_node_for_curr_selection)
+        select_tag_data_btn.clicked.connect(self._select_tag_data_node)
+        remove_tag_data_btn.clicked.connect(self._remove_tag_data_node)
 
         # ================================================================================
 
@@ -223,6 +227,20 @@ class SolsticeTagger(solstice_windows.Window, object):
     def closeEvent(self, event):
         OpenMaya.MMessage.removeCallback(self.selection_changed_callback)
         super(SolsticeTagger, self).closeEvent(event)
+
+    def _select_tag_data_node(self):
+        tag_data_node = self.get_tag_data_node_from_curr_sel()
+        if tag_data_node is None:
+            return
+        cmds.select(tag_data_node)
+
+    def _remove_tag_data_node(self):
+        tag_data_node = self.get_tag_data_node_from_curr_sel()
+        if tag_data_node is None:
+            return
+        cmds.delete(tag_data_node)
+        self.update_metadata_node()
+        self._update_selected_tags()
 
     def _save(self):
         self.close()
@@ -237,9 +255,6 @@ class SolsticeTagger(solstice_windows.Window, object):
 
         self.update_metadata_node()
         self._update_selected_tags()
-
-        # except Exception as e:
-        #     print(str(e))
 
     def _update_types(self):
 
@@ -296,6 +311,7 @@ class SolsticeTagger(solstice_windows.Window, object):
         if tag_data_node is not None:
             types = cmds.getAttr(tag_data_node + '.types')
             selections = cmds.getAttr(tag_data_node + '.selections')
+            description = cmds.getAttr(tag_data_node + '.description')
             if types is not None and types != '':
                 types = types.split()
                 for t in types:
@@ -318,6 +334,9 @@ class SolsticeTagger(solstice_windows.Window, object):
                                 tag_name = tag_w.get_name()
                                 if tag_name == s:
                                     tag_w.btn.setChecked(True)
+
+            if description is not None and description != '':
+                self._description_text.setText(description)
 
         self._update_current_info()
 
@@ -439,9 +458,8 @@ class SolsticeTagger(solstice_windows.Window, object):
                     selections = ''.join(str(e) + ' ' for e in selections_split)
                 cmds.setAttr(tag_data_node+'.selections', selections, type='string')
             elif category == 'description':
-                pass
+                cmds.setAttr(tag_data_node+'.description', self._description_text.toPlainText(), type='string')
         else:
-
             if category == 'types':
                 types = cmds.getAttr(tag_data_node+'.types')
                 if types is None or types == '':
@@ -465,7 +483,7 @@ class SolsticeTagger(solstice_windows.Window, object):
                 selections = ''.join(str(e) + ' ' for e in selections_split)
                 cmds.setAttr(tag_data_node + '.selections', selections, type='string')
             elif category == 'description':
-                pass
+                cmds.setAttr(tag_data_node+'.description', self._description_text.toPlainText(), type='string')
 
         self._update_current_info()
 

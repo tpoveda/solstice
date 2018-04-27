@@ -229,5 +229,16 @@ def safe_delete_later(widget):
     """
 
     from Qt import __binding__
-    if __binding__ in ('PySide', 'PyQt4'):
+    if __binding__ in ('PySide', 'tPyQt4'):
         widget.deleteLater()
+
+
+def show_question(parent, title, question):
+    """
+    Show a question QMessageBox with the given question text
+    :param question: str
+    :return:
+    """
+
+    flags = QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+    return QMessageBox.question(parent, title, question, flags)

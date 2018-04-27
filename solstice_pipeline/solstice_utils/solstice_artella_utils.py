@@ -293,16 +293,41 @@ def synchronize_path(path):
     :param path: str
     """
 
+    # TODO: We need to check if Artella App is running, if not abort the operation
+
     uri = get_cms_uri(path)
     spigot = get_spigot_client()
     rsp = spigot.execute(command_action='do', command_name='updateCollection', payload=uri)
 
-    # if isinstance(rsp, basestring):
-    #     rsp = json.loads(rsp)
-    #
-    # sp.logger.debug(rsp)
-    # return rsp
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
 
+    sp.logger.debug(rsp)
+    return rsp
+
+
+def get_path_synchronization_progress(path):
+    uri = get_cms_uri(path)
+    spigot = get_spigot_client()
+    rsp = spigot.execute(command_action='do', command_name='getUpdateCollectionProgress', payload=uri)
+
+    if type(rsp) == str:
+        rsp = json.loads(rsp)
+
+    sp.logger.debug(rsp)
+    return rsp
+
+
+def cancel_path_synchronization(path):
+    uri = get_cms_uri(path)
+    spigot = get_spigot_client()
+    rsp = spigot.execute(command_action='do', command_name='cancelUpdateCollection', payload=uri)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+
+    sp.logger.debug(rsp)
+    return rsp
 
 
 try:

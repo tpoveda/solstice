@@ -109,3 +109,18 @@ class AssetWidget(QWidget, object):
         if self._simple_mode:
             return
         self._asset_menu_widget.setVisible(not self._asset_menu_widget.isVisible())
+
+    def contextMenuEvent(self, event):
+        menu = self._generate_context_menu()
+        menu.exec_(event.globalPos())
+
+    def _generate_context_menu(self):
+        """
+        This class generates a context menu for the Asset widget depending of the asset
+        widget properties
+        :return: QMenu
+        """
+
+        menu = QMenu(self)
+        menu.addAction('Open Asset in Light Rig')
+        return menu
