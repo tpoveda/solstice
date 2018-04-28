@@ -20,14 +20,14 @@ from solstice_utils import solstice_python_utils as utils
 
 
 class AssetViewer(solstice_grid.GridWidget, object):
-    def __init__(self, assets_path, update_asset_info_fn, simple_assets=False, checkable_assets=False, parent=None):
+    def __init__(self, assets_path, item_prsesed_callback, simple_assets=False, checkable_assets=False, parent=None):
         super(AssetViewer, self).__init__(parent=parent)
 
         self._assets_paths = assets_path
         self._simple_assets = simple_assets
         self._checkable_assets = checkable_assets
         self._items = dict()
-        self._update_asset_info_fn = update_asset_info_fn
+        self._item_pressed_callback = item_prsesed_callback
 
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.setShowGrid(False)
@@ -36,16 +36,6 @@ class AssetViewer(solstice_grid.GridWidget, object):
         self.verticalHeader().hide()
         self.resizeRowsToContents()
         self.resizeColumnsToContents()
-
-        # self.setStyleSheet(
-        #     """
-        #     QTableView::item::selected
-        #     {
-        #         background-color: red;
-        #         color: blue;
-        #     }
-        #     """
-        # )
 
         self.update_items()
 
@@ -89,8 +79,8 @@ class AssetViewer(solstice_grid.GridWidget, object):
                                 simple_mode=self._simple_assets,
                                 checkable=self._checkable_assets
                             )
-                            if self._update_asset_info_fn:
-                                new_asset._asset_btn.clicked.connect(partial(self._update_asset_info_fn, new_asset))
+                            if self._item_pressed_callback:
+                                new_asset._asset_btn.clicked.connect(partial(self._item_pressed_callback, new_asset))
                             self.add_asset(new_asset)
                         else:
                             if asset_category == category:
@@ -107,7 +97,7 @@ class AssetViewer(solstice_grid.GridWidget, object):
                                     simple_mode=self._simple_assets,
                                     checkable=self._checkable_assets
                                 )
-                                if self._update_asset_info_fn:
-                                    new_asset._asset_btn.clicked.connect(partial(self._update_asset_info_fn, new_asset))
+                                if self._item_pressed_callback:
+                                    new_asset._asset_btn.clicked.connect(partial(self._item_pressed_callback, new_asset))
                                 self.add_asset(new_asset)
 

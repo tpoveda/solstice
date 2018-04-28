@@ -28,10 +28,12 @@ def delete_instances(window_class):
     for ins in window_class.instances:
         sp.logger.debug('Deleting {} window'.format(ins))
         try:
+            window_class.remove_callbacks()
             ins.setParent(None)
             ins.deleteLater()
-        except:
+        except Exception as e:
             # Ignore the deletion exception if the actual parent has already been deleted by Maya
+            sp.logger.debug(str(e))
             pass
         window_class.instances.remove(ins)
         del ins
@@ -47,6 +49,7 @@ class Window(QMainWindow, object):
     docked = False
 
     instances = list()
+    callbacks = list()
 
     def __init__(self, name='SolsticeDockedWindow', parent=None, layout=None, **kwargs):
         super(Window, self).__init__(parent=parent)
@@ -68,6 +71,16 @@ class Window(QMainWindow, object):
 
         self.custom_ui()
 
+    @classmethod
+    def add_callback(cls, callback_id):
+        cls.callbacks.append(callback_id)
+
+    @classmethod
+    def remove_callbacks(cls):
+        for c in cls.callbacks:
+            solstice_maya_utils.remove_callback(c)
+            cls.callbacks.remove(c)
+
     def custom_ui(self):
         if self.main_layout is None:
             self.main_widget = QWidget()
@@ -77,7 +90,6 @@ class Window(QMainWindow, object):
             self.main_widget.setLayout(self.main_layout)
             self.setCentralWidget(self.main_widget)
 
-            title_layout = QHBoxLayout()
             title_layout = QHBoxLayout()
             title_layout.setContentsMargins(0, 0, 0, 0)
             title_layout.setSpacing(0)
@@ -107,6 +119,10 @@ class Window(QMainWindow, object):
         # TODO: Take the width from the QGraphicsView not hardcoded :)
         self.logo_view.centerOn(1000, 0)
         return super(Window, self).resizeEvent(event)
+
+    def closeEvent(self, event):
+        self.remove_callbacks()
+        super(Window, self).closeEvent(event)
 
     @classmethod
     def run(cls):

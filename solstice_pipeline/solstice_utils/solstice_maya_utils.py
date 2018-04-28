@@ -19,6 +19,7 @@ import maya.cmds as cmds
 import maya.mel as mel
 import maya.utils as utils
 import maya.OpenMayaUI as OpenMayaUI
+import maya.OpenMaya as OpenMaya
 
 
 def get_maya_api_version():
@@ -133,3 +134,17 @@ def delete_all_incoming_nodes(node):
 
         for node in upstream_nodes_clean:
             cmds.delete(node)
+
+
+def remove_callback(callback_id):
+    try:
+        OpenMaya.MEventMessage.removeCallback(callback_id)
+        return
+    except Exception:
+        pass
+    try:
+        OpenMaya.MDGMessage.removeCallback(callback_id)
+        return
+    except Exception:
+        pass
+

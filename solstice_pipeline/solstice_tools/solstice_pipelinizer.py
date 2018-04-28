@@ -115,7 +115,7 @@ class Pipelinizer(solstice_windows.Window, object):
         asset_splitter = QSplitter(Qt.Horizontal)
         main_categories_menu_layout.addWidget(asset_splitter)
 
-        self._asset_viewer = solstice_assetviewer.AssetViewer(assets_path=self.get_solstice_assets_path(), update_asset_info_fn=self._update_asset_info)
+        self._asset_viewer = solstice_assetviewer.AssetViewer(assets_path=self.get_solstice_assets_path(), item_prsesed_callback=self._update_asset_info)
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         asset_splitter.addWidget(self._asset_viewer)
 

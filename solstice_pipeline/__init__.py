@@ -17,13 +17,14 @@ if sys.version_info[:2] > (2, 7):
 else:
     from imp import reload
 
+from maya import OpenMaya
+
 import solstice_pipeline
 
 root_path = os.path.dirname(os.path.abspath(__file__))
 loaded_modules = OrderedDict()
 reload_modules = list()
 logger = None
-
 
 def update_paths():
     extra_paths = [os.path.join(root_path, 'externals'), os.path.join(root_path, 'icons')]

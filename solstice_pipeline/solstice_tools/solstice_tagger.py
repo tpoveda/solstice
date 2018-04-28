@@ -493,7 +493,7 @@ def run():
     reload(solstice_grid)
     reload(solstice_buttons)
     # try:
-    tagger = SolsticeTagger.run()
+    tagger = SolsticeTagger().run()
     # except Exception as e:
     #     sp.logger.debug(str(e))
     #     OpenMaya.MMessage.removeCallback(tagger.selection_changed_callback)
