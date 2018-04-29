@@ -23,35 +23,6 @@ from solstice_utils import solstice_mash_utils
 from solstice_gui import solstice_asset
 
 
-class ScatterMetaData(object):
-    def __init__(self, mash_network):
-        self._mash_network = mash_network
-        self._scatter_nodes = list()
-        self._scatter_properties = dict()
-
-        self._node = cmds.createNode('network', name=mash_network.networkName+'_scatter_data')
-        cmds.addAttr(self._node, ln='mash_network', at='message')
-        if not cmds.attributeQuery('scatter_data', node=mash_network.networkName, exists=True):
-            cmds.addAttr(mash_network.networkName, ln='scatter_data', at='message')
-        cmds.connectAttr(self._node+'.mash_network', mash_network.networkName+'.scatter_data')
-
-        for attr in ['scatter_nodes', 'scatter_properties']:
-            cmds.addAttr(self._node, ln=attr, dt='string')
-
-    def add_scatter_node(self, node_name):
-        pass
-
-    def remove_scatter_node(self, node_name):
-        pass
-
-    @staticmethod
-    def get_scatter_data_from_mash_network(mash_network):
-        try:
-            return cmds.listConnections(mash_network.networkName + '.scatter_data')[0]
-        except:
-            return None
-
-
 class SolsticeScatter(solstice_windows.Window, object):
 
     title = 'Solstice Tools - Scatter Tool'
@@ -66,7 +37,21 @@ class SolsticeScatter(solstice_windows.Window, object):
 
         super(SolsticeScatter, self).__init__(name=name, parent=parent, **kwargs)
 
-        self.add_callback(OpenMaya.MEventMessage.addEventCallback('SelectionChanged', self._update_ui))
+        self.add_callback(OpenMaya.MEventMessage.addEventCallback('NewSceneOpened', self._update_ui, self))
+        self.add_callback(OpenMaya.MEventMessage.addEventCallback('SceneOpened', self._update_ui, self))
+        self.add_callback(OpenMaya.MEventMessage.addEventCallback('SceneImported', self._update_ui, self))
+        self.add_callback(OpenMaya.MEventMessage.addEventCallback('NameChanged', self._update_ui, self))
+        self.add_callback(OpenMaya.MEventMessage.addEventCallback('Undo', self._update_ui, self))
+        self.add_callback(OpenMaya.MEventMessage.addEventCallback('SelectionChanged', self._update_ui, self))
+        self.add_callback(OpenMaya.MDGMessage.addNodeRemovedCallback(self._update_ui))
+
+        orig_sel = cmds.ls(sl=True)
+        scatter_grp = 'SOLSTICE_SCATTER'
+        if not cmds.objExists(scatter_grp):
+            self._scatter_grp = cmds.group(empty=True, name=scatter_grp, world=True)
+        else:
+            self._scatter_grp = cmds.ls(scatter_grp)[0]
+        cmds.select(orig_sel)
 
     def custom_ui(self):
         super(SolsticeScatter, self).custom_ui()
@@ -99,9 +84,11 @@ class SolsticeScatter(solstice_windows.Window, object):
 
         self._asset_viewer = solstice_assetviewer.AssetViewer(
             assets_path=solstice_pipelinizer.Pipelinizer.get_solstice_assets_path(),
-            item_prsesed_callback=self._update_scatter_node,
+            item_prsesed_callback=self._on_asset_click,
             simple_assets=True,
-            checkable_assets=True)
+            checkable_assets=True,
+            show_only_published_assets=False)
+            # show_only_published_assets=True)      # TODO: Uncomment later
         self._asset_viewer.setColumnCount(2)
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         main_categories_menu_layout.addWidget(self._asset_viewer)
@@ -112,7 +99,7 @@ class SolsticeScatter(solstice_windows.Window, object):
         categories_buttons = dict()
         for category in categories:
             new_btn = QPushButton(category)
-            new_btn.toggled.connect(partial(self._update_items, category))
+            # new_btn.toggled.connect(partial(self._update_items, category))
             categories_buttons[category] = new_btn
             categories_buttons[category].setCheckable(True)
             categories_menu_layout.addWidget(new_btn)
@@ -126,10 +113,6 @@ class SolsticeScatter(solstice_windows.Window, object):
         scatter_widget.setLayout(scatter_layout)
         scatter_splitter.addWidget(scatter_widget)
 
-        scatter_layout.addWidget(solstice_splitters.Splitter('TARGET SURFACES'))
-        self._target_surfaces_list = QListView()
-        scatter_layout.addWidget(self._target_surfaces_list)
-
         v_div_w = QWidget()
         v_div_l = QHBoxLayout()
         v_div_l.setAlignment(Qt.AlignCenter)
@@ -142,253 +125,240 @@ class SolsticeScatter(solstice_windows.Window, object):
         v_div.setFrameShadow(QFrame.Sunken)
         v_div_l.addWidget(v_div)
         scatter_layout.addWidget(v_div_w)
-
-        scatter_layout.addWidget(solstice_splitters.Splitter('TRANSFORM'))
-        scatter_transform_widget = QWidget()
-        scatter_transform_layout = QVBoxLayout()
-        scatter_widget.setLayout(scatter_transform_layout)
-
-        v_div_w = QWidget()
-        v_div_l = QHBoxLayout()
-        v_div_l.setAlignment(Qt.AlignCenter)
-        v_div_l.setContentsMargins(0, 0, 0, 0)
-        v_div_l.setSpacing(0)
-        v_div_w.setLayout(v_div_l)
-        v_div = QFrame()
-        v_div.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        v_div.setFrameShape(QFrame.HLine)
-        v_div.setFrameShadow(QFrame.Sunken)
-        v_div_l.addWidget(v_div)
-        scatter_layout.addWidget(v_div_w)
-
-        scatter_layout.addWidget(solstice_splitters.Splitter('PAINT'))
-        paint_widget = QWidget()
-        paint_layout = QVBoxLayout()
-        paint_layout.setContentsMargins(5, 5, 5, 5,)
-        paint_layout.setSpacing(5)
-        paint_widget.setLayout(paint_layout)
-        scatter_layout.addWidget(paint_widget)
-        self._paint_btn = QPushButton('Paint')
-        self._paint_btn.setCheckable(True)
-        paint_layout.addWidget(self._paint_btn)
-
-        scatter_layout.addWidget(solstice_splitters.Splitter('PAINT_OPTIONS'))
-        paint_options_widget = QWidget()
-        paint_options_layout = QVBoxLayout()
-        paint_options_layout.setContentsMargins(5, 5, 5, 5, )
-        paint_options_layout.setSpacing(5)
-        paint_options_widget.setLayout(paint_options_layout)
-        scatter_layout.addWidget(paint_options_widget)
-
-        v_div_w = QWidget()
-        v_div_l = QHBoxLayout()
-        v_div_l.setAlignment(Qt.AlignCenter)
-        v_div_l.setContentsMargins(0, 0, 0, 0)
-        v_div_l.setSpacing(0)
-        v_div_w.setLayout(v_div_l)
-        v_div = QFrame()
-        v_div.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        v_div.setFrameShape(QFrame.HLine)
-        v_div.setFrameShadow(QFrame.Sunken)
-        v_div_l.addWidget(v_div)
-        scatter_layout.addWidget(v_div_w)
-
-        mash_splitter = QSplitter(Qt.Horizontal)
-        mash_splitter.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        scatter_splitter.addWidget(mash_splitter)
-
-        mash_widget = QWidget()
-        mash_layout = QVBoxLayout()
-        mash_widget.setLayout(mash_layout)
-        mash_splitter.addWidget(mash_widget)
 
         mash_list_layout = QHBoxLayout()
         mash_list_buttons_layout = QVBoxLayout()
         mash_list_buttons_layout.setAlignment(Qt.AlignTop)
         mash_list_layout.setContentsMargins(2, 2, 2, 2)
+        self._mash_outliner = solstice_mash_utils.get_mash_outliner_tree()
+        mash_list_layout.addWidget(self._mash_outliner)
         mash_list_layout.setSpacing(2)
-        mash_add_btn = QPushButton('+')
-        mash_add_btn.setMinimumWidth(30)
-        mash_add_btn.setMinimumHeight(30)
-        mash_remove_btn = QPushButton('-')
-        mash_remove_btn.setMinimumWidth(30)
-        mash_remove_btn.setMinimumHeight(30)
-        mash_list_buttons_layout.addWidget(mash_add_btn)
-        mash_list_buttons_layout.addWidget(mash_remove_btn)
-        mash_layout.addLayout(mash_list_layout)
-        self._mash_list = QListView()
-        self._mash_list_model = QStringListModel()
-        self._mash_list.setModel(self._mash_list_model)
-        mash_list_layout.addWidget(self._mash_list)
+        self._mash_add_btn = QPushButton('+')
+        self._mash_add_btn.setMinimumWidth(30)
+        self._mash_add_btn.setMinimumHeight(30)
+        self._mash_remove_btn = QPushButton('-')
+        self._mash_remove_btn.setMinimumWidth(30)
+        self._mash_remove_btn.setMinimumHeight(30)
         mash_list_layout.addLayout(mash_list_buttons_layout)
-        mash_tree = solstice_mash_utils.get_mash_outliner_tree()
-        mash_list_layout.addWidget(mash_tree)
+        mash_list_buttons_layout.addWidget(self._mash_add_btn)
+        mash_list_buttons_layout.addWidget(self._mash_remove_btn)
+        scatter_layout.addLayout(mash_list_layout)
+
+        v_div_w = QWidget()
+        v_div_l = QHBoxLayout()
+        v_div_l.setAlignment(Qt.AlignCenter)
+        v_div_l.setContentsMargins(0, 0, 0, 0)
+        v_div_l.setSpacing(0)
+        v_div_w.setLayout(v_div_l)
+        v_div = QFrame()
+        v_div.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        v_div.setFrameShape(QFrame.HLine)
+        v_div.setFrameShadow(QFrame.Sunken)
+        v_div_l.addWidget(v_div)
+        scatter_layout.addWidget(v_div_w)
 
         # =================================================================================
 
-        self._mash_list.selectionModel().selectionChanged.connect(self._on_selection_changed)
-        self._mash_list_model.dataChanged.connect(self._rename_mash)
-        mash_add_btn.clicked.connect(self._add_mash)
-        mash_remove_btn.clicked.connect(self._remove_mash)
-        self._paint_btn.toggled.connect(self._update_paint_mode)
+        self._mash_outliner.clicked.connect(self._on_mash_outliner_click)
+        self._mash_add_btn.clicked.connect(self._add_mash)
+        self._mash_remove_btn.clicked.connect(self._remove_mash)
 
         # =================================================================================
 
         self._update_ui()
 
-    def is_paint_mode(self):
-        return self._paint_btn.isChecked()
+    def get_selected_mash_network(self):
+        item = self._mash_outliner._getCorrespondingItem(self._mash_outliner.currentIndex())
+        if not item:
+            return None
+        return solstice_mash_utils.get_mash_network(item.getName())
 
-    def _update_paint_mode(self):
-        self._categories_widget.setEnabled(not self.is_paint_mode())
+    def _on_asset_click(self, asset):
+        mash_network = self.get_selected_mash_network()
+        if mash_network is None:
+            return
 
-        if self.is_paint_mode():
-            print('We need to get selected assets and connect them to the selected MASH node')
+        instancer = mash_network.instancer
+        if instancer is None or instancer == '':
+            return
+
+        curr_sel = cmds.ls(sl=True)
+        instancer_type = cmds.objectType(instancer)
+        cmds.select(instancer)
+        if instancer_type == 'MASH_Repro':
+            repro_widget = solstice_mash_utils.get_repro_object_widget(instancer)
+            if not repro_widget:
+                return
+
+            print(asset.is_published())
+
+
+        elif instancer_type == 'MASH_Instancer':
+            print('Add asset to MASH_Instancer')
+        cmds.select(curr_sel)
+
+    def _update_asset_viewer_ui(self, w):
+        mash_network = self.get_selected_mash_network()
+        print(mash_network)
+
+        # if not mash_network:
+        #     return
+        # mash_scatter_data = ScatterMetaData.get_scatter_data_from_mash_network(mash_network)
+        # if not mash_scatter_data:
+        #     return
+        #
+        # scatter_nodes = cmds.getAttr(mash_scatter_data+'.scatter_nodes')
+        # if scatter_nodes is None or scatter_nodes == '':
+        #     return
+        # else:
+        #     scatter_nodes = scatter_nodes.split()
+        #
+        # # Firt we disable all the items
+        # for i in range(self._asset_viewer.rowCount()):
+        #     for j in range(self._asset_viewer.columnCount()):
+        #         self._asset_viewer.cellWidget(i, j).containedWidget._asset_btn.setChecked(False)
+        #
+        # for node in scatter_nodes:
+        #     for i in range(self._asset_viewer.rowCount()):
+        #         for j in range(self._asset_viewer.columnCount()):
+        #             item = self._asset_viewer.cellWidget(i, j)
+        #             asset = item.containedWidget
+        #             if asset.name == node:
+        #                 asset._asset_btn.setChecked(True)
+
+    def _on_mash_outliner_click(self, index):
+        item = self._mash_outliner.model().itemFromIndex(index)
+        is_waiter = item.mashNode.isWaiter
+        self._categories_widget.setEnabled(is_waiter)
+        self._mash_remove_btn.setEnabled(is_waiter)
+
+    # def test(self, index):
+    #     item = self._mash_outliner.model().itemFromIndex(index)
+    #     print(item)
+    #
+    # def is_paint_mode(self):
+    #     return self._paint_btn.isChecked()
+    #
+    # def _update_paint_mode(self):
+    #     self._categories_widget.setEnabled(not self.is_paint_mode())
+    #
+    #     if self.is_paint_mode():
+    #         print('We need to get selected assets and connect them to the selected MASH node')
+    #     else:
+    #         pass
+    #
+    # def _update_items(self, category, flag):
+    #     self._current_asset = None
+    #     self._asset_viewer.update_items(category)
+
+    # def _add_mash_data(self):
+    #     self._node = cmds.createNode('network', name=mash_network.networkName + '_scatter_data')
+    #     cmds.addAttr(self._node, ln='mash_network', at='message')
+    #     if not cmds.attributeQuery('scatter_data', node=mash_network.networkName, exists=True):
+    #         cmds.addAttr(mash_network.networkName, ln='scatter_data', at='message')
+    #     cmds.connectAttr(self._node + '.mash_network', mash_network.networkName + '.scatter_data')
+    #
+    #     for attr in ['scatter_nodes', 'scatter_properties']:
+    #         cmds.addAttr(self._node, ln=attr, dt='string')
+
+    def _update_ui(self, *args, **kwargs):
+        mash_network = self.get_selected_mash_network()
+        if not mash_network:
+            self._categories_widget.setEnabled(False)
         else:
-            pass
+            self._categories_widget.setEnabled(True)
 
+        self._mash_outliner.updateModel()
 
-
-
-
-    def _update_items(self, category, flag):
-        self._current_asset = None
-        self._asset_viewer.update_items(category)
+        # if not self._ignore_callbacks:
+        #     self._update_mash_selection()
+        #     self._update_mash_list()
 
     def _add_mash(self):
         mash_network = solstice_mash_utils.create_mash_network()
-        return ScatterMetaData(mash_network=mash_network)
-
-    def _rename_mash(self, index):
-        sel_indices = self._mash_list.selectionModel().selection().indexes()
-        if len(sel_indices) > 0:
-            item = sel_indices[0]
-            cmds.rename(cmds.ls(sl=True)[0], item.data())
+        painter = mash_network.addNode('MASH_Placer')
+        self._mash_outliner.updateModel()
+        return mash_network
 
     def _remove_mash(self):
-        sel_indices = self._mash_list.selectionModel().selection().indexes()
-        if len(sel_indices) > 0:
-            item = sel_indices[0]
-            solstice_mash_utils.remove_mash_network(item.data())
-            self._mash_list.selectionModel().setCurrentIndex(self._mash_list_model.index(self._mash_list_model.rowCount()-1), QItemSelectionModel.Select)
-
-    def _update_mash_list(self):
-
-        new_selection = cmds.ls(sl=True)
-        if len(new_selection) > 0:
-            new_selection = new_selection[0]
-        else:
-            new_selection = None
-
-        self._mash_list_model.removeRows(0, self._mash_list_model.rowCount())
-        mash_waiters = solstice_mash_utils.get_mash_nodes()
-        for m in mash_waiters:
-            if self._mash_list_model.insertRow(self._mash_list_model.rowCount()):
-                index = self._mash_list_model.index(self._mash_list_model.rowCount()-1, 0)
-                self._mash_list_model.setData(index, m)
-                if new_selection and m == new_selection:
-                    self._mash_list.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select)
-
-    def _on_selection_changed(self):
-        self._update_mash_selection()
-        self._update_asset_viewer_ui()
-
-    def _update_mash_selection(self, index=None):
-        sel_indices = self._mash_list.selectionModel().selection().indexes()
-        if len(sel_indices) > 0:
-            self._categories_widget.setEnabled(True)
-            item = sel_indices[0]
-            if cmds.objExists(item.data()):
-                self._ignore_callbacks = True
-                cmds.select(item.data(), replace=True, noExpand=True)
-                self._ignore_callbacks = False
-        else:
-            self._categories_widget.setEnabled(False)
-
-        self._update_asset_viewer_ui()
-
-    def _update_ui(self, *args, **kwargs):
-        if not self._ignore_callbacks:
-            self._update_mash_selection()
-            self._update_mash_list()
-
-    def get_selected_mash_network(self):
-        sel_indices = self._mash_list.selectionModel().selection().indexes()
-        if len(sel_indices) > 0:
-            item = sel_indices[0]
-            if item:
-                item_data = item.data()
-                print(item_data)
-                try:
-                    return solstice_mash_utils.get_mash_network(item_data)
-                except:
-                    pass
-        return None
-
-    def _update_asset_viewer_ui(self):
         mash_network = self.get_selected_mash_network()
-        if not mash_network:
-            return
-        mash_scatter_data = ScatterMetaData.get_scatter_data_from_mash_network(mash_network)
-        if not mash_scatter_data:
-            return
-
-        scatter_nodes = cmds.getAttr(mash_scatter_data+'.scatter_nodes')
-        if scatter_nodes is None or scatter_nodes == '':
-            return
-        else:
-            scatter_nodes = scatter_nodes.split()
-
-        # Firt we disable all the items
-        for i in range(self._asset_viewer.rowCount()):
-            for j in range(self._asset_viewer.columnCount()):
-                self._asset_viewer.cellWidget(i, j).containedWidget._asset_btn.setChecked(False)
-
-        for node in scatter_nodes:
-            for i in range(self._asset_viewer.rowCount()):
-                for j in range(self._asset_viewer.columnCount()):
-                    item = self._asset_viewer.cellWidget(i, j)
-                    asset = item.containedWidget
-                    if asset.name == node:
-                        asset._asset_btn.setChecked(True)
-
-    def _update_scatter_node(self, asset):
-        if not asset:
-            return
-        mash_network = self.get_selected_mash_network()
-        if not mash_network:
-            return
-        mash_scatter_data = ScatterMetaData.get_scatter_data_from_mash_network(mash_network)
-        if not mash_scatter_data:
-            return
-
-        asset_name = asset.name
-        asset_check = asset._asset_btn.isChecked()
-
-        if asset_check:
-            scatter_nodes = cmds.getAttr(mash_scatter_data+'.scatter_nodes')
-            if scatter_nodes is None or scatter_nodes == '':
-                scatter_nodes = asset_name
-            else:
-                scatter_nodes_split = scatter_nodes.split()
-                if asset_name in scatter_nodes_split:
-                    return
-                scatter_nodes_split.append(asset_name)
-                scatter_nodes = ''.join(str(s) + ' ' for s in scatter_nodes_split)
-            cmds.setAttr(mash_scatter_data+'.scatter_nodes', scatter_nodes, type='string')
-        else:
-            scatter_nodes = cmds.getAttr(mash_scatter_data+'.scatter_nodes')
-            if scatter_nodes is None or scatter_nodes == '':
-                return
-            scatter_nodes_split = scatter_nodes.split()
-            if asset_name in scatter_nodes_split:
-                scatter_nodes_split.remove(asset_name)
-            else:
-                return
-            scatter_nodes = ''.join(str(s) + ' ' for s in scatter_nodes_split)
-            cmds.setAttr(mash_scatter_data+'.scatter_nodes', scatter_nodes, type='string')
-
-        self._update_asset_viewer_ui()
+        instancer = mash_network.instancer
+        self._mash_outliner._deleteNode()
+        self._mash_outliner.updateModel()
+        if instancer and cmds.objExists(instancer):
+            cmds.delete(instancer)
+    # def _update_mash_list(self):
+    #
+    #     new_selection = cmds.ls(sl=True)
+    #     if len(new_selection) > 0:
+    #         new_selection = new_selection[0]
+    #     else:
+    #         new_selection = None
+    #
+    #     self._mash_list_model.removeRows(0, self._mash_list_model.rowCount())
+    #     mash_waiters = solstice_mash_utils.get_mash_nodes()
+    #     for m in mash_waiters:
+    #         if self._mash_list_model.insertRow(self._mash_list_model.rowCount()):
+    #             index = self._mash_list_model.index(self._mash_list_model.rowCount()-1, 0)
+    #             self._mash_list_model.setData(index, m)
+    #             if new_selection and m == new_selection:
+    #                 self._mash_list.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select)
+    #
+    # def _on_selection_changed(self):
+    #     self._update_mash_selection()
+    #     self._update_asset_viewer_ui()
+    #
+    # def _update_mash_selection(self, index=None):
+    #     sel_indices = self._mash_list.selectionModel().selection().indexes()
+    #     if len(sel_indices) > 0:
+    #         self._categories_widget.setEnabled(True)
+    #         item = sel_indices[0]
+    #         if cmds.objExists(item.data()):
+    #             self._ignore_callbacks = True
+    #             cmds.select(item.data(), replace=True, noExpand=True)
+    #             self._ignore_callbacks = False
+    #     else:
+    #         self._categories_widget.setEnabled(False)
+    #
+    #     self._update_asset_viewer_ui()
+    #
+    # def _update_scatter_node(self, asset):
+    #     if not asset:
+    #         return
+    #     mash_network = self.get_selected_mash_network()
+    #     if not mash_network:
+    #         return
+    #     mash_scatter_data = ScatterMetaData.get_scatter_data_from_mash_network(mash_network)
+    #     if not mash_scatter_data:
+    #         return
+    #
+    #     asset_name = asset.name
+    #     asset_check = asset._asset_btn.isChecked()
+    #
+    #     if asset_check:
+    #         scatter_nodes = cmds.getAttr(mash_scatter_data+'.scatter_nodes')
+    #         if scatter_nodes is None or scatter_nodes == '':
+    #             scatter_nodes = asset_name
+    #         else:
+    #             scatter_nodes_split = scatter_nodes.split()
+    #             if asset_name in scatter_nodes_split:
+    #                 return
+    #             scatter_nodes_split.append(asset_name)
+    #             scatter_nodes = ''.join(str(s) + ' ' for s in scatter_nodes_split)
+    #         cmds.setAttr(mash_scatter_data+'.scatter_nodes', scatter_nodes, type='string')
+    #     else:
+    #         scatter_nodes = cmds.getAttr(mash_scatter_data+'.scatter_nodes')
+    #         if scatter_nodes is None or scatter_nodes == '':
+    #             return
+    #         scatter_nodes_split = scatter_nodes.split()
+    #         if asset_name in scatter_nodes_split:
+    #             scatter_nodes_split.remove(asset_name)
+    #         else:
+    #             return
+    #         scatter_nodes = ''.join(str(s) + ' ' for s in scatter_nodes_split)
+    #         cmds.setAttr(mash_scatter_data+'.scatter_nodes', scatter_nodes, type='string')
+    #
+    #     self._update_asset_viewer_ui()
 
 
 def run():
@@ -396,4 +366,4 @@ def run():
     reload(solstice_assetviewer)
     reload(solstice_mash_utils)
 
-    SolsticeScatter().run()
+    SolsticeScatter.run()

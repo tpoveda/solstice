@@ -11,11 +11,13 @@
 import os
 import time
 import threading
+import traceback
 from functools import partial
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
 
+import solstice_pipeline as sp
 from solstice_utils import solstice_maya_utils
 from solstice_utils import solstice_artella_utils as artella
 
@@ -63,6 +65,7 @@ class SolsticeSync(QDialog, object):
         self._progress_bar.setMaximum(50)
         self._progress_bar.setMinimum(0)
         self._progress_bar.setTextVisible(False)
+        self._progress_bar.setStyleSheet("QProgressBar {border: 0px solid grey; border-radius:4px; padding:0px} QProgressBar::chunk {background: qlineargradient(x1: 0, y1: 1, x2: 1, y2: 1, stop: 0 rgb(245, 180, 148), stop: 1 rgb(75, 70, 170)); }")
         self._splash_layout.addWidget(self._progress_bar)
 
         self._progress_text = QLabel('Synchronizing Artella Files ... Please wait!')
@@ -99,6 +102,37 @@ class SolsticeSync(QDialog, object):
         return super(SolsticeSync, self).closeEvent(event)
 
 
+class SolsticeSyncFile(SolsticeSync, object):
+    def __init__(self, files=None):
+        super(SolsticeSyncFile, self).__init__()
+        self._files = files
+
+    def _update_progress_bar(self):
+        super(SolsticeSyncFile, self)._update_progress_bar()
+
+        if self._event.is_set():
+            self._timer.stop()
+            self.close()
+
+    def sync(self):
+        if not self._files:
+            self.close()
+        super(SolsticeSyncFile, self).sync()
+        self._event = threading.Event()
+        try:
+            threading.Thread(target=self.sync_files, args=(self._event,), name='SolsticeSyncFilesThread').start()
+        except Exception as e:
+            sp.logger.debug(str(e))
+            sp.logger.debug(traceback.format_exc())
+        self.exec_()
+
+    def sync_files(self, event):
+        for p in self._files:
+            self._progress_text.setText('Syncing file: {0} ... Please wait!'.format(p))
+            artella.synchronize_file(p)
+        event.set()
+
+
 class SolsticeSyncPath(SolsticeSync, object):
     def __init__(self, paths=None):
         super(SolsticeSyncPath, self).__init__()
@@ -114,12 +148,13 @@ class SolsticeSyncPath(SolsticeSync, object):
     def sync(self):
         if not self._paths:
             self.close()
-
         super(SolsticeSyncPath, self).sync()
-
         self._event = threading.Event()
-        threading.Thread(target=self.sync_files, args=(self._event,), name='SolsticeSyncThread').start()
-
+        try:
+            threading.Thread(target=self.sync_files, args=(self._event,), name='SolsticeSyncPathsThread').start()
+        except Exception as e:
+            sp.logger.debug(str(e))
+            sp.logger.debug(traceback.format_exc())
         self.exec_()
 
     def sync_files(self, event):

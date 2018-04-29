@@ -28,7 +28,7 @@ def delete_instances(window_class):
     for ins in window_class.instances:
         sp.logger.debug('Deleting {} window'.format(ins))
         try:
-            window_class.remove_callbacks()
+            ins.cleanup()
             ins.setParent(None)
             ins.deleteLater()
         except Exception as e:
@@ -49,13 +49,14 @@ class Window(QMainWindow, object):
     docked = False
 
     instances = list()
-    callbacks = list()
 
     def __init__(self, name='SolsticeDockedWindow', parent=None, layout=None, **kwargs):
         super(Window, self).__init__(parent=parent)
 
         delete_instances(self.__class__)
         self.__class__.instances.append(weakref.proxy(self))
+
+        self.callbacks = list()
 
         if not self.docked:
             if parent is None:
@@ -71,15 +72,17 @@ class Window(QMainWindow, object):
 
         self.custom_ui()
 
-    @classmethod
-    def add_callback(cls, callback_id):
-        cls.callbacks.append(callback_id)
+    def add_callback(self, callback_id):
+        self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(callback_id=callback_id))
 
-    @classmethod
-    def remove_callbacks(cls):
-        for c in cls.callbacks:
-            solstice_maya_utils.remove_callback(c)
-            cls.callbacks.remove(c)
+    def remove_callbacks(self):
+        for c in self.callbacks:
+            try:
+                self.callbacks.remove(c)
+                del c
+            except Exception as e:
+                pass
+        self.callbacks = []
 
     def custom_ui(self):
         if self.main_layout is None:
@@ -120,9 +123,15 @@ class Window(QMainWindow, object):
         self.logo_view.centerOn(1000, 0)
         return super(Window, self).resizeEvent(event)
 
-    def closeEvent(self, event):
+    def cleanup(self):
         self.remove_callbacks()
-        super(Window, self).closeEvent(event)
+
+    def closeEvent(self, event):
+        self.cleanup()
+        event.accept()
+
+    def __del__(self):
+        self.cleanup()
 
     @classmethod
     def run(cls):

@@ -16,7 +16,6 @@ from Qt.QtWidgets import *
 
 from maya import cmds, OpenMaya
 
-import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_grid, solstice_buttons
 from solstice_utils import solstice_python_utils as utils
 from resources import solstice_resource

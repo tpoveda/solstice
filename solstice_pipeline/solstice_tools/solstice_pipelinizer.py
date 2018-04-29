@@ -9,6 +9,8 @@
 # ==================================================================="""
 
 import os
+import re
+import time
 from functools import partial
 
 import pathlib2
@@ -18,8 +20,10 @@ from Qt.QtCore import *
 from Qt.QtWidgets import *
 from Qt.QtGui import *
 
+import maya.cmds as cmds
+
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser
+from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser, solstice_published_info_widget, solstice_sync_dialog
 from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_artella_utils, solstice_image
 from resources import solstice_resource
 
@@ -34,6 +38,7 @@ class Pipelinizer(solstice_windows.Window, object):
     docked = False
 
     solstice_project_id = '2/2252d6c8-407d-4419-a186-cf90760c9967/'
+    solstice_project_id_raw = '2252d6c8-407d-4419-a186-cf90760c9967'
 
     def __init__(self, name='PipelinizwerWindow', parent=None, **kwargs):
 
@@ -115,7 +120,9 @@ class Pipelinizer(solstice_windows.Window, object):
         asset_splitter = QSplitter(Qt.Horizontal)
         main_categories_menu_layout.addWidget(asset_splitter)
 
-        self._asset_viewer = solstice_assetviewer.AssetViewer(assets_path=self.get_solstice_assets_path(), item_prsesed_callback=self._update_asset_info)
+        self._asset_viewer = solstice_assetviewer.AssetViewer(
+            assets_path=self.get_solstice_assets_path(),
+            item_prsesed_callback=self._update_asset_info)
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         asset_splitter.addWidget(self._asset_viewer)
 
@@ -134,7 +141,7 @@ class Pipelinizer(solstice_windows.Window, object):
         categories_buttons = dict()
         for category in categories:
             new_btn = QPushButton(category)
-            new_btn.toggled.connect(partial(self._update_items, category))
+            new_btn.toggled.connect(partial(self._change_category, category))
             categories_buttons[category] = new_btn
             categories_buttons[category].setCheckable(True)
             categories_menu_layout.addWidget(new_btn)
@@ -145,10 +152,14 @@ class Pipelinizer(solstice_windows.Window, object):
         self._asset_icon = QLabel()
         self._asset_icon.setPixmap(solstice_resource.pixmap('empty_file', category='icons').scaled(200, 200, Qt.KeepAspectRatio))
         self._asset_icon.setAlignment(Qt.AlignCenter)
+        self._asset_published_info = solstice_published_info_widget.PublishedInfoWidget()
         self._asset_description = QTextEdit()
         self._asset_description.setReadOnly(True)
         info_asset_layout.addWidget(self._asset_info_lbl)
         info_asset_layout.addWidget(self._asset_icon)
+        info_asset_layout.addLayout(solstice_splitters.SplitterLayout())
+        info_asset_layout.addWidget(solstice_splitters.Splitter('PUBLISHED INFO'))
+        info_asset_layout.addWidget(self._asset_published_info)
         info_asset_layout.addLayout(solstice_splitters.SplitterLayout())
         info_asset_layout.addWidget(self._asset_description)
 
@@ -180,10 +191,117 @@ class Pipelinizer(solstice_windows.Window, object):
 
         #self.get_assets_by_category()
 
-    def _update_items(self, category, flag):
+    def _change_category(self, category, flag):
+        self._asset_viewer.change_category(category=category)
+
+    def _update_items(self, update=False):
         self._current_asset = None
         self._info_asset_widget.setVisible(False)
-        self._asset_viewer.update_items(category)
+        self._asset_viewer.update_items(update=update)
+
+        items = list()
+        for i in range(self._asset_viewer.rowCount()):
+            for j in range(self._asset_viewer.columnCount()):
+                item = self._asset_viewer.cellWidget(i, j)
+                if not item:
+                    continue
+                item = item.containedWidget.name
+                items.append(item)
+
+    def sync_all_assets(self, full_sync=False, ask=False):
+        """
+        Synchronizes all the assets of Solstice Short Film
+        :param full_sync: bool, If True, all the assets will be syncrhonized with the content on Artella Server,
+               if False, only will synchronize the assets that are missing (no waranty that you have latests versions
+               on other assets)
+        :return:
+        """
+
+        # Characters Synchronization
+        cmds.waitCursor(state=True)
+        characters = list()
+        start_time = time.time()
+        thread, event = sp.info_dialog.do('Getting Artella Characters Info ... Please wait!', 'SolsticeArtellaChars', self.get_assets_by_category, ['Characters', True, characters])
+        while not event.is_set():
+            QCoreApplication.processEvents()
+            event.wait(0.25)
+        characters_to_sync = list()
+        if characters:
+            characters = characters[0]
+            for i, ch in enumerate(characters.expand_tree()):
+                if i == 0:
+                    continue
+                if full_sync:
+                    characters_to_sync.append(characters[ch].tag)
+                else:
+                    if not os.path.exists(characters[ch].tag):
+                        characters_to_sync.append(characters[ch].tag)
+        if len(characters_to_sync) > 0:
+            if ask:
+                result = solstice_qt_utils.show_question(None, 'Some characters are not synchronized locally', 'Do you want to synchronize them? NOTE: This can take quite a lot of time!')
+                if result == QMessageBox.Yes:
+                    solstice_sync_dialog.SolsticeSyncPath(paths=characters_to_sync).sync()
+            else:
+                solstice_sync_dialog.SolsticeSyncPath(paths=characters_to_sync).sync()
+        elapsed_time = time.time() - start_time
+        sp.logger.debug('Characters synchronized in {0} seconds'.format(elapsed_time))
+
+        # Props synchronization
+        props = list()
+        start_time = time.time()
+        thread, event = sp.info_dialog.do('Getting Artella Props Info ... Please wait!', 'SolsticeArtellaProps', self.get_assets_by_category, ['Props', True, props])
+        while not event.is_set():
+            QCoreApplication.processEvents()
+            event.wait(0.25)
+        props_to_sync = list()
+        if props:
+            props = props[0]
+            for i, pr in enumerate(props.expand_tree()):
+                if i == 0:
+                    continue
+                if full_sync:
+                    props_to_sync.append(props[pr].tag)
+                else:
+                    if not os.path.exists(props[pr].tag):
+                        props_to_sync.append(props[pr].tag)
+        if len(props_to_sync) > 0:
+            if ask:
+                result = solstice_qt_utils.show_question(None, 'Some props are not synchronized locally', 'Do you want to synchronize them? NOTE: This can take quite a lot of time!')
+                if result == QMessageBox.Yes:
+                    solstice_sync_dialog.SolsticeSyncPath(paths=props_to_sync).sync()
+            else:
+                solstice_sync_dialog.SolsticeSyncPath(paths=props_to_sync).sync()
+        elapsed_time = time.time() - start_time
+        sp.logger.debug('Props synchronized in {0} seconds'.format(elapsed_time))
+
+        # Background Elements Synchronization
+        elements = list()
+        start_time = time.time()
+        thread, event = sp.info_dialog.do('Getting Artella Background Elements Info ... Please wait!', 'SolsticeArtellaBackgroundElements', self.get_assets_by_category, ['BackgroundElements', True, elements])
+        while not event.is_set():
+            QCoreApplication.processEvents()
+            event.wait(0.25)
+        elements_to_sync = list()
+        if elements:
+            elements = elements[0]
+            for i, el in enumerate(elements.expand_tree()):
+                if i == 0:
+                    continue
+                if full_sync:
+                    elements_to_sync.append(elements[el].tag)
+                else:
+                    if not os.path.exists(elements[el].tag):
+                        elements_to_sync.append(elements[el].tag)
+        if len(elements_to_sync) > 0:
+            if ask:
+                result = solstice_qt_utils.show_question(None, 'Some background elements are not synchronized locally', 'Do you want to synchronize them? NOTE: This can take quite a lot of time!')
+                if result == QMessageBox.Yes:
+                    solstice_sync_dialog.SolsticeSyncPath(paths=elements_to_sync).sync()
+            else:
+                solstice_sync_dialog.SolsticeSyncPath(paths=elements_to_sync).sync()
+        elapsed_time = time.time() - start_time
+        sp.logger.debug('Background Elements synchronized in {0} seconds'.format(elapsed_time))
+        cmds.waitCursor(state=False)
 
     def _update_asset_info(self, asset=None):
 
@@ -201,7 +319,7 @@ class Pipelinizer(solstice_windows.Window, object):
         else:
             self._info_asset_widget.setVisible(False)
 
-    def get_assets_by_category(self, category='Characters', only_assets=True):
+    def get_assets_by_category(self, category='Characters', only_assets=True, thread_result=None, thread_event=None):
         """
         Gets a list of assets of a specific category
         :param category: str
@@ -233,7 +351,12 @@ class Pipelinizer(solstice_windows.Window, object):
                         tree.create_node(ref_data.path, parent=parent_node, data=status)
 
         get_assets(root)
-        tree.show()
+        # tree.show()
+
+        if thread_event:
+            thread_event.set()
+            thread_result.append(tree)
+
         return tree
 
         # category_folder = os.path.join(solstice_assets_path, category)
@@ -241,18 +364,6 @@ class Pipelinizer(solstice_windows.Window, object):
         #     # TODO: Add messagebox to answer the user if they want to syncrhonize the category folder
         #     print('Category folder does not exists! Trying to retrieve it!')
         #     solstice_artella_utils.synchronize_path(category_folder)
-
-    def load_projects(self):
-        self._projects_btn.setMenu(None)
-        self._projects_btn.setStyleSheet(
-            """
-            QPushButton::menu-indicator
-            {
-                subcontrol-position: right center;
-            }
-            """
-        )
-        menu = QMenu(self._projects_btn)
 
     @classmethod
     def update_solstice_project_path(cls):
@@ -293,11 +404,27 @@ class Pipelinizer(solstice_windows.Window, object):
 
         assets_path = os.path.join(cls.get_solstice_project_path(), 'Assets')
         if os.path.exists(assets_path):
-            sp.logger.debug('Getting Assets Path: {0}'.format(assets_path))
+            # sp.logger.debug('Getting Assets Path: {0}'.format(assets_path))
             return assets_path
         else:
-            sp.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
+            # sp.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
             return None
+
+    @classmethod
+    def get_asset_version(cls, name):
+        """
+        Returns the version of a specific given asset (model_v001, return [v001, 001, 1])
+        :param name: str
+        :return: list<str, int>
+        """
+
+        string_version = name[-4:]
+        int_version = map(int, re.findall('\d+', string_version))[0]
+        int_version_formatted = '{0:03}'.format(int_version)
+
+        return [string_version, int_version, int_version_formatted]
+
+
 
 def run():
     reload(solstice_python_utils)
@@ -318,6 +445,7 @@ def run():
     reload(solstice_navigationwidget)
     reload(solstice_filelistwidget)
     reload(solstice_splitters)
+    reload(solstice_published_info_widget)
 
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()
@@ -328,10 +456,10 @@ def run():
     # Update Solstice Project Environment Variable
     Pipelinizer.update_solstice_project_path()
 
-    current_directory = pathlib2.Path(Pipelinizer.get_solstice_project_path()).glob('**/*')
-    files = [x for x in current_directory if x.is_file()]
-    for f in files:
-        print(f)
+    # current_directory = pathlib2.Path(Pipelinizer.get_solstice_project_path()).glob('**/*')
+    # files = [x for x in current_directory if x.is_file()]
+    # for f in files:
+    #     print(f)
 
     # dct = solstice_python_utils.path_to_dictionary(path=Pipelinizer.get_solstice_project_path())
     # print(dct)

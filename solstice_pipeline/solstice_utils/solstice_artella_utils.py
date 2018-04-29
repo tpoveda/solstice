@@ -13,6 +13,7 @@ import os
 import sys
 import json
 import subprocess
+import urllib2
 
 import maya.cmds as cmds
 
@@ -167,8 +168,7 @@ def get_spigot_client():
         utils.force_stack_trace_on()
         from am.artella.spigot.spigot import SpigotClient
         spigot_client = SpigotClient()
-
-    connect_artella_app_to_spigot(spigot_client)
+        connect_artella_app_to_spigot(spigot_client)
     return spigot_client
 
 
@@ -220,6 +220,8 @@ def get_status(filepath):
     rsp = spigot.execute(command_action='do', command_name='status', payload=uri)
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
+
+        # print(rsp)
 
     if 'data' in rsp:
         if '_latest'in rsp['data']:
@@ -306,22 +308,18 @@ def synchronize_path(path):
     return rsp
 
 
-def get_path_synchronization_progress(path):
-    uri = get_cms_uri(path)
+def synchronize_file(file_path):
+    """
+    Synchronize the specific given file, if exists
+    :param file_path: str
+    :return:
+    """
+
+    # TODO: We need to check if Artella App is running, if not abort the operation
+
+    uri = get_cms_uri(file_path)
     spigot = get_spigot_client()
-    rsp = spigot.execute(command_action='do', command_name='getUpdateCollectionProgress', payload=uri)
-
-    if type(rsp) == str:
-        rsp = json.loads(rsp)
-
-    sp.logger.debug(rsp)
-    return rsp
-
-
-def cancel_path_synchronization(path):
-    uri = get_cms_uri(path)
-    spigot = get_spigot_client()
-    rsp = spigot.execute(command_action='do', command_name='cancelUpdateCollection', payload=uri)
+    rsp = spigot.execute(command_action='do', command_name='update', payload=uri)
 
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
@@ -330,11 +328,23 @@ def cancel_path_synchronization(path):
     return rsp
 
 
+def get_asset_image(asset_path, project_id):
+    """
+    Returns the asset image from Artella server
+    :param asset_path: str, path of the asset relative to the Assets folder
+    :param project_id: str, ID of the Artella project you are currently working
+    :return:
+    """
+
+    # TODO: Authentication problem when doing request: look for workaround
+    image_url = os.path.join('https://cms-static.artella.com/cms_browser/thumbcontainerAvatar', project_id, asset_path)
+    print(image_url)
+    data = urllib2.urlopen(image_url).read()
+
+
 try:
     import Artella as artella
 except ImportError:
     load_artella_maya_plugin()
     update_artella_paths()
     import Artella as artella
-
-

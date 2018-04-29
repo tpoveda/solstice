@@ -21,6 +21,33 @@ import maya.utils as utils
 import maya.OpenMayaUI as OpenMayaUI
 import maya.OpenMaya as OpenMaya
 
+import solstice_pipeline as sp
+
+
+class MCallbackIdWrapper(object):
+    """
+    Wrapper class to handle cleaning up of MCallbackIds from registered MMessages
+    """
+
+    def __init__(self, callback_id):
+        super(MCallbackIdWrapper, self).__init__()
+        self.callback_id = callback_id
+        sp.logger.debug('Adding Callback: %s' % self.callback_id)
+
+    def __del__(self):
+        try:
+            OpenMaya.MDGMessage.removeCallback(self.callback_id)
+        except Exception:
+            pass
+        try:
+            OpenMaya.MMessage.removeCallback(self.callback_id)
+        except Exception:
+            pass
+        sp.logger.debug('Removing Callback: %s' % self.callback_id)
+
+    def __repr__(self):
+        return 'MCallbackIdWrapper(%r)' % self.callback_id
+
 
 def get_maya_api_version():
     """

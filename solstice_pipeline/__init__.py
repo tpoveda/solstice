@@ -17,14 +17,13 @@ if sys.version_info[:2] > (2, 7):
 else:
     from imp import reload
 
-from maya import OpenMaya
-
 import solstice_pipeline
 
 root_path = os.path.dirname(os.path.abspath(__file__))
 loaded_modules = OrderedDict()
 reload_modules = list()
 logger = None
+info_dialog = None
 
 def update_paths():
     extra_paths = [os.path.join(root_path, 'externals'), os.path.join(root_path, 'icons')]
@@ -152,8 +151,19 @@ def create_solstice_logger():
     logger.debug('Initializing Solstice Tools ...')
 
 
+def create_solstice_info_window():
+    """
+    Creates a global window that is used to show different type of info
+    """
+
+    from solstice_gui import solstice_info_dialog
+    global info_dialog
+    info_dialog = solstice_info_dialog.InfoDialog()
+
 def init():
     # update_paths()
     create_solstice_logger()
     import_modules(solstice_pipeline.__path__[0], only_packages=True, order=['solstice_pipeline.solstice_utils', 'solstice_pipeline.solstice_gui', 'solstice_pipeline.solstice_tools'])
     reload_all()
+    create_solstice_info_window()
+

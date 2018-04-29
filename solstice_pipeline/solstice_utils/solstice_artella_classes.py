@@ -10,8 +10,9 @@
 # ==================================================================="""
 
 import os
-import solstice_pipeline as sp
+import collections
 
+import solstice_pipeline as sp
 
 class ArtellaHeaderMetaData(object):
     def __init__(self, header_dict):
@@ -67,6 +68,24 @@ class ArtellaAssetMetaData(object):
         self.__latest = status_dict['data']['_latest']
         self._latest_ = status_dict['data']['latest']
 
+        self._published_folders = dict()
+        self._must_folders = ['model', 'textures', 'shading']
+
+        for f in self._must_folders:
+            self._published_folders[f] = dict()
+
+        from solstice_tools import solstice_pipelinizer as pipeline
+
+        for name, data in status_dict['data'].items():
+            if name == '_latest' or name == 'latest':
+                continue
+            for f in self._must_folders:
+                if f in name:
+                    model_version = pipeline.Pipelinizer.get_asset_version(name)[1]
+                    self._published_folders[f][str(model_version)] = name
+        for f in self._must_folders:
+            self._published_folders[f] = collections.OrderedDict(sorted(self._published_folders[f].items()))
+
     @property
     def path(self):
         return self._path
@@ -79,15 +98,40 @@ class ArtellaAssetMetaData(object):
     def latest(self):
         return self._latest_
 
+    @property
+    def published_models(self):
+        return self._published_folders['model']
+
+    @property
+    def published_textures(self):
+        return self._published_folders['textures']
+
+    @property
+    def published_shading(self):
+        return self._published_folders['shading']
+
+    def get_is_published(self):
+        is_published = True
+        for f in self._must_folders:
+            must_dict = self._published_folders[f]
+            if not must_dict:
+                sp.logger.debug('Asset {0} is not published -> Folder "{1}" is not published yet!'.format(self._path, f))
+                is_published = False
+        return is_published
+
+
 
 class ArtellaReferencesMetaData(object):
     def __init__(self, ref_name, ref_path, ref_dict):
         self._name = ref_name.split('/')[-1]
         self._path = os.path.join(ref_path, ref_name)
 
+        self._maximum_version_deleted = ref_dict['maximum_version_deleted'] if 'maximum_version_deleted' in ref_dict else False
         self._is_directory = ref_dict['is_directory'] if 'is_directory' in ref_dict else False
-        self._maximum_version = ref_dict['maximum_version'] if 'maximum_version' in ref_dict else None
+        self._view_version = ref_dict['view_version'] if 'view_version' in ref_dict else None
         self._relative_path = ref_dict['relative_path'] if 'relative_path' in ref_dict else None
+        self._maximum_version = ref_dict['maximum_version'] if 'maximum_version' in ref_dict else None
+        self._view_version_digest = ref_dict['view_version_digest'] if 'view_version_digest' in ref_dict else None
 
     @property
     def name(self):
@@ -98,8 +142,28 @@ class ArtellaReferencesMetaData(object):
         return self._path
 
     @property
+    def maximum_version_deleted(self):
+        return self._maximum_version_deleted
+
+    @property
     def is_directory(self):
         return self._is_directory
+
+    @property
+    def view_version(self):
+        return self._view_version
+
+    @property
+    def relative_path(self):
+        return self._relative_path
+
+    @property
+    def maximum_version(self):
+        return self._maximum_version
+
+    @property
+    def view_version_digest(self):
+        return self._view_version_digest
 
 
 class ArtellaDirectoryMetaData(object):

@@ -8,11 +8,21 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
+import os
+import urllib
+
 from Qt.QtCore import *
 from Qt.QtWidgets import *
 from Qt.QtGui import *
 
 from solstice_utils import solstice_image as img
+from solstice_utils import solstice_artella_utils as artella
+
+from solstice_utils import solstice_artella_classes
+
+reload(img)
+reload(artella)
+reload(solstice_artella_classes)
 
 
 class AssetWidget(QWidget, object):
@@ -49,6 +59,7 @@ class AssetWidget(QWidget, object):
         if self._icon:
             self._asset_btn.setIcon(QPixmap.fromImage(img.base64_to_image(self._icon, image_format=icon_format)))
             self._asset_btn.setIconSize(QSize(150, 150))
+
         self._asset_label = QLabel(self._name)
         self._asset_label.setAlignment(Qt.AlignCenter)
         asset_menu_layout = QHBoxLayout()
@@ -113,6 +124,13 @@ class AssetWidget(QWidget, object):
     def contextMenuEvent(self, event):
         menu = self._generate_context_menu()
         menu.exec_(event.globalPos())
+
+    def is_published(self):
+        asset_data = artella.get_status(os.path.join(self._asset_path))
+        if not asset_data:
+            return
+
+        return asset_data.get_is_published()
 
     def _generate_context_menu(self):
         """
