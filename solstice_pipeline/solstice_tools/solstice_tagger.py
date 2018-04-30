@@ -52,6 +52,7 @@ class TaggerWidget(QWidget, object):
 
 class SolsticeTagger(solstice_windows.Window, object):
 
+    name = 'Tagger'
     title = 'Solstice Tools - Tagger'
     version = '1.0'
     docked = False

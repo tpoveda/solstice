@@ -26,7 +26,7 @@ DEF_MAYA_EXECUTABLE = 'maya.exe'
 
 def get_system_config_directory(console):
     """
-    Returns platform specifi configuration directory
+    Returns platform specific configuration directory
     """
 
     if platform.system().lower() == 'windows':

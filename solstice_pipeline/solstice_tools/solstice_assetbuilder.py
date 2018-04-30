@@ -24,6 +24,7 @@ from solstice_utils import solstice_image as img
 
 class AssetBuilder(solstice_windows.Window, object):
 
+    name = 'Asset Builder'
     title = 'Solstice Tools - Asset Builder'
     version = '1.0'
     docked = False

@@ -25,6 +25,7 @@ from solstice_gui import solstice_asset
 
 class SolsticeScatter(solstice_windows.Window, object):
 
+    name = 'Scatter'
     title = 'Solstice Tools - Scatter Tool'
     version = '1.0'
     docked = False

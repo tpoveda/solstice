@@ -19,7 +19,8 @@ from solstice_utils import solstice_qt_utils
 
 class LightRigManager(solstice_windows.Window, object):
 
-    title = 'Solstice Tools - Light Rigs'
+    name = 'Light Rigs Manager'
+    title = 'Solstice Tools - Light Rigs Managers'
     version = '1.0'
     docked = False
 

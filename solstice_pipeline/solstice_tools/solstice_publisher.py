@@ -13,6 +13,7 @@ from solstice_gui import solstice_windows
 
 class SolsticePublisher(solstice_windows.Window, object):
 
+    name = 'Publisher'
     title = 'Solstice Tools - Publisher'
     version = '1.0'
     docked = False

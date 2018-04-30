@@ -11,10 +11,12 @@
 import os
 import re
 import ast
+import json
+import platform
 from tempfile import mkstemp
 from shutil import move
-import json
 
+from pathlib2 import Path
 
 iters = [list, tuple, set, frozenset]
 class _hack(tuple): pass
@@ -182,3 +184,18 @@ def camel_case_to_string(camel_case_string):
     """
 
     return re.sub("([a-z])([A-Z])", "\g<1> \g<2>", camel_case_string)
+
+
+def get_system_config_directory():
+    """
+    Returns platform specific configuration directory
+    """
+
+    if platform.system().lower() == 'windows':
+        config_directory = Path(os.getenv('APPDATA') or '~')
+    elif platform.system().lower() == 'darwin':
+        config_directory = Path('~', 'Library', 'Preferences')
+    else:
+        config_directory = Path(os.getenv('XDG_CONFIG_HOME') or '~/.config')
+
+    return config_directory

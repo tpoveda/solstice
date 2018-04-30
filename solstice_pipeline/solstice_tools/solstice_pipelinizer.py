@@ -12,6 +12,7 @@ import os
 import re
 import time
 from functools import partial
+from distutils.util import strtobool
 
 import pathlib2
 import treelib
@@ -31,8 +32,50 @@ from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice
 from solstice_gui import solstice_label, solstice_breadcrumb, solstice_navigationwidget, solstice_filelistwidget, solstice_splitters
 
 
+class PipelinizerSettings(QDialog, object):
+    def __init__(self, settings, parent=None):
+        super(PipelinizerSettings, self).__init__(parent=parent)
+
+        self._settings = settings
+
+        self.setObjectName('PipelinizerSettingsDialog')
+        self.setWindowTitle('Pipelinizer - Settings')
+        self.setMinimumWidth(250)
+
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(5, 5, 5, 5)
+        main_layout.setSpacing(2)
+        self.setLayout(main_layout)
+
+        frame = QFrame()
+        frame.setFrameShape(QFrame.StyledPanel)
+        frame_layout = QVBoxLayout()
+        frame_layout.setContentsMargins(5, 5, 5, 5)
+        frame_layout.setSpacing(2)
+        frame.setLayout(frame_layout)
+        main_layout.addWidget(frame)
+
+        self._auto_check_cbx = QCheckBox('Auto Check Versions?')
+        frame_layout.addWidget(self._auto_check_cbx)
+
+        main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        bottom_layout = QHBoxLayout()
+        bottom_layout.setContentsMargins(0, 0, 0, 0)
+        bottom_layout.setSpacing(1)
+        main_layout.addLayout(bottom_layout)
+
+        save_btn = QPushButton('Save')
+        cancel_btn = QPushButton('Cancel')
+        bottom_layout.addWidget(save_btn)
+        bottom_layout.addWidget(cancel_btn)
+
+        self.exec_()
+
+
 class Pipelinizer(solstice_windows.Window, object):
 
+    name = 'Pipelinizer'
     title = 'Solstice Tools - Artella Pipeline'
     version = '1.0'
     docked = False
@@ -47,6 +90,11 @@ class Pipelinizer(solstice_windows.Window, object):
         super(Pipelinizer, self).custom_ui()
 
         self.set_logo('solstice_pipeline_logo')
+
+        if self.settings.config_file.exists():
+            if not self.settings.has_option(self.settings.app_name, 'auto_check'):
+                self.settings.set(self.settings.app_name, 'auto_check', str(False))
+                self.settings.update()
 
         self._current_asset = None
 
@@ -69,10 +117,6 @@ class Pipelinizer(solstice_windows.Window, object):
         synchronize_btn = QToolButton()
         synchronize_btn.setText('Synchronize')
         synchronize_btn.setPopupMode(QToolButton.InstantPopup)
-        self._auto_check_btn = QToolButton()
-        self._auto_check_btn.setCheckable(True)
-        self._auto_check_btn.setText('Auto Check')
-        self._auto_check_btn.setChecked(True)
         settings_btn = QToolButton()
         settings_btn.setText('Settings')
 
@@ -86,7 +130,7 @@ class Pipelinizer(solstice_windows.Window, object):
             synchronize_menu.addAction(action)
         synchronize_btn.setMenu(synchronize_menu)
 
-        for i, btn in enumerate([artella_project_btn, project_folder_btn, synchronize_btn, self._auto_check_btn, settings_btn]):
+        for i, btn in enumerate([artella_project_btn, project_folder_btn, synchronize_btn, settings_btn]):
             top_menu_layout.addWidget(btn, 0, i, 1, 1, Qt.AlignCenter)
 
         tab_widget = QTabWidget()
@@ -190,6 +234,7 @@ class Pipelinizer(solstice_windows.Window, object):
         # =================================================================================================
         sync_background_elements_action.triggered.connect(self.sync_background_elements)
         sync_characters_action.triggered.connect(self.sync_characters)
+        settings_btn.clicked.connect(self._open_settings)
         # =================================================================================================
 
     def _change_category(self, category, flag):
@@ -208,6 +253,9 @@ class Pipelinizer(solstice_windows.Window, object):
                     continue
                 item = item.containedWidget.name
                 items.append(item)
+
+    def _open_settings(self):
+        PipelinizerSettings(self.settings)
 
     def sync_background_elements(self, full_sync=True, ask=False):
         """

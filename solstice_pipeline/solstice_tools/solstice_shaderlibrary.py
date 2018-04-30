@@ -387,6 +387,7 @@ class ShaderViewerWidget(QWidget, object):
 
 class ShaderLibrary(solstice_windows.Window, object):
 
+    name = 'Shader Library'
     title = 'Solstice Tools - Shader Manager'
     version = '1.0'
     docked = False

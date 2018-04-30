@@ -15,8 +15,10 @@ from Qt.QtWidgets import *
 
 import maya.cmds as cmds
 
+from appdirs import *
+
 import solstice_pipeline as sp
-from solstice_utils import solstice_qt_utils, solstice_maya_utils
+from solstice_utils import solstice_qt_utils, solstice_maya_utils, solstice_config
 from resources import solstice_resource
 
 
@@ -44,6 +46,7 @@ class Window(QMainWindow, object):
     Class to create basic Maya docked windows
     """
 
+    name = 'Solstice Tools'
     title = 'Solstice Tools'
     version = '1.0'
     docked = False
@@ -57,6 +60,7 @@ class Window(QMainWindow, object):
         self.__class__.instances.append(weakref.proxy(self))
 
         self.callbacks = list()
+        self.settings = solstice_config.create_config(self.name)
 
         if not self.docked:
             if parent is None:
