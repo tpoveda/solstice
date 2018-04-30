@@ -17,8 +17,8 @@ from Qt.QtCore import *
 from Qt.QtWidgets import *
 from Qt.QtGui import *
 
+import solstice_pipeline as sp
 from solstice_gui import solstice_splitters
-from solstice_tools import solstice_pipelinizer as pipeline
 from solstice_utils import solstice_image as img
 
 
@@ -95,7 +95,7 @@ class AssetBuilder(solstice_windows.Window, object):
         out_dict['asset']['preview_format'] = ''
         out_dict['asset']['description'] = self._description_text.toPlainText()
 
-        save_file = QFileDialog.getSaveFileName(self, 'Set folder to store asset data', pipeline.Pipelinizer.get_solstice_assets_path(), 'JSON Files (*.json)')[0]
+        save_file = QFileDialog.getSaveFileName(self, 'Set folder to store asset data', sp.get_solstice_assets_path(), 'JSON Files (*.json)')[0]
         if os.path.exists(os.path.dirname(save_file)):
             with open(save_file, 'w') as f:
                 json.dump(out_dict, f)
@@ -107,7 +107,7 @@ class AssetBuilder(solstice_windows.Window, object):
             #     pass
 
     def _load_asset(self):
-        load_file = QFileDialog.getOpenFileName(self, 'Select asset data file to open', pipeline.Pipelinizer.get_solstice_assets_path(), 'JSON Files (*.json)')[0]
+        load_file = QFileDialog.getOpenFileName(self, 'Select asset data file to open', sp.get_solstice_assets_path(), 'JSON Files (*.json)')[0]
         if os.path.isfile(load_file):
             data = None
             with open(load_file, 'r') as f:
@@ -130,7 +130,7 @@ class AssetBuilder(solstice_windows.Window, object):
 
     def _set_icon(self):
         file_dialog = QFileDialog(self)
-        icon_file_path = file_dialog.getOpenFileName(self, 'Select Icon File', pipeline.Pipelinizer.get_solstice_assets_path(), 'PNG Files (*.png);; JPG Files (*.jpg)')
+        icon_file_path = file_dialog.getOpenFileName(self, 'Select Icon File', sp.get_solstice_assets_path(), 'PNG Files (*.png);; JPG Files (*.jpg)')
         if icon_file_path and os.path.isfile(icon_file_path[0]):
             self._icon_btn.setIcon(QIcon(QPixmap(icon_file_path[0])))
             self._icon_btn.setText('')
@@ -142,7 +142,6 @@ class AssetBuilder(solstice_windows.Window, object):
 
 def run():
     reload(solstice_splitters)
-    reload(pipeline)
     reload(img)
     AssetBuilder().run()
 

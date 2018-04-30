@@ -16,8 +16,8 @@ from Qt.QtWidgets import *
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
+import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_assetviewer, solstice_splitters
-from solstice_tools import solstice_pipelinizer
 from solstice_utils import solstice_mash_utils
 
 from solstice_gui import solstice_asset
@@ -83,7 +83,7 @@ class SolsticeScatter(solstice_windows.Window, object):
         main_categories_menu_layout.addWidget(categories_menu)
 
         self._asset_viewer = solstice_assetviewer.AssetViewer(
-            assets_path=solstice_pipelinizer.Pipelinizer.get_solstice_assets_path(),
+            assets_path=sp.get_solstice_assets_path(),
             item_prsesed_callback=self._on_asset_click,
             simple_assets=True,
             checkable_assets=True,

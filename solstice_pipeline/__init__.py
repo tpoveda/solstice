@@ -25,6 +25,14 @@ reload_modules = list()
 logger = None
 info_dialog = None
 
+# =================================================================================
+
+solstice_project_id = '2/2252d6c8-407d-4419-a186-cf90760c9967/'
+solstice_project_id_raw = '2252d6c8-407d-4419-a186-cf90760c9967'
+
+# =================================================================================
+
+
 def update_paths():
     extra_paths = [os.path.join(root_path, 'externals'), os.path.join(root_path, 'icons')]
     for path in extra_paths:
@@ -159,6 +167,52 @@ def create_solstice_info_window():
     from solstice_gui import solstice_info_dialog
     global info_dialog
     info_dialog = solstice_info_dialog.InfoDialog()
+
+
+def update_solstice_project_path():
+    """
+    Updates environment variable that stores Solstice Project path and returns
+    the stored path
+    :return: str
+    """
+
+    artella_var = os.environ.get('ART_LOCAL_ROOT', None)
+    if artella_var and os.path.exists(artella_var):
+        os.environ['SOLSTICE_PROJECT'] = '{0}/_art/production/{1}'.format(artella_var, solstice_project_id)
+    else:
+        logger.debug('ERROR: Impossible to set Solstice Project Environment Variable! Contact TD please!')
+
+
+def get_solstice_project_path():
+    """
+    Returns Solstice Project path
+    :return: str
+    """
+    env_var = os.environ.get('SOLSTICE_PROJECT', None)
+    if env_var is None:
+        update_solstice_project_path()
+
+    env_var = os.environ.get('SOLSTICE_PROJECT', None)
+    if env_var is None:
+        raise RuntimeError('Solstice Project not setted up properly. Is Artella running? Contact TD!')
+
+    return os.environ.get('SOLSTICE_PROJECT')
+
+
+def get_solstice_assets_path():
+    """
+    Returns Solstice Project Assets path
+    :return: str
+    """
+
+    assets_path = os.path.join(get_solstice_project_path(), 'Assets')
+    if os.path.exists(assets_path):
+        # sp.logger.debug('Getting Assets Path: {0}'.format(assets_path))
+        return assets_path
+    else:
+        # sp.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
+        return None
+
 
 def init():
     # update_paths()

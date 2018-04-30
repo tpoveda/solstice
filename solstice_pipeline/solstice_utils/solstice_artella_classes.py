@@ -75,14 +75,34 @@ class ArtellaAssetMetaData(object):
             self._published_folders[f] = dict()
 
         from solstice_tools import solstice_pipelinizer as pipeline
+        from solstice_utils import solstice_artella_utils as artella
 
         for name, data in status_dict['data'].items():
             if name == '_latest' or name == 'latest':
                 continue
+
+            # Before doing nothing, check if the published version is valid (has not been deleted from Artella manually)
+            version_valid = True
+            try:
+                version_path = os.path.join(self._path, '__{0}__'.format(name))
+                version_info = artella.get_status(version_path)
+                if version_info:
+                    for n, d in version_info.references.items():
+                        if d.maximum_version_deleted and d.deleted:
+                            version_valid = False
+                            break
+            except Exception:
+                version_valid = False
+            if not version_valid:
+                continue
+
+            # Store all valid published folders
             for f in self._must_folders:
                 if f in name:
-                    model_version = pipeline.Pipelinizer.get_asset_version(name)[1]
-                    self._published_folders[f][str(model_version)] = name
+                    version = pipeline.Pipelinizer.get_asset_version(name)[1]
+                    self._published_folders[f][str(version)] = name
+
+        # Sort all dictionaries by version number
         for f in self._must_folders:
             self._published_folders[f] = collections.OrderedDict(sorted(self._published_folders[f].items()))
 
@@ -128,6 +148,8 @@ class ArtellaReferencesMetaData(object):
 
         self._maximum_version_deleted = ref_dict['maximum_version_deleted'] if 'maximum_version_deleted' in ref_dict else False
         self._is_directory = ref_dict['is_directory'] if 'is_directory' in ref_dict else False
+        self._deleted = ref_dict['deleted'] if 'deleted' in ref_dict else False
+        self._local_version = ref_dict['local_version'] if 'local_version' in ref_dict else None
         self._view_version = ref_dict['view_version'] if 'view_version' in ref_dict else None
         self._relative_path = ref_dict['relative_path'] if 'relative_path' in ref_dict else None
         self._maximum_version = ref_dict['maximum_version'] if 'maximum_version' in ref_dict else None
@@ -148,6 +170,14 @@ class ArtellaReferencesMetaData(object):
     @property
     def is_directory(self):
         return self._is_directory
+
+    @property
+    def deleted(self):
+        return self._deleted
+
+    @property
+    def local_version(self):
+        return self._local_version
 
     @property
     def view_version(self):

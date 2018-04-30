@@ -18,12 +18,10 @@ from Qt.QtCore import *
 from Qt.QtWidgets import *
 
 import solstice_pipeline as sp
-from solstice_utils import solstice_maya_utils
+from solstice_utils import solstice_maya_utils, solstice_python_utils
 from solstice_utils import solstice_artella_utils as artella
 
 from resources import solstice_resource
-
-from maya import utils
 
 
 class SolsticeSyncSplash(QSplashScreen, object):
@@ -128,7 +126,8 @@ class SolsticeSyncFile(SolsticeSync, object):
 
     def sync_files(self, event):
         for p in self._files:
-            self._progress_text.setText('Syncing file: {0} ... Please wait!'.format(p))
+            file_path = os.path.relpath(p, sp.get_solstice_assets_path())
+            self._progress_text.setText('Syncing file: {0} ... Please wait!'.format(file_path))
             artella.synchronize_file(p)
         event.set()
 
@@ -159,7 +158,8 @@ class SolsticeSyncPath(SolsticeSync, object):
 
     def sync_files(self, event):
         for p in self._paths:
-            self._progress_text.setText('Syncing files of folder: {0} ... Please wait!'.format(p))
+            file_path = os.path.relpath(p, sp.get_solstice_assets_path())
+            self._progress_text.setText('Syncing files of folder: {0} ... Please wait!'.format(file_path))
             artella.synchronize_path(p)
         event.set()
 

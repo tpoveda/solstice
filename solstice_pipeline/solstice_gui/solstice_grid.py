@@ -9,9 +9,7 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from Qt.QtCore import *
 from Qt.QtWidgets import *
-from Qt.QtGui import *
 
 from solstice_gui import solstice_containerwidget
 

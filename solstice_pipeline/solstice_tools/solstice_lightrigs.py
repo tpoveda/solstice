@@ -9,20 +9,12 @@
 # ==================================================================="""
 
 import os
-from functools import partial
 
-from Qt.QtCore import *
 from Qt.QtWidgets import *
-from Qt.QtGui import *
-
-from maya import cmds, OpenMaya
 
 import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_sync_dialog
-from solstice_tools import solstice_pipelinizer as pipeline
 from solstice_utils import solstice_qt_utils
-from solstice_utils import solstice_python_utils as utils
-from resources import solstice_resource
 
 
 class LightRigManager(solstice_windows.Window, object):
@@ -48,7 +40,7 @@ class LightRigManager(solstice_windows.Window, object):
         :return: str
         """
 
-        light_rigs_path = os.path.join(pipeline.Pipelinizer.get_solstice_assets_path(), 'lighting', 'Light Rigs')
+        light_rigs_path = os.path.join(sp.get_solstice_assets_path(), 'lighting', 'Light Rigs')
         if os.path.exists(light_rigs_path):
             sp.logger.debug('Getting Light Rigs Path: {0}'.format(light_rigs_path))
             return light_rigs_path

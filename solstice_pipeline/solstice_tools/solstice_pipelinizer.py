@@ -37,9 +37,6 @@ class Pipelinizer(solstice_windows.Window, object):
     version = '1.0'
     docked = False
 
-    solstice_project_id = '2/2252d6c8-407d-4419-a186-cf90760c9967/'
-    solstice_project_id_raw = '2252d6c8-407d-4419-a186-cf90760c9967'
-
     def __init__(self, name='PipelinizwerWindow', parent=None, **kwargs):
 
         self._projects = None
@@ -69,12 +66,28 @@ class Pipelinizer(solstice_windows.Window, object):
         artella_project_btn.setText('Artella')
         project_folder_btn = QToolButton()
         project_folder_btn.setText('Project')
+        synchronize_btn = QToolButton()
+        synchronize_btn.setText('Synchronize')
+        synchronize_btn.setPopupMode(QToolButton.InstantPopup)
+        self._auto_check_btn = QToolButton()
+        self._auto_check_btn.setCheckable(True)
+        self._auto_check_btn.setText('Auto Check')
+        self._auto_check_btn.setChecked(True)
         settings_btn = QToolButton()
         settings_btn.setText('Settings')
 
-        top_menu_layout.addWidget(artella_project_btn, 0, 0, 1, 1, Qt.AlignCenter)
-        top_menu_layout.addWidget(project_folder_btn, 0, 1, 1, 1, Qt.AlignCenter)
-        top_menu_layout.addWidget(settings_btn, 0, 2, 1, 1, Qt.AlignCenter)
+        # TODO: Create gobal settings file and simple file dialog editor
+
+        synchronize_menu = QMenu(self)
+        sync_characters_action = QAction('Characters', self)
+        sync_props_action = QAction('Props', self)
+        sync_background_elements_action = QAction('Background Elements', self)
+        for action in [sync_characters_action, sync_props_action, sync_background_elements_action]:
+            synchronize_menu.addAction(action)
+        synchronize_btn.setMenu(synchronize_menu)
+
+        for i, btn in enumerate([artella_project_btn, project_folder_btn, synchronize_btn, self._auto_check_btn, settings_btn]):
+            top_menu_layout.addWidget(btn, 0, i, 1, 1, Qt.AlignCenter)
 
         tab_widget = QTabWidget()
         tab_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -121,10 +134,12 @@ class Pipelinizer(solstice_windows.Window, object):
         main_categories_menu_layout.addWidget(asset_splitter)
 
         self._asset_viewer = solstice_assetviewer.AssetViewer(
-            assets_path=self.get_solstice_assets_path(),
+            assets_path=sp.get_solstice_assets_path(),
             item_prsesed_callback=self._update_asset_info)
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         asset_splitter.addWidget(self._asset_viewer)
+
+        self._asset_viewer.first_empty_cell()
 
         self._info_asset_widget = QWidget()
         self._info_asset_widget.setVisible(False)
@@ -148,21 +163,6 @@ class Pipelinizer(solstice_windows.Window, object):
             self._categories_btn_group.addButton(new_btn)
         categories_buttons['All'].setChecked(True)
 
-        self._asset_info_lbl = solstice_splitters.Splitter('')
-        self._asset_icon = QLabel()
-        self._asset_icon.setPixmap(solstice_resource.pixmap('empty_file', category='icons').scaled(200, 200, Qt.KeepAspectRatio))
-        self._asset_icon.setAlignment(Qt.AlignCenter)
-        self._asset_published_info = solstice_published_info_widget.PublishedInfoWidget()
-        self._asset_description = QTextEdit()
-        self._asset_description.setReadOnly(True)
-        info_asset_layout.addWidget(self._asset_info_lbl)
-        info_asset_layout.addWidget(self._asset_icon)
-        info_asset_layout.addLayout(solstice_splitters.SplitterLayout())
-        info_asset_layout.addWidget(solstice_splitters.Splitter('PUBLISHED INFO'))
-        info_asset_layout.addWidget(self._asset_published_info)
-        info_asset_layout.addLayout(solstice_splitters.SplitterLayout())
-        info_asset_layout.addWidget(self._asset_description)
-
         # ================== Asset Browser Widget
         asset_viewer_splitter = QSplitter(Qt.Horizontal)
         asset_browser_layout.addWidget(asset_viewer_splitter)
@@ -181,15 +181,16 @@ class Pipelinizer(solstice_windows.Window, object):
         local_data_layout = QHBoxLayout()
         local_data_layout.setContentsMargins(0, 0, 0, 0)
         local_data_layout.setSpacing(0)
-        # local_data_layout.setAlignment(Qt.AlignTop)
+        local_data_layout.setAlignment(Qt.AlignTop)
         local_data_widget.setLayout(local_data_layout)
-        local_data_browser = solstice_assetbrowser.AssetBrowser(title='       Local Data      ', root_path=self.get_solstice_assets_path())
+        local_data_browser = solstice_assetbrowser.AssetBrowser(title='       Local Data      ', root_path=sp.get_solstice_assets_path())
         local_data_layout.addWidget(local_data_browser)
         asset_viewer_splitter.addWidget(local_data_widget)
 
         # =================================================================================================
-
-        #self.get_assets_by_category()
+        sync_background_elements_action.triggered.connect(self.sync_background_elements)
+        sync_characters_action.triggered.connect(self.sync_characters)
+        # =================================================================================================
 
     def _change_category(self, category, flag):
         self._asset_viewer.change_category(category=category)
@@ -207,6 +208,92 @@ class Pipelinizer(solstice_windows.Window, object):
                     continue
                 item = item.containedWidget.name
                 items.append(item)
+
+    def sync_background_elements(self, full_sync=True, ask=False):
+        """
+        Synchronizes all background elements located in Artella Server
+         :param full_sync: bool, If True, all the assets will be sync with the content on Artella Server,
+               if False, only will synchronize the assets that are missing (no warranty that you have latest versions
+               on other assets)
+        :param ask: bool, True if you want to show a message box to the user to decide if the want or not download
+                          missing files in his local machine
+        """
+
+        start_time = time.time()
+        try:
+            cmds.waitCursor(state=True)
+            elements = list()
+            thread, event = sp.info_dialog.do('Getting Artella Background Elements Info ... Please wait!', 'SolsticeArtellaBackgroundElements', self.get_assets_by_category, ['BackgroundElements', True, elements])
+            while not event.is_set():
+                QCoreApplication.processEvents()
+                event.wait(0.25)
+            elements_to_sync = list()
+            if elements:
+                elements = elements[0]
+                for i, el in enumerate(elements.expand_tree()):
+                    if i == 0:
+                        continue
+                    if full_sync:
+                        elements_to_sync.append(elements[el].tag)
+                    else:
+                        if not os.path.exists(elements[el].tag):
+                            elements_to_sync.append(elements[el].tag)
+            if len(elements_to_sync) > 0:
+                if ask:
+                    result = solstice_qt_utils.show_question(None,'Some background elements are not synchronized locally','Do you want to synchronize them? NOTE: This can take quite a lot of time!')
+                    if result == QMessageBox.Yes:
+                        solstice_sync_dialog.SolsticeSyncPath(paths=elements_to_sync).sync()
+                else:
+                    solstice_sync_dialog.SolsticeSyncPath(paths=elements_to_sync).sync()
+        except Exception as e:
+            sp.logger.debug(str(e))
+            cmds.waitCursor(state=False)
+        elapsed_time = time.time() - start_time
+        sp.logger.debug('Background Elements synchronized in {0} seconds'.format(elapsed_time))
+        cmds.waitCursor(state=False)
+
+    def sync_characters(self, full_sync=True, ask=False):
+        """
+        Synchronizes all characters located in Artella Server
+         :param full_sync: bool, If True, all the assets will be sync with the content on Artella Server,
+               if False, only will synchronize the assets that are missing (no warranty that you have latest versions
+               on other assets)
+        :param ask: bool, True if you want to show a message box to the user to decide if the want or not download
+                          missing files in his local machine
+        """
+
+        start_time = time.time()
+        try:
+            cmds.waitCursor(state=True)
+            characters = list()
+            thread, event = sp.info_dialog.do('Getting Artella Characters Info ... Please wait!', 'SolsticeArtellaCharacters', self.get_assets_by_category, ['Characters', True, characters])
+            while not event.is_set():
+                QCoreApplication.processEvents()
+                event.wait(0.25)
+                characters_to_sync = list()
+            if characters:
+                characters = characters[0]
+                for i, ch in enumerate(characters.expand_tree()):
+                    if i == 0:
+                        continue
+                    if full_sync:
+                        characters_to_sync.append(characters[ch].tag)
+                    else:
+                        if not os.path.exists(characters[ch].tag):
+                            characters_to_sync.append(characters[ch].tag)
+            if len(characters_to_sync) > 0:
+                if ask:
+                    result = solstice_qt_utils.show_question(None, 'Some characters are not synchronized locally','Do you want to synchronize them? NOTE: This can take quite a lot of time!')
+                    if result == QMessageBox.Yes:
+                        solstice_sync_dialog.SolsticeSyncPath(paths=characters_to_sync).sync()
+                else:
+                    solstice_sync_dialog.SolsticeSyncPath(paths=characters_to_sync).sync()
+        except Exception as e:
+            sp.logger.debug(str(e))
+            cmds.waitCursor(state=False)
+        elapsed_time = time.time() - start_time
+        sp.logger.debug('Characters synchronized in {0} seconds'.format(elapsed_time))
+        cmds.waitCursor(state=False)
 
     def sync_all_assets(self, full_sync=False, ask=False):
         """
@@ -305,17 +392,16 @@ class Pipelinizer(solstice_windows.Window, object):
 
     def _update_asset_info(self, asset=None):
 
-        if self._current_asset:
-            self._current_asset.toggle_asset_menu()
         self._current_asset = asset
-
         if asset:
-            self._info_asset_widget.setVisible(True)
-            self._asset_info_lbl.set_text(asset.name)
-            if asset.icon is not None and asset.icon != '':
-                self._asset_icon.setPixmap(QPixmap.fromImage(solstice_image.base64_to_image(asset.icon, image_format=asset.icon_format)).scaled(300, 300, Qt.KeepAspectRatio))
-            self._asset_description.setText(asset.description)
+            info_widget = asset.get_asset_info_widget()
+            if not info_widget:
+                return
 
+            for i in reversed(range(self._info_asset_widget.layout().count())):
+                self._info_asset_widget.layout().itemAt(i).widget().setParent(None)
+            self._info_asset_widget.layout().addWidget(info_widget)
+            self._info_asset_widget.setVisible(True)
         else:
             self._info_asset_widget.setVisible(False)
 
@@ -327,7 +413,7 @@ class Pipelinizer(solstice_windows.Window, object):
         :return: list<str>
         """
 
-        assets_path = self.get_solstice_assets_path()
+        assets_path = sp.get_solstice_assets_path()
         chars_path = os.path.join(assets_path, category)
         st = solstice_artella_utils.get_status(chars_path)
 
@@ -366,51 +452,6 @@ class Pipelinizer(solstice_windows.Window, object):
         #     solstice_artella_utils.synchronize_path(category_folder)
 
     @classmethod
-    def update_solstice_project_path(cls):
-        """
-        Updates environment variable that stores Solstice Project path and returns
-        the stored path
-        :return: str
-        """
-
-        artella_var = os.environ.get('ART_LOCAL_ROOT', None)
-        if artella_var and os.path.exists(artella_var):
-            os.environ['SOLSTICE_PROJECT'] = '{0}/_art/production/{1}'.format(artella_var, cls.solstice_project_id)
-        else:
-            sp.logger.debug('ERROR: Impossible to set Solstice Project Environment Variable! Contact TD please!')
-
-    @classmethod
-    def get_solstice_project_path(cls):
-        """
-        Returns Solstice Project path
-        :return: str
-        """
-        env_var = os.environ.get('SOLSTICE_PROJECT', None)
-        if env_var is None:
-            cls.update_solstice_project_path()
-
-        env_var = os.environ.get('SOLSTICE_PROJECT', None)
-        if env_var is None:
-            raise RuntimeError('Solstice Project not setted up properly. Is Artella running? Contact TD!')
-
-        return os.environ.get('SOLSTICE_PROJECT')
-
-    @classmethod
-    def get_solstice_assets_path(cls):
-        """
-        Returns Solstice Project Assets path
-        :return: str
-        """
-
-        assets_path = os.path.join(cls.get_solstice_project_path(), 'Assets')
-        if os.path.exists(assets_path):
-            # sp.logger.debug('Getting Assets Path: {0}'.format(assets_path))
-            return assets_path
-        else:
-            # sp.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
-            return None
-
-    @classmethod
     def get_asset_version(cls, name):
         """
         Returns the version of a specific given asset (model_v001, return [v001, 001, 1])
@@ -423,7 +464,6 @@ class Pipelinizer(solstice_windows.Window, object):
         int_version_formatted = '{0:03}'.format(int_version)
 
         return [string_version, int_version, int_version_formatted]
-
 
 
 def run():
@@ -454,14 +494,14 @@ def run():
             pass
 
     # Update Solstice Project Environment Variable
-    Pipelinizer.update_solstice_project_path()
+    sp.update_solstice_project_path()
 
-    # current_directory = pathlib2.Path(Pipelinizer.get_solstice_project_path()).glob('**/*')
+    # current_directory = pathlib2.Path(sp.get_solstice_project_path()).glob('**/*')
     # files = [x for x in current_directory if x.is_file()]
     # for f in files:
     #     print(f)
 
-    # dct = solstice_python_utils.path_to_dictionary(path=Pipelinizer.get_solstice_project_path())
+    # dct = solstice_python_utils.path_to_dictionary(path=sp.get_solstice_project_path())
     # print(dct)
     #
     # metadata = solstice_artella_utils.get_metadata()

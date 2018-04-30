@@ -223,7 +223,7 @@ def create_qrc_file(src_paths, dst_file):
 
 def safe_delete_later(widget):
     """
-    Calsl the deleteLater method on the given widget, but only
+    calls the deleteLater method on the given widget, but only
     in the necessary Qt environment
     :param widget: QWidget
     """
@@ -242,3 +242,13 @@ def show_question(parent, title, question):
 
     flags = QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
     return QMessageBox.question(parent, title, question, flags)
+
+
+def clear_layout_widgets(layout):
+    """
+    Removes all the widgets added in the given layout
+    :param layout: QLayout
+    """
+
+    for i in reversed(range(layout.count())):
+        layout.itemAt(i).widget().setParent(None)

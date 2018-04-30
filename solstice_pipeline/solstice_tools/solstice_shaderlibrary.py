@@ -23,7 +23,6 @@ from solstice_gui import solstice_windows, solstice_shaderviewer, solstice_shade
 from solstice_utils import solstice_maya_utils as utils
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_shader_utils
-from solstice_tools import solstice_pipelinizer as pipeline
 
 IGNORE_SHADERS = ['particleCloud1', 'shaderGlow1', 'defaultColorMgtGlobals', 'lambert1']
 IGNORE_ATTRS = ['computedFileTextureNamePattern']
@@ -452,7 +451,7 @@ class ShaderLibrary(solstice_windows.Window, object):
 
     @staticmethod
     def get_shader_library_path():
-        return os.path.join(pipeline.Pipelinizer.get_solstice_assets_path(), 'ShadersLibrary')
+        return os.path.join(sp.get_solstice_assets_path(), 'ShadersLibrary')
 
     def _export_selected_shaders(self):
         shaders = cmds.ls(sl=True, materials=True)

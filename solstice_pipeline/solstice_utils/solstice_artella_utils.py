@@ -207,7 +207,7 @@ def get_metadata():
     return metadata
 
 
-def get_status(filepath):
+def get_status(filepath, as_json=False):
     """
     Returns the status of  the given file path
     :param filepath: str
@@ -221,7 +221,11 @@ def get_status(filepath):
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
 
-        # print(rsp)
+        # TODO: Print cannot be used because if we use threads Maya will crash, check if logger crash Maya
+        # sp.logger.debug(rsp)
+
+    if as_json:
+        return rsp
 
     if 'data' in rsp:
         if '_latest'in rsp['data']:
