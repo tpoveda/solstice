@@ -8,40 +8,18 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-import weakref
+import uuid
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
 
-import maya.cmds as cmds
+from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
-from appdirs import *
-
-import solstice_pipeline as sp
-from solstice_utils import solstice_qt_utils, solstice_maya_utils, solstice_config
+from solstice_utils import solstice_maya_utils, solstice_config
 from resources import solstice_resource
 
 
-def dock_window(window_class):
-    cmds.evalDeferred(lambda *args: solstice_qt_utils.dock_solstice_widget(widget_class=window_class))
-
-
-def delete_instances(window_class):
-    for ins in window_class.instances:
-        sp.logger.debug('Deleting {} window'.format(ins))
-        try:
-            ins.cleanup()
-            ins.setParent(None)
-            ins.deleteLater()
-        except Exception as e:
-            # Ignore the deletion exception if the actual parent has already been deleted by Maya
-            sp.logger.debug(str(e))
-            pass
-        window_class.instances.remove(ins)
-        del ins
-
-
-class Window(QMainWindow, object):
+class Window(MayaQWidgetDockableMixin, QMainWindow):
     """
     Class to create basic Maya docked windows
     """
@@ -49,30 +27,22 @@ class Window(QMainWindow, object):
     name = 'Solstice Tools'
     title = 'Solstice Tools'
     version = '1.0'
-    docked = False
+    dock = False
 
-    instances = list()
+    def __init__(self, name='SolsticeDockedWindow', **kwargs):
+        super(Window, self).__init__(parent=solstice_maya_utils.get_maya_window())
 
-    def __init__(self, name='SolsticeDockedWindow', parent=None, layout=None, **kwargs):
-        super(Window, self).__init__(parent=parent)
-
-        delete_instances(self.__class__)
-        self.__class__.instances.append(weakref.proxy(self))
+        # Window needs to have a unique name to avoid problems with Maya workspaces
+        win_name = '{0}_{1}'.format(name, uuid.uuid4())
 
         self.callbacks = list()
         self.settings = solstice_config.create_config(self.name)
 
-        if not self.docked:
-            if parent is None:
-                self.setParent(solstice_maya_utils.get_maya_window())
-
-            self.setObjectName(name)
-            self.setWindowTitle(kwargs.get('title', self.title))
-            self.setWindowFlags(self.windowFlags() | Qt.Window)
-            self.setFocusPolicy(Qt.StrongFocus)
-            self.main_layout = None
-        else:
-            self.main_layout = layout
+        self.setObjectName(win_name)
+        self.setWindowTitle(kwargs.get('title', self.title))
+        self.setWindowFlags(self.windowFlags() | Qt.Window)
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.main_layout = None
 
         self.custom_ui()
 
@@ -96,6 +66,7 @@ class Window(QMainWindow, object):
             self.main_layout.setSpacing(0)
             self.main_widget.setLayout(self.main_layout)
             self.setCentralWidget(self.main_widget)
+            # self.setLayout(self.main_layout)
 
             title_layout = QHBoxLayout()
             title_layout.setContentsMargins(0, 0, 0, 0)
@@ -136,13 +107,3 @@ class Window(QMainWindow, object):
 
     def __del__(self):
         self.cleanup()
-
-    @classmethod
-    def run(cls):
-        if cls.docked:
-            return dock_window(cls)
-        else:
-            win = cls()
-            win.show()
-            win.raise_()
-            return win

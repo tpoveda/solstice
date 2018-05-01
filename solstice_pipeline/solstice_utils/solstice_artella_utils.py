@@ -293,13 +293,27 @@ def get_status_current_file():
     return status
 
 
+def explore_file(path):
+    """
+    Opens the current file in the file explorer
+    :param path: str
+    """
+
+    uri = get_cms_uri(path)
+    spigot = get_spigot_client()
+    rsp = spigot.execute(command_action='do', command_name='explore', payload=uri)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+
+    return rsp
+
+
 def synchronize_path(path):
     """
     Synchronize all the content of the given path, if exists
     :param path: str
     """
-
-    # TODO: We need to check if Artella App is running, if not abort the operation
 
     uri = get_cms_uri(path)
     spigot = get_spigot_client()
@@ -344,6 +358,42 @@ def get_asset_image(asset_path, project_id):
     image_url = os.path.join('https://cms-static.artella.com/cms_browser/thumbcontainerAvatar', project_id, asset_path)
     print(image_url)
     data = urllib2.urlopen(image_url).read()
+
+
+def open_file_in_maya(file_path, maya_version=2017):
+    """
+    Open the given path in the given Maya version
+    :param file_path: str
+    :param maya_version: int
+    """
+
+    spigot = get_spigot_client()
+
+    # Firt we try to open the app if its not launched
+    payload = dict()
+    payload['appName'] = "maya.{0}".format(str(maya_version))
+    payload['parameter'] = "\"{0}\"".format(file_path)
+    payload['wait'] = "60"
+    payload = json.dumps(payload)
+    rsp = spigot.execute(command_action='do', command_name='launchApp', payload=payload)
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+    sp.logger.debug(rsp)
+
+    # Now we open the file
+    payload = dict()
+    payload['appId'] = "maya.{0}".format(str(maya_version))
+    payload['message'] = "{\"CommandName\":\"open\",\"CommandArgs\":{\"path\":\""+file_path+"\"}}".replace('\\', '/')
+    payload['message'] = payload['message'].replace('\\', '/').replace('//', '/')
+    payload = json.dumps(payload)
+
+    rsp = spigot.execute(command_action='do', command_name='passToApp', payload=payload)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+
+    sp.logger.debug(rsp)
+    return rsp
 
 
 try:

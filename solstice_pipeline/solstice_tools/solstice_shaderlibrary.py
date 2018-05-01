@@ -13,6 +13,7 @@ import re
 import json
 
 import maya.cmds as cmds
+import maya.OpenMayaUI as OpenMayaUI
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
@@ -390,7 +391,7 @@ class ShaderLibrary(solstice_windows.Window, object):
     name = 'Shader Library'
     title = 'Solstice Tools - Shader Manager'
     version = '1.0'
-    docked = False
+    dock = True
 
     def __init__(self, name='ShaderManagerWindow', parent=None, **kwargs):
 
@@ -463,10 +464,48 @@ class ShaderLibrary(solstice_windows.Window, object):
         ShaderExporter(shaders=shaders, parent=self).exec_()
         pass
 
-def run():
+
+# ============================================================================================================
+
+if not 'shader_library_window' in globals():
+    shader_library_window = None
+
+
+def shader_library_window_closed(object=None):
+    global shader_library_window
+    if shader_library_window is not None:
+        shader_library_window.cleanup()
+        shader_library_window.parent().setParent(None)
+        shader_library_window.parent().deleteLater()
+    shader_library_window = None
+
+
+def shader_library_window_destroyed(object=None):
+    global shader_library_window
+    shader_library_window = None
+
+
+def run(restore=False):
     reload(utils)
     reload(solstice_shader_utils)
     reload(solstice_shaderviewer)
     reload(solstice_shader)
 
-    ShaderLibrary.run()
+    global shader_library_window
+    if shader_library_window is None:
+        shader_library_window = ShaderLibrary()
+        shader_library_window.destroyed.connect(shader_library_window_destroyed)
+        shader_library_window.setProperty('saveWindowPref', True)
+
+    if restore:
+        parent = OpenMayaUI.MQtUtil.getCurrentParent()
+        mixin_ptr = OpenMayaUI.MQtUtil.findControl(shader_library_window.objectName())
+        OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
+    else:
+        shader_library_window.show(dockable=ShaderLibrary.dock, save=True, closeCallback='from solstice_tools import solstice_shaderlibrary\nsolstice_shaderlibrary.shader_library_window_closed()', uiScript='from solstice_tools import solstice_shaderlibrary\nsolstice_shaderlibrary.run(restore=True)')
+
+    shader_library_window.window().raise_()
+    shader_library_window.raise_()
+    shader_library_window.isActiveWindow()
+
+    return shader_library_window

@@ -13,6 +13,7 @@ import re
 import ast
 import json
 import platform
+import subprocess
 from tempfile import mkstemp
 from shutil import move
 
@@ -199,3 +200,12 @@ def get_system_config_directory():
         config_directory = Path(os.getenv('XDG_CONFIG_HOME') or '~/.config')
 
     return config_directory
+
+
+def open_folder(path):
+    if platform.system() == "Windows":
+        os.startfile(path)
+    elif platform.system() == "Darwin":
+        subprocess.Popen(["open", path])
+    else:
+        subprocess.Popen(["xdg-open", path])

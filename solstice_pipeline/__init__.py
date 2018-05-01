@@ -7,6 +7,7 @@
 # ==================================================================="""
 
 import os
+import re
 import sys
 import importlib
 import pkgutil
@@ -212,6 +213,20 @@ def get_solstice_assets_path():
     else:
         # sp.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
         return None
+
+
+def get_asset_version(name):
+    """
+    Returns the version of a specific given asset (model_v001, return [v001, 001, 1])
+    :param name: str
+    :return: list<str, int>
+    """
+
+    string_version = name[-4:]
+    int_version = map(int, re.findall('\d+', string_version))[0]
+    int_version_formatted = '{0:03}'.format(int_version)
+
+    return [string_version, int_version, int_version_formatted]
 
 
 def init():

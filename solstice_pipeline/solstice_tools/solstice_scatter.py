@@ -15,9 +15,10 @@ from Qt.QtWidgets import *
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
+import maya.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_assetviewer, solstice_splitters
+from solstice_gui import solstice_windows, solstice_assetviewer
 from solstice_utils import solstice_mash_utils
 
 from solstice_gui import solstice_asset
@@ -85,7 +86,7 @@ class SolsticeScatter(solstice_windows.Window, object):
 
         self._asset_viewer = solstice_assetviewer.AssetViewer(
             assets_path=sp.get_solstice_assets_path(),
-            item_prsesed_callback=self._on_asset_click,
+            item_pressed_callback=self._on_asset_click,
             simple_assets=True,
             checkable_assets=True,
             show_only_published_assets=False)
@@ -271,10 +272,6 @@ class SolsticeScatter(solstice_windows.Window, object):
 
         self._mash_outliner.updateModel()
 
-        # if not self._ignore_callbacks:
-        #     self._update_mash_selection()
-        #     self._update_mash_list()
-
     def _add_mash(self):
         mash_network = solstice_mash_utils.create_mash_network()
         painter = mash_network.addNode('MASH_Placer')
@@ -288,83 +285,47 @@ class SolsticeScatter(solstice_windows.Window, object):
         self._mash_outliner.updateModel()
         if instancer and cmds.objExists(instancer):
             cmds.delete(instancer)
-    # def _update_mash_list(self):
-    #
-    #     new_selection = cmds.ls(sl=True)
-    #     if len(new_selection) > 0:
-    #         new_selection = new_selection[0]
-    #     else:
-    #         new_selection = None
-    #
-    #     self._mash_list_model.removeRows(0, self._mash_list_model.rowCount())
-    #     mash_waiters = solstice_mash_utils.get_mash_nodes()
-    #     for m in mash_waiters:
-    #         if self._mash_list_model.insertRow(self._mash_list_model.rowCount()):
-    #             index = self._mash_list_model.index(self._mash_list_model.rowCount()-1, 0)
-    #             self._mash_list_model.setData(index, m)
-    #             if new_selection and m == new_selection:
-    #                 self._mash_list.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select)
-    #
-    # def _on_selection_changed(self):
-    #     self._update_mash_selection()
-    #     self._update_asset_viewer_ui()
-    #
-    # def _update_mash_selection(self, index=None):
-    #     sel_indices = self._mash_list.selectionModel().selection().indexes()
-    #     if len(sel_indices) > 0:
-    #         self._categories_widget.setEnabled(True)
-    #         item = sel_indices[0]
-    #         if cmds.objExists(item.data()):
-    #             self._ignore_callbacks = True
-    #             cmds.select(item.data(), replace=True, noExpand=True)
-    #             self._ignore_callbacks = False
-    #     else:
-    #         self._categories_widget.setEnabled(False)
-    #
-    #     self._update_asset_viewer_ui()
-    #
-    # def _update_scatter_node(self, asset):
-    #     if not asset:
-    #         return
-    #     mash_network = self.get_selected_mash_network()
-    #     if not mash_network:
-    #         return
-    #     mash_scatter_data = ScatterMetaData.get_scatter_data_from_mash_network(mash_network)
-    #     if not mash_scatter_data:
-    #         return
-    #
-    #     asset_name = asset.name
-    #     asset_check = asset._asset_btn.isChecked()
-    #
-    #     if asset_check:
-    #         scatter_nodes = cmds.getAttr(mash_scatter_data+'.scatter_nodes')
-    #         if scatter_nodes is None or scatter_nodes == '':
-    #             scatter_nodes = asset_name
-    #         else:
-    #             scatter_nodes_split = scatter_nodes.split()
-    #             if asset_name in scatter_nodes_split:
-    #                 return
-    #             scatter_nodes_split.append(asset_name)
-    #             scatter_nodes = ''.join(str(s) + ' ' for s in scatter_nodes_split)
-    #         cmds.setAttr(mash_scatter_data+'.scatter_nodes', scatter_nodes, type='string')
-    #     else:
-    #         scatter_nodes = cmds.getAttr(mash_scatter_data+'.scatter_nodes')
-    #         if scatter_nodes is None or scatter_nodes == '':
-    #             return
-    #         scatter_nodes_split = scatter_nodes.split()
-    #         if asset_name in scatter_nodes_split:
-    #             scatter_nodes_split.remove(asset_name)
-    #         else:
-    #             return
-    #         scatter_nodes = ''.join(str(s) + ' ' for s in scatter_nodes_split)
-    #         cmds.setAttr(mash_scatter_data+'.scatter_nodes', scatter_nodes, type='string')
-    #
-    #     self._update_asset_viewer_ui()
 
 
-def run():
+# if not 'scatter_window' in globals():
+scatter_window = None
+
+
+def scatter_window_closed(object=None):
+    global scatter_window
+    if scatter_window is not None:
+        scatter_window.cleanup()
+        scatter_window.parent().setParent(None)
+        scatter_window.parent().deleteLater()
+        scatter_window = None
+
+
+def scatter_window_destroyed(object=None):
+    global scatter_window
+    scatter_window = None
+
+
+def run(restore=False):
+
     reload(solstice_asset)
     reload(solstice_assetviewer)
     reload(solstice_mash_utils)
 
-    SolsticeScatter.run()
+    global scatter_window
+    if scatter_window is None:
+        scatter_window = SolsticeScatter()
+        scatter_window.destroyed.connect(scatter_window_destroyed)
+        scatter_window.setProperty('saveWindowPref', True)
+
+    if restore:
+        parent = OpenMayaUI.MQtUtil.getCurrentParent()
+        mixin_ptr = OpenMayaUI.MQtUtil.findControl(scatter_window.objectName())
+        OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
+    else:
+        scatter_window.show(dockable=SolsticeScatter.dock, save=True, closeCallback='from solstice_tools import solstice_scatter\nsolstice_scatter.scatter_window_closed()')
+
+        scatter_window.window().raise_()
+        scatter_window.raise_()
+        scatter_window.isActiveWindow()
+
+    return scatter_window

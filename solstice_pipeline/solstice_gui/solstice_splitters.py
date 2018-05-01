@@ -94,7 +94,7 @@ class SplitterLayout(QHBoxLayout, object):
         self.addWidget(splitter)
 
 
-def get_horizontal_separator_widget():
+def get_horizontal_separator_widget(max_height=30):
 
     v_div_w = QWidget()
     v_div_l = QVBoxLayout()
@@ -103,7 +103,7 @@ def get_horizontal_separator_widget():
     v_div_l.setSpacing(0)
     v_div_w.setLayout(v_div_l)
     v_div = QFrame()
-    v_div.setMaximumHeight(30)
+    v_div.setMaximumHeight(max_height)
     v_div.setFrameShape(QFrame.VLine)
     v_div.setFrameShadow(QFrame.Sunken)
     v_div_l.addWidget(v_div)

@@ -9,8 +9,8 @@
 # ==================================================================="""
 
 import os
-import re
 import time
+import webbrowser
 from functools import partial
 from distutils.util import strtobool
 
@@ -19,9 +19,9 @@ import treelib
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
-from Qt.QtGui import *
 
 import maya.cmds as cmds
+import maya.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser, solstice_published_info_widget, solstice_sync_dialog
@@ -33,10 +33,9 @@ from solstice_gui import solstice_label, solstice_breadcrumb, solstice_navigatio
 
 
 class PipelinizerSettings(QDialog, object):
-    def __init__(self, settings, parent=None):
+    def __init__(self, parent):
         super(PipelinizerSettings, self).__init__(parent=parent)
 
-        self._settings = settings
 
         self.setObjectName('PipelinizerSettingsDialog')
         self.setWindowTitle('Pipelinizer - Settings')
@@ -70,7 +69,33 @@ class PipelinizerSettings(QDialog, object):
         bottom_layout.addWidget(save_btn)
         bottom_layout.addWidget(cancel_btn)
 
+        # ===========================================================================
+
+        self._settings = self.parent().settings
+        if not self._settings:
+            return
+
+        if self._settings.has_option(self._settings.app_name, 'auto_check'):
+            self._auto_check_cbx.setChecked(strtobool(self._settings.get('auto_check')))
+
+        # ===========================================================================
+
+        save_btn.clicked.connect(self._save_settings)
+        cancel_btn.clicked.connect(self.close)
+
+        # ===========================================================================
+
         self.exec_()
+
+    def _save_settings(self):
+        self._update_settings()
+        self.close()
+
+    def _update_settings(self):
+        if self._settings.has_option(self._settings.app_name, 'auto_check'):
+            self._settings.set(self._settings.app_name, 'auto_check', str(self._auto_check_cbx.isChecked()))
+            self._settings.update()
+        sp.logger.debug('{0}: Settings Updated successfully!'.format(self._settings.app_name))
 
 
 class Pipelinizer(solstice_windows.Window, object):
@@ -78,7 +103,7 @@ class Pipelinizer(solstice_windows.Window, object):
     name = 'Pipelinizer'
     title = 'Solstice Tools - Artella Pipeline'
     version = '1.0'
-    docked = False
+    docked = True
 
     def __init__(self, name='PipelinizwerWindow', parent=None, **kwargs):
 
@@ -119,8 +144,6 @@ class Pipelinizer(solstice_windows.Window, object):
         synchronize_btn.setPopupMode(QToolButton.InstantPopup)
         settings_btn = QToolButton()
         settings_btn.setText('Settings')
-
-        # TODO: Create gobal settings file and simple file dialog editor
 
         synchronize_menu = QMenu(self)
         sync_characters_action = QAction('Characters', self)
@@ -179,7 +202,8 @@ class Pipelinizer(solstice_windows.Window, object):
 
         self._asset_viewer = solstice_assetviewer.AssetViewer(
             assets_path=sp.get_solstice_assets_path(),
-            item_prsesed_callback=self._update_asset_info)
+            item_pressed_callback=self._update_asset_info,
+            parent=self)
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         asset_splitter.addWidget(self._asset_viewer)
 
@@ -232,10 +256,20 @@ class Pipelinizer(solstice_windows.Window, object):
         asset_viewer_splitter.addWidget(local_data_widget)
 
         # =================================================================================================
+        artella_project_btn.clicked.connect(self.open_project_in_artella)
+        project_folder_btn.clicked.connect(self.open_project_folder)
         sync_background_elements_action.triggered.connect(self.sync_background_elements)
         sync_characters_action.triggered.connect(self.sync_characters)
+        sync_props_action.triggered.connect(self.sync_props)
         settings_btn.clicked.connect(self._open_settings)
         # =================================================================================================
+
+    def open_project_in_artella(self):
+        project_url = 'https://www.artella.com/project/{0}/files'.format(sp.solstice_project_id_raw)
+        webbrowser.open(project_url)
+
+    def open_project_folder(self):
+        solstice_python_utils.open_folder(sp.get_solstice_project_path())
 
     def _change_category(self, category, flag):
         self._asset_viewer.change_category(category=category)
@@ -255,7 +289,7 @@ class Pipelinizer(solstice_windows.Window, object):
                 items.append(item)
 
     def _open_settings(self):
-        PipelinizerSettings(self.settings)
+        PipelinizerSettings(self)
 
     def sync_background_elements(self, full_sync=True, ask=False):
         """
@@ -341,6 +375,49 @@ class Pipelinizer(solstice_windows.Window, object):
             cmds.waitCursor(state=False)
         elapsed_time = time.time() - start_time
         sp.logger.debug('Characters synchronized in {0} seconds'.format(elapsed_time))
+        cmds.waitCursor(state=False)
+
+    def sync_props(self, full_sync=True, ask=False):
+        """
+        Synchronizes all props located in Artella Server
+         :param full_sync: bool, If True, all the assets will be sync with the content on Artella Server,
+               if False, only will synchronize the assets that are missing (no warranty that you have latest versions
+               on other assets)
+        :param ask: bool, True if you want to show a message box to the user to decide if the want or not download
+                          missing files in his local machine
+        """
+
+        start_time = time.time()
+        try:
+            cmds.waitCursor(state=True)
+            props = list()
+            thread, event = sp.info_dialog.do('Getting Artella Props Info ... Please wait!', 'SolsticeArtellaProps', self.get_assets_by_category, ['Props', True, props])
+            while not event.is_set():
+                QCoreApplication.processEvents()
+                event.wait(0.25)
+                props_to_sync = list()
+            if props:
+                props = props[0]
+                for i, pr in enumerate(props.expand_tree()):
+                    if i == 0:
+                        continue
+                    if full_sync:
+                        props_to_sync.append(props[pr].tag)
+                    else:
+                        if not os.path.exists(props[pr].tag):
+                            props_to_sync.append(props[pr].tag)
+            if len(props_to_sync) > 0:
+                if ask:
+                    result = solstice_qt_utils.show_question(None, 'Some props are not synchronized locally','Do you want to synchronize them? NOTE: This can take quite a lot of time!')
+                    if result == QMessageBox.Yes:
+                        solstice_sync_dialog.SolsticeSyncPath(paths=props_to_sync).sync()
+                else:
+                    solstice_sync_dialog.SolsticeSyncPath(paths=props_to_sync).sync()
+        except Exception as e:
+            sp.logger.debug(str(e))
+            cmds.waitCursor(state=False)
+        elapsed_time = time.time() - start_time
+        sp.logger.debug('Props synchronized in {0} seconds'.format(elapsed_time))
         cmds.waitCursor(state=False)
 
     def sync_all_assets(self, full_sync=False, ask=False):
@@ -438,11 +515,15 @@ class Pipelinizer(solstice_windows.Window, object):
         sp.logger.debug('Background Elements synchronized in {0} seconds'.format(elapsed_time))
         cmds.waitCursor(state=False)
 
-    def _update_asset_info(self, asset=None):
-
+    def _update_asset_info(self, asset=None, check_versions=None):
         self._current_asset = asset
         if asset:
-            info_widget = asset.get_asset_info_widget()
+            if not check_versions:
+                check_versions = False
+                if self.settings.has_option(self.settings.app_name, 'auto_check'):
+                    check_versions = strtobool(self.settings.get('auto_check'))
+
+            info_widget = asset.get_asset_info_widget(check_versions=check_versions)
             if not info_widget:
                 return
 
@@ -499,22 +580,29 @@ class Pipelinizer(solstice_windows.Window, object):
         #     print('Category folder does not exists! Trying to retrieve it!')
         #     solstice_artella_utils.synchronize_path(category_folder)
 
-    @classmethod
-    def get_asset_version(cls, name):
-        """
-        Returns the version of a specific given asset (model_v001, return [v001, 001, 1])
-        :param name: str
-        :return: list<str, int>
-        """
 
-        string_version = name[-4:]
-        int_version = map(int, re.findall('\d+', string_version))[0]
-        int_version_formatted = '{0:03}'.format(int_version)
+# ============================================================================================================
 
-        return [string_version, int_version, int_version_formatted]
+# if not 'pipelinizer_window' in globals():
+pipelinizer_window = None
 
 
-def run():
+def pipelinizer_window_closed(object=None):
+    global pipelinizer_window
+    if pipelinizer_window is not None:
+        pipelinizer_window.cleanup()
+        pipelinizer_window.parent().setParent(None)
+        pipelinizer_window.parent().deleteLater()
+        pipelinizer_window = None
+
+
+def pipelinizer_window_destroyed(object=None):
+    global pipelinizer_window
+    pipelinizer_window = None
+
+
+def run(restore=False):
+
     reload(solstice_python_utils)
     reload(solstice_maya_utils)
     reload(solstice_artella_classes)
@@ -544,48 +632,66 @@ def run():
     # Update Solstice Project Environment Variable
     sp.update_solstice_project_path()
 
-    # current_directory = pathlib2.Path(sp.get_solstice_project_path()).glob('**/*')
-    # files = [x for x in current_directory if x.is_file()]
-    # for f in files:
-    #     print(f)
+    global pipelinizer_window
+    if pipelinizer_window is None:
+        pipelinizer_window = Pipelinizer()
+        pipelinizer_window.destroyed.connect(pipelinizer_window_destroyed)
+        pipelinizer_window.setProperty('saveWindowPref', True)
 
-    # dct = solstice_python_utils.path_to_dictionary(path=sp.get_solstice_project_path())
-    # print(dct)
-    #
-    # metadata = solstice_artella_utils.get_metadata()
+    if restore:
+        parent = OpenMayaUI.MQtUtil.getCurrentParent()
+        mixin_ptr = OpenMayaUI.MQtUtil.findControl(pipelinizer_window.objectName())
+        OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
+    else:
+        pipelinizer_window.show(dockable=Pipelinizer.dock, save=True, closeCallback='from solstice_tools import solstice_pipelinizer\nsolstice_pipelinizer.pipelinizer_window_closed()')
 
-    #
-    # uri = solstice_artella_utils.get_cms_uri_current_file()
-    # spigot = solstice_artella_utils.get_spigot_client()
-    # rsp = spigot.execute(command_action='do', command_name='history', payload=uri)
-    # rsp = spigot.execute(command_action='do', command_name='explore', payload=uri)
-    # rsp = spigot.execute(command_action='do', command_name='checkout', payload=uri)
-    # rsp = spigot.execute(command_action='do', command_name='unlock', payload=uri)
-    # print(rsp)
+    pipelinizer_window.window().raise_()
+    pipelinizer_window.raise_()
+    pipelinizer_window.isActiveWindow()
 
-    # solstice_artella_utils.get_status_current_file()
+    return pipelinizer_window
 
-    # // solstice: {u'meta': {u'content_length': u'529', u'status': u'OK',
-    #                         u'container_uri': u'/production/2/2252d6c8-407d-4419-a186-cf90760c9967/Assets/Characters/S_CH_02_summer',
-    #                         u'content_type': u'application/json', u'date': u'Wed, 18 Apr 2018 00:45:44 GMT',
-    #                         u'release_name': u'rig_v001', u'type': u'container_file',
-    #                         u'file_path': u'rig/S_CH_02_summer_RIG.ma'},
-    #               u'data': {
-    #     u'rig/S_CH_02_summer_RIG.ma': {u'locked_view': u'0b51b5c2-eb9e7144-8f92-11e7-8af3-3e1fea15fa15',
-    #                                    u'locked': True, u'locked_by': u'fc6d3b61-1ede-458c-aa0c-ad8343ee66ac',
-    #                                    u'view_version': 15, u'relative_path': u'rig/S_CH_02_summer_RIG.ma',
-    #                                    u'maximum_version': 16,
-    #                                    u'lockedByDisplay': u'fc6d3b61-1ede-458c-aa0c-ad8343ee66ac',
-    #                                    u'view_version_digest': u'e475f0a9755d9a28ab3275dabdea58cbe0be6734da8b135e045f83058913c033'}}
-    #               } //
 
-    # ret = QMessageBox().question(solstice_maya_utils.get_maya_window(), 'Artella Plugin not loaded!', 'Do you want to select manually where Artella Plugin is located?')
-        # if ret == QMessageBox.Yes:
-        #     artella_installation = os.path.join(os.getenv('PROGRAMDATA'), 'Artella')
-        #     artella_plugin_path = QFileDialog.getOpenFileName(solstice_maya_utils.get_maya_window(), 'Select Artella Plugin', artella_installation, 'Python Files (*.py)')
-        #     print(artella_plugin_path)
-        #     return
-        # else:
-        #     return
+# current_directory = pathlib2.Path(sp.get_solstice_project_path()).glob('**/*')
+# files = [x for x in current_directory if x.is_file()]
+# for f in files:
+#     print(f)
 
-    Pipelinizer.run()
+# dct = solstice_python_utils.path_to_dictionary(path=sp.get_solstice_project_path())
+# print(dct)
+#
+# metadata = solstice_artella_utils.get_metadata()
+
+#
+# uri = solstice_artella_utils.get_cms_uri_current_file()
+# spigot = solstice_artella_utils.get_spigot_client()
+# rsp = spigot.execute(command_action='do', command_name='history', payload=uri)
+# rsp = spigot.execute(command_action='do', command_name='explore', payload=uri)
+# rsp = spigot.execute(command_action='do', command_name='checkout', payload=uri)
+# rsp = spigot.execute(command_action='do', command_name='unlock', payload=uri)
+# print(rsp)
+
+# solstice_artella_utils.get_status_current_file()
+
+# // solstice: {u'meta': {u'content_length': u'529', u'status': u'OK',
+#                         u'container_uri': u'/production/2/2252d6c8-407d-4419-a186-cf90760c9967/Assets/Characters/S_CH_02_summer',
+#                         u'content_type': u'application/json', u'date': u'Wed, 18 Apr 2018 00:45:44 GMT',
+#                         u'release_name': u'rig_v001', u'type': u'container_file',
+#                         u'file_path': u'rig/S_CH_02_summer_RIG.ma'},
+#               u'data': {
+#     u'rig/S_CH_02_summer_RIG.ma': {u'locked_view': u'0b51b5c2-eb9e7144-8f92-11e7-8af3-3e1fea15fa15',
+#                                    u'locked': True, u'locked_by': u'fc6d3b61-1ede-458c-aa0c-ad8343ee66ac',
+#                                    u'view_version': 15, u'relative_path': u'rig/S_CH_02_summer_RIG.ma',
+#                                    u'maximum_version': 16,
+#                                    u'lockedByDisplay': u'fc6d3b61-1ede-458c-aa0c-ad8343ee66ac',
+#                                    u'view_version_digest': u'e475f0a9755d9a28ab3275dabdea58cbe0be6734da8b135e045f83058913c033'}}
+#               } //
+
+# ret = QMessageBox().question(solstice_maya_utils.get_maya_window(), 'Artella Plugin not loaded!', 'Do you want to select manually where Artella Plugin is located?')
+    # if ret == QMessageBox.Yes:
+    #     artella_installation = os.path.join(os.getenv('PROGRAMDATA'), 'Artella')
+    #     artella_plugin_path = QFileDialog.getOpenFileName(solstice_maya_utils.get_maya_window(), 'Select Artella Plugin', artella_installation, 'Python Files (*.py)')
+    #     print(artella_plugin_path)
+    #     return
+    # else:
+    #     return

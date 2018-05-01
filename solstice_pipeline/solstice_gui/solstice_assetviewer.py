@@ -27,7 +27,7 @@ class AssetViewer(solstice_grid.GridWidget, object):
 
     IGNORED_PATHS = ['PIPELINE', 'lighting', 'Light Rigs', 'S_CH_02_summer_scripts']
 
-    def __init__(self, assets_path, item_prsesed_callback, simple_assets=False, checkable_assets=False, show_only_published_assets=False, parent=None):
+    def __init__(self, assets_path, item_pressed_callback, simple_assets=False, checkable_assets=False, show_only_published_assets=False, parent=None):
         super(AssetViewer, self).__init__(parent=parent)
 
 
@@ -35,7 +35,7 @@ class AssetViewer(solstice_grid.GridWidget, object):
         self._simple_assets = simple_assets
         self._checkable_assets = checkable_assets
         self._items = dict()
-        self._item_pressed_callback = item_prsesed_callback
+        self._item_pressed_callback = item_pressed_callback
         self._show_only_published_assets = show_only_published_assets
 
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -176,6 +176,13 @@ class AssetViewer(solstice_grid.GridWidget, object):
                             simple_mode=self._simple_assets,
                             checkable=self._checkable_assets
                         )
+
+                        # We connect this signal to allow Pipelinizer Tool update its asset info widget after syncronizing
+                        # This is a very bad way but it works for now!
+                        try:
+                            new_asset.sync_finished.connect(partial(self.parent()._update_asset_info, new_asset, True))
+                        except:
+                            pass
 
                         if not new_asset:
                             sp.logger.debug('Asset Widget for "{0}" was not generated!'.format(asset_name))

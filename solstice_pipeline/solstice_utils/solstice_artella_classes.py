@@ -69,12 +69,11 @@ class ArtellaAssetMetaData(object):
         self._latest_ = status_dict['data']['latest']
 
         self._published_folders = dict()
-        self._must_folders = ['model', 'textures', 'shading']
+        self._must_folders = ['model', 'textures', 'shading', 'groom']
 
         for f in self._must_folders:
             self._published_folders[f] = dict()
 
-        from solstice_tools import solstice_pipelinizer as pipeline
         from solstice_utils import solstice_artella_utils as artella
 
         for name, data in status_dict['data'].items():
@@ -99,7 +98,7 @@ class ArtellaAssetMetaData(object):
             # Store all valid published folders
             for f in self._must_folders:
                 if f in name:
-                    version = pipeline.Pipelinizer.get_asset_version(name)[1]
+                    version = sp.get_asset_version(name)[1]
                     self._published_folders[f][str(version)] = name
 
         # Sort all dictionaries by version number
@@ -138,6 +137,9 @@ class ArtellaAssetMetaData(object):
                 sp.logger.debug('Asset {0} is not published -> Folder "{1}" is not published yet!'.format(self._path, f))
                 is_published = False
         return is_published
+
+    def get_published_versions(self):
+        return self._published_folders
 
 
 

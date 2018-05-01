@@ -9,7 +9,9 @@
 # ==================================================================="""
 
 import os
-import threading
+import webbrowser
+import collections
+from functools import partial
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
@@ -18,7 +20,7 @@ from Qt.QtGui import *
 import solstice_pipeline as sp
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_artella_utils as artella
-from solstice_utils import solstice_artella_classes, solstice_qt_utils
+from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_python_utils
 from solstice_gui import solstice_splitters, solstice_published_info_widget, solstice_sync_dialog
 from resources import solstice_resource
 
@@ -26,6 +28,7 @@ reload(img)
 reload(artella)
 reload(solstice_artella_classes)
 reload(solstice_qt_utils)
+reload(solstice_python_utils)
 reload(solstice_splitters)
 reload(solstice_published_info_widget)
 reload(solstice_sync_dialog)
@@ -55,8 +58,10 @@ class AssetInfo(QWidget, object):
     to show information of the widget itself
     """
 
-    def __init__(self, asset):
+    def __init__(self, asset, check_versions=False):
         super(AssetInfo, self).__init__()
+
+        self._check_versions = check_versions
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(2, 2, 2, 2)
@@ -70,22 +75,45 @@ class AssetInfo(QWidget, object):
         self._buttons_layout = QHBoxLayout()
         self._buttons_layout.setContentsMargins(0, 0, 0, 0)
         self._buttons_layout.setSpacing(1)
-        self._asset_published_info = solstice_published_info_widget.PublishedInfoWidget(asset=asset)
+        self._asset_buttons_layout = QVBoxLayout()
+        self._asset_buttons_layout.setContentsMargins(0, 0, 0, 0)
+        self._asset_buttons_layout.setSpacing(1)
+        self._asset_buttons_layout.setAlignment(Qt.AlignTop)
+        self._buttons_layout.addLayout(self._asset_buttons_layout)
+        asset_tab = QTabWidget()
+        asset_tab.setMaximumHeight(96)
+        self._buttons_layout.addWidget(asset_tab)
+        working_asset = QWidget()
+        self._working_asset_layout = QHBoxLayout()
+        self._working_asset_layout.setContentsMargins(0, 0, 0, 0)
+        self._working_asset_layout.setSpacing(1)
+        working_asset.setLayout(self._working_asset_layout)
+        published_asset = QWidget()
+        self._published_asset_layout = QHBoxLayout()
+        self._published_asset_layout.setContentsMargins(0, 0, 0, 0)
+        self._published_asset_layout.setSpacing(1)
+        published_asset.setLayout(self._published_asset_layout)
+        asset_tab.addTab(working_asset, 'Working')
+        asset_tab.addTab(published_asset, 'Published')
+        self._asset_published_info = solstice_published_info_widget.PublishedInfoWidget(asset=asset, check_versions=check_versions)
         self._asset_description = QTextEdit()
         self._asset_description.setReadOnly(True)
         self._publish_btn = QPushButton('> PUBLISH NEW VERSION <')
+
         main_layout.addWidget(self._asset_info_lbl)
         main_layout.addWidget(self._asset_icon)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
         main_layout.addLayout(self._buttons_layout)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
-        main_layout.addWidget(solstice_splitters.Splitter('PUBLISHED INFO'))
         main_layout.addWidget(self._asset_published_info)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
         main_layout.addWidget(self._asset_description)
         main_layout.addWidget(self._publish_btn)
 
+
 class AssetWidget(QWidget, object):
+
+    sync_finished = Signal()
 
     def __init__(self, **kwargs):
         parent = kwargs['parent'] if 'parent' in kwargs else None
@@ -181,8 +209,129 @@ class AssetWidget(QWidget, object):
             return
         self._menu.exec_(event.globalPos())
 
-    def is_published(self):
+    def get_local_versions(self, status='published'):
+        folders = ['model', 'textures', 'shading', 'groom']
+        local_folders = dict()
+        for f in folders:
+            local_folders[f] = dict()
 
+        if status == 'working':
+            pass
+        else:
+
+            for p in os.listdir(self._asset_path):
+                if p == '__working__':
+                    continue
+                #
+                # version_valid = True
+                # try:
+                #     version_path = os.path.join(self._asset_path, p)
+                #     version_info = artella.get_status(version_path)
+                #     if version_info:
+                #         for n, d in version_info.references.items():
+                #             if d.maximum_version_deleted and d.deleted:
+                #                 version_valid = False
+                #                 break
+                # except Exception:
+                #     version_valid = False
+                # if not version_valid:
+                #     continue
+
+                for f in folders:
+                    if f in p:
+                        version = sp.get_asset_version(p)[1]
+                        local_folders[f][str(version)] = p
+
+            # Sort all dictionaries by version number
+            for f in folders:
+                local_folders[f] = collections.OrderedDict(sorted(local_folders[f].items()))
+
+            return local_folders
+
+    def get_published_versions(self):
+        asset_data = list()
+        thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo', self.get_artella_asset_data, [asset_data])
+        while not event.is_set():
+            QCoreApplication.processEvents()
+            event.wait(0.25)
+        if asset_data and len(asset_data) > 0:
+            asset_data = asset_data[0]
+            if not asset_data:
+                return
+            return asset_data.get_published_versions()
+
+    def get_max_local_versions(self):
+        folders = ['model', 'textures', 'shading', 'groom']
+        max_local_versions = dict()
+        for f in folders:
+            max_local_versions[f] = None
+
+        local_versions = self.get_local_versions()
+
+        for f, versions in local_versions.items():
+            if versions:
+                for version, version_folder in versions.items():
+                    if max_local_versions[f] is None:
+                        max_local_versions[f] = [int(version), version_folder]
+                    else:
+                        if int(max_local_versions[f][0]) < int(version):
+                            max_local_versions[f] = [int(version), version_folder]
+
+        return max_local_versions
+
+    def get_max_published_versions(self):
+        folders = ['model', 'textures', 'shading', 'groom']
+        max_server_versions = dict()
+        for f in folders:
+            max_server_versions[f] = None
+
+        server_versions = self.get_published_versions()
+
+        for f, versions in server_versions.items():
+            if versions:
+                for version, version_folder in versions.items():
+                    if max_server_versions[f] is None:
+                        max_server_versions[f] = [int(version), version_folder]
+                    else:
+                        if int(max_server_versions[f][0]) < int(version):
+                            max_server_versions[f] = [int(version), version_folder]
+
+        return max_server_versions
+
+    def get_max_versions(self, status='published'):
+        folders = ['model', 'textures', 'shading', 'groom']
+        max_versions = dict()
+        published_versions = self.get_published_versions()
+        local_versions = self.get_local_versions(status=status)
+        for t in ['local', 'server']:
+            max_versions[t] = dict()
+            for f in folders:
+                max_versions[t][f] = None
+
+        for(local_name, local_versions), (server_name, server_versions) in zip(local_versions.items(), published_versions.items()):
+            if local_versions:
+                for version, version_folder in local_versions.items():
+                    if max_versions['local'][local_name] is None:
+                        max_versions['local'][local_name] = int(version)
+                    else:
+                        if int(max_versions['local'][local_name]) < int(version):
+                            max_versions['local'][local_name] = int(version)
+            else:
+                max_versions['local'][local_name] = None
+
+            if server_versions:
+                for version, version_folder in server_versions.items():
+                    if max_versions['server'][server_name] is None:
+                        max_versions['server'][server_name] = int(version)
+                    else:
+                        if int(max_versions['server'][server_name]) < int(version):
+                            max_versions['server'][server_name] = int(version)
+            else:
+                max_versions['server'][server_name] = None
+
+        return max_versions
+
+    def is_published(self):
         asset_data = list()
         thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticeAssetInfo', self.get_artella_asset_data, [asset_data])
         while not event.is_set():
@@ -201,7 +350,6 @@ class AssetWidget(QWidget, object):
 
                 return True
 
-
         sp.logger.debug('Asset {0} is not published in Artella Server!'.format(self._name))
         return False
 
@@ -211,7 +359,6 @@ class AssetWidget(QWidget, object):
             thread_event.set()
             thread_result.append(rst)
         return rst
-
 
     def generate_context_menu(self):
         """
@@ -224,32 +371,116 @@ class AssetWidget(QWidget, object):
 
         get_info_action = QAction('Get Info (DEV)', self._menu)
         self._menu.addAction(get_info_action)
-
         sync_action = QAction('Synchronize', self._menu)
         self._menu.addAction(sync_action)
-
         check_versions_action = QAction('Check for New Versions', self._menu)
         self._menu.addAction(check_versions_action)
+        import_asset_action = QAction('Import to current scene ...', self._menu)
+        self._menu.addAction(import_asset_action)
+        reference_asset_action = QAction('Reference in current scene ...', self._menu)
+        self._menu.addAction(reference_asset_action)
 
         get_info_action.triggered.connect(self.get_asset_info)
         sync_action.triggered.connect(self.sync)
 
     def get_asset_info(self):
-        # rsp = artella.get_status(os.path.join(self._asset_path, '__model_v001__'), as_json=True)
         rsp = artella.get_status(self._asset_path, as_json=True)
         print(rsp)
 
     def sync(self):
         result = solstice_qt_utils.show_question(None, 'Synchronize file {0}'.format(self._name), 'Are you sure you want to synchronize this asset? This can take quite a lot of time!')
         if result == QMessageBox.Yes:
-            solstice_sync_dialog.SolsticeSyncFile(files=[self._asset_path]).sync()
+            paths_to_sync = [self._asset_path, os.path.join(self._asset_path, '__working__')]
+            max_versions = self.get_max_published_versions()
+            for f, version_list in max_versions.items():
+                if not version_list:
+                    continue
+                paths_to_sync.append(os.path.join(self._asset_path, '__{0}__'.format(version_list[1])))
+            solstice_sync_dialog.SolsticeSyncFile(files=paths_to_sync).sync()
+            self.sync_finished.emit()
 
-    def generate_asset_info_widget(self):
-        self._asset_info = AssetInfo(asset=self)
+    def open_asset_file(self, file_type, status):
+        if file_type != 'model' and file_type != 'textures' and file_type != 'shading' and file_type != 'shading':
+            return
+        if status != 'working' and status != 'published':
+            return
+
+        asset_name = self._name
+        if file_type == 'shading':
+            asset_name = self._name + '_SHD'
+        elif file_type == 'groom':
+            asset_name = self._name + '_GROOMING'
+        asset_name = asset_name + '.ma'
+
+        if status == 'working':
+            working_path = os.path.join(self._asset_path, '__working__', file_type, asset_name)
+            if os.path.isfile(working_path):
+                artella.open_file_in_maya(file_path=working_path)
+        elif status == 'published':
+            local_max_versions = self.get_max_local_versions()
+            if local_max_versions[file_type]:
+                published_path = os.path.join(self._asset_path, local_max_versions[file_type][1], file_type, asset_name)
+                if os.path.isfile(published_path):
+                    artella.open_file_in_maya(file_path=published_path)
+
+    def open_textures_folder(self, status):
+
+        if status != 'working' and status != 'published':
+            return
+
+        if status == 'working':
+            working_path = os.path.join(self._asset_path, '__working__', 'textures')
+            if os.path.exists(working_path):
+                solstice_python_utils.open_folder(working_path)
+        elif status == 'published':
+            local_max_versions = self.get_max_local_versions()
+            if local_max_versions['textures']:
+                published_path = os.path.join(self._asset_path, local_max_versions['textures'][1], 'textures')
+                if os.path.exists(published_path):
+                    solstice_python_utils.open_folder(published_path)
+
+    def generate_asset_info_widget(self, check_versions=False):
+        self._asset_info = AssetInfo(asset=self, check_versions=check_versions)
+        self._folder_btn = QPushButton('Folder')
+        self._artella_btn = QPushButton('Artella')
+        self._sync_btn = QPushButton('Sync')
+        self._check_btn = QPushButton('Check')
+        for btn in [self._folder_btn, self._artella_btn, self._sync_btn, self._check_btn]:
+            self._asset_info._asset_buttons_layout.addWidget(btn)
+
+        self._working_model_btn = QPushButton('Model')
+        self._working_shading_btn = QPushButton('Shading')
+        self._working_textures_btn = QPushButton('Textures')
+        self._published_model_btn = QPushButton('Model')
+        self._published_shading_btn = QPushButton('Shading')
+        self._published_textures_btn = QPushButton('Textures')
+        for btn in [self._working_model_btn, self._working_shading_btn, self._working_textures_btn]:
+            btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self._asset_info._working_asset_layout.addWidget(btn)
+        for btn in [self._published_model_btn, self._published_shading_btn, self._published_textures_btn]:
+            btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self._asset_info._published_asset_layout.addWidget(btn)
         self.update_asset_info()
 
-    def get_asset_info_widget(self):
-        self.generate_asset_info_widget()
+        self._folder_btn.clicked.connect(partial(artella.explore_file, self._asset_path))
+        self._artella_btn.clicked.connect(self.open_asset_artella_url)
+        self._sync_btn.clicked.connect(self.sync)
+        self._check_btn.clicked.connect(self.sync_finished.emit)
+        self._working_model_btn.clicked.connect(partial(self.open_asset_file, 'model', 'working'))
+        self._working_shading_btn.clicked.connect(partial(self.open_asset_file, 'shading', 'working'))
+        self._working_textures_btn.clicked.connect(partial(self.open_textures_folder, 'working'))
+        self._published_model_btn.clicked.connect(partial(self.open_asset_file, 'model', 'published'))
+        self._published_shading_btn.clicked.connect(partial(self.open_asset_file, 'shading', 'published'))
+        self._published_textures_btn.clicked.connect(partial(self.open_textures_folder, 'published'))
+
+    def open_asset_artella_url(self):
+
+        file_path = os.path.relpath(self._asset_path, sp.get_solstice_assets_path())
+        asset_url = 'https://www.artella.com/project/{0}/files/Assets/{1}'.format(sp.solstice_project_id_raw, file_path)
+        webbrowser.open(asset_url)
+
+    def get_asset_info_widget(self, check_versions=False):
+        self.generate_asset_info_widget(check_versions=check_versions)
         return self._asset_info
 
     def update_asset_info(self):
@@ -266,20 +497,15 @@ class CharacterAsset(AssetWidget, object):
     def __init__(self, **kwargs):
         super(CharacterAsset, self).__init__(**kwargs)
 
-    def generate_asset_info_widget(self):
-        super(CharacterAsset, self).generate_asset_info_widget()
+    def generate_asset_info_widget(self, check_versions=False):
+        super(CharacterAsset, self).generate_asset_info_widget(check_versions=check_versions)
         if not self._asset_info:
             return
 
-        self._model_btn = QPushButton('Model')
-        self._shading_btn = QPushButton('Shading')
-        self._textures_btn = QPushButton('Textures')
-        self._groom_btn = QPushButton('Groom')
-        self._folder_btn = QPushButton('Folder')
-        self._artella_btn = QPushButton('Artella')
-        self._sync_btn = QPushButton('Sync')
-        for btn in [self._model_btn, self._shading_btn, self._textures_btn, self._groom_btn, self._folder_btn, self._artella_btn, self._sync_btn]:
-            self._asset_info._buttons_layout.addWidget(btn)
+        self._working_groom_btn = QPushButton('Groom')
+        self._published_groom_btn = QPushButton('Groom')
+        self._working_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'working'))
+        self._published_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'pubilshed'))
 
     def update_asset_info(self):
         super(CharacterAsset, self).update_asset_info()
@@ -289,17 +515,8 @@ class PropAsset(AssetWidget, object):
     def __init__(self, **kwargs):
         super(PropAsset, self).__init__(**kwargs)
 
-    def generate_asset_info_widget(self):
-        super(PropAsset, self).generate_asset_info_widget()
-
-        self._model_btn = QPushButton('Model')
-        self._shading_btn = QPushButton('Shading')
-        self._textures_btn = QPushButton('Textures')
-        self._folder_btn = QPushButton('Folder')
-        self._artella_btn = QPushButton('Artella')
-        self._sync_btn = QPushButton('Sync')
-        for btn in [self._model_btn, self._shading_btn, self._textures_btn, self._folder_btn, self._artella_btn, self._sync_btn]:
-            self._asset_info._buttons_layout.addWidget(btn)
+    def generate_asset_info_widget(self, check_versions=False):
+        super(PropAsset, self).generate_asset_info_widget(check_versions=check_versions)
 
     def update_asset_info(self):
         super(PropAsset, self).update_asset_info()
@@ -309,17 +526,8 @@ class BackgroundElementAsset(AssetWidget, object):
     def __init__(self, **kwargs):
         super(BackgroundElementAsset, self).__init__(**kwargs)
 
-    def generate_asset_info_widget(self):
-        super(BackgroundElementAsset, self).generate_asset_info_widget()
-
-        self._model_btn = QPushButton('Model')
-        self._shading_btn = QPushButton('Shading')
-        self._textures_btn = QPushButton('Textures')
-        self._folder_btn = QPushButton('Folder')
-        self._artella_btn = QPushButton('Artella')
-        self._sync_btn = QPushButton('Sync')
-        for btn in [self._model_btn, self._shading_btn, self._textures_btn, self._folder_btn, self._artella_btn, self._sync_btn]:
-            self._asset_info._buttons_layout.addWidget(btn)
+    def generate_asset_info_widget(self, check_versions=False):
+        super(BackgroundElementAsset, self).generate_asset_info_widget(check_versions=check_versions)
 
     def update_asset_info(self):
         super(BackgroundElementAsset, self).update_asset_info()
