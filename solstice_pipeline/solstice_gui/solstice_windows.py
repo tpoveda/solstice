@@ -19,7 +19,7 @@ from solstice_utils import solstice_maya_utils, solstice_config
 from resources import solstice_resource
 
 
-class Window(MayaQWidgetDockableMixin, QMainWindow):
+class Window(MayaQWidgetDockableMixin, QWidget):
     """
     Class to create basic Maya docked windows
     """
@@ -60,13 +60,13 @@ class Window(MayaQWidgetDockableMixin, QMainWindow):
 
     def custom_ui(self):
         if self.main_layout is None:
-            self.main_widget = QWidget()
+            # self.main_widget = QWidget()
             self.main_layout = QVBoxLayout()
             self.main_layout.setContentsMargins(0, 0, 0, 0)
             self.main_layout.setSpacing(0)
-            self.main_widget.setLayout(self.main_layout)
-            self.setCentralWidget(self.main_widget)
-            # self.setLayout(self.main_layout)
+            # self.main_widget.setLayout(self.main_layout)
+            # self.setCentralWidget(self.main_widget)
+            self.setLayout(self.main_layout)
 
             title_layout = QHBoxLayout()
             title_layout.setContentsMargins(0, 0, 0, 0)

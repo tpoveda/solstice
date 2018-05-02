@@ -346,6 +346,31 @@ def synchronize_file(file_path):
     return rsp
 
 
+def get_asset_history(file_path, as_json=False):
+    """
+    Returns the history info of the given file, if exists
+    :param file_path: str
+    """
+
+    uri = get_cms_uri(file_path)
+    spigot = get_spigot_client()
+    rsp = spigot.execute(command_action='do', command_name='history', payload=uri)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+
+    sp.logger.debug(rsp)
+
+    if as_json:
+        return rsp
+
+    if 'data' in rsp:
+        file_metadata = classes.ArtellaFileMetaData(file_dict=rsp)
+        return file_metadata
+
+    return rsp
+
+
 def get_asset_image(asset_path, project_id):
     """
     Returns the asset image from Artella server

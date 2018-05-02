@@ -9,7 +9,6 @@
 # ==================================================================="""
 
 import os
-import time
 from functools import partial
 
 from Qt.QtCore import *
@@ -180,7 +179,8 @@ class AssetViewer(solstice_grid.GridWidget, object):
                         # We connect this signal to allow Pipelinizer Tool update its asset info widget after syncronizing
                         # This is a very bad way but it works for now!
                         try:
-                            new_asset.sync_finished.connect(partial(self.parent()._update_asset_info, new_asset, True))
+                            new_asset.sync_finished.connect(partial(self.parent().update_asset_info, new_asset, True))
+                            new_asset.sync_finished.connect(partial(sp.register_asset, new_asset.name))
                         except:
                             pass
 

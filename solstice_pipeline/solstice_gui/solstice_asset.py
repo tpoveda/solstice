@@ -9,6 +9,7 @@
 # ==================================================================="""
 
 import os
+import time
 import webbrowser
 import collections
 from functools import partial
@@ -215,38 +216,36 @@ class AssetWidget(QWidget, object):
         for f in folders:
             local_folders[f] = dict()
 
-        if status == 'working':
-            pass
-        else:
+        for p in os.listdir(self._asset_path):
+            if status == 'working':
+                if p != '__working__':
+                    continue
 
-            for p in os.listdir(self._asset_path):
+                for f in os.listdir(os.path.join(self._asset_path, '__working__')):
+                    if f in folders:
+                        asset_name = self._name
+                        if f == 'shading':
+                            asset_name = asset_name + '_SHD'
+                        if f == 'textures':
+                            continue
+
+                        file_path = os.path.join(self._asset_path, '__working__', f, asset_name+'.ma')
+                        history = artella.get_asset_history(file_path)
+                        local_folders[f] = history
+            else:
                 if p == '__working__':
                     continue
-                #
-                # version_valid = True
-                # try:
-                #     version_path = os.path.join(self._asset_path, p)
-                #     version_info = artella.get_status(version_path)
-                #     if version_info:
-                #         for n, d in version_info.references.items():
-                #             if d.maximum_version_deleted and d.deleted:
-                #                 version_valid = False
-                #                 break
-                # except Exception:
-                #     version_valid = False
-                # if not version_valid:
-                #     continue
 
                 for f in folders:
                     if f in p:
                         version = sp.get_asset_version(p)[1]
                         local_folders[f][str(version)] = p
 
-            # Sort all dictionaries by version number
-            for f in folders:
-                local_folders[f] = collections.OrderedDict(sorted(local_folders[f].items()))
+                # Sort all dictionaries by version number
+                for f in folders:
+                    local_folders[f] = collections.OrderedDict(sorted(local_folders[f].items()))
 
-            return local_folders
+        return local_folders
 
     def get_published_versions(self):
         asset_data = list()
@@ -372,6 +371,17 @@ class AssetWidget(QWidget, object):
         get_info_action = QAction('Get Info (DEV)', self._menu)
         self._menu.addAction(get_info_action)
         sync_action = QAction('Synchronize', self._menu)
+        sync_menu = QMenu(self)
+        sync_action.setMenu(sync_menu)
+        sync_all_action = QAction('All', self._menu)
+        sync_menu.addAction(sync_all_action)
+        sync_menu.addSeparator()
+        sync_model_action = QAction('Model', self._menu)
+        sync_menu.addAction(sync_model_action)
+        sync_textures_action = QAction('Textures', self._menu)
+        sync_menu.addAction(sync_textures_action)
+        sync_shading_action = QAction('Shading', self._menu)
+        sync_menu.addAction(sync_shading_action)
         self._menu.addAction(sync_action)
         check_versions_action = QAction('Check for New Versions', self._menu)
         self._menu.addAction(check_versions_action)
@@ -381,30 +391,59 @@ class AssetWidget(QWidget, object):
         self._menu.addAction(reference_asset_action)
 
         get_info_action.triggered.connect(self.get_asset_info)
-        sync_action.triggered.connect(self.sync)
+        sync_model_action.triggered.connect(partial(self.sync, 'model', False))
+        sync_textures_action.triggered.connect(partial(self.sync, 'textures', False))
+        sync_shading_action.triggered.connect(partial(self.sync, 'shading', False))
+
+        if self.category == 'Characters':
+            sync_menu_grooming_action = QAction('Groom', self._menu)
+            sync_menu.addAction(sync_menu_grooming_action)
+            sync_menu_grooming_action.triggered.connect(partial(self.sync, 'groom', False))
+
 
     def get_asset_info(self):
         rsp = artella.get_status(self._asset_path, as_json=True)
         print(rsp)
 
-    def sync(self):
-        result = solstice_qt_utils.show_question(None, 'Synchronize file {0}'.format(self._name), 'Are you sure you want to synchronize this asset? This can take quite a lot of time!')
-        if result == QMessageBox.Yes:
+    def sync(self, sync_type='all', ask=False):
+
+        if sync_type != 'all' and sync_type != 'model' and sync_type != 'shading' and sync_type != 'textures':
+            sp.logger.error('Synchronization type {0} is not valid!'.format(sync_type))
+            return
+
+        if ask:
+            result = solstice_qt_utils.show_question(None, 'Synchronize file {0}'.format(self._name), 'Are you sure you want to synchronize this asset? This can take quite a lot of time!')
+            if result == QMessageBox.No:
+                return
+
+        start_time = time.time()
+
+        if sync_type == 'all':
             paths_to_sync = [self._asset_path, os.path.join(self._asset_path, '__working__')]
-            max_versions = self.get_max_published_versions()
-            for f, version_list in max_versions.items():
-                if not version_list:
-                    continue
+        else:
+            paths_to_sync = [os.path.join(self._asset_path, '__working__', sync_type)]
+
+        max_versions = self.get_max_published_versions()
+        for f, version_list in max_versions.items():
+            if not version_list:
+                continue
+            version_type = version_list[1]
+            if sync_type != 'all':
+                if sync_type in version_type:
+                    paths_to_sync.append(os.path.join(self._asset_path, '__{0}__'.format(version_list[1])))
+            else:
                 paths_to_sync.append(os.path.join(self._asset_path, '__{0}__'.format(version_list[1])))
-            solstice_sync_dialog.SolsticeSyncFile(files=paths_to_sync).sync()
-            self.sync_finished.emit()
+
+        solstice_sync_dialog.SolsticeSyncFile(files=paths_to_sync).sync()
+        elapsed_time = time.time() - start_time
+        sp.logger.debug('{0} synchronized in {1} seconds'.format(self._name, elapsed_time))
+        self.sync_finished.emit()
 
     def open_asset_file(self, file_type, status):
         if file_type != 'model' and file_type != 'textures' and file_type != 'shading' and file_type != 'shading':
             return
         if status != 'working' and status != 'published':
             return
-
         asset_name = self._name
         if file_type == 'shading':
             asset_name = self._name + '_SHD'
@@ -424,10 +463,8 @@ class AssetWidget(QWidget, object):
                     artella.open_file_in_maya(file_path=published_path)
 
     def open_textures_folder(self, status):
-
         if status != 'working' and status != 'published':
             return
-
         if status == 'working':
             working_path = os.path.join(self._asset_path, '__working__', 'textures')
             if os.path.exists(working_path):

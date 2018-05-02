@@ -29,7 +29,7 @@ class SolsticeScatter(solstice_windows.Window, object):
     name = 'Scatter'
     title = 'Solstice Tools - Scatter Tool'
     version = '1.0'
-    docked = False
+    docked = True
 
     def __init__(self, name='ScatterWindow', parent=None, **kwargs):
 
@@ -322,7 +322,7 @@ def run(restore=False):
         mixin_ptr = OpenMayaUI.MQtUtil.findControl(scatter_window.objectName())
         OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
     else:
-        scatter_window.show(dockable=SolsticeScatter.dock, save=True, closeCallback='from solstice_tools import solstice_scatter\nsolstice_scatter.scatter_window_closed()')
+        scatter_window.show(dockable=True, save=True, closeCallback='from solstice_tools import solstice_scatter\nsolstice_scatter.scatter_window_closed()')
 
         scatter_window.window().raise_()
         scatter_window.raise_()

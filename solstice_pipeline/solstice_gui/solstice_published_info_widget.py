@@ -172,19 +172,43 @@ class PublishedInfoWidget(QWidget, object):
                     if local_version > server_version or local_version is None and server_version is not None:
                         ui[status][local_f]['status'].setPixmap(self._error_pixmap)
                         sync_btn.setVisible(True)
-            else:
-                max_local_versions = self._asset.get_max_local_versions()
-                for f in folders:
-                    if f in folders_to_update:
-                        if max_local_versions[f]:
-                            ui[status][f]['local_text'].setText(str('v{0}'.format(str(max_local_versions[f][0]))))
-                            ui[status][f]['status'].setPixmap(self._warning_pixmap)
-                        else:
-                            ui[status][f]['local_text'].setText('None')
-                            ui[status][f]['status'].setPixmap(self._error_pixmap)
+        else:
+            max_local_versions = self._asset.get_max_local_versions()
+            for f in folders:
+                if f in folders_to_update:
+                    if max_local_versions[f]:
+                        ui[status][f]['local_text'].setText(str('v{0}'.format(str(max_local_versions[f][0]))))
+                        ui[status][f]['status'].setPixmap(self._warning_pixmap)
+                    else:
+                        ui[status][f]['local_text'].setText('None')
+                        ui[status][f]['status'].setPixmap(self._error_pixmap)
 
         # Update Working Info
-        self._asset.get_
+        status = 'working'
+        locals = self._asset.get_local_versions(status=status)
+        if not locals:
+            return
+
+        for f, file_data in locals.items():
+            if not file_data:
+                continue
+
+            if not file_data.versions:
+                continue
+
+            for version in file_data.versions:
+                print(version[1].date_created)
+
+            # print('asdfasfasf')
+            # print(version_data)
+            # print(version_data.date_created)
+
+
+
+        # last_version = locals[-1]
+        # print(last_version[1].name)
+        # print(last_version)
+
 
 
 

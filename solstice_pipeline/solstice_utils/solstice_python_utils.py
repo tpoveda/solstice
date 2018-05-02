@@ -187,6 +187,17 @@ def camel_case_to_string(camel_case_string):
     return re.sub("([a-z])([A-Z])", "\g<1> \g<2>", camel_case_string)
 
 
+def string_to_camel_case(string):
+    """
+    Converts a string to a camel case one
+    test path --> TestPath
+    :param string: str
+    :return: str
+    """
+
+    return ''.join(x for x in string.title() if not x.isspace())
+
+
 def get_system_config_directory():
     """
     Returns platform specific configuration directory

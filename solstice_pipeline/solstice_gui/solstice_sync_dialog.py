@@ -9,16 +9,14 @@
 # ==================================================================="""
 
 import os
-import time
 import threading
 import traceback
-from functools import partial
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
 
 import solstice_pipeline as sp
-from solstice_utils import solstice_maya_utils, solstice_python_utils
+from solstice_utils import solstice_maya_utils
 from solstice_utils import solstice_artella_utils as artella
 
 from resources import solstice_resource
@@ -129,6 +127,7 @@ class SolsticeSyncFile(SolsticeSync, object):
             file_path = os.path.relpath(p, sp.get_solstice_assets_path())
             self._progress_text.setText('Syncing file: {0} ... Please wait!'.format(file_path))
             artella.synchronize_file(p)
+            sp.register_asset(p)
         event.set()
 
 
@@ -161,6 +160,7 @@ class SolsticeSyncPath(SolsticeSync, object):
             file_path = os.path.relpath(p, sp.get_solstice_assets_path())
             self._progress_text.setText('Syncing files of folder: {0} ... Please wait!'.format(file_path))
             artella.synchronize_path(p)
+            sp.register_asset(p)
         event.set()
 
 

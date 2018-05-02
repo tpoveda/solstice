@@ -4,7 +4,7 @@
 # """ ==================================================================
 # Script Name: solstice_artella_classes.py
 # by Tomas Poveda
-# Utility Module thata contains data classes for Artella information
+# Utility Module that contains data classes for Artella information
 #  with Artella
 # ______________________________________________________________________
 # ==================================================================="""
@@ -13,6 +13,7 @@ import os
 import collections
 
 import solstice_pipeline as sp
+
 
 class ArtellaHeaderMetaData(object):
     def __init__(self, header_dict):
@@ -142,7 +143,6 @@ class ArtellaAssetMetaData(object):
         return self._published_folders
 
 
-
 class ArtellaReferencesMetaData(object):
     def __init__(self, ref_name, ref_path, ref_dict):
         self._name = ref_name.split('/')[-1]
@@ -263,6 +263,110 @@ class ArtellaAppMetaData(object):
         os.environ['ART_LOCAL_ROOT'] = self._local_root
 
 
-class ArtellaFileStatus(object):
-    def __init__(self):
-        pass
+class ArtellaFileVerionMetaData(object):
+    def __init__(self, version_data):
+
+        self._comment = None
+        self._relative_dir = None
+        self._name = None
+        self._creator = None
+        self._locked_by = None
+        self._relative_path = None
+        self._version = None
+        self._creator_display = None
+        self._date_created = None
+        self._digest = None
+        self._size = None
+
+        if not version_data:
+            return
+
+        self._comment = version_data['comment']
+        self._relative_path = version_data['relative_dir']
+        self._name = version_data['name']
+        self._creator = version_data['creator']
+        self._locked = version_data['locked_by']
+        self._relative_path = version_data['relative_path']
+        self._version = version_data['version']
+        self._creator_display = version_data['creatorDisplay']
+        self._date_created = version_data['date_created']
+        self._digest = version_data['digest']
+        self._size = version_data['size']
+
+    @property
+    def comment(self):
+        return self._comment
+
+    @property
+    def relative_dir(self):
+        return self._relative_dir
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def creator(self):
+        return self._creator
+
+    @property
+    def locked_by(self):
+        return self._locked_by
+
+    @property
+    def relative_path(self):
+        return self._relative_path
+
+    @property
+    def version(self):
+        return self._version
+
+    @property
+    def creator_display(self):
+        return self._creator_display
+
+    @property
+    def date_created(self):
+        return self._date_created
+
+    @property
+    def digest(self):
+        return self._digest
+
+    @property
+    def size(self):
+        return self._size
+
+
+class ArtellaFileMetaData(object):
+    def __init__(self, file_dict):
+
+        self._name = None
+        self._relative_path = None
+        self._versions = dict()
+
+        if not file_dict:
+            return
+
+        for name, data in file_dict['data'].items():
+            self._name = data['name']
+            self._relative_path = data['relative_path']
+
+            for version in data['versions']:
+                new_version = ArtellaFileVerionMetaData(version_data=version)
+                self._versions[str(new_version.version)] = new_version
+
+            # Sort versions by key
+            self._versions = sorted(self._versions.items())
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def relative_path(self):
+        return self._relative_path
+
+    @property
+    def versions(self):
+        return self._versions

@@ -9,8 +9,9 @@
 import os
 import re
 import sys
-import importlib
 import pkgutil
+import datetime
+import importlib
 from types import ModuleType
 from collections import OrderedDict
 if sys.version_info[:2] > (2, 7):
@@ -25,11 +26,13 @@ loaded_modules = OrderedDict()
 reload_modules = list()
 logger = None
 info_dialog = None
+settings = None
 
 # =================================================================================
 
 solstice_project_id = '2/2252d6c8-407d-4419-a186-cf90760c9967/'
 solstice_project_id_raw = '2252d6c8-407d-4419-a186-cf90760c9967'
+valid_categories = ['model', 'textures', 'shading', 'groom']
 
 # =================================================================================
 
@@ -160,6 +163,16 @@ def create_solstice_logger():
     logger.debug('Initializing Solstice Tools ...')
 
 
+def create_solstice_settings():
+    """
+    Creates a settings file that can be accessed globally by all tools
+    """
+
+    from solstice_utils import solstice_config
+    global settings
+    settings = solstice_config.create_config('solstice_tools')
+
+
 def create_solstice_info_window():
     """
     Creates a global window that is used to show different type of info
@@ -229,10 +242,31 @@ def get_asset_version(name):
     return [string_version, int_version, int_version_formatted]
 
 
+def register_asset(asset_name):
+    """
+    Adds the given asset to the local registry of assets
+    This register is used to check last time a user synchronized a specific asset
+    :param asset_name: str, name of the asset to register
+    :return: str, sync time
+    """
+
+    invalid_names = ['__working__']
+    if asset_name in invalid_names:
+        return
+
+    now = datetime.datetime.now()
+    sync_time = now.strftime("%m/%d/%Y %H:%M:%S")
+    logger.debug('Registering Asset Sync: {0} - {1}'.format(asset_name, sync_time))
+    settings.set(settings.app_name, asset_name, str(sync_time))
+    settings.update()
+    return sync_time
+
+
 def init():
     # update_paths()
     create_solstice_logger()
     import_modules(solstice_pipeline.__path__[0], only_packages=True, order=['solstice_pipeline.solstice_utils', 'solstice_pipeline.solstice_gui', 'solstice_pipeline.solstice_tools'])
     reload_all()
+    create_solstice_settings()
     create_solstice_info_window()
 

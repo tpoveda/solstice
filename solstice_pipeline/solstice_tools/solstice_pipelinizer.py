@@ -10,6 +10,7 @@
 
 import os
 import time
+import datetime
 import webbrowser
 from functools import partial
 from distutils.util import strtobool
@@ -24,7 +25,7 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser, solstice_published_info_widget, solstice_sync_dialog
+from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser, solstice_published_info_widget, solstice_sync_dialog, solstice_sequencer
 from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_artella_utils, solstice_image
 from resources import solstice_resource
 
@@ -35,7 +36,6 @@ from solstice_gui import solstice_label, solstice_breadcrumb, solstice_navigatio
 class PipelinizerSettings(QDialog, object):
     def __init__(self, parent):
         super(PipelinizerSettings, self).__init__(parent=parent)
-
 
         self.setObjectName('PipelinizerSettingsDialog')
         self.setWindowTitle('Pipelinizer - Settings')
@@ -105,33 +105,30 @@ class Pipelinizer(solstice_windows.Window, object):
     version = '1.0'
     docked = True
 
-    def __init__(self, name='PipelinizwerWindow', parent=None, **kwargs):
-
+    def __init__(self, name='PipelinizerWindow', parent=None, **kwargs):
         self._projects = None
         super(Pipelinizer, self).__init__(name=name, parent=parent, **kwargs)
-        # self.load_projects()
 
     def custom_ui(self):
         super(Pipelinizer, self).custom_ui()
 
+        # Set Tool Logo
         self.set_logo('solstice_pipeline_logo')
 
+        # Create Settings File
         if self.settings.config_file.exists():
             if not self.settings.has_option(self.settings.app_name, 'auto_check'):
                 self.settings.set(self.settings.app_name, 'auto_check', str(False))
                 self.settings.update()
 
-        self._current_asset = None
-
-        self._toolbar = QToolBar('Tools', self)
-        self._toolbar.setAllowedAreas(Qt.RightToolBarArea | Qt.LeftToolBarArea | Qt.BottomToolBarArea)
-        self.addToolBar(Qt.RightToolBarArea, self._toolbar)
-
+        # User Icon
+        # TODO: After creating the user database read the info for this user from that file
         user_icon = solstice_user.UserWidget(name='Summer', role='Director')
         user_icon.move(1100, 0)
         user_icon.setStyleSheet("QWidget{background: transparent;}");
         self._logo_scene.addWidget(user_icon)
 
+        # Top Menu Bar
         top_menu_layout = QGridLayout()
         top_menu_layout.setAlignment(Qt.AlignTop)
         self.main_layout.addLayout(top_menu_layout)
@@ -144,18 +141,53 @@ class Pipelinizer(solstice_windows.Window, object):
         synchronize_btn.setPopupMode(QToolButton.InstantPopup)
         settings_btn = QToolButton()
         settings_btn.setText('Settings')
+        for i, btn in enumerate([artella_project_btn, project_folder_btn, synchronize_btn, settings_btn]):
+            top_menu_layout.addWidget(btn, 0, i, 1, 1, Qt.AlignCenter)
 
         synchronize_menu = QMenu(self)
         sync_characters_action = QAction('Characters', self)
         sync_props_action = QAction('Props', self)
         sync_background_elements_action = QAction('Background Elements', self)
-        for action in [sync_characters_action, sync_props_action, sync_background_elements_action]:
+        sync_all_action = QAction('All', self)
+        for action in [sync_characters_action, sync_props_action, sync_background_elements_action, sync_all_action]:
             synchronize_menu.addAction(action)
         synchronize_btn.setMenu(synchronize_menu)
 
-        for i, btn in enumerate([artella_project_btn, project_folder_btn, synchronize_btn, settings_btn]):
-            top_menu_layout.addWidget(btn, 0, i, 1, 1, Qt.AlignCenter)
+        sync_characters_menu = QMenu(self)
+        sync_characters_action.setMenu(sync_characters_menu)
+        sync_characters_all_action = QAction('All', self)
+        sync_character_model_action = QAction('Model', self)
+        sync_character_textures_action = QAction('Textures', self)
+        sync_character_shading_action = QAction('Shading', self)
+        sync_character_grooming_action = QAction('Groom', self)
+        sync_characters_menu.addAction(sync_characters_all_action)
+        sync_characters_menu.addSeparator()
+        for action in [sync_character_model_action, sync_character_textures_action, sync_character_shading_action, sync_character_grooming_action]:
+            sync_characters_menu.addAction(action)
 
+        sync_background_elements_menu = QMenu(self)
+        sync_background_elements_action.setMenu(sync_background_elements_menu)
+        sync_background_elements_all_action = QAction('All', self)
+        sync_background_elements_model_action = QAction('Model', self)
+        sync_background_elements_textures_action = QAction('Textures', self)
+        sync_background_elements_shading_action = QAction('Shading', self)
+        sync_background_elements_menu.addAction(sync_background_elements_all_action)
+        sync_background_elements_menu.addSeparator()
+        for action in [sync_background_elements_model_action, sync_background_elements_textures_action, sync_background_elements_shading_action]:
+            sync_background_elements_menu.addAction(action)
+
+        sync_props_menu = QMenu(self)
+        sync_props_action.setMenu(sync_props_menu)
+        sync_props_all_action = QAction('All', self)
+        sync_props_model_action = QAction('Model', self)
+        sync_props_textures_action = QAction('Textures', self)
+        sync_props_shading_action = QAction('Shading', self)
+        sync_props_menu.addAction(sync_props_all_action)
+        sync_props_menu.addSeparator()
+        for action in [sync_props_model_action, sync_props_textures_action, sync_props_shading_action]:
+            sync_props_menu.addAction(action)
+
+        # Pipelinizer Widgets
         tab_widget = QTabWidget()
         tab_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         tab_widget.setMinimumHeight(330)
@@ -181,7 +213,7 @@ class Pipelinizer(solstice_windows.Window, object):
 
         tab_widget.addTab(categories_widget, 'Assets Manager')
         tab_widget.addTab(asset_browser_widget, ' Assets Browser ')
-        tab_widget.addTab(sequences_widget, 'Sequences Manager')
+        tab_widget.addTab(sequences_widget, 'Sequence Manager')
 
         # ================== Asset Manager Widget
         main_categories_menu_layout = QHBoxLayout()
@@ -202,7 +234,7 @@ class Pipelinizer(solstice_windows.Window, object):
 
         self._asset_viewer = solstice_assetviewer.AssetViewer(
             assets_path=sp.get_solstice_assets_path(),
-            item_pressed_callback=self._update_asset_info,
+            item_pressed_callback=self.update_asset_info,
             parent=self)
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         asset_splitter.addWidget(self._asset_viewer)
@@ -255,27 +287,42 @@ class Pipelinizer(solstice_windows.Window, object):
         local_data_layout.addWidget(local_data_browser)
         asset_viewer_splitter.addWidget(local_data_widget)
 
+        # Sequence Manager Widget
+        self._sequencer = solstice_sequencer.SequencerTreeView()
+        sequences_layout.addWidget(self._sequencer)
+
         # =================================================================================================
         artella_project_btn.clicked.connect(self.open_project_in_artella)
         project_folder_btn.clicked.connect(self.open_project_folder)
-        sync_background_elements_action.triggered.connect(self.sync_background_elements)
-        sync_characters_action.triggered.connect(self.sync_characters)
-        sync_props_action.triggered.connect(self.sync_props)
-        settings_btn.clicked.connect(self._open_settings)
+        sync_characters_all_action.triggered.connect(partial(self.sync_category, 'Characters', 'all', True, True))
+        sync_character_model_action.triggered.connect(partial(self.sync_category, 'Characters', 'model', True, False))
+        sync_character_shading_action.triggered.connect(partial(self.sync_category, 'Characters', 'shading', True, False))
+        sync_character_textures_action.triggered.connect(partial(self.sync_category, 'Characters', 'textures', True, False))
+        sync_character_grooming_action.triggered.connect(partial(self.sync_category, 'Characters', 'groom', True, False))
+        sync_background_elements_all_action.triggered.connect(partial(self.sync_category, 'BackgroundElements', 'all', True, True))
+        sync_background_elements_model_action.triggered.connect(partial(self.sync_category, 'BackgroundElements', 'model', True, False))
+        sync_background_elements_shading_action.triggered.connect(partial(self.sync_category, 'BackgroundElements', 'shading', True, False))
+        sync_background_elements_textures_action.triggered.connect(partial(self.sync_category, 'BackgroundElements', 'textures', True, False))
+        sync_props_all_action.triggered.connect(partial(self.sync_category, 'Props', 'all', True, True))
+        sync_props_model_action.triggered.connect(partial(self.sync_category, 'Props', 'model', True, False))
+        sync_props_shading_action.triggered.connect(partial(self.sync_category, 'Props', 'shading', True, False))
+        sync_props_textures_action.triggered.connect(partial(self.sync_category, 'Props', 'textures', True, False))
+        settings_btn.clicked.connect(self.open_settings)
         # =================================================================================================
 
-    def open_project_in_artella(self):
+    @staticmethod
+    def open_project_in_artella():
         project_url = 'https://www.artella.com/project/{0}/files'.format(sp.solstice_project_id_raw)
         webbrowser.open(project_url)
 
-    def open_project_folder(self):
+    @staticmethod
+    def open_project_folder():
         solstice_python_utils.open_folder(sp.get_solstice_project_path())
 
     def _change_category(self, category, flag):
         self._asset_viewer.change_category(category=category)
 
     def _update_items(self, update=False):
-        self._current_asset = None
         self._info_asset_widget.setVisible(False)
         self._asset_viewer.update_items(update=update)
 
@@ -288,27 +335,41 @@ class Pipelinizer(solstice_windows.Window, object):
                 item = item.containedWidget.name
                 items.append(item)
 
-    def _open_settings(self):
+    def open_settings(self):
+        """
+        Opens Pipelinizer Settings Dialog
+        """
+
         PipelinizerSettings(self)
 
-    def sync_background_elements(self, full_sync=True, ask=False):
+    def sync_category(self, category, sync_type='all', full_sync=True, ask=False):
         """
-        Synchronizes all background elements located in Artella Server
-         :param full_sync: bool, If True, all the assets will be sync with the content on Artella Server,
-               if False, only will synchronize the assets that are missing (no warranty that you have latest versions
-               on other assets)
-        :param ask: bool, True if you want to show a message box to the user to decide if the want or not download
-                          missing files in his local machine
+        Synchronizes the given category located in Artella Server, if exists
+        :param category:
+        :param full_sync:
+        :param sync_type:
+        :param ask:
+        :return:
         """
+
+        if sync_type != 'all' and sync_type != 'model' and sync_type != 'shading' and sync_type != 'textures':
+            sp.logger.error('Synchronization type {0} is not valid!'.format(sync_type))
+            return
 
         start_time = time.time()
         try:
             cmds.waitCursor(state=True)
             elements = list()
-            thread, event = sp.info_dialog.do('Getting Artella Background Elements Info ... Please wait!', 'SolsticeArtellaBackgroundElements', self.get_assets_by_category, ['BackgroundElements', True, elements])
+            category_name = solstice_python_utils.string_to_camel_case(category)
+            thread, event = sp.info_dialog.do(
+                'Getting Artella "{0}" Info ... Please wait!'.format(category_name),
+                'SolsticeArtella{0}Thread'.format(category_name),
+                self.get_assets_by_category, [category, True, elements])
+
             while not event.is_set():
                 QCoreApplication.processEvents()
                 event.wait(0.25)
+
             elements_to_sync = list()
             if elements:
                 elements = elements[0]
@@ -320,202 +381,53 @@ class Pipelinizer(solstice_windows.Window, object):
                     else:
                         if not os.path.exists(elements[el].tag):
                             elements_to_sync.append(elements[el].tag)
-            if len(elements_to_sync) > 0:
-                if ask:
-                    result = solstice_qt_utils.show_question(None,'Some background elements are not synchronized locally','Do you want to synchronize them? NOTE: This can take quite a lot of time!')
-                    if result == QMessageBox.Yes:
-                        solstice_sync_dialog.SolsticeSyncPath(paths=elements_to_sync).sync()
-                else:
-                    solstice_sync_dialog.SolsticeSyncPath(paths=elements_to_sync).sync()
+
+                if len(elements_to_sync) > 0:
+                    assets = list()
+                    for el in elements_to_sync:
+                        assets.append(solstice_asset.AssetWidget(
+                            name=os.path.basename(el),
+                            path=el
+                        ))
+
+                    if ask:
+                        result = solstice_qt_utils.show_question(
+                            None,
+                            'Some {0} are not synchronized locally'.format(category),
+                            'Do you want to synchronize them? NOTE: This can take quite a lot of time!')
+                        if result == QMessageBox.No:
+                            cmds.waitCursor(state=False)
+                            return
+
+                    for asset in assets:
+                        asset.sync(sync_type=sync_type, ask=False)
+                    # solstice_sync_dialog.SolsticeSyncPath(paths=elements_to_sync).sync()
         except Exception as e:
             sp.logger.debug(str(e))
             cmds.waitCursor(state=False)
         elapsed_time = time.time() - start_time
-        sp.logger.debug('Background Elements synchronized in {0} seconds'.format(elapsed_time))
-        cmds.waitCursor(state=False)
-
-    def sync_characters(self, full_sync=True, ask=False):
-        """
-        Synchronizes all characters located in Artella Server
-         :param full_sync: bool, If True, all the assets will be sync with the content on Artella Server,
-               if False, only will synchronize the assets that are missing (no warranty that you have latest versions
-               on other assets)
-        :param ask: bool, True if you want to show a message box to the user to decide if the want or not download
-                          missing files in his local machine
-        """
-
-        start_time = time.time()
-        try:
-            cmds.waitCursor(state=True)
-            characters = list()
-            thread, event = sp.info_dialog.do('Getting Artella Characters Info ... Please wait!', 'SolsticeArtellaCharacters', self.get_assets_by_category, ['Characters', True, characters])
-            while not event.is_set():
-                QCoreApplication.processEvents()
-                event.wait(0.25)
-                characters_to_sync = list()
-            if characters:
-                characters = characters[0]
-                for i, ch in enumerate(characters.expand_tree()):
-                    if i == 0:
-                        continue
-                    if full_sync:
-                        characters_to_sync.append(characters[ch].tag)
-                    else:
-                        if not os.path.exists(characters[ch].tag):
-                            characters_to_sync.append(characters[ch].tag)
-            if len(characters_to_sync) > 0:
-                if ask:
-                    result = solstice_qt_utils.show_question(None, 'Some characters are not synchronized locally','Do you want to synchronize them? NOTE: This can take quite a lot of time!')
-                    if result == QMessageBox.Yes:
-                        solstice_sync_dialog.SolsticeSyncPath(paths=characters_to_sync).sync()
-                else:
-                    solstice_sync_dialog.SolsticeSyncPath(paths=characters_to_sync).sync()
-        except Exception as e:
-            sp.logger.debug(str(e))
-            cmds.waitCursor(state=False)
-        elapsed_time = time.time() - start_time
-        sp.logger.debug('Characters synchronized in {0} seconds'.format(elapsed_time))
-        cmds.waitCursor(state=False)
-
-    def sync_props(self, full_sync=True, ask=False):
-        """
-        Synchronizes all props located in Artella Server
-         :param full_sync: bool, If True, all the assets will be sync with the content on Artella Server,
-               if False, only will synchronize the assets that are missing (no warranty that you have latest versions
-               on other assets)
-        :param ask: bool, True if you want to show a message box to the user to decide if the want or not download
-                          missing files in his local machine
-        """
-
-        start_time = time.time()
-        try:
-            cmds.waitCursor(state=True)
-            props = list()
-            thread, event = sp.info_dialog.do('Getting Artella Props Info ... Please wait!', 'SolsticeArtellaProps', self.get_assets_by_category, ['Props', True, props])
-            while not event.is_set():
-                QCoreApplication.processEvents()
-                event.wait(0.25)
-                props_to_sync = list()
-            if props:
-                props = props[0]
-                for i, pr in enumerate(props.expand_tree()):
-                    if i == 0:
-                        continue
-                    if full_sync:
-                        props_to_sync.append(props[pr].tag)
-                    else:
-                        if not os.path.exists(props[pr].tag):
-                            props_to_sync.append(props[pr].tag)
-            if len(props_to_sync) > 0:
-                if ask:
-                    result = solstice_qt_utils.show_question(None, 'Some props are not synchronized locally','Do you want to synchronize them? NOTE: This can take quite a lot of time!')
-                    if result == QMessageBox.Yes:
-                        solstice_sync_dialog.SolsticeSyncPath(paths=props_to_sync).sync()
-                else:
-                    solstice_sync_dialog.SolsticeSyncPath(paths=props_to_sync).sync()
-        except Exception as e:
-            sp.logger.debug(str(e))
-            cmds.waitCursor(state=False)
-        elapsed_time = time.time() - start_time
-        sp.logger.debug('Props synchronized in {0} seconds'.format(elapsed_time))
+        sp.logger.debug('{0} synchronized in {1} seconds'.format(category_name, elapsed_time))
         cmds.waitCursor(state=False)
 
     def sync_all_assets(self, full_sync=False, ask=False):
         """
         Synchronizes all the assets of Solstice Short Film
-        :param full_sync: bool, If True, all the assets will be syncrhonized with the content on Artella Server,
-               if False, only will synchronize the assets that are missing (no waranty that you have latests versions
+        :param full_sync: bool, If True, all the assets will be sync with the content on Artella Server,
+               if False, only will synchronize the assets that are missing (no warranty that you have latest versions
                on other assets)
+       :param ask: bool, True if you want to show a message box to the user to decide if the want or not download
+               missing files in his local machine
         :return:
         """
 
-        # Characters Synchronization
-        cmds.waitCursor(state=True)
-        characters = list()
-        start_time = time.time()
-        thread, event = sp.info_dialog.do('Getting Artella Characters Info ... Please wait!', 'SolsticeArtellaChars', self.get_assets_by_category, ['Characters', True, characters])
-        while not event.is_set():
-            QCoreApplication.processEvents()
-            event.wait(0.25)
-        characters_to_sync = list()
-        if characters:
-            characters = characters[0]
-            for i, ch in enumerate(characters.expand_tree()):
-                if i == 0:
-                    continue
-                if full_sync:
-                    characters_to_sync.append(characters[ch].tag)
-                else:
-                    if not os.path.exists(characters[ch].tag):
-                        characters_to_sync.append(characters[ch].tag)
-        if len(characters_to_sync) > 0:
-            if ask:
-                result = solstice_qt_utils.show_question(None, 'Some characters are not synchronized locally', 'Do you want to synchronize them? NOTE: This can take quite a lot of time!')
-                if result == QMessageBox.Yes:
-                    solstice_sync_dialog.SolsticeSyncPath(paths=characters_to_sync).sync()
-            else:
-                solstice_sync_dialog.SolsticeSyncPath(paths=characters_to_sync).sync()
-        elapsed_time = time.time() - start_time
-        sp.logger.debug('Characters synchronized in {0} seconds'.format(elapsed_time))
+        if ask:
+            result = solstice_qt_utils.show_question(None, 'Full synchronization', 'Do you want to synchronize all assets? NOTE: This can take quite a lot of time!')
+            if result == QMessageBox.Yes:
+                self.sync_category(category='Characters', full_sync=full_sync, ask=False)
+                self.sync_category(category='BackgroundElements', full_sync=full_sync, ask=False)
+                self.sync_category(category='Props', full_sync=full_sync, ask=False)
 
-        # Props synchronization
-        props = list()
-        start_time = time.time()
-        thread, event = sp.info_dialog.do('Getting Artella Props Info ... Please wait!', 'SolsticeArtellaProps', self.get_assets_by_category, ['Props', True, props])
-        while not event.is_set():
-            QCoreApplication.processEvents()
-            event.wait(0.25)
-        props_to_sync = list()
-        if props:
-            props = props[0]
-            for i, pr in enumerate(props.expand_tree()):
-                if i == 0:
-                    continue
-                if full_sync:
-                    props_to_sync.append(props[pr].tag)
-                else:
-                    if not os.path.exists(props[pr].tag):
-                        props_to_sync.append(props[pr].tag)
-        if len(props_to_sync) > 0:
-            if ask:
-                result = solstice_qt_utils.show_question(None, 'Some props are not synchronized locally', 'Do you want to synchronize them? NOTE: This can take quite a lot of time!')
-                if result == QMessageBox.Yes:
-                    solstice_sync_dialog.SolsticeSyncPath(paths=props_to_sync).sync()
-            else:
-                solstice_sync_dialog.SolsticeSyncPath(paths=props_to_sync).sync()
-        elapsed_time = time.time() - start_time
-        sp.logger.debug('Props synchronized in {0} seconds'.format(elapsed_time))
-
-        # Background Elements Synchronization
-        elements = list()
-        start_time = time.time()
-        thread, event = sp.info_dialog.do('Getting Artella Background Elements Info ... Please wait!', 'SolsticeArtellaBackgroundElements', self.get_assets_by_category, ['BackgroundElements', True, elements])
-        while not event.is_set():
-            QCoreApplication.processEvents()
-            event.wait(0.25)
-        elements_to_sync = list()
-        if elements:
-            elements = elements[0]
-            for i, el in enumerate(elements.expand_tree()):
-                if i == 0:
-                    continue
-                if full_sync:
-                    elements_to_sync.append(elements[el].tag)
-                else:
-                    if not os.path.exists(elements[el].tag):
-                        elements_to_sync.append(elements[el].tag)
-        if len(elements_to_sync) > 0:
-            if ask:
-                result = solstice_qt_utils.show_question(None, 'Some background elements are not synchronized locally', 'Do you want to synchronize them? NOTE: This can take quite a lot of time!')
-                if result == QMessageBox.Yes:
-                    solstice_sync_dialog.SolsticeSyncPath(paths=elements_to_sync).sync()
-            else:
-                solstice_sync_dialog.SolsticeSyncPath(paths=elements_to_sync).sync()
-        elapsed_time = time.time() - start_time
-        sp.logger.debug('Background Elements synchronized in {0} seconds'.format(elapsed_time))
-        cmds.waitCursor(state=False)
-
-    def _update_asset_info(self, asset=None, check_versions=None):
+    def update_asset_info(self, asset=None, check_versions=None):
         self._current_asset = asset
         if asset:
             if not check_versions:
@@ -534,7 +446,8 @@ class Pipelinizer(solstice_windows.Window, object):
         else:
             self._info_asset_widget.setVisible(False)
 
-    def get_assets_by_category(self, category='Characters', only_assets=True, thread_result=None, thread_event=None):
+    @staticmethod
+    def get_assets_by_category(category='Characters', only_assets=True, thread_result=None, thread_event=None):
         """
         Gets a list of assets of a specific category
         :param category: str
@@ -622,6 +535,7 @@ def run(restore=False):
     reload(solstice_filelistwidget)
     reload(solstice_splitters)
     reload(solstice_published_info_widget)
+    reload(solstice_sequencer)
 
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()

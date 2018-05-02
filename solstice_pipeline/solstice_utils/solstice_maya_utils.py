@@ -23,6 +23,8 @@ import maya.OpenMaya as OpenMaya
 
 import solstice_pipeline as sp
 
+_DPI_SCALE = 1.0 if not hasattr(cmds, "mayaDpiSetting") else cmds.mayaDpiSetting(query=True, realScaleValue=True)
+
 
 class MCallbackIdWrapper(object):
     """
@@ -174,4 +176,8 @@ def remove_callback(callback_id):
         return
     except Exception:
         pass
+
+
+def dpi_scale(value):
+    return _DPI_SCALE * value
 
