@@ -14,6 +14,7 @@ from Qt.QtCore import *
 from Qt.QtWidgets import *
 from Qt.QtGui import *
 
+import solstice_pipeline as sp
 from resources import solstice_resource
 from solstice_utils import solstice_qt_utils
 from solstice_gui import solstice_splitters
@@ -138,28 +139,28 @@ class PublishedInfoWidget(QWidget, object):
                 ui[status][f]['layout'].addWidget(solstice_splitters.get_horizontal_separator_widget())
                 ui[status][f]['layout'].addLayout(ui[status][f]['info_layout'])
 
-                ui[status][f]['local_layout'] = QHBoxLayout()
-                ui[status][f]['local_layout'].setContentsMargins(1, 1, 1, 1)
-                ui[status][f]['local_layout'].setSpacing(1)
-                ui[status][f]['server_layout'] = QHBoxLayout()
-                ui[status][f]['server_layout'].setContentsMargins(1, 1, 1, 1)
-                ui[status][f]['server_layout'].setSpacing(1)
+                for status_type in ['local', 'server']:
+                    ui[status][f][status_type] = dict()
+                    ui[status][f][status_type]['layout'] = QHBoxLayout()
+                    ui[status][f][status_type]['layout'].setContentsMargins(1, 1, 1, 1)
+                    ui[status][f][status_type]['layout'].setSpacing(1)
+                    ui[status][f][status_type]['layout'] = QHBoxLayout()
+                    ui[status][f][status_type]['layout'].setContentsMargins(1, 1, 1, 1)
+                    ui[status][f][status_type]['layout'].setSpacing(1)
 
-                ui[status][f]['info_layout'].addLayout(ui[status][f]['local_layout'])
+                ui[status][f]['info_layout'].addLayout(ui[status][f]['local']['layout'])
                 ui[status][f]['info_layout'].addWidget(solstice_splitters.get_horizontal_separator_widget())
-                ui[status][f]['info_layout'].addLayout(ui[status][f]['server_layout'])
+                ui[status][f]['info_layout'].addLayout(ui[status][f]['server']['layout'])
 
-                ui[status][f]['local_logo'] = QLabel()
-                ui[status][f]['local_logo'].setPixmap(self._local_pixmap)
-                ui[status][f]['local_text'] = QLabel('None')
-                ui[status][f]['local_layout'].addWidget(ui[status][f]['local_logo'])
-                ui[status][f]['local_layout'].addWidget(ui[status][f]['local_text'])
-
-                ui[status][f]['server_logo'] = QLabel()
-                ui[status][f]['server_logo'].setPixmap(self._server_pixmap)
-                ui[status][f]['server_text'] = QLabel('None')
-                ui[status][f]['server_layout'].addWidget(ui[status][f]['server_logo'])
-                ui[status][f]['server_layout'].addWidget(ui[status][f]['server_text'])
+                for status_type in ['local', 'server']:
+                    ui[status][f][status_type]['logo'] = QLabel()
+                    if status_type == 'local':
+                        ui[status][f][status_type]['logo'].setPixmap(self._local_pixmap)
+                    else:
+                        ui[status][f][status_type]['logo'].setPixmap(self._server_pixmap)
+                    ui[status][f][status_type]['text'] = QLabel('None')
+                    ui[status][f][status_type]['layout'].addWidget(ui[status][f][status_type]['logo'])
+                    ui[status][f][status_type]['layout'].addWidget(ui[status][f][status_type]['text'])
 
                 ui[status][f]['info_btn'] = QPushButton()
                 ui[status][f]['info_btn'].setIcon(QIcon(self._info_pixmap))
@@ -178,13 +179,35 @@ class PublishedInfoWidget(QWidget, object):
 
         # Update Working Info
         if self._check_working_info:
-            print('Checking working info ...')
-            max_versions = self._asset.get_max_versions('working')
-            print(max_versions)
+            status = 'working'
+            max_versions = self._asset.get_max_versions(status=status)
+            for f in sp.valid_categories:
+                for status_type in ['local', 'server']:
+                    if f not in max_versions[status_type].keys():
+                        continue
+                    version_info = max_versions[status_type][f]
+                    if f == 'textures':
+                        print(version_info)
+                    else:
+                        if not version_info:
+                            continue
+                        # TODO: Check if necessary use sync time to know if we have a proper version of the working asset
+                        ui[status][f][status_type]['text'].setText('v{0}'.format(str(version_info.version)))
 
         # Update Published Info
         if self._check_published_info:
-            print('Checking published info ...')
+            print('Checking Published Info ...')
+            status = 'published'
+            max_versions = self._asset.get_max_versions(status=status)
+            for f in sp.valid_categories:
+                for status_type in ['local', 'server']:
+                    if f not in max_versions[status_type].keys():
+                        continue
+                    version_info = max_versions[status_type][f]
+                    if not version_info:
+                        continue
+                    # TODO: Check if necessary use sync time to know if we have a proper version of the working asset
+                    ui[status][f][status_type]['text'].setText('v{0}'.format(str(version_info)))
 
         # status = 'working'
         # if self._check_versions:
