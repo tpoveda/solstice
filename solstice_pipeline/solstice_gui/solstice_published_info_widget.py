@@ -8,6 +8,7 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
+from functools import partial
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
@@ -28,12 +29,14 @@ class PublishedInfoWidget(QWidget, object):
     _ok_pixmap = solstice_resource.pixmap('ok', category='icons').scaled(QSize(24, 24))
     _local_pixmap = solstice_resource.pixmap('hdd', category='icons').scaled(QSize(24, 24))
     _server_pixmap = solstice_resource.pixmap('artella', category='icons').scaled(QSize(24, 24))
+    _info_pixmap = solstice_resource.pixmap('info', category='icons').scaled(QSize(24, 24))
 
-    def __init__(self, asset, check_versions=False, parent=None):
+    def __init__(self, asset, check_published_info=False ,check_working_info=False, parent=None):
         super(PublishedInfoWidget, self).__init__(parent=parent)
 
         self._asset = asset
-        self._check_versions = check_versions
+        self._check_published_info = check_published_info
+        self._check_working_info = check_working_info
         self._has_model = True
         self._has_shading = True
         self._has_textures = True
@@ -44,13 +47,38 @@ class PublishedInfoWidget(QWidget, object):
         self._main_layout.setSpacing(5)
         self.setLayout(self._main_layout)
 
-        self.update_published_info()
+        self._info_layout = QHBoxLayout()
+        self._info_layout.setContentsMargins(0, 0, 0, 0)
+        self._info_layout.setSpacing(0)
+        self._info_layout.setAlignment(Qt.AlignCenter)
+        self._info_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
+        self._main_layout.addLayout(self._info_layout)
 
-    def update_published_info(self):
+        bottom_layout = QHBoxLayout()
+        bottom_layout.setContentsMargins(2, 2, 2, 2)
+        bottom_layout.setSpacing(2)
+        self._main_layout.addLayout(bottom_layout)
+        self._asset_description = QTextEdit()
+        self._asset_description.setReadOnly(True)
+        bottom_splitter = QSplitter(Qt.Horizontal)
+        bottom_layout.addWidget(bottom_splitter)
+        bottom_splitter.addWidget(self._asset_description)
+        self._versions_widget = QWidget()
+        self._versions_widget.setVisible(False)
+        self._versions_layout = QVBoxLayout()
+        self._versions_layout.setContentsMargins(2, 2, 2, 2)
+        self._versions_layout.setSpacing(2)
+        self._versions_widget.setLayout(self._versions_layout)
+        bottom_splitter.addWidget(self._versions_widget)
+
+        self.update_version_info()
+
+    def update_versions_info(self, status, file_type):
+        self._versions_widget.setVisible(True)
+
+    def update_version_info(self):
 
         solstice_qt_utils.clear_layout_widgets(self._main_layout)
-
-        folders = ['model', 'shading', 'textures', 'groom']
 
         folders_to_update = list()
         if self._has_model:
@@ -70,30 +98,23 @@ class PublishedInfoWidget(QWidget, object):
             labels[status]['shading'] = QLabel(' SHADING')
             labels[status]['groom'] = QLabel('    GROOM')
 
-        info_layout = QHBoxLayout()
-        info_layout.setContentsMargins(0, 0, 0, 0)
-        info_layout.setSpacing(0)
-        info_layout.setAlignment(Qt.AlignCenter)
-        self._main_layout.addLayout(info_layout)
-
         ui = dict()
         for status in ['working', 'published']:
             ui[status] = dict()
 
-            info_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
             ui[status]['layout'] = QVBoxLayout()
             ui[status]['layout'].setContentsMargins(2, 2, 2, 2)
             ui[status]['layout'].setSpacing(2)
-            info_layout.addLayout(ui[status]['layout'])
+            self._info_layout.addLayout(ui[status]['layout'])
 
             if status == 'working':
                 ui[status]['layout'].addWidget(solstice_splitters.Splitter('WORKING INFO'))
             elif status == 'published':
                 ui[status]['layout'].addWidget(solstice_splitters.Splitter('PUBLSIHED INFO'))
 
-            info_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
+            self._info_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
             if status == 'working':
-                info_layout.addWidget(solstice_splitters.get_horizontal_separator_widget(200))
+                self._info_layout.addWidget(solstice_splitters.get_horizontal_separator_widget(200))
 
             for f in folders_to_update:
                 ui[status][f] = dict()
@@ -140,64 +161,93 @@ class PublishedInfoWidget(QWidget, object):
                 ui[status][f]['server_layout'].addWidget(ui[status][f]['server_logo'])
                 ui[status][f]['server_layout'].addWidget(ui[status][f]['server_text'])
 
+                ui[status][f]['info_btn'] = QPushButton()
+                ui[status][f]['info_btn'].setIcon(QIcon(self._info_pixmap))
+                ui[status][f]['info_btn'].setMaximumWidth(20)
+                ui[status][f]['info_btn'].setMaximumHeight(20)
+                ui[status][f]['info_layout'].addWidget(ui[status][f]['info_btn'])
+
+                ui[status][f]['info_btn'].clicked.connect(partial(self.update_versions_info, status, f))
+
+            self._info_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
+
         sync_btn = QPushButton('Synchronize {0}'.format(self._asset.name))
         sync_btn.clicked.connect(self._asset.sync)
         sync_btn.setVisible(False)
         self._main_layout.addWidget(sync_btn)
 
         # Update Working Info
-        status = 'published'
-        if self._check_versions:
-            max_versions = self._asset.get_max_versions()
-            local_versions = max_versions['local']
-            server_versions = max_versions['server']
-            for (local_f, local_version), (server_f, server_version) in zip(local_versions.items(), server_versions.items()):
-                if local_f in folders_to_update and server_f in folders_to_update:
-                    ui[status][local_f]['status'].setPixmap(self._error_pixmap)
-                    if local_version:
-                        ui[status][local_f]['local_text'].setText(str('v{0}'.format(str(local_version))))
-                        ui[status][local_f]['status'].setPixmap(self._warning_pixmap)
-                    else:
-                        ui[status][local_f]['local_text'].setText('None')
+        if self._check_working_info:
+            print('Checking working info ...')
+            max_versions = self._asset.get_max_versions('working')
+            print(max_versions)
 
-                    if server_version:
-                        ui[status][server_f]['server_text'].setText(str('v{0}'.format(str(server_version))))
-                        ui[status][server_f]['status'].setPixmap(self._warning_pixmap)
-                    else:
-                        ui[status][server_f]['server_text'].setText('None')
+        # Update Published Info
+        if self._check_published_info:
+            print('Checking published info ...')
 
-                    if local_version == server_version and local_version is not None and server_version is not None:
-                        ui[status][local_f]['status'].setPixmap(self._ok_pixmap)
+        # status = 'working'
+        # if self._check_versions:
+        #     max_versions = self._asset.get_max_versions('working')
+        #     local_versions = max_versions['local']
+        #     server_versions = max_versions['server']
+            # for (local_f, local_version), (server_f, server_version) in zip(local_versions.items(), server_versions.items()):
+            #     if local_f in folders_to_update and server_f in folders_to_update:
+            #         ui[status][]
 
-                    if local_version > server_version or local_version is None and server_version is not None:
-                        ui[status][local_f]['status'].setPixmap(self._error_pixmap)
-                        sync_btn.setVisible(True)
-        else:
-            max_local_versions = self._asset.get_max_local_versions()
-            for f in folders:
-                if f in folders_to_update:
-                    if max_local_versions[f]:
-                        ui[status][f]['local_text'].setText(str('v{0}'.format(str(max_local_versions[f][0]))))
-                        ui[status][f]['status'].setPixmap(self._warning_pixmap)
-                    else:
-                        ui[status][f]['local_text'].setText('None')
-                        ui[status][f]['status'].setPixmap(self._error_pixmap)
 
-        # Update Working Info
-        status = 'working'
-        locals = self._asset.get_local_versions(status=status)
-        if not locals:
-            return
-
-        for f, file_data in locals.items():
-            if not file_data:
-                continue
-
-            if not file_data.versions:
-                continue
-
-            for version in file_data.versions:
-                print(version[1].date_created)
+        # status = 'published'
+        # if self._check_versions:
+        #     max_versions = self._asset.get_max_versions()
+        #     local_versions = max_versions['local']
+        #     server_versions = max_versions['server']
+        #     for (local_f, local_version), (server_f, server_version) in zip(local_versions.items(), server_versions.items()):
+        #         if local_f in folders_to_update and server_f in folders_to_update:
+        #             ui[status][local_f]['status'].setPixmap(self._error_pixmap)
+        #             if local_version:
+        #                 ui[status][local_f]['local_text'].setText(str('v{0}'.format(str(local_version))))
+        #                 ui[status][local_f]['status'].setPixmap(self._warning_pixmap)
+        #             else:
+        #                 ui[status][local_f]['local_text'].setText('None')
+        #
+        #             if server_version:
+        #                 ui[status][server_f]['server_text'].setText(str('v{0}'.format(str(server_version))))
+        #                 ui[status][server_f]['status'].setPixmap(self._warning_pixmap)
+        #             else:
+        #                 ui[status][server_f]['server_text'].setText('None')
+        #
+        #             if local_version == server_version and local_version is not None and server_version is not None:
+        #                 ui[status][local_f]['status'].setPixmap(self._ok_pixmap)
+        #
+        #             if local_version > server_version or local_version is None and server_version is not None:
+        #                 ui[status][local_f]['status'].setPixmap(self._error_pixmap)
+        #                 sync_btn.setVisible(True)
+        # else:
+        #     max_local_versions = self._asset.get_max_local_versions()
+        #     for f in folders:
+        #         if f in folders_to_update:
+        #             if max_local_versions[f]:
+        #                 ui[status][f]['local_text'].setText(str('v{0}'.format(str(max_local_versions[f][0]))))
+        #                 ui[status][f]['status'].setPixmap(self._warning_pixmap)
+        #             else:
+        #                 ui[status][f]['local_text'].setText('None')
+        #                 ui[status][f]['status'].setPixmap(self._error_pixmap)
+        #
+        # # Update Working Info
+        # status = 'working'
+        # locals = self._asset.get_local_versions(status=status)
+        # if not locals:
+        #     return
+        #
+        # for f, file_data in locals.items():
+        #     if not file_data:
+        #         continue
+        #
+        #     if not file_data.versions:
+        #         continue
+        #
+        #     for version in file_data.versions:
+        #         print(version[1].date_created)
 
             # print('asdfasfasf')
             # print(version_data)

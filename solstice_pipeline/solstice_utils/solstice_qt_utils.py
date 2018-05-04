@@ -251,4 +251,8 @@ def clear_layout_widgets(layout):
     """
 
     for i in reversed(range(layout.count())):
-        layout.itemAt(i).widget().setParent(None)
+        item = layout.itemAt(i)
+        if item:
+            w = item.widget()
+            if w:
+                w.setParent(None)

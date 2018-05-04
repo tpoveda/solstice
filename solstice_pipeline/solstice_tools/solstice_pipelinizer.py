@@ -54,8 +54,10 @@ class PipelinizerSettings(QDialog, object):
         frame.setLayout(frame_layout)
         main_layout.addWidget(frame)
 
-        self._auto_check_cbx = QCheckBox('Auto Check Versions?')
-        frame_layout.addWidget(self._auto_check_cbx)
+        self._auto_check_published_cbx = QCheckBox('Auto Check Published Versions?')
+        frame_layout.addWidget(self._auto_check_published_cbx)
+        self._auto_check_working_cbx = QCheckBox('Auto Check Working Versions?')
+        frame_layout.addWidget(self._auto_check_working_cbx)
 
         main_layout.addLayout(solstice_splitters.SplitterLayout())
 
@@ -75,8 +77,10 @@ class PipelinizerSettings(QDialog, object):
         if not self._settings:
             return
 
-        if self._settings.has_option(self._settings.app_name, 'auto_check'):
-            self._auto_check_cbx.setChecked(strtobool(self._settings.get('auto_check')))
+        if self._settings.has_option(self._settings.app_name, 'auto_check_published'):
+            self._auto_check_published_cbx.setChecked(strtobool(self._settings.get('auto_check_published')))
+        if self._settings.has_option(self._settings.app_name, 'auto_check_working'):
+            self._auto_check_working_cbx.setChecked(strtobool(self._settings.get('auto_check_working')))
 
         # ===========================================================================
 
@@ -92,9 +96,11 @@ class PipelinizerSettings(QDialog, object):
         self.close()
 
     def _update_settings(self):
-        if self._settings.has_option(self._settings.app_name, 'auto_check'):
-            self._settings.set(self._settings.app_name, 'auto_check', str(self._auto_check_cbx.isChecked()))
-            self._settings.update()
+        if self._settings.has_option(self._settings.app_name, 'auto_check_published'):
+            self._settings.set(self._settings.app_name, 'auto_check_published', str(self._auto_check_published_cbx.isChecked()))
+        if self._settings.has_option(self._settings.app_name, 'auto_check_working'):
+            self._settings.set(self._settings.app_name, 'auto_check_working', str(self._auto_check_working_cbx.isChecked()))
+        self._settings.update()
         sp.logger.debug('{0}: Settings Updated successfully!'.format(self._settings.app_name))
 
 
@@ -117,9 +123,11 @@ class Pipelinizer(solstice_windows.Window, object):
 
         # Create Settings File
         if self.settings.config_file.exists():
-            if not self.settings.has_option(self.settings.app_name, 'auto_check'):
-                self.settings.set(self.settings.app_name, 'auto_check', str(False))
-                self.settings.update()
+            if not self.settings.has_option(self.settings.app_name, 'auto_check_published'):
+                self.settings.set(self.settings.app_name, 'auto_check_published', str(False))
+            if not self.settings.has_option(self.settings.app_name, 'auto_check_working'):
+                self.settings.set(self.settings.app_name, 'auto_check_working', str(False))
+            self.settings.update()
 
         # User Icon
         # TODO: After creating the user database read the info for this user from that file
@@ -427,15 +435,17 @@ class Pipelinizer(solstice_windows.Window, object):
                 self.sync_category(category='BackgroundElements', full_sync=full_sync, ask=False)
                 self.sync_category(category='Props', full_sync=full_sync, ask=False)
 
-    def update_asset_info(self, asset=None, check_versions=None):
+    def update_asset_info(self, asset=None, check_published_info=None, check_working_info=None):
         self._current_asset = asset
         if asset:
-            if not check_versions:
-                check_versions = False
-                if self.settings.has_option(self.settings.app_name, 'auto_check'):
-                    check_versions = strtobool(self.settings.get('auto_check'))
+            if not check_published_info:
+                check_published_info = False
+                if self.settings.has_option(self.settings.app_name, 'auto_check_published'):
+                    check_published_info = strtobool(self.settings.get('auto_check_published'))
+                if self.settings.has_option(self.settings.app_name, 'auto_check_working'):
+                    check_working_info = strtobool(self.settings.get('auto_check_working'))
 
-            info_widget = asset.get_asset_info_widget(check_versions=check_versions)
+            info_widget = asset.get_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info)
             if not info_widget:
                 return
 
