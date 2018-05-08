@@ -38,10 +38,10 @@ class PublishedInfoWidget(QWidget, object):
         self._asset = asset
         self._check_published_info = check_published_info
         self._check_working_info = check_working_info
-        self._has_model = True
-        self._has_shading = True
-        self._has_textures = True
-        self._has_groom = False
+        self._has_model = asset.has_model()
+        self._has_shading = asset.has_shading()
+        self._has_textures = asset.has_textures()
+        self._has_groom = asset.has_groom()
 
         self._main_layout = QVBoxLayout()
         self._main_layout.setContentsMargins(5, 5, 5, 5)
@@ -208,80 +208,3 @@ class PublishedInfoWidget(QWidget, object):
                         continue
                     # TODO: Check if necessary use sync time to know if we have a proper version of the working asset
                     ui[status][f][status_type]['text'].setText('v{0}'.format(str(version_info)))
-
-        # status = 'working'
-        # if self._check_versions:
-        #     max_versions = self._asset.get_max_versions('working')
-        #     local_versions = max_versions['local']
-        #     server_versions = max_versions['server']
-            # for (local_f, local_version), (server_f, server_version) in zip(local_versions.items(), server_versions.items()):
-            #     if local_f in folders_to_update and server_f in folders_to_update:
-            #         ui[status][]
-
-
-        # status = 'published'
-        # if self._check_versions:
-        #     max_versions = self._asset.get_max_versions()
-        #     local_versions = max_versions['local']
-        #     server_versions = max_versions['server']
-        #     for (local_f, local_version), (server_f, server_version) in zip(local_versions.items(), server_versions.items()):
-        #         if local_f in folders_to_update and server_f in folders_to_update:
-        #             ui[status][local_f]['status'].setPixmap(self._error_pixmap)
-        #             if local_version:
-        #                 ui[status][local_f]['local_text'].setText(str('v{0}'.format(str(local_version))))
-        #                 ui[status][local_f]['status'].setPixmap(self._warning_pixmap)
-        #             else:
-        #                 ui[status][local_f]['local_text'].setText('None')
-        #
-        #             if server_version:
-        #                 ui[status][server_f]['server_text'].setText(str('v{0}'.format(str(server_version))))
-        #                 ui[status][server_f]['status'].setPixmap(self._warning_pixmap)
-        #             else:
-        #                 ui[status][server_f]['server_text'].setText('None')
-        #
-        #             if local_version == server_version and local_version is not None and server_version is not None:
-        #                 ui[status][local_f]['status'].setPixmap(self._ok_pixmap)
-        #
-        #             if local_version > server_version or local_version is None and server_version is not None:
-        #                 ui[status][local_f]['status'].setPixmap(self._error_pixmap)
-        #                 sync_btn.setVisible(True)
-        # else:
-        #     max_local_versions = self._asset.get_max_local_versions()
-        #     for f in folders:
-        #         if f in folders_to_update:
-        #             if max_local_versions[f]:
-        #                 ui[status][f]['local_text'].setText(str('v{0}'.format(str(max_local_versions[f][0]))))
-        #                 ui[status][f]['status'].setPixmap(self._warning_pixmap)
-        #             else:
-        #                 ui[status][f]['local_text'].setText('None')
-        #                 ui[status][f]['status'].setPixmap(self._error_pixmap)
-        #
-        # # Update Working Info
-        # status = 'working'
-        # locals = self._asset.get_local_versions(status=status)
-        # if not locals:
-        #     return
-        #
-        # for f, file_data in locals.items():
-        #     if not file_data:
-        #         continue
-        #
-        #     if not file_data.versions:
-        #         continue
-        #
-        #     for version in file_data.versions:
-        #         print(version[1].date_created)
-
-            # print('asdfasfasf')
-            # print(version_data)
-            # print(version_data.date_created)
-
-
-
-        # last_version = locals[-1]
-        # print(last_version[1].name)
-        # print(last_version)
-
-
-
-

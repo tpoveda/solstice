@@ -70,10 +70,12 @@ class ArtellaAssetMetaData(object):
         self._latest_ = status_dict['data']['latest']
 
         self._published_folders = dict()
+        self._published_folders_all = dict()
         self._must_folders = ['model', 'textures', 'shading', 'groom']
 
         for f in self._must_folders:
             self._published_folders[f] = dict()
+            self._published_folders_all[f] = dict()
 
         from solstice_utils import solstice_artella_utils as artella
 
@@ -93,18 +95,24 @@ class ArtellaAssetMetaData(object):
                             break
             except Exception:
                 version_valid = False
-            if not version_valid:
-                continue
+            # if not version_valid:
+            #     continue
 
             # Store all valid published folders
             for f in self._must_folders:
                 if f in name:
                     version = sp.get_asset_version(name)[1]
-                    self._published_folders[f][str(version)] = name
+                    if not version_valid:
+                        self._published_folders_all[f][str(version)] = name
+                    else:
+                        self._published_folders_all[f][str(version)] = name
+                        self._published_folders[f][str(version)] = name
+
 
         # Sort all dictionaries by version number
         for f in self._must_folders:
             self._published_folders[f] = collections.OrderedDict(sorted(self._published_folders[f].items()))
+            self._published_folders_all[f] = collections.OrderedDict(sorted(self._published_folders_all[f].items()))
 
     @property
     def path(self):
@@ -139,8 +147,11 @@ class ArtellaAssetMetaData(object):
                 is_published = False
         return is_published
 
-    def get_published_versions(self):
-        return self._published_folders
+    def get_published_versions(self, all=False):
+        if all:
+            return self._published_folders_all
+        else:
+            return self._published_folders
 
 
 class ArtellaReferencesMetaData(object):

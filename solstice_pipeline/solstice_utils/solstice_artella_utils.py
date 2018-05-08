@@ -421,6 +421,30 @@ def open_file_in_maya(file_path, maya_version=2017):
     return rsp
 
 
+def publish_asset(file_path, comment, selected_versions):
+    """
+    Publish a new version of the given asset
+    :param file_path:
+    :param comment:
+    :param selected_versions:
+    """
+
+    spigot = get_spigot_client()
+    payload = dict()
+    payload['cms_uri'] = artella.getCmsUri(file_path)
+    payload['comment'] = comment
+    payload['selectedVersions'] = selected_versions
+    payload = json.dumps(payload)
+
+    rsp = spigot.execute(command_action='do', command_name='createRelease', payload=payload)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+
+    sp.logger.debug(rsp)
+    return rsp
+
+
 try:
     import Artella as artella
 except ImportError:

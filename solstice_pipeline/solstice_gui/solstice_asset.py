@@ -23,6 +23,7 @@ from solstice_utils import solstice_image as img
 from solstice_utils import solstice_artella_utils as artella
 from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_python_utils
 from solstice_gui import solstice_splitters, solstice_published_info_widget, solstice_sync_dialog
+from solstice_tools import solstice_publisher
 from resources import solstice_resource
 
 reload(img)
@@ -34,6 +35,7 @@ reload(solstice_splitters)
 reload(solstice_published_info_widget)
 reload(solstice_sync_dialog)
 reload(solstice_resource)
+reload(solstice_publisher)
 
 # ================================================================================================================
 
@@ -100,6 +102,8 @@ class AssetInfo(QWidget, object):
         asset_tab.addTab(published_asset, 'Published')
         self._asset_published_info = solstice_published_info_widget.PublishedInfoWidget(asset=asset, check_published_info=check_published_info, check_working_info=check_working_info)
         self._publish_btn = QPushButton('> PUBLISH NEW VERSION <')
+        self._publish_btn.clicked.connect(asset.publish)
+
         #
         main_layout.addWidget(self._asset_info_lbl)
         main_layout.addWidget(self._asset_icon)
@@ -110,6 +114,7 @@ class AssetInfo(QWidget, object):
         main_layout.addLayout(solstice_splitters.SplitterLayout())
         main_layout.addWidget(self._publish_btn)
         main_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Preferred, QSizePolicy.Expanding))
+
 
 class AssetWidget(QWidget, object):
 
@@ -162,8 +167,8 @@ class AssetWidget(QWidget, object):
         return self._name
 
     @property
-    def path(self):
-        return self._path
+    def asset_path(self):
+        return self._asset_path
 
     @property
     def icon(self):
@@ -202,6 +207,9 @@ class AssetWidget(QWidget, object):
         print('\tPreview Format: {0}'.format(self._preview_format))
         print('\t   Simple Mode: {0}'.format(self._simple_mode))
         print('\t  Is Checkable: {0}'.format(self._checkable))
+
+    def publish(self):
+        solstice_publisher.run(asset=self)
 
     def contextMenuEvent(self, event):
         self.generate_context_menu()
@@ -258,7 +266,7 @@ class AssetWidget(QWidget, object):
 
         return local_folders
 
-    def get_server_versions(self, status='published'):
+    def get_server_versions(self, status='published', all_versions=False):
         if status == 'published':
             asset_data = list()
             thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo',
@@ -270,7 +278,7 @@ class AssetWidget(QWidget, object):
                 asset_data = asset_data[0]
                 if not asset_data:
                     return
-            return asset_data.get_published_versions()
+            return asset_data.get_published_versions(all=all_versions)
         else:
             server_data = dict()
             folders = sp.valid_categories
@@ -291,7 +299,8 @@ class AssetWidget(QWidget, object):
                 except Exception:
                     # This exception si launched if some server folder has no valid files. For example, if an asset
                     # does not have a grooming file. In those cases the server version data for that category is {}
-                    server_data[category] = {}
+                    if not server_data[category]:
+                        server_data[category] = {}
             return server_data
 
     def get_max_local_versions(self):
@@ -313,13 +322,13 @@ class AssetWidget(QWidget, object):
 
         return max_local_versions
 
-    def get_max_published_versions(self):
+    def get_max_published_versions(self, all_versions=False):
         folders = ['model', 'textures', 'shading', 'groom']
         max_server_versions = dict()
         for f in folders:
             max_server_versions[f] = None
 
-        server_versions = self.get_server_versions()
+        server_versions = self.get_server_versions(all_versions=all_versions)
 
         for f, versions in server_versions.items():
             if versions:
@@ -359,7 +368,7 @@ class AssetWidget(QWidget, object):
                                 if txt not in max_versions['local'][local_name]:
                                     max_versions['local'][local_name][txt] = v[1]
                                 else:
-                                    if int(max_versions['local'][local_name][txt].version < int(v[1].version)):
+                                    if int(max_versions['local'][local_name][txt].version) < int(v[1].version):
                                         max_versions['local'][local_name][txt] = v[1]
                     else:
                         for v in local_versions.versions:
@@ -387,7 +396,7 @@ class AssetWidget(QWidget, object):
                                 if txt not in max_versions['server'][local_name]:
                                     max_versions['server'][local_name][txt] = v[1]
                                 else:
-                                    if int(max_versions['server'][local_name][txt].version < int(v[1].version)):
+                                    if int(max_versions['server'][local_name][txt].version) < int(v[1].version):
                                         max_versions['server'][local_name][txt] = v[1]
                     else:
                         for v in local_versions.versions:
@@ -597,8 +606,27 @@ class AssetWidget(QWidget, object):
             self._asset_info._asset_icon.setPixmap(QPixmap.fromImage(img.base64_to_image(self._icon, image_format=self._icon_format)).scaled(300, 300, Qt.KeepAspectRatio))
         self._asset_info._asset_published_info._asset_description.setText(self._description)
 
-        # self._asset_info._asset_description.setText(self._description)
+    def has_model(self):
+        return True
 
+    def has_shading(self):
+        return True
+
+    def has_textures(self):
+        return True
+
+    def has_groom(self):
+        return False
+
+    def has_category(self, category):
+        if category == 'model':
+            return self.has_model()
+        if category == 'shading':
+            return self.has_shading()
+        if category == 'textures':
+            return self.has_textures()
+        if category == 'groom':
+            return self.has_groom()
 
 class CharacterAsset(AssetWidget, object):
     def __init__(self, **kwargs):
@@ -613,6 +641,9 @@ class CharacterAsset(AssetWidget, object):
         self._published_groom_btn = QPushButton('Groom')
         self._working_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'working'))
         self._published_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'pubilshed'))
+
+    def has_groom(self):
+        return True
 
     def update_asset_info(self):
         super(CharacterAsset, self).update_asset_info()
