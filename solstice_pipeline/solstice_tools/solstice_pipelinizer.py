@@ -497,13 +497,6 @@ class Pipelinizer(solstice_windows.Window, object):
 
         return tree
 
-        # category_folder = os.path.join(solstice_assets_path, category)
-        # if not os.path.exists(category_folder):
-        #     # TODO: Add messagebox to answer the user if they want to syncrhonize the category folder
-        #     print('Category folder does not exists! Trying to retrieve it!')
-        #     solstice_artella_utils.synchronize_path(category_folder)
-
-
 # ============================================================================================================
 
 # if not 'pipelinizer_window' in globals():
@@ -576,46 +569,6 @@ def run(restore=False):
     return pipelinizer_window
 
 
-# current_directory = pathlib2.Path(sp.get_solstice_project_path()).glob('**/*')
-# files = [x for x in current_directory if x.is_file()]
-# for f in files:
-#     print(f)
-
-# dct = solstice_python_utils.path_to_dictionary(path=sp.get_solstice_project_path())
-# print(dct)
-#
-# metadata = solstice_artella_utils.get_metadata()
-
-#
-# uri = solstice_artella_utils.get_cms_uri_current_file()
 # spigot = solstice_artella_utils.get_spigot_client()
-# rsp = spigot.execute(command_action='do', command_name='history', payload=uri)
-# rsp = spigot.execute(command_action='do', command_name='explore', payload=uri)
 # rsp = spigot.execute(command_action='do', command_name='checkout', payload=uri)
 # rsp = spigot.execute(command_action='do', command_name='unlock', payload=uri)
-# print(rsp)
-
-# solstice_artella_utils.get_status_current_file()
-
-# // solstice: {u'meta': {u'content_length': u'529', u'status': u'OK',
-#                         u'container_uri': u'/production/2/2252d6c8-407d-4419-a186-cf90760c9967/Assets/Characters/S_CH_02_summer',
-#                         u'content_type': u'application/json', u'date': u'Wed, 18 Apr 2018 00:45:44 GMT',
-#                         u'release_name': u'rig_v001', u'type': u'container_file',
-#                         u'file_path': u'rig/S_CH_02_summer_RIG.ma'},
-#               u'data': {
-#     u'rig/S_CH_02_summer_RIG.ma': {u'locked_view': u'0b51b5c2-eb9e7144-8f92-11e7-8af3-3e1fea15fa15',
-#                                    u'locked': True, u'locked_by': u'fc6d3b61-1ede-458c-aa0c-ad8343ee66ac',
-#                                    u'view_version': 15, u'relative_path': u'rig/S_CH_02_summer_RIG.ma',
-#                                    u'maximum_version': 16,
-#                                    u'lockedByDisplay': u'fc6d3b61-1ede-458c-aa0c-ad8343ee66ac',
-#                                    u'view_version_digest': u'e475f0a9755d9a28ab3275dabdea58cbe0be6734da8b135e045f83058913c033'}}
-#               } //
-
-# ret = QMessageBox().question(solstice_maya_utils.get_maya_window(), 'Artella Plugin not loaded!', 'Do you want to select manually where Artella Plugin is located?')
-    # if ret == QMessageBox.Yes:
-    #     artella_installation = os.path.join(os.getenv('PROGRAMDATA'), 'Artella')
-    #     artella_plugin_path = QFileDialog.getOpenFileName(solstice_maya_utils.get_maya_window(), 'Select Artella Plugin', artella_installation, 'Python Files (*.py)')
-    #     print(artella_plugin_path)
-    #     return
-    # else:
-    #     return

@@ -104,7 +104,6 @@ class AssetInfo(QWidget, object):
         self._publish_btn = QPushButton('> PUBLISH NEW VERSION <')
         self._publish_btn.clicked.connect(asset.publish)
 
-        #
         main_layout.addWidget(self._asset_info_lbl)
         main_layout.addWidget(self._asset_icon)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
@@ -285,15 +284,31 @@ class AssetWidget(QWidget, object):
             for category in folders:
                 server_data[category] = dict()
                 server_path = os.path.join(self._asset_path, '__working__', category)
-                path_info = artella.get_status(server_path)
+
+                asset_data = list()
+                thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo',
+                                                  self.get_artella_asset_data, [asset_data])
+                while not event.is_set():
+                    QCoreApplication.processEvents()
+                    event.wait(0.25)
+                if asset_data and len(asset_data) > 0:
+                    asset_data = asset_data[0]
+                    if not asset_data:
+                        return
                 try:
-                    for ref_name, ref_data in path_info.references.items():
+                    for ref_name, ref_data in asset_data.references.items():
                         if category == 'textures':
                             ref_path = os.path.join(server_path, ref_data.name)
+
+                            # TODO: Create custom sync dialog
+
                             ref_history = artella.get_asset_history(ref_path)
                             server_data[category][ref_data.name] = ref_history
                         else:
                             ref_path = os.path.join(server_path, ref_data.name)
+
+                            # TODO: Create custom sync dialog
+
                             ref_history = artella.get_asset_history(ref_path)
                             server_data[category] = ref_history
                 except Exception:
@@ -434,6 +449,13 @@ class AssetWidget(QWidget, object):
 
     def get_artella_asset_data(self, thread_result=None, thread_event=None):
         rst = artella.get_status(os.path.join(self._asset_path))
+        if thread_event:
+            thread_event.set()
+            thread_result.append(rst)
+        return rst
+
+    def get_artella_asset_history(self, path, thread_result=None, thread_event=None):
+        rst = artella.get_asset_history(path)
         if thread_event:
             thread_event.set()
             thread_result.append(rst)

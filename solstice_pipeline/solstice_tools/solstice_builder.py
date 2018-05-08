@@ -11,28 +11,57 @@
 import os
 import json
 
-from solstice_gui import solstice_windows
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
 from Qt.QtGui import *
 
+import maya.OpenMayaUI as OpenMayaUI
+
 import solstice_pipeline as sp
+from solstice_gui import solstice_windows
 from solstice_gui import solstice_splitters
 from solstice_utils import solstice_image as img
 
+class SolsticeBuilder(solstice_windows.Window, object):
 
-class AssetBuilder(solstice_windows.Window, object):
-
-    name = 'Asset Builder'
-    title = 'Solstice Tools - Asset Builder'
+    name = 'Solstice Builder'
+    title = 'Solstice Tools - Solstice Builder'
     version = '1.0'
     docked = False
 
     def __init__(self, name='AssetBuilderWindow', parent=None, **kwargs):
-        super(AssetBuilder, self).__init__(name=name, parent=parent, **kwargs)
+        super(SolsticeBuilder, self).__init__(name=name, parent=parent, **kwargs)
 
         self.set_logo('solstice_assetbuilder_logo')
+
+        tab_widget = QTabWidget()
+        self.main_layout.addWidget(tab_widget)
+
+        self._asset_builder = AssetBuilder()
+        self._user_builder = UserBuilder()
+        tab_widget.addTab(self._asset_builder, 'Asset')
+        tab_widget.addTab(self._user_builder, 'User')
+
+
+class UserBuilder(QWidget, object):
+    def __init__(self, parent=None):
+        super(UserBuilder, self).__init__(parent=parent)
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(2, 2, 2, 2)
+        self.main_layout.setSpacing(2)
+        self.setLayout(self.main_layout)
+
+
+class AssetBuilder(QWidget, object):
+    def __init__(self, parent=None):
+        super(AssetBuilder, self).__init__(parent=parent)
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(2, 2, 2, 2)
+        self.main_layout.setSpacing(2)
+        self.setLayout(self.main_layout)
 
         self._current_icon_path = None
         self._current_preview_path = None
@@ -140,9 +169,46 @@ class AssetBuilder(solstice_windows.Window, object):
     def _set_preview(self):
         pass
 
+# if not 'builder_window' in globals():
+builder_window = None
 
-def run():
+
+def builder_window_closed(object=None):
+    global builder_window
+    if builder_window is not None:
+        builder_window.cleanup()
+        builder_window.parent().setParent(None)
+        builder_window.parent().deleteLater()
+        builder_window = None
+
+
+def builder_window_destroyed(object=None):
+    global builder_window
+    builder_window = None
+
+
+def run(restore=False):
+
     reload(solstice_splitters)
     reload(img)
-    AssetBuilder().run()
+
+    global builder_window
+    if builder_window is None:
+        builder_window = SolsticeBuilder()
+        builder_window.destroyed.connect(builder_window_destroyed)
+        builder_window.setProperty('saveWindowPref', True)
+
+    if restore:
+        parent = OpenMayaUI.MQtUtil.getCurrentParent()
+        mixin_ptr = OpenMayaUI.MQtUtil.findControl(builder_window.objectName())
+        OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
+    else:
+        builder_window.show(dockable=True, save=True, closeCallback='from solstice_tools import solstice_builder\nsolstice_builder.builder_window_closed()')
+
+        builder_window.window().raise_()
+        builder_window.raise_()
+        builder_window.isActiveWindow()
+
+    return builder_window
+
 

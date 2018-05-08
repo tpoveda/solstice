@@ -99,76 +99,76 @@ class PublishedInfoWidget(QWidget, object):
             labels[status]['shading'] = QLabel(' SHADING')
             labels[status]['groom'] = QLabel('    GROOM')
 
-        ui = dict()
+        self._ui = dict()
         for status in ['working', 'published']:
-            ui[status] = dict()
+            self._ui[status] = dict()
 
-            ui[status]['layout'] = QVBoxLayout()
-            ui[status]['layout'].setContentsMargins(2, 2, 2, 2)
-            ui[status]['layout'].setSpacing(2)
-            self._info_layout.addLayout(ui[status]['layout'])
+            self._ui[status]['layout'] = QVBoxLayout()
+            self._ui[status]['layout'].setContentsMargins(2, 2, 2, 2)
+            self._ui[status]['layout'].setSpacing(2)
+            self._info_layout.addLayout(self._ui[status]['layout'])
 
             if status == 'working':
-                ui[status]['layout'].addWidget(solstice_splitters.Splitter('WORKING INFO'))
+                self._ui[status]['layout'].addWidget(solstice_splitters.Splitter('WORKING INFO'))
             elif status == 'published':
-                ui[status]['layout'].addWidget(solstice_splitters.Splitter('PUBLSIHED INFO'))
+                self._ui[status]['layout'].addWidget(solstice_splitters.Splitter('PUBLSIHED INFO'))
 
             self._info_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
             if status == 'working':
                 self._info_layout.addWidget(solstice_splitters.get_horizontal_separator_widget(200))
 
             for f in folders_to_update:
-                ui[status][f] = dict()
-                ui[status][f]['layout'] = QHBoxLayout()
-                ui[status][f]['layout'].setContentsMargins(2, 2, 2, 2)
-                ui[status][f]['layout'].setSpacing(2)
-                ui[status][f]['layout'].setAlignment(Qt.AlignLeft)
-                ui[status]['layout'].addLayout(ui[status][f]['layout'])
+                self._ui[status][f] = dict()
+                self._ui[status][f]['layout'] = QHBoxLayout()
+                self._ui[status][f]['layout'].setContentsMargins(2, 2, 2, 2)
+                self._ui[status][f]['layout'].setSpacing(2)
+                self._ui[status][f]['layout'].setAlignment(Qt.AlignLeft)
+                self._ui[status]['layout'].addLayout(self._ui[status][f]['layout'])
 
-                ui[status][f]['status'] = QLabel()
-                ui[status][f]['status'].setPixmap(self._error_pixmap)
-                ui[status][f]['label'] = labels[status][f]
+                self._ui[status][f]['status'] = QLabel()
+                self._ui[status][f]['status'].setPixmap(self._error_pixmap)
+                self._ui[status][f]['label'] = labels[status][f]
 
-                ui[status][f]['info_layout'] = QHBoxLayout()
-                ui[status][f]['info_layout'].setContentsMargins(2, 2, 2, 2)
-                ui[status][f]['info_layout'].setSpacing(2)
+                self._ui[status][f]['info_layout'] = QHBoxLayout()
+                self._ui[status][f]['info_layout'].setContentsMargins(2, 2, 2, 2)
+                self._ui[status][f]['info_layout'].setSpacing(2)
 
-                ui[status][f]['layout'].addWidget(ui[status][f]['status'])
-                ui[status][f]['layout'].addWidget(solstice_splitters.get_horizontal_separator_widget())
-                ui[status][f]['layout'].addWidget(ui[status][f]['label'])
-                ui[status][f]['layout'].addWidget(solstice_splitters.get_horizontal_separator_widget())
-                ui[status][f]['layout'].addLayout(ui[status][f]['info_layout'])
-
-                for status_type in ['local', 'server']:
-                    ui[status][f][status_type] = dict()
-                    ui[status][f][status_type]['layout'] = QHBoxLayout()
-                    ui[status][f][status_type]['layout'].setContentsMargins(1, 1, 1, 1)
-                    ui[status][f][status_type]['layout'].setSpacing(1)
-                    ui[status][f][status_type]['layout'] = QHBoxLayout()
-                    ui[status][f][status_type]['layout'].setContentsMargins(1, 1, 1, 1)
-                    ui[status][f][status_type]['layout'].setSpacing(1)
-
-                ui[status][f]['info_layout'].addLayout(ui[status][f]['local']['layout'])
-                ui[status][f]['info_layout'].addWidget(solstice_splitters.get_horizontal_separator_widget())
-                ui[status][f]['info_layout'].addLayout(ui[status][f]['server']['layout'])
+                self._ui[status][f]['layout'].addWidget(self._ui[status][f]['status'])
+                self._ui[status][f]['layout'].addWidget(solstice_splitters.get_horizontal_separator_widget())
+                self._ui[status][f]['layout'].addWidget(self._ui[status][f]['label'])
+                self._ui[status][f]['layout'].addWidget(solstice_splitters.get_horizontal_separator_widget())
+                self._ui[status][f]['layout'].addLayout(self._ui[status][f]['info_layout'])
 
                 for status_type in ['local', 'server']:
-                    ui[status][f][status_type]['logo'] = QLabel()
+                    self._ui[status][f][status_type] = dict()
+                    self._ui[status][f][status_type]['layout'] = QHBoxLayout()
+                    self._ui[status][f][status_type]['layout'].setContentsMargins(1, 1, 1, 1)
+                    self._ui[status][f][status_type]['layout'].setSpacing(1)
+                    self._ui[status][f][status_type]['layout'] = QHBoxLayout()
+                    self._ui[status][f][status_type]['layout'].setContentsMargins(1, 1, 1, 1)
+                    self._ui[status][f][status_type]['layout'].setSpacing(1)
+
+                self._ui[status][f]['info_layout'].addLayout(self._ui[status][f]['local']['layout'])
+                self._ui[status][f]['info_layout'].addWidget(solstice_splitters.get_horizontal_separator_widget())
+                self._ui[status][f]['info_layout'].addLayout(self._ui[status][f]['server']['layout'])
+
+                for status_type in ['local', 'server']:
+                    self._ui[status][f][status_type]['logo'] = QLabel()
                     if status_type == 'local':
-                        ui[status][f][status_type]['logo'].setPixmap(self._local_pixmap)
+                        self._ui[status][f][status_type]['logo'].setPixmap(self._local_pixmap)
                     else:
-                        ui[status][f][status_type]['logo'].setPixmap(self._server_pixmap)
-                    ui[status][f][status_type]['text'] = QLabel('None')
-                    ui[status][f][status_type]['layout'].addWidget(ui[status][f][status_type]['logo'])
-                    ui[status][f][status_type]['layout'].addWidget(ui[status][f][status_type]['text'])
+                        self._ui[status][f][status_type]['logo'].setPixmap(self._server_pixmap)
+                    self._ui[status][f][status_type]['text'] = QLabel('None')
+                    self._ui[status][f][status_type]['layout'].addWidget(self._ui[status][f][status_type]['logo'])
+                    self._ui[status][f][status_type]['layout'].addWidget(self._ui[status][f][status_type]['text'])
 
-                ui[status][f]['info_btn'] = QPushButton()
-                ui[status][f]['info_btn'].setIcon(QIcon(self._info_pixmap))
-                ui[status][f]['info_btn'].setMaximumWidth(20)
-                ui[status][f]['info_btn'].setMaximumHeight(20)
-                ui[status][f]['info_layout'].addWidget(ui[status][f]['info_btn'])
+                self._ui[status][f]['info_btn'] = QPushButton()
+                self._ui[status][f]['info_btn'].setIcon(QIcon(self._info_pixmap))
+                self._ui[status][f]['info_btn'].setMaximumWidth(20)
+                self._ui[status][f]['info_btn'].setMaximumHeight(20)
+                self._ui[status][f]['info_layout'].addWidget(self._ui[status][f]['info_btn'])
 
-                ui[status][f]['info_btn'].clicked.connect(partial(self.update_versions_info, status, f))
+                self._ui[status][f]['info_btn'].clicked.connect(partial(self.update_versions_info, status, f))
 
             self._info_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
 
@@ -177,7 +177,10 @@ class PublishedInfoWidget(QWidget, object):
         sync_btn.setVisible(False)
         self._main_layout.addWidget(sync_btn)
 
-        # Update Working Info
+        self.update_working_info()
+        self.update_published_info()
+
+    def update_working_info(self):
         if self._check_working_info:
             status = 'working'
             max_versions = self._asset.get_max_versions(status=status)
@@ -191,14 +194,14 @@ class PublishedInfoWidget(QWidget, object):
                     else:
                         if not version_info:
                             continue
-                        # TODO: Check if necessary use sync time to know if we have a proper version of the working asset
-                        ui[status][f][status_type]['text'].setText('v{0}'.format(str(version_info.version)))
+                        self._ui[status][f][status_type]['text'].setText('v{0}'.format(str(version_info.version)))
 
-        # Update Published Info
+
+    def update_published_info(self):
         if self._check_published_info:
-            print('Checking Published Info ...')
             status = 'published'
             max_versions = self._asset.get_max_versions(status=status)
+            categories_to_check = list()
             for f in sp.valid_categories:
                 for status_type in ['local', 'server']:
                     if f not in max_versions[status_type].keys():
@@ -206,5 +209,15 @@ class PublishedInfoWidget(QWidget, object):
                     version_info = max_versions[status_type][f]
                     if not version_info:
                         continue
-                    # TODO: Check if necessary use sync time to know if we have a proper version of the working asset
-                    ui[status][f][status_type]['text'].setText('v{0}'.format(str(version_info)))
+                    self._ui[status][f][status_type]['text'].setText('v{0}'.format(str(version_info)))
+                    self._ui[status][f]['status'].setPixmap(self._warning_pixmap)
+                    categories_to_check.append(f)
+
+            for cat in categories_to_check:
+                max_local = max_versions['local'][cat]
+                max_server = max_versions['server'][cat]
+
+                if max_local == max_server and max_local is not None and max_server is not None:
+                    self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
+                if max_local > max_server or max_local is None and max_server is not None:
+                    self._ui[status][cat]['status'].setPixmap(self._error_pixmap)

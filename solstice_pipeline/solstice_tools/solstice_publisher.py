@@ -185,8 +185,6 @@ class AssetPublisherWidget(QWidget, object):
                 artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
 
 
-
-
 def run(asset=None):
     publisher_dialog = SolsticePublisher(asset=asset)
     publisher_dialog.exec_()

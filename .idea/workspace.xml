@@ -2,13 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f2c1a1a5-c0ef-4607-abef-97b02641319f" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_dialog.py" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_asset.py" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_asset.py" />
       <change beforePath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_published_info_widget.py" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_published_info_widget.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_assetbuilder.py" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_builder.py" />
+      <change beforePath="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_pipelinizer.py" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_pipelinizer.py" />
       <change beforePath="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_publisher.py" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_publisher.py" />
-      <change beforePath="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_classes.py" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_classes.py" />
-      <change beforePath="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_utils.py" afterPath="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_utils.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -27,98 +26,7 @@
     <fileColor scope="Non-Project Files (Material Palenight)" color="2f2e43" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.5550031">
-      <split-first>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="solstice_published_info_widget.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_published_info_widget.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-2693">
-                  <caret line="43" column="43" lean-forward="false" selection-start-line="43" selection-start-column="43" selection-end-line="43" selection-end-column="43" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_publisher.py" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_publisher.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="200">
-                  <caret line="74" column="0" lean-forward="false" selection-start-line="74" selection-start-column="0" selection-end-line="74" selection-end-column="0" />
-                  <folding>
-                    <element signature="e#377#386#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_pipelinizer.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_pipelinizer.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="99">
-                  <caret line="486" column="45" lean-forward="false" selection-start-line="486" selection-start-column="45" selection-end-line="486" selection-end-column="45" />
-                  <folding>
-                    <element signature="e#400#409#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-first>
-      <split-second>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="solstice_asset.py" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_asset.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="473">
-                  <caret line="346" column="0" lean-forward="false" selection-start-line="346" selection-start-column="0" selection-end-line="346" selection-end-column="0" />
-                  <folding>
-                    <element signature="e#394#403#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_artella_classes.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_classes.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="252">
-                  <caret line="99" column="0" lean-forward="true" selection-start-line="99" selection-start-column="0" selection-end-line="100" selection-end-column="0" />
-                  <folding>
-                    <element signature="e#415#424#0" expanded="true" />
-                    <element signature="e#519#1830#0" expanded="false" />
-                    <element signature="e#5209#6941#0" expanded="false" />
-                    <element signature="e#6988#7642#0" expanded="false" />
-                    <element signature="e#7683#8686#0" expanded="false" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_windows.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_windows.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="291">
-                  <caret line="25" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="solstice_artella_utils.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_utils.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="410">
-                  <caret line="438" column="0" lean-forward="false" selection-start-line="438" selection-start-column="0" selection-end-line="438" selection-end-column="0" />
-                  <folding />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-second>
-    </splitter>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -129,9 +37,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>InstantP</find>
-      <find>self._current_asset</find>
-      <find>_open_settings</find>
       <find>des</find>
       <find>description</find>
       <find>descr</find>
@@ -159,6 +64,9 @@
       <find>_ok_pixmap =</find>
       <find>publish</find>
       <find>version</find>
+      <find>solstice_info_dialog</find>
+      <find>info_dialog</find>
+      <find>_ok_pixmap</find>
     </findStrings>
     <replaceStrings>
       <replace>from</replace>
@@ -174,7 +82,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_color.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_pixmap.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_icon.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_containerwidget.py" />
@@ -202,7 +109,6 @@
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_animations.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_info_dialog.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_grid.py" />
-        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_assetbuilder.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_lightrigs.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_tagger.py" />
         <option value="$PROJECT_DIR$/solstice_launcher/solstice_launcher_utils.py" />
@@ -218,13 +124,15 @@
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_scatter.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_qt_utils.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_sync_dialog.py" />
-        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_pipelinizer.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_dialog.py" />
-        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_published_info_widget.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_utils.py" />
-        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_asset.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_classes.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_pipelinizer.py" />
         <option value="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_publisher.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_assetbuilder.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_builder.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_asset.py" />
+        <option value="$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_published_info_widget.py" />
       </list>
     </option>
   </component>
@@ -281,26 +189,14 @@
               <item name="solstice" type="b2602c69:ProjectViewProjectNode" />
               <item name="solstice" type="462c0819:PsiDirectoryNode" />
               <item name="solstice_pipeline" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_gui" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="solstice" type="b2602c69:ProjectViewProjectNode" />
-              <item name="solstice" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_pipeline" type="462c0819:PsiDirectoryNode" />
               <item name="solstice_tools" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="solstice" type="b2602c69:ProjectViewProjectNode" />
-              <item name="solstice" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_pipeline" type="462c0819:PsiDirectoryNode" />
-              <item name="solstice_utils" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -455,7 +351,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297414" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -471,7 +366,7 @@
       <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29268292" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24814422" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Key Promoter X" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -524,6 +419,11 @@
           <line>39</line>
           <option name="timeStamp" value="71" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_asset.py</url>
+          <line>268</line>
+          <option name="timeStamp" value="277" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -532,7 +432,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="277" />
+      <option name="time" value="278" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -600,27 +500,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp1347873735075692371.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_color.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_maya_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="622">
-          <caret line="179" column="0" lean-forward="true" selection-start-line="179" selection-start-column="0" selection-end-line="179" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_sequencer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="441">
@@ -671,84 +550,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_scatter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="142">
-          <caret line="302" column="20" lean-forward="true" selection-start-line="302" selection-start-column="20" selection-end-line="302" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp8930832814172813168.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3969265411237936384.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp7811649152325815425.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp6445696100342389955.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp8035044510807606064.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp4181199321373253591.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp1554805431012320630.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp6734445309414863696.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp1027438206166952657.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp6882361438748094714.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp8930832814172813168.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3969265411237936384.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp7811649152325815425.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp6445696100342389955.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp8035044510807606064.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp4181199321373253591.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp1554805431012320630.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp6734445309414863696.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp1027438206166952657.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp6882361438748094714.py" />
     <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_assetviewer.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="142">
@@ -759,53 +570,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp6704726698749790923.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3923210880909637006.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp9089317807630260301.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp5470317875183464600.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp8239975390200232401.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp6704726698749790923.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3923210880909637006.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp9089317807630260301.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp5470317875183464600.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp8239975390200232401.py" />
     <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_sync_dialog.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
           <caret line="112" column="19" lean-forward="false" selection-start-line="112" selection-start-column="19" selection-end-line="112" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_info_dialog.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1323">
-          <caret line="115" column="26" lean-forward="true" selection-start-line="114" selection-start-column="27" selection-end-line="115" selection-end-column="26" />
           <folding />
         </state>
       </provider>
@@ -822,7 +595,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -830,15 +602,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_windows.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="291">
-          <caret line="25" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -846,7 +609,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -854,7 +616,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -862,7 +623,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -870,7 +630,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-953">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -894,33 +653,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_pipeline/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="229">
-          <caret line="233" column="20" lean-forward="true" selection-start-line="233" selection-start-column="20" selection-end-line="233" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_pipelinizer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="99">
-          <caret line="486" column="45" lean-forward="false" selection-start-line="486" selection-start-column="45" selection-end-line="486" selection-end-column="45" />
-          <folding>
-            <element signature="e#400#409#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_published_info_widget.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2693">
-          <caret line="43" column="43" lean-forward="false" selection-start-line="43" selection-start-column="43" selection-end-line="43" selection-end-column="43" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -928,11 +660,78 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp2724228297537831552.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3758333704624899704.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_classes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1197">
+          <caret line="99" column="0" lean-forward="false" selection-start-line="99" selection-start-column="0" selection-end-line="100" selection-end-column="0" />
+          <folding>
+            <element signature="e#415#424#0" expanded="false" />
+            <element signature="e#519#1830#0" expanded="false" />
+            <element signature="e#5209#6941#0" expanded="false" />
+            <element signature="e#6988#7642#0" expanded="false" />
+            <element signature="e#7683#8686#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="182" column="18" lean-forward="false" selection-start-line="182" selection-start-column="18" selection-end-line="182" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_windows.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="291">
+          <caret line="25" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="109" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="422">
+          <caret line="438" column="0" lean-forward="false" selection-start-line="438" selection-start-column="0" selection-end-line="438" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp1755531975725438611.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_info_dialog.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="111" column="0" lean-forward="false" selection-start-line="111" selection-start-column="0" selection-end-line="111" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp426747989235630771.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -948,50 +747,54 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Temp/MayaCharmTemp3758333704624899704.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_classes.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="99" column="0" lean-forward="true" selection-start-line="99" selection-start-column="0" selection-end-line="100" selection-end-column="0" />
-          <folding>
-            <element signature="e#415#424#0" expanded="true" />
-            <element signature="e#519#1830#0" expanded="false" />
-            <element signature="e#5209#6941#0" expanded="false" />
-            <element signature="e#6988#7642#0" expanded="false" />
-            <element signature="e#7683#8686#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_utils/solstice_artella_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="410">
-          <caret line="438" column="0" lean-forward="false" selection-start-line="438" selection-start-column="0" selection-end-line="438" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_publisher.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="74" column="0" lean-forward="false" selection-start-line="74" selection-start-column="0" selection-end-line="74" selection-end-column="0" />
+        <state relative-caret-position="419">
+          <caret line="186" column="0" lean-forward="false" selection-start-line="186" selection-start-column="0" selection-end-line="186" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_scatter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="17" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_builder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="461">
+          <caret line="43" column="53" lean-forward="false" selection-start-line="43" selection-start-column="53" selection-end-line="43" selection-end-column="53" />
           <folding>
-            <element signature="e#377#386#0" expanded="true" />
+            <element signature="e#401#410#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_tools/solstice_pipelinizer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="82">
+          <caret line="427" column="7" lean-forward="false" selection-start-line="427" selection-start-column="7" selection-end-line="427" selection-end-column="7" />
+          <folding>
+            <element signature="e#400#409#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_published_info_widget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="503">
+          <caret line="222" column="81" lean-forward="false" selection-start-line="222" selection-start-column="81" selection-end-line="222" selection-end-column="81" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/solstice_pipeline/solstice_gui/solstice_asset.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="473">
-          <caret line="346" column="0" lean-forward="false" selection-start-line="346" selection-start-column="0" selection-end-line="346" selection-end-column="0" />
+        <state relative-caret-position="265">
+          <caret line="309" column="61" lean-forward="false" selection-start-line="309" selection-start-column="61" selection-end-line="309" selection-end-column="61" />
           <folding>
             <element signature="e#394#403#0" expanded="true" />
           </folding>
