@@ -224,8 +224,23 @@ def get_solstice_assets_path():
         # sp.logger.debug('Getting Assets Path: {0}'.format(assets_path))
         return assets_path
     else:
-        # sp.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
+        logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
         return None
+
+
+def get_solstice_production_path():
+    """
+    Returns Solstice Project Production path
+    :return: str
+    """
+
+    production_path = os.path.join(get_solstice_project_path(), 'Production')
+    if os.path.exists(production_path):
+        return production_path
+    else:
+        logger.debug('Production Path does not exists!: {0}'.format(production_path))
+        return None
+
 
 
 def get_asset_version(name):

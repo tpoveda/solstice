@@ -229,6 +229,7 @@ def get_status(filepath, as_json=False):
 
     if 'data' in rsp:
         if '_latest'in rsp['data']:
+            # if 'SEQ' not in rsp['meta']['container_uri']:
             status_metadata = classes.ArtellaAssetMetaData(metadata_path=filepath, status_dict=rsp)
             return status_metadata
 

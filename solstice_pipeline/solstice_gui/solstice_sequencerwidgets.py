@@ -37,9 +37,11 @@ ICON_PADDING = utils.dpi_scale(10.0)
 
 
 class SequencerTreeView(QTreeView, object):
-    def __init__(self, parent=None):
+    def __init__(self, sequences, parent=None):
 
         super(SequencerTreeView, self).__init__(parent=parent)
+
+        self._sequences = sequences
 
         self.setHeaderHidden(True)
         self.setIndentation(12)
@@ -52,12 +54,19 @@ class SequencerTreeView(QTreeView, object):
         self.setColumnWidth(0, 250)
         self.header().resizeSection(0, 250)
 
-        sequence = SequencerNode(sequence_name='Sequence 001', icon=None, enabled=True)
-        sequence_layout = SequenceFileNode(file_name='Master Layout', icon=None, enabled=True)
+        # sequence_layout = SequenceFileNode(file_name='Master Layout', icon=None, enabled=True)
 
         root = SequencerItem(None, 'All', None, None)
-        child = SequencerItem(sequence, 'Child', None, root)
-        child_layout = SequencerItem(sequence_layout, 'Master Layout', None, child)
+
+        self._sequence_nodes = list()
+        for seq_data, seq_files in self._sequences.items():
+            sequence = SequencerNode(sequence_name=seq_data.name, icon=None, enabled=True)
+            sequence_item = SequencerItem(sequence, sequence.name, None, root)
+            self._sequence_nodes.append(sequence_item)
+
+            for file_name, file_data in seq_files.items():
+                seq_file = SequenceFileNode(file_name=file_name, icon=None, enabled=True)
+                sequence_item = SequencerItem(seq_file, seq_file.name, None, sequence_item)
 
         model = SequencerTreeModel(sequencer_view=self, root=root)
         self.setModel(model)
@@ -265,7 +274,6 @@ class SequencerDelegate(QItemDelegate, object):
         oldPen = painter.pen()
 
         return text_rect
-
 
 
 class SequencerNode(object):

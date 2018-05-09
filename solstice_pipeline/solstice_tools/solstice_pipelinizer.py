@@ -25,8 +25,9 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser, solstice_published_info_widget, solstice_sync_dialog, solstice_sequencer
+from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser, solstice_published_info_widget, solstice_sync_dialog
 from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_artella_utils, solstice_image
+from solstice_tools import solstice_sequencer
 from resources import solstice_resource
 
 from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_browser_utils
@@ -296,7 +297,7 @@ class Pipelinizer(solstice_windows.Window, object):
         asset_viewer_splitter.addWidget(local_data_widget)
 
         # Sequence Manager Widget
-        self._sequencer = solstice_sequencer.SequencerTreeView()
+        self._sequencer = solstice_sequencer.SolsticeSequencer()
         sequences_layout.addWidget(self._sequencer)
 
         # =================================================================================================
@@ -539,6 +540,7 @@ def run(restore=False):
     reload(solstice_splitters)
     reload(solstice_published_info_widget)
     reload(solstice_sequencer)
+
 
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()
