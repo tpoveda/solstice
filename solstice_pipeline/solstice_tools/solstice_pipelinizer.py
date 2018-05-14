@@ -197,10 +197,11 @@ class Pipelinizer(solstice_windows.Window, object):
             sync_props_menu.addAction(action)
 
         # Pipelinizer Widgets
-        tab_widget = QTabWidget()
-        tab_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        tab_widget.setMinimumHeight(330)
-        self.main_layout.addWidget(tab_widget)
+        self._tab_widget = QTabWidget()
+        self._tab_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self._tab_widget.setMinimumHeight(330)
+        self.main_layout.addWidget(self._tab_widget)
+        self._tab_widget.currentChanged.connect(self._on_tab_changed)
 
         categories_widget = QWidget()
         categories_layout = QVBoxLayout()
@@ -215,14 +216,15 @@ class Pipelinizer(solstice_windows.Window, object):
         asset_browser_widget.setLayout(asset_browser_layout)
 
         sequences_widget = QWidget()
+        sequences_widget.setObjectName('SequencerWidget')
         sequences_layout = QVBoxLayout()
         sequences_layout.setContentsMargins(0, 0, 0, 0)
         sequences_layout.setSpacing(0)
         sequences_widget.setLayout(sequences_layout)
 
-        tab_widget.addTab(categories_widget, 'Assets Manager')
-        tab_widget.addTab(asset_browser_widget, ' Assets Browser ')
-        tab_widget.addTab(sequences_widget, 'Sequence Manager')
+        self._tab_widget.addTab(categories_widget, 'Assets Manager')
+        self._tab_widget.addTab(asset_browser_widget, ' Assets Browser ')
+        self._tab_widget.addTab(sequences_widget, 'Sequence Manager')
 
         # ================== Asset Manager Widget
         main_categories_menu_layout = QHBoxLayout()
@@ -497,6 +499,11 @@ class Pipelinizer(solstice_windows.Window, object):
             thread_result.append(tree)
 
         return tree
+
+    def _on_tab_changed(self, index):
+        if self._tab_widget.currentWidget().objectName() == 'SequencerWidget':
+            self._sequencer.init_sequencer()
+
 
 # ============================================================================================================
 

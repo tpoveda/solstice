@@ -386,16 +386,15 @@ def get_asset_image(asset_path, project_id):
     data = urllib2.urlopen(image_url).read()
 
 
-def open_file_in_maya(file_path, maya_version=2017):
+def launch_maya(file_path, maya_version=2017):
     """
-    Open the given path in the given Maya version
     :param file_path: str
     :param maya_version: int
+    :return:
     """
 
     spigot = get_spigot_client()
 
-    # Firt we try to open the app if its not launched
     payload = dict()
     payload['appName'] = "maya.{0}".format(str(maya_version))
     payload['parameter'] = "\"{0}\"".format(file_path)
@@ -406,10 +405,71 @@ def open_file_in_maya(file_path, maya_version=2017):
         rsp = json.loads(rsp)
     sp.logger.debug(rsp)
 
+
+def open_file_in_maya(file_path, maya_version=2017):
+    """
+    Open the given path in the given Maya version
+    :param file_path: str
+    :param maya_version: int
+    """
+
+    spigot = get_spigot_client()
+
+    # Firt we try to open the app if its not launched
+    launch_maya(file_path=file_path, maya_version=maya_version)
+
     # Now we open the file
     payload = dict()
     payload['appId'] = "maya.{0}".format(str(maya_version))
     payload['message'] = "{\"CommandName\":\"open\",\"CommandArgs\":{\"path\":\""+file_path+"\"}}".replace('\\', '/')
+    payload['message'] = payload['message'].replace('\\', '/').replace('//', '/')
+    payload = json.dumps(payload)
+
+    rsp = spigot.execute(command_action='do', command_name='passToApp', payload=payload)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+
+    sp.logger.debug(rsp)
+    return rsp
+
+
+def import_file_in_maya(file_path, maya_version=2017):
+    """
+    Import the given asset path in the given Maya version current scene
+    :param file_path: str
+    :param maya_version: int
+    """
+
+    spigot = get_spigot_client()
+
+    payload = dict()
+    payload['appId'] = "maya.{0}".format(str(maya_version))
+    payload['message'] = "{\"CommandName\":\"import\",\"CommandArgs\":{\"path\":\""+file_path+"\"}}".replace('\\', '/')
+    payload['message'] = payload['message'].replace('\\', '/').replace('//', '/')
+    payload = json.dumps(payload)
+
+    rsp = spigot.execute(command_action='do', command_name='passToApp', payload=payload)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+
+    sp.logger.debug(rsp)
+    return rsp
+
+
+def reference_file_in_maya(file_path, maya_version=2017):
+    """
+    Import the given asset path in the given Maya version current scene
+    :param file_path: str
+    :param maya_version: int
+    """
+
+    spigot = get_spigot_client()
+
+    payload = dict()
+    payload['appId'] = "maya.{0}".format(str(maya_version))
+    payload['message'] = "{\"CommandName\":\"reference\",\"CommandArgs\":{\"path\":\""+file_path+"\"}}".replace('\\', '/')
     payload['message'] = payload['message'].replace('\\', '/').replace('//', '/')
     payload = json.dumps(payload)
 

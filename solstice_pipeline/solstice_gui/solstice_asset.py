@@ -22,7 +22,7 @@ import solstice_pipeline as sp
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_artella_utils as artella
 from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_python_utils
-from solstice_gui import solstice_splitters, solstice_published_info_widget, solstice_sync_dialog
+from solstice_gui import solstice_splitters, solstice_published_info_widget, solstice_sync_dialog, solstice_buttons
 from solstice_tools import solstice_publisher
 from resources import solstice_resource
 
@@ -34,6 +34,7 @@ reload(solstice_python_utils)
 reload(solstice_splitters)
 reload(solstice_published_info_widget)
 reload(solstice_sync_dialog)
+reload(solstice_buttons)
 reload(solstice_resource)
 reload(solstice_publisher)
 
@@ -86,7 +87,7 @@ class AssetInfo(QWidget, object):
         self._asset_buttons_layout.setAlignment(Qt.AlignTop)
         self._buttons_layout.addLayout(self._asset_buttons_layout)
         asset_tab = QTabWidget()
-        asset_tab.setMaximumHeight(73)
+        asset_tab.setMinimumHeight(80)
         self._buttons_layout.addWidget(asset_tab)
         working_asset = QWidget()
         self._working_asset_layout = QHBoxLayout()
@@ -143,9 +144,18 @@ class AssetWidget(QWidget, object):
         self.setMaximumHeight(200)
 
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(1)
+        main_layout.setContentsMargins(5, 5, 5, 5)
+        main_layout.setSpacing(0)
         self.setLayout(main_layout)
+
+        widget_layout = QVBoxLayout()
+        widget_layout.setContentsMargins(2, 2, 2, 2)
+        widget_layout.setSpacing(0)
+        main_frame = QFrame()
+        main_frame.setFrameStyle(QFrame.StyledPanel | QFrame.Raised)
+        main_frame.setLineWidth(1)
+        main_frame.setLayout(widget_layout)
+        main_layout.addWidget(main_frame)
 
         self._asset_btn = QPushButton('', self)
         if self._icon:
@@ -153,10 +163,10 @@ class AssetWidget(QWidget, object):
             self._asset_btn.setIconSize(QSize(150, 150))
 
         self._asset_label = QLabel(self._name)
+        self._asset_label.setStyleSheet("background-color:rgba(0, 0, 0, 150);")
         self._asset_label.setAlignment(Qt.AlignCenter)
         for widget in [self._asset_btn, self._asset_label]:
-            main_layout.addWidget(widget)
-
+            widget_layout.addWidget(widget)
         self._asset_btn.setCheckable(self._checkable)
 
         self._asset_info = None
@@ -496,6 +506,8 @@ class AssetWidget(QWidget, object):
         sync_model_action.triggered.connect(partial(self.sync, 'model', False))
         sync_textures_action.triggered.connect(partial(self.sync, 'textures', False))
         sync_shading_action.triggered.connect(partial(self.sync, 'shading', False))
+        import_asset_action.triggered.connect(self.import_asset_file)
+        reference_asset_action.triggered.connect(self.reference_asset_file)
 
         if self.category == 'Characters':
             sync_menu_grooming_action = QAction('Groom', self._menu)
@@ -563,6 +575,22 @@ class AssetWidget(QWidget, object):
                 if os.path.isfile(published_path):
                     artella.open_file_in_maya(file_path=published_path)
 
+    def import_asset_file(self):
+        asset_name = self._name + '.ma'
+        local_max_versions = self.get_max_local_versions()
+        if local_max_versions['model']:
+            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', asset_name)
+            if os.path.isfile(published_path):
+                artella.import_file_in_maya(file_path=published_path)
+
+    def reference_asset_file(self):
+        asset_name = self._name + '.ma'
+        local_max_versions = self.get_max_local_versions()
+        if local_max_versions['model']:
+            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', asset_name)
+            if os.path.isfile(published_path):
+                artella.reference_file_in_maya(file_path=published_path)
+
     def open_textures_folder(self, status):
         if status != 'working' and status != 'published':
             return
@@ -585,29 +613,32 @@ class AssetWidget(QWidget, object):
         for btn in [self._folder_btn, self._artella_btn, self._check_btn]:
             self._asset_info._asset_buttons_layout.addWidget(btn)
 
-        self._working_model_btn = QPushButton('Model')
-        self._working_shading_btn = QPushButton('Shading')
-        self._working_textures_btn = QPushButton('Textures')
-        self._published_model_btn = QPushButton('Model')
-        self._published_shading_btn = QPushButton('Shading')
-        self._published_textures_btn = QPushButton('Textures')
+        # Create buttons for assets files
+        self._working_model_btn = solstice_buttons.CategoryButtonWidget(category_name='Model')
+        self._working_shading_btn = solstice_buttons.CategoryButtonWidget(category_name='Shading')
+        self._working_textures_btn = solstice_buttons.CategoryButtonWidget(category_name='Textures')
+        self._published_model_btn = solstice_buttons.CategoryButtonWidget(category_name='Model')
+        self._published_shading_btn = solstice_buttons.CategoryButtonWidget(category_name='Shading')
+        self._published_textures_btn = solstice_buttons.CategoryButtonWidget(category_name='Textures')
+
         for btn in [self._working_model_btn, self._working_shading_btn, self._working_textures_btn]:
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             self._asset_info._working_asset_layout.addWidget(btn)
         for btn in [self._published_model_btn, self._published_shading_btn, self._published_textures_btn]:
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             self._asset_info._published_asset_layout.addWidget(btn)
+
         self.update_asset_info()
 
-        self._folder_btn.clicked.connect(partial(artella.explore_file, self._asset_path))
-        self._artella_btn.clicked.connect(self.open_asset_artella_url)
-        self._check_btn.clicked.connect(self.sync_finished.emit)
-        self._working_model_btn.clicked.connect(partial(self.open_asset_file, 'model', 'working'))
-        self._working_shading_btn.clicked.connect(partial(self.open_asset_file, 'shading', 'working'))
-        self._working_textures_btn.clicked.connect(partial(self.open_textures_folder, 'working'))
-        self._published_model_btn.clicked.connect(partial(self.open_asset_file, 'model', 'published'))
-        self._published_shading_btn.clicked.connect(partial(self.open_asset_file, 'shading', 'published'))
-        self._published_textures_btn.clicked.connect(partial(self.open_textures_folder, 'published'))
+        # self._folder_btn.clicked.connect(partial(artella.explore_file, self._asset_path))
+        # self._artella_btn.clicked.connect(self.open_asset_artella_url)
+        # self._check_btn.clicked.connect(self.sync_finished.emit)
+        # self._working_model_btn.clicked.connect(partial(self.open_asset_file, 'model', 'working'))
+        # self._working_shading_btn.clicked.connect(partial(self.open_asset_file, 'shading', 'working'))
+        # self._working_textures_btn.clicked.connect(partial(self.open_textures_folder, 'working'))
+        # self._published_model_btn.clicked.connect(partial(self.open_asset_file, 'model', 'published'))
+        # self._published_shading_btn.clicked.connect(partial(self.open_asset_file, 'shading', 'published'))
+        # self._published_textures_btn.clicked.connect(partial(self.open_textures_folder, 'published'))
 
     def open_asset_artella_url(self):
 
@@ -659,10 +690,10 @@ class CharacterAsset(AssetWidget, object):
         if not self._asset_info:
             return
 
-        self._working_groom_btn = QPushButton('Groom')
-        self._published_groom_btn = QPushButton('Groom')
-        self._working_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'working'))
-        self._published_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'pubilshed'))
+        self._working_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom')
+        self._published_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom')
+        # self._working_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'working'))
+        # self._published_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'pubilshed'))
 
     def has_groom(self):
         return True

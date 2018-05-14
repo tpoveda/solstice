@@ -12,7 +12,6 @@ import threading
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
-from Qt.QtGui import *
 
 from solstice_utils import solstice_maya_utils
 from solstice_gui import solstice_animations
