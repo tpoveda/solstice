@@ -18,7 +18,7 @@ import maya.OpenMaya as OpenMaya
 import maya.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_assetviewer
+from solstice_gui import solstice_windows, solstice_assetviewer, solstice_splitters
 from solstice_utils import solstice_mash_utils
 
 from solstice_gui import solstice_asset
@@ -84,6 +84,11 @@ class SolsticeScatter(solstice_windows.Window, object):
         categories_menu.setLayout(categories_menu_layout)
         main_categories_menu_layout.addWidget(categories_menu)
 
+        asset_viewer_layout = QVBoxLayout()
+        asset_viewer_layout.setContentsMargins(2, 2, 2, 2)
+        asset_viewer_layout.setSpacing(2)
+        main_categories_menu_layout.addLayout(asset_viewer_layout)
+
         self._asset_viewer = solstice_assetviewer.AssetViewer(
             assets_path=sp.get_solstice_assets_path(),
             item_pressed_callback=self._on_asset_click,
@@ -93,7 +98,11 @@ class SolsticeScatter(solstice_windows.Window, object):
             # show_only_published_assets=True)      # TODO: Uncomment later
         self._asset_viewer.setColumnCount(2)
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        main_categories_menu_layout.addWidget(self._asset_viewer)
+        asset_viewer_layout.addWidget(self._asset_viewer)
+        asset_viewer_layout.addLayout(solstice_splitters.SplitterLayout())
+        self._update_scatter_btn = QPushButton('Update Scatter')
+        self._update_scatter_btn.setEnabled(False)
+        asset_viewer_layout.addWidget(self._update_scatter_btn)
 
         self._categories_btn_group = QButtonGroup(self)
         self._categories_btn_group.setExclusive(True)
@@ -145,6 +154,18 @@ class SolsticeScatter(solstice_windows.Window, object):
         mash_list_buttons_layout.addWidget(self._mash_add_btn)
         mash_list_buttons_layout.addWidget(self._mash_remove_btn)
         scatter_layout.addLayout(mash_list_layout)
+
+        scatter_buttons_layout = QHBoxLayout()
+        scatter_buttons_layout.setContentsMargins(2, 2, 2, 2)
+        scatter_buttons_layout.setSpacing(2)
+        scatter_layout.addLayout(solstice_splitters.SplitterLayout())
+        scatter_layout.addLayout(scatter_buttons_layout)
+        self._bake_all_scatters = QPushButton('Bake All Scatters')
+        self._bake_selected_scatters = QPushButton('Bake Selected Scatters')
+        self._bake_all_scatters.setEnabled(False)
+        self._bake_selected_scatters.setEnabled(False)
+        scatter_buttons_layout.addWidget(self._bake_selected_scatters)
+        scatter_buttons_layout.addWidget(self._bake_all_scatters)
 
         v_div_w = QWidget()
         v_div_l = QHBoxLayout()

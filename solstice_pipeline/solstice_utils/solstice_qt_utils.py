@@ -229,7 +229,7 @@ def safe_delete_later(widget):
     """
 
     from Qt import __binding__
-    if __binding__ in ('PySide', 'tPyQt4'):
+    if __binding__ in ('PySide', 'PyQt4'):
         widget.deleteLater()
 
 

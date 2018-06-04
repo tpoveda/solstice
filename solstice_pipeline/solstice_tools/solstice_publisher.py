@@ -161,28 +161,35 @@ class AssetPublisherWidget(QWidget, object):
 
             version_info = server_versions[cat]
 
+            # TODO: When publishing shading files check that exists a Maya file that ends with
+            # TODO: _SHD. If not, we avoid the publication of that file because nomenclature is not
+            # TODO: valid
+
+            asset_path = self._asset().asset_path
+            new_version = int(self._ui[cat]['next_version'].text()[1:])
+            new_version = '{0:03}'.format(new_version)
+            asset_path = os.path.join(asset_path, '__{0}_v{1}__ '.format(cat, new_version))
+
+            comment = self._comment_box.toPlainText()
+            selected_version = dict()
+
             if cat == 'textures':
-                pass
+                textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
+                if os.path.exists(textures_path):
+                    textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+                    if len(textures) <= 0:
+                        continue
+                    for txt in textures:
+                        txt_history = artella.get_asset_history(txt)
+                        txt_last_version = txt_history.versions[-1][0]
+                        selected_version['textures/{0}'.format(os.path.basename(txt))] = int(txt_last_version)
             else:
-
-                # TODO: When publishing shading files check that exists a Maya file that ends with
-                # TODO: _SHD. If not, we avoid the publication of that file because nomenclature is not
-                # TODO: valid
-
-                asset_path = self._asset().asset_path
-                new_version = int(self._ui[cat]['next_version'].text()[1:])
-                new_version = '{0:03}'.format(new_version)
-                asset_path = os.path.join(asset_path, '__{0}_v{1}__ '.format(cat, new_version))
-
-                comment = self._comment_box.toPlainText()
-                selected_version = dict()
-
                 if not version_info:
                     selected_version[os.path.join(cat, self._asset().name + '.ma')] = 1
                 else:
                     selected_version[version_info.relative_path] = version_info.version
 
-                artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
+            artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
 
 
 def run(asset=None):
