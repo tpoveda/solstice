@@ -10,12 +10,10 @@
 
 import os
 import time
-import datetime
 import webbrowser
 from functools import partial
 from distutils.util import strtobool
 
-import pathlib2
 import treelib
 
 from Qt.QtCore import *
@@ -142,7 +140,7 @@ class Pipelinizer(solstice_windows.Window, object):
         # TODO: After creating the user database read the info for this user from that file
         user_icon = solstice_user.UserWidget(name='Summer', role='Director')
         user_icon.move(1100, 0)
-        user_icon.setStyleSheet("QWidget{background: transparent;}");
+        user_icon.setStyleSheet("QWidget{background: transparent;}")
         self._logo_scene.addWidget(user_icon)
 
         # Top Menu Bar

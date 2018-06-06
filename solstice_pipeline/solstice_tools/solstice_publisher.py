@@ -37,11 +37,11 @@ class SolsticePublisher(solstice_dialog.Dialog, object):
 
         super(SolsticePublisher, self).__init__(name=name, parent=parent, **kwargs)
 
+        self.setMaximumWidth(200)
+
     def custom_ui(self):
         super(SolsticePublisher, self).custom_ui()
-
         self.set_logo('solstice_publisher_logo')
-
         if self._asset:
             asset_publisher = AssetPublisherWidget(asset=self._asset)
             self.main_layout.addWidget(asset_publisher)
@@ -112,6 +112,18 @@ class AssetPublisherWidget(QWidget, object):
         main_layout.addWidget(self._publish_btn)
 
         self._update_versions()
+
+        # =====================================================================================================
+
+        for cat in sp.valid_categories:
+            asset_is_locked, current_user = self._asset().is_locked(category=cat, status='working')
+            if asset_is_locked:
+                if not current_user:
+                    self._ui[cat]['check'].setChecked(False)
+                    self._ui[cat]['current_version'].setText('LOCK')
+                    self._ui[cat]['next_version'].setText('LOCK')
+                    for name, w in self._ui[cat].items():
+                        w.setEnabled(False)
 
     def _update_versions(self):
         for cat, version in self._versions.items():
