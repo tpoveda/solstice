@@ -482,6 +482,70 @@ def reference_file_in_maya(file_path, maya_version=2017):
     return rsp
 
 
+def lock_asset(file_path):
+    """
+    Locks given file path
+    :param file_path:
+    """
+
+    spigot = get_spigot_client()
+    payload = dict()
+    payload['cms_uri'] = artella.getCmsUri(file_path)
+    payload = json.dumps(payload)
+
+    rsp = spigot.execute(command_action='do', command_name='checkout', payload=payload)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+
+    sp.logger.debug(rsp)
+    return rsp
+
+
+def get_current_user_id():
+    metadata = get_metadata()
+    if not metadata:
+        return None
+    return metadata.storage_id
+
+
+def can_unlock(file_path):
+    asset_status = get_status(filepath=file_path)
+    if not asset_status:
+        return
+    asset_info = asset_status.references.values()[0]
+    locker_name = asset_info.locked_view
+    user_id = get_current_user_id()
+    if locker_name is not None and locker_name != user_id:
+        return False
+
+    return True
+
+
+def unlock_asset(file_path):
+    """
+    Unlocks a given file path
+    :param file_path:
+    """
+
+    spigot = get_spigot_client()
+    payload = dict()
+    payload['cms_uri'] = artella.getCmsUri(file_path)
+    payload = json.dumps(payload)
+
+    if not can_unlock(file_path=file_path):
+        sp.logger.debug('Impossible to unlock file. File is locked by other user!')
+        return
+
+    rsp = spigot.execute(command_action='do', command_name='unlock', payload=payload)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+
+    sp.logger.debug(rsp)
+    return rsp
+
+
 def publish_asset(file_path, comment, selected_versions):
     """
     Publish a new version of the given asset

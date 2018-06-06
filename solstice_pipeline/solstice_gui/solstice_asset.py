@@ -62,11 +62,12 @@ class AssetInfo(QWidget, object):
     to show information of the widget itself
     """
 
-    def __init__(self, asset, check_published_info=False, check_working_info=False):
+    def __init__(self, asset, check_published_info=False, check_working_info=False, check_lock_info=False):
         super(AssetInfo, self).__init__()
 
         self._check_published_info = check_published_info
         self._check_working_info = check_working_info
+        self._check_lock_info = check_lock_info
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(2, 2, 2, 2)
@@ -86,21 +87,21 @@ class AssetInfo(QWidget, object):
         self._asset_buttons_layout.setSpacing(1)
         self._asset_buttons_layout.setAlignment(Qt.AlignTop)
         self._buttons_layout.addLayout(self._asset_buttons_layout)
-        asset_tab = QTabWidget()
-        asset_tab.setMinimumHeight(80)
-        self._buttons_layout.addWidget(asset_tab)
-        working_asset = QWidget()
+        self.asset_tab = QTabWidget()
+        self.asset_tab.setMinimumHeight(80)
+        self._buttons_layout.addWidget(self.asset_tab)
+        self.working_asset = QWidget()
         self._working_asset_layout = QHBoxLayout()
         self._working_asset_layout.setContentsMargins(0, 0, 0, 0)
         self._working_asset_layout.setSpacing(1)
-        working_asset.setLayout(self._working_asset_layout)
-        published_asset = QWidget()
+        self.working_asset.setLayout(self._working_asset_layout)
+        self.published_asset = QWidget()
         self._published_asset_layout = QHBoxLayout()
         self._published_asset_layout.setContentsMargins(0, 0, 0, 0)
         self._published_asset_layout.setSpacing(1)
-        published_asset.setLayout(self._published_asset_layout)
-        asset_tab.addTab(working_asset, 'Working')
-        asset_tab.addTab(published_asset, 'Published')
+        self.published_asset.setLayout(self._published_asset_layout)
+        self.asset_tab.addTab(self.working_asset, 'Working')
+        self.asset_tab.addTab(self.published_asset, 'Published')
         self._asset_published_info = solstice_published_info_widget.PublishedInfoWidget(asset=asset, check_published_info=check_published_info, check_working_info=check_working_info)
         self._publish_btn = QPushButton('> PUBLISH NEW VERSION <')
         self._publish_btn.clicked.connect(asset.publish)
@@ -114,6 +115,19 @@ class AssetInfo(QWidget, object):
         main_layout.addLayout(solstice_splitters.SplitterLayout())
         main_layout.addWidget(self._publish_btn)
         main_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Preferred, QSizePolicy.Expanding))
+
+        # Uncomment if you want to check for locked/unlocked files each time
+        # the user presses Working/Published tabs
+        # self.asset_tab.currentChanged.connect(self.update_buttons)
+
+    def update_buttons(self, index):
+        widgets = list()
+        if index == 0:
+            widgets = self.working_asset.findChildren(solstice_buttons.CategoryButtonWidget)
+        elif index == 1:
+            widgets = self.published_asset.findChildren(solstice_buttons.CategoryButtonWidget)
+        for w in widgets:
+            w.update()
 
 
 class AssetWidget(QWidget, object):
@@ -226,8 +240,16 @@ class AssetWidget(QWidget, object):
             return
         self._menu.exec_(event.globalPos())
 
-    def get_local_versions(self, status='published'):
-        folders = ['model', 'textures', 'shading', 'groom']
+    def get_local_versions(self, status='published', categories=None):
+
+        if categories:
+            if type(categories) not in [list]:
+                folders = [categories]
+            else:
+                folders = categories
+        else:
+            folders = sp.valid_categories
+
         local_folders = dict()
         for f in folders:
             local_folders[f] = dict()
@@ -275,11 +297,10 @@ class AssetWidget(QWidget, object):
 
         return local_folders
 
-    def get_server_versions(self, status='published', all_versions=False):
+    def get_server_versions(self, status='published', all_versions=False, categories=None):
         if status == 'published':
             asset_data = list()
-            thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo',
-                                              self.get_artella_asset_data, [asset_data])
+            thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo', self.get_artella_asset_data, [asset_data])
             while not event.is_set():
                 QCoreApplication.processEvents()
                 event.wait(0.25)
@@ -287,17 +308,35 @@ class AssetWidget(QWidget, object):
                 asset_data = asset_data[0]
                 if not asset_data:
                     return
-            return asset_data.get_published_versions(all=all_versions)
+
+
+
+            published_versions = asset_data.get_published_versions(all=all_versions)
+            if categories:
+                publish_dict = dict()
+                for cat in categories:
+                    if cat in published_versions.keys():
+                        publish_dict[cat] = published_versions[cat]
+                return publish_dict
+
+            return published_versions
         else:
             server_data = dict()
-            folders = sp.valid_categories
+
+            if categories:
+                if type(categories) not in [list]:
+                    folders = [categories]
+                else:
+                    folders = categories
+            else:
+                folders = sp.valid_categories
+
             for category in folders:
                 server_data[category] = dict()
                 server_path = os.path.join(self._asset_path, '__working__', category)
 
                 asset_data = list()
-                thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo',
-                                                  self.get_artella_asset_data, [asset_data])
+                thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo', self.get_artella_asset_data_path, [server_path, asset_data])
                 while not event.is_set():
                     QCoreApplication.processEvents()
                     event.wait(0.25)
@@ -328,8 +367,16 @@ class AssetWidget(QWidget, object):
                         server_data[category] = {}
             return server_data
 
-    def get_max_local_versions(self):
-        folders = ['model', 'textures', 'shading', 'groom']
+    def get_max_local_versions(self, categories=None):
+
+        if categories:
+            if type(categories) not in [list]:
+                folders = [categories]
+            else:
+                folders = categories
+        else:
+            folders = sp.valid_categories
+
         max_local_versions = dict()
         for f in folders:
             max_local_versions[f] = None
@@ -347,8 +394,16 @@ class AssetWidget(QWidget, object):
 
         return max_local_versions
 
-    def get_max_published_versions(self, all_versions=False):
-        folders = ['model', 'textures', 'shading', 'groom']
+    def get_max_published_versions(self, all_versions=False, categories=None):
+
+        if categories:
+            if type(categories) not in [list]:
+                folders = [categories]
+            else:
+                folders = categories
+        else:
+            folders = sp.valid_categories
+
         max_server_versions = dict()
         for f in folders:
             max_server_versions[f] = None
@@ -366,11 +421,19 @@ class AssetWidget(QWidget, object):
 
         return max_server_versions
 
-    def get_max_versions(self, status='published'):
-        folders = ['model', 'textures', 'shading', 'groom']
+    def get_max_versions(self, status='published', categories=None):
+
+        if categories:
+            if type(categories) not in [list]:
+                folders = [categories]
+            else:
+                folders = categories
+        else:
+            folders = sp.valid_categories
+
         max_versions = dict()
-        server_versions_list = self.get_server_versions(status=status)
-        local_versions_list = self.get_local_versions(status=status)
+        server_versions_list = self.get_server_versions(status=status, categories=folders)
+        local_versions_list = self.get_local_versions(status=status, categories=folders)
         for t in ['local', 'server']:
             max_versions[t] = dict()
             for f in folders:
@@ -435,6 +498,58 @@ class AssetWidget(QWidget, object):
 
         return max_versions
 
+    def lock(self, category, status='working'):
+        versions = self.get_max_versions(status=status, categories=category)
+        if versions['server']:
+            if versions['server'][category]:
+                if category == 'textures':
+                    if status == 'working':
+                        for txt_name, txt_data in versions['server'][category].items():
+                            file_path = os.path.join(self.asset_path, '__working__', txt_data.relative_path)
+                            artella.lock_asset(file_path=file_path)
+                else:
+                    if status == 'working':
+                        file_path = os.path.join(self.asset_path, '__working__', versions['server'][category].relative_path)
+                        artella.lock_asset(file_path=file_path)
+
+    def unlock(self, category, status='working'):
+        versions = self.get_max_versions(status=status, categories=category)
+        if versions['server']:
+            if category == 'textures':
+                if status == 'working':
+                    for txt_name, txt_data in versions['server'][category].items():
+                        file_path = os.path.join(self.asset_path, '__working__', txt_data.relative_path)
+                        artella.unlock_asset(file_path=file_path)
+            else:
+                if status == 'working':
+                    file_path = os.path.join(self.asset_path, '__working__', versions['server'][category].relative_path)
+                    artella.unlock_asset(file_path=file_path)
+
+    def is_locked(self, category, status='working'):
+        versions = self.get_max_versions(status=status, categories=category)
+        if versions['server']:
+            if versions['server'][category]:
+                if category == 'textures':
+                    for txt_data in versions['server'][category].items():
+                        if status == 'working':
+                            file_path = os.path.join(self.asset_path, '__working__', 'textures', txt_data[0])
+                        else:
+                            file_path = os.path.join(self.asset_path, 'textures', txt_data[0])
+                        current_user_locker = artella.can_unlock(file_path=file_path)
+                        if txt_data[1].locked_by is not None:
+                            return True, current_user_locker
+                    return False, current_user_locker
+                else:
+                    if status == 'working':
+                        file_path = os.path.join(self.asset_path, '__working__', versions['server'][category].relative_path)
+                    else:
+                        file_path = os.path.join(self.asset_path, '__{0}_v{1}__'.format(category, '{0:03}'.format(versions['server'][category])))
+                    current_user_locker = artella.can_unlock(file_path=file_path)
+
+                    return versions['server'][category].locked_by, current_user_locker
+
+        return False, False
+
     def is_published(self):
         asset_data = list()
         thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticeAssetInfo', self.get_artella_asset_data, [asset_data])
@@ -459,6 +574,13 @@ class AssetWidget(QWidget, object):
 
     def get_artella_asset_data(self, thread_result=None, thread_event=None):
         rst = artella.get_status(os.path.join(self._asset_path))
+        if thread_event:
+            thread_event.set()
+            thread_result.append(rst)
+        return rst
+
+    def get_artella_asset_data_path(self, path, thread_result=None, thread_event=None):
+        rst = artella.get_status(path)
         if thread_event:
             thread_event.set()
             thread_result.append(rst)
@@ -503,6 +625,7 @@ class AssetWidget(QWidget, object):
         self._menu.addAction(reference_asset_action)
 
         get_info_action.triggered.connect(self.get_asset_info)
+        sync_all_action.triggered.connect(partial(self.sync, 'all', False))
         sync_model_action.triggered.connect(partial(self.sync, 'model', False))
         sync_textures_action.triggered.connect(partial(self.sync, 'textures', False))
         sync_shading_action.triggered.connect(partial(self.sync, 'shading', False))
@@ -605,8 +728,8 @@ class AssetWidget(QWidget, object):
                 if os.path.exists(published_path):
                     solstice_python_utils.open_folder(published_path)
 
-    def generate_asset_info_widget(self, check_published_info=False, check_working_info=False):
-        self._asset_info = AssetInfo(asset=self, check_published_info=check_published_info, check_working_info=check_working_info)
+    def generate_asset_info_widget(self, check_published_info=False, check_working_info=False, check_lock_info=False):
+        self._asset_info = AssetInfo(asset=self, check_published_info=check_published_info, check_working_info=check_working_info, check_lock_info=check_lock_info)
         self._folder_btn = QPushButton('Folder')
         self._artella_btn = QPushButton('Artella')
         self._check_btn = QPushButton('Check')
@@ -614,12 +737,12 @@ class AssetWidget(QWidget, object):
             self._asset_info._asset_buttons_layout.addWidget(btn)
 
         # Create buttons for assets files
-        self._working_model_btn = solstice_buttons.CategoryButtonWidget(category_name='Model')
-        self._working_shading_btn = solstice_buttons.CategoryButtonWidget(category_name='Shading')
-        self._working_textures_btn = solstice_buttons.CategoryButtonWidget(category_name='Textures')
-        self._published_model_btn = solstice_buttons.CategoryButtonWidget(category_name='Model')
-        self._published_shading_btn = solstice_buttons.CategoryButtonWidget(category_name='Shading')
-        self._published_textures_btn = solstice_buttons.CategoryButtonWidget(category_name='Textures')
+        self._working_model_btn = solstice_buttons.CategoryButtonWidget(category_name='Model', status='working', asset=self, check_lock_info=self._asset_info._check_lock_info)
+        self._working_shading_btn = solstice_buttons.CategoryButtonWidget(category_name='Shading', status='working', asset=self, check_lock_info=self._asset_info._check_lock_info)
+        self._working_textures_btn = solstice_buttons.CategoryButtonWidget(category_name='Textures', status='working', asset=self, check_lock_info=self._asset_info._check_lock_info)
+        self._published_model_btn = solstice_buttons.CategoryButtonWidget(category_name='Model', status='published', asset=self, check_lock_info=self._asset_info._check_lock_info)
+        self._published_shading_btn = solstice_buttons.CategoryButtonWidget(category_name='Shading', status='published', asset=self, check_lock_info=self._asset_info._check_lock_info)
+        self._published_textures_btn = solstice_buttons.CategoryButtonWidget(category_name='Textures', status='published', asset=self, check_lock_info=self._asset_info._check_lock_info)
 
         for btn in [self._working_model_btn, self._working_shading_btn, self._working_textures_btn]:
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -630,15 +753,9 @@ class AssetWidget(QWidget, object):
 
         self.update_asset_info()
 
-        # self._folder_btn.clicked.connect(partial(artella.explore_file, self._asset_path))
-        # self._artella_btn.clicked.connect(self.open_asset_artella_url)
-        # self._check_btn.clicked.connect(self.sync_finished.emit)
-        # self._working_model_btn.clicked.connect(partial(self.open_asset_file, 'model', 'working'))
-        # self._working_shading_btn.clicked.connect(partial(self.open_asset_file, 'shading', 'working'))
-        # self._working_textures_btn.clicked.connect(partial(self.open_textures_folder, 'working'))
-        # self._published_model_btn.clicked.connect(partial(self.open_asset_file, 'model', 'published'))
-        # self._published_shading_btn.clicked.connect(partial(self.open_asset_file, 'shading', 'published'))
-        # self._published_textures_btn.clicked.connect(partial(self.open_textures_folder, 'published'))
+        self._folder_btn.clicked.connect(partial(artella.explore_file, self._asset_path))
+        self._artella_btn.clicked.connect(self.open_asset_artella_url)
+        self._check_btn.clicked.connect(self.sync_finished.emit)
 
     def open_asset_artella_url(self):
 
@@ -646,8 +763,8 @@ class AssetWidget(QWidget, object):
         asset_url = 'https://www.artella.com/project/{0}/files/Assets/{1}'.format(sp.solstice_project_id_raw, file_path)
         webbrowser.open(asset_url)
 
-    def get_asset_info_widget(self, check_published_info=False, check_working_info=False):
-        self.generate_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info)
+    def get_asset_info_widget(self, check_published_info=False, check_working_info=False, check_lock_info=False):
+        self.generate_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info, check_lock_info=check_lock_info)
         return self._asset_info
 
     def update_asset_info(self):
@@ -685,13 +802,13 @@ class CharacterAsset(AssetWidget, object):
     def __init__(self, **kwargs):
         super(CharacterAsset, self).__init__(**kwargs)
 
-    def generate_asset_info_widget(self, check_published_info=False, check_working_info=False):
-        super(CharacterAsset, self).generate_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info)
+    def generate_asset_info_widget(self, check_published_info=False, check_working_info=False, check_lock_info=False):
+        super(CharacterAsset, self).generate_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info, check_lock_info=check_lock_info)
         if not self._asset_info:
             return
 
-        self._working_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom')
-        self._published_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom')
+        self._working_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom', asset=self)
+        self._published_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom', asset=self)
         # self._working_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'working'))
         # self._published_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'pubilshed'))
 
@@ -706,8 +823,8 @@ class PropAsset(AssetWidget, object):
     def __init__(self, **kwargs):
         super(PropAsset, self).__init__(**kwargs)
 
-    def generate_asset_info_widget(self, check_published_info=False, check_working_info=False):
-        super(PropAsset, self).generate_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info)
+    def generate_asset_info_widget(self, check_published_info=False, check_working_info=False, check_lock_info=False):
+        super(PropAsset, self).generate_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info, check_lock_info=check_lock_info)
 
     def update_asset_info(self):
         super(PropAsset, self).update_asset_info()
@@ -717,8 +834,8 @@ class BackgroundElementAsset(AssetWidget, object):
     def __init__(self, **kwargs):
         super(BackgroundElementAsset, self).__init__(**kwargs)
 
-    def generate_asset_info_widget(self, check_published_info=False, check_working_info=False):
-        super(BackgroundElementAsset, self).generate_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info)
+    def generate_asset_info_widget(self, check_published_info=False, check_working_info=False, check_lock_info=False):
+        super(BackgroundElementAsset, self).generate_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info, check_lock_info=check_lock_info)
 
     def update_asset_info(self):
         super(BackgroundElementAsset, self).update_asset_info()

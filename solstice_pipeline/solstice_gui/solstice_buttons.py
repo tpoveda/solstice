@@ -8,6 +8,9 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
+import os
+import weakref
+
 from Qt.QtCore import *
 from Qt.QtWidgets import *
 from Qt.QtGui import *
@@ -61,9 +64,14 @@ class LockButton(QPushButton, object):
     def unlock(self):
         self.setIcon(self._unlock_icon)
 
+
 class CategoryButtonWidget(QWidget, object):
-    def __init__(self, category_name, parent=None):
+    def __init__(self, category_name, status, asset, check_lock_info=False, parent=None):
         super(CategoryButtonWidget, self).__init__(parent=parent)
+
+        self._asset = weakref.ref(asset)
+        self._category_name = category_name.lower()
+        self._status = status.lower()
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -80,15 +88,48 @@ class CategoryButtonWidget(QWidget, object):
         widget_layout.addWidget(self._category_btn)
         main_layout.addWidget(main_widget)
 
-        button_layout = QVBoxLayout()
-        button_layout.setContentsMargins(0, 0, 0, 0)
-        button_layout.setSpacing(0)
-        button_frame = QFrame()
-        button_frame.setFrameStyle(QFrame.Panel | QFrame.Sunken)
-        button_frame.setLineWidth(1)
-        button_frame.setLayout(button_layout)
-        self._lock_btn = LockButton()
-        button_layout.addWidget(self._lock_btn)
-        button_frame.setParent(self)
-        main_layout.addWidget(button_frame)
+        if status == 'working' and check_lock_info:
+            button_layout = QVBoxLayout()
+            button_layout.setContentsMargins(0, 0, 0, 0)
+            button_layout.setSpacing(0)
+            button_frame = QFrame()
+            button_frame.setFrameStyle(QFrame.Panel | QFrame.Sunken)
+            button_frame.setLineWidth(1)
+            button_frame.setLayout(button_layout)
+            self._lock_btn = LockButton()
+            button_layout.addWidget(self._lock_btn)
+            button_frame.setParent(self)
+            main_layout.addWidget(button_frame)
+            self._lock_btn.toggled.connect(self.lock_file)
 
+        self._category_btn.clicked.connect(self.open_asset_file)
+
+        if check_lock_info:
+            self.update()
+
+    def update(self):
+        if self._status == 'working':
+            asset_is_locked, current_user = self._asset().is_locked(category=self._category_name, status=self._status)
+            self._lock_btn.blockSignals(True)
+            if asset_is_locked is not None and asset_is_locked:
+                self._lock_btn.setChecked(True)
+            else:
+                self._lock_btn.setChecked(False)
+            self._lock_btn.blockSignals(False)
+
+            if not current_user:
+                self._lock_btn.setEnabled(False)
+            else:
+                self._lock_btn.setEnabled(True)
+
+    def open_asset_file(self):
+        if self._category_name == 'textures':
+            self._asset().open_textures_folder(self._status)
+        else:
+            self._asset().open_asset_file(self._category_name, self._status)
+
+    def lock_file(self, flag):
+        if flag:
+            self._asset().lock(category=self._category_name, status=self._status)
+        else:
+            self._asset() .unlock(category=self._category_name, status=self._status)

@@ -37,7 +37,6 @@ class SolsticePublisher(solstice_dialog.Dialog, object):
 
         super(SolsticePublisher, self).__init__(name=name, parent=parent, **kwargs)
 
-
     def custom_ui(self):
         super(SolsticePublisher, self).custom_ui()
 

@@ -181,7 +181,7 @@ class AssetViewer(solstice_grid.GridWidget, object):
                         try:
                             new_asset.sync_finished.connect(partial(self.parent().update_asset_info, new_asset, True))
                             new_asset.sync_finished.connect(partial(sp.register_asset, new_asset.name))
-                        except:
+                        except Exception:
                             pass
 
                         if not new_asset:

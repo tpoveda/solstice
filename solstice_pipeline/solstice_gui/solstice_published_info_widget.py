@@ -184,6 +184,7 @@ class PublishedInfoWidget(QWidget, object):
         if self._check_working_info:
             status = 'working'
             max_versions = self._asset.get_max_versions(status=status)
+            categories_to_check = list()
             for f in sp.valid_categories:
                 for status_type in ['local', 'server']:
                     if f not in max_versions[status_type].keys():
@@ -195,7 +196,17 @@ class PublishedInfoWidget(QWidget, object):
                         if not version_info:
                             continue
                         self._ui[status][f][status_type]['text'].setText('v{0}'.format(str(version_info.version)))
+                        self._ui[status][f]['status'].setPixmap(self._warning_pixmap)
+                        categories_to_check.append(f)
 
+                for cat in categories_to_check:
+                    max_local = max_versions['local'][cat]
+                    max_server = max_versions['server'][cat]
+
+                    if max_local == max_server and max_local is not None and max_server is not None:
+                        self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
+                    if max_local > max_server or max_local is None and max_server is not None:
+                        self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
 
     def update_published_info(self):
         if self._check_published_info:

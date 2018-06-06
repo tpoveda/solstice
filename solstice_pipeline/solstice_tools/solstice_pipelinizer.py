@@ -59,6 +59,8 @@ class PipelinizerSettings(QDialog, object):
         frame_layout.addWidget(self._auto_check_published_cbx)
         self._auto_check_working_cbx = QCheckBox('Auto Check Working Versions?')
         frame_layout.addWidget(self._auto_check_working_cbx)
+        self._auto_check_lock_cbx = QCheckBox('Check Lock/Unlock Working Versions?')
+        frame_layout.addWidget(self._auto_check_lock_cbx)
 
         main_layout.addLayout(solstice_splitters.SplitterLayout())
 
@@ -82,6 +84,8 @@ class PipelinizerSettings(QDialog, object):
             self._auto_check_published_cbx.setChecked(strtobool(self._settings.get('auto_check_published')))
         if self._settings.has_option(self._settings.app_name, 'auto_check_working'):
             self._auto_check_working_cbx.setChecked(strtobool(self._settings.get('auto_check_working')))
+        if self._settings.has_option(self._settings.app_name, 'auto_check_lock'):
+            self._auto_check_lock_cbx.setChecked(strtobool(self._settings.get('auto_check_lock')))
 
         # ===========================================================================
 
@@ -101,6 +105,8 @@ class PipelinizerSettings(QDialog, object):
             self._settings.set(self._settings.app_name, 'auto_check_published', str(self._auto_check_published_cbx.isChecked()))
         if self._settings.has_option(self._settings.app_name, 'auto_check_working'):
             self._settings.set(self._settings.app_name, 'auto_check_working', str(self._auto_check_working_cbx.isChecked()))
+        if self._settings.has_option(self._settings.app_name, 'auto_check_lock'):
+            self._settings.set(self._settings.app_name, 'auto_check_lock', str(self._auto_check_lock_cbx.isChecked()))
         self._settings.update()
         sp.logger.debug('{0}: Settings Updated successfully!'.format(self._settings.app_name))
 
@@ -128,6 +134,8 @@ class Pipelinizer(solstice_windows.Window, object):
                 self.settings.set(self.settings.app_name, 'auto_check_published', str(False))
             if not self.settings.has_option(self.settings.app_name, 'auto_check_working'):
                 self.settings.set(self.settings.app_name, 'auto_check_working', str(False))
+            if not self.settings.has_option(self.settings.app_name, 'auto_check_lock'):
+                self.settings.set(self.settings.app_name, 'auto_check_lock', str(False))
             self.settings.update()
 
         # User Icon
@@ -438,7 +446,7 @@ class Pipelinizer(solstice_windows.Window, object):
                 self.sync_category(category='BackgroundElements', full_sync=full_sync, ask=False)
                 self.sync_category(category='Props', full_sync=full_sync, ask=False)
 
-    def update_asset_info(self, asset=None, check_published_info=None, check_working_info=None):
+    def update_asset_info(self, asset=None, check_published_info=None, check_working_info=None, check_lock_info=None):
         self._current_asset = asset
         if asset:
             if not check_published_info:
@@ -448,7 +456,10 @@ class Pipelinizer(solstice_windows.Window, object):
                 if self.settings.has_option(self.settings.app_name, 'auto_check_working'):
                     check_working_info = strtobool(self.settings.get('auto_check_working'))
 
-            info_widget = asset.get_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info)
+            if self.settings.has_option(self.settings.app_name, 'auto_check_lock'):
+                check_lock_info = strtobool(self.settings.get('auto_check_lock'))
+
+            info_widget = asset.get_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info, check_lock_info=check_lock_info)
             if not info_widget:
                 return
 

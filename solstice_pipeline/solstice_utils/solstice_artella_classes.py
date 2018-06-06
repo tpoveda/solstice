@@ -71,7 +71,7 @@ class ArtellaAssetMetaData(object):
 
         self._published_folders = dict()
         self._published_folders_all = dict()
-        self._must_folders = ['model', 'textures', 'shading', 'groom']
+        self._must_folders = sp.valid_categories
 
         for f in self._must_folders:
             self._published_folders[f] = dict()
@@ -85,29 +85,23 @@ class ArtellaAssetMetaData(object):
 
             # Before doing nothing, check if the published version is valid (has not been deleted from Artella manually)
             version_valid = True
-            try:
-                version_path = os.path.join(self._path, '__{0}__'.format(name))
-                version_info = artella.get_status(version_path)
-                if version_info:
-                    for n, d in version_info.references.items():
-                        if d.maximum_version_deleted and d.deleted:
-                            version_valid = False
-                            break
-            except Exception:
-                version_valid = False
-            # if not version_valid:
-            #     continue
+            version_path = os.path.join(self._path, '__{0}__'.format(name))
+            version_info = artella.get_status(version_path)
+            if version_info:
+                for n, d in version_info.references.items():
+                    if d.maximum_version_deleted and d.deleted:
+                        version_valid = False
+                        break
 
             # Store all valid published folders
             for f in self._must_folders:
                 if f in name:
                     version = sp.get_asset_version(name)[1]
                     if not version_valid:
-                        self._published_folders_all[f][str(version)] = name
+                        self._published_folders_all[f][str(version)] = '__{0}__'.format(name)
                     else:
-                        self._published_folders_all[f][str(version)] = name
-                        self._published_folders[f][str(version)] = name
-
+                        self._published_folders_all[f][str(version)] = '__{0}__'.format(name)
+                        self._published_folders[f][str(version)] = '__{0}__'.format(name)
 
         # Sort all dictionaries by version number
         for f in self._must_folders:
@@ -167,6 +161,10 @@ class ArtellaReferencesMetaData(object):
         self._relative_path = ref_dict['relative_path'] if 'relative_path' in ref_dict else None
         self._maximum_version = ref_dict['maximum_version'] if 'maximum_version' in ref_dict else None
         self._view_version_digest = ref_dict['view_version_digest'] if 'view_version_digest' in ref_dict else None
+        self._locked = ref_dict['locked'] if 'locked' in ref_dict else False
+        self._locked_view = ref_dict['locked_view'] if 'locked_view' in ref_dict else None
+        self._locked_by = ref_dict['locked_by'] if 'locked_by' in ref_dict else None
+        self._locked_by_display = ref_dict['lockedByDisplay'] if 'lockedByDisplay' in ref_dict else None
 
     @property
     def name(self):
@@ -207,6 +205,22 @@ class ArtellaReferencesMetaData(object):
     @property
     def view_version_digest(self):
         return self._view_version_digest
+
+    @property
+    def locked(self):
+        return self._locked
+
+    @property
+    def locked_by(self):
+        return self._locked_by
+
+    @property
+    def locked_view(self):
+        return self._locked_view
+
+    @property
+    def locked_by_display(self):
+        return self._locked_by_display
 
 
 class ArtellaDirectoryMetaData(object):
@@ -296,7 +310,7 @@ class ArtellaFileVerionMetaData(object):
         self._relative_path = version_data['relative_dir']
         self._name = version_data['name']
         self._creator = version_data['creator']
-        self._locked = version_data['locked_by']
+        self._locked_by = version_data['locked_by']
         self._relative_path = version_data['relative_path']
         self._version = version_data['version']
         self._creator_display = version_data['creatorDisplay']
@@ -359,16 +373,17 @@ class ArtellaFileMetaData(object):
         if not file_dict:
             return
 
-        for name, data in file_dict['data'].items():
-            self._name = data['name']
-            self._relative_path = data['relative_path']
+        if file_dict['data']:
+            for name, data in file_dict['data'].items():
+                self._name = data['name']
+                self._relative_path = data['relative_path']
 
-            for version in data['versions']:
-                new_version = ArtellaFileVerionMetaData(version_data=version)
-                self._versions[str(new_version.version)] = new_version
+                for version in data['versions']:
+                    new_version = ArtellaFileVerionMetaData(version_data=version)
+                    self._versions[str(new_version.version)] = new_version
 
-            # Sort versions by key
-            self._versions = sorted(self._versions.items())
+                # Sort versions by key
+                self._versions = sorted(self._versions.items())
 
     @property
     def name(self):
