@@ -19,7 +19,7 @@ import maya.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_assetviewer, solstice_splitters
-from solstice_utils import solstice_mash_utils
+from solstice_utils import solstice_mash_utils, solstice_artella_utils
 
 from solstice_gui import solstice_asset
 
@@ -144,16 +144,40 @@ class SolsticeScatter(solstice_windows.Window, object):
         self._mash_outliner = solstice_mash_utils.get_mash_outliner_tree()
         mash_list_layout.addWidget(self._mash_outliner)
         mash_list_layout.setSpacing(2)
-        self._mash_add_btn = QPushButton('+')
+        self._mash_add_btn = QToolButton()
+        self._mash_add_btn.setText('+')
         self._mash_add_btn.setMinimumWidth(30)
         self._mash_add_btn.setMinimumHeight(30)
-        self._mash_remove_btn = QPushButton('-')
+        self._mash_remove_btn = QToolButton()
+        self._mash_remove_btn.setText('-')
         self._mash_remove_btn.setMinimumWidth(30)
         self._mash_remove_btn.setMinimumHeight(30)
         mash_list_layout.addLayout(mash_list_buttons_layout)
         mash_list_buttons_layout.addWidget(self._mash_add_btn)
         mash_list_buttons_layout.addWidget(self._mash_remove_btn)
         scatter_layout.addLayout(mash_list_layout)
+
+        # create_action_menu.addAction(create_ctrl_from_selection_action)
+
+        self._mash_add_menu = QMenu(self)
+        self._mash_add_btn.setMenu(self._mash_add_menu)
+        self._mash_add_btn.setPopupMode(QToolButton.InstantPopup)
+
+        self._mash_arnold_buildin_action = QAction('Arnold Buildins', self._mash_add_menu)
+        self._mash_add_menu.addAction(self._mash_arnold_buildin_action)
+
+        for btn in [self._mash_add_btn, self._mash_remove_btn]:
+            btn.setStyleSheet(
+                '''
+                QToolButton::menu-indicator
+                { 
+                    image: none;
+                }
+                QToolButton
+                {
+                    background-color: rgb(93, 93, 93);
+                }
+                ''')
 
         scatter_buttons_layout = QHBoxLayout()
         scatter_buttons_layout.setContentsMargins(2, 2, 2, 2)
@@ -183,7 +207,7 @@ class SolsticeScatter(solstice_windows.Window, object):
         # =================================================================================
 
         self._mash_outliner.clicked.connect(self._on_mash_outliner_click)
-        self._mash_add_btn.clicked.connect(self._add_mash)
+        # self._mash_add_btn.clicked.connect(self._add_mash)
         self._mash_remove_btn.clicked.connect(self._remove_mash)
 
         # =================================================================================
@@ -331,6 +355,15 @@ def run(restore=False):
     reload(solstice_asset)
     reload(solstice_assetviewer)
     reload(solstice_mash_utils)
+
+    # Check that Artella plugin is loaded and, if not, we loaded it
+    solstice_artella_utils.update_artella_paths()
+    if not solstice_artella_utils.check_artella_plugin_loaded():
+        if not solstice_artella_utils.load_artella_maya_plugin():
+            pass
+
+    # Update Solstice Project Environment Variable
+    sp.update_solstice_project_path()
 
     global scatter_window
     if scatter_window is None:

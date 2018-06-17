@@ -88,10 +88,13 @@ class ArtellaAssetMetaData(object):
             version_path = os.path.join(self._path, '__{0}__'.format(name))
             version_info = artella.get_status(version_path)
             if version_info:
-                for n, d in version_info.references.items():
-                    if d.maximum_version_deleted and d.deleted:
-                        version_valid = False
-                        break
+                if isinstance(version_info, ArtellaHeaderMetaData):
+                    version_valid = False
+                else:
+                    for n, d in version_info.references.items():
+                        if d.maximum_version_deleted and d.deleted:
+                            version_valid = False
+                            break
 
             # Store all valid published folders
             for f in self._must_folders:

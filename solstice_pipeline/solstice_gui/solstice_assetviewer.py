@@ -29,7 +29,6 @@ class AssetViewer(solstice_grid.GridWidget, object):
     def __init__(self, assets_path, item_pressed_callback, simple_assets=False, checkable_assets=False, show_only_published_assets=False, parent=None):
         super(AssetViewer, self).__init__(parent=parent)
 
-
         self._assets_paths = assets_path
         self._simple_assets = simple_assets
         self._checkable_assets = checkable_assets
@@ -67,16 +66,7 @@ class AssetViewer(solstice_grid.GridWidget, object):
             self.update_items()
 
     def change_category(self, category='All'):
-
-        # First we store all the current assets
         assets = []
-        # for i in range(self.rowCount()):
-        #     assets.append(list())
-        #     for j in range(self.columnCount()):
-        #         item = self.cellWidget(i, j)
-        #         if not item:
-        #             continue
-        #         assets[i].append(item)
 
         # Store current items
         for i in range(self.rowCount()):
@@ -102,27 +92,6 @@ class AssetViewer(solstice_grid.GridWidget, object):
 
         for asset in new_assets:
             self.add_asset(asset)
-
-
-        # self.clear()
-        #
-        # for
-
-
-
-        # for i in range(self.rowCount()):
-        #     for j in range(self.columnCount()):
-        #         item = self.cellWidget(i, j)
-        #         if not item:
-        #             continue
-        #         widget = item.containedWidget
-        #         if category == 'All':
-        #             widget.setVisible(True)
-        #         else:
-        #             if widget.category == category:
-        #                 widget.setVisible(True)
-        #             else:
-        #                 widget.setVisible(False)
 
     def update_items(self, update=True):
         """

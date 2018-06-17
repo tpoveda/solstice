@@ -309,8 +309,6 @@ class AssetWidget(QWidget, object):
                 if not asset_data:
                     return
 
-
-
             published_versions = asset_data.get_published_versions(all=all_versions)
             if categories:
                 publish_dict = dict()

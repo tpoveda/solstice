@@ -22,6 +22,7 @@ import solstice_pipeline as sp
 from solstice_gui import solstice_dialog, solstice_splitters
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_artella_utils as artella
+from solstice_utils import solstice_artella_classes as classes
 from resources import solstice_resource
 
 
@@ -71,7 +72,7 @@ class AssetPublisherWidget(QWidget, object):
         main_layout.addWidget(self._asset_label)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
 
-        self._versions = self._asset().get_max_published_versions(all_versions=True)
+        # self._versions = self._asset().get_max_published_versions(all_versions=True)
 
         versions_layout = QGridLayout()
         versions_layout.setContentsMargins(10, 10, 10, 10)
@@ -91,7 +92,8 @@ class AssetPublisherWidget(QWidget, object):
             self._ui[category]['next_version'].setAlignment(Qt.AlignCenter)
             self._ui[category]['check'] = QCheckBox('')
             self._ui[category]['check'].setChecked(True)
-            self._ui[category]['check'].toggled.connect(self._update_versions)
+            # self._ui[category]['check'].toggled.connect(self._update_versions)
+            self._ui[category]['check'].toggled.connect(self._update_ui)
             for j, widget in enumerate(['label', 'current_version', 'separator', 'next_version', 'check']):
                 versions_layout.addWidget(self._ui[category][widget], i, j)
 
@@ -111,19 +113,21 @@ class AssetPublisherWidget(QWidget, object):
         self._publish_btn.clicked.connect(self._publish)
         main_layout.addWidget(self._publish_btn)
 
-        self._update_versions()
+        # self._update_versions()
 
         # =====================================================================================================
 
-        for cat in sp.valid_categories:
-            asset_is_locked, current_user = self._asset().is_locked(category=cat, status='working')
-            if asset_is_locked:
-                if not current_user:
-                    self._ui[cat]['check'].setChecked(False)
-                    self._ui[cat]['current_version'].setText('LOCK')
-                    self._ui[cat]['next_version'].setText('LOCK')
-                    for name, w in self._ui[cat].items():
-                        w.setEnabled(False)
+        # for cat in sp.valid_categories:
+        #     asset_is_locked, current_user = self._asset().is_locked(category=cat, status='working')
+        #     if asset_is_locked:
+        #         if not current_user:
+        #             self._ui[cat]['check'].setChecked(False)
+        #             self._ui[cat]['current_version'].setText('LOCK')
+        #             self._ui[cat]['next_version'].setText('LOCK')
+        #             for name, w in self._ui[cat].items():
+        #                 w.setEnabled(False)
+    def _update_must_textures_checkbox(self):
+        print('hola')
 
     def _update_versions(self):
         for cat, version in self._versions.items():
@@ -159,10 +163,16 @@ class AssetPublisherWidget(QWidget, object):
 
         self._publish_btn.setEnabled(publish_state)
 
+        self._ui['shading']['check'].setEnabled(True)
+        if self._ui['textures']['check'].isChecked():
+            self._ui['shading']['check'].setChecked(True)
+            self._ui['shading']['check'].setEnabled(False)
+
+
     def _publish(self):
 
-        max_versions = self._asset().get_max_versions(status='working')
-        server_versions = max_versions['server']
+        # max_versions = self._asset().get_max_versions(status='working')
+        # server_versions = max_versions['server']
 
         for cat in sp.valid_categories:
             if not self._ui[cat]['check'].isChecked():
@@ -170,7 +180,7 @@ class AssetPublisherWidget(QWidget, object):
             if not self._asset().has_category(category=cat):
                 continue
 
-            version_info = server_versions[cat]
+            # version_info = server_versions[cat]
 
             # TODO: When publishing shading files check that exists a Maya file that ends with
             # TODO: _SHD. If not, we avoid the publication of that file because nomenclature is not
@@ -194,13 +204,29 @@ class AssetPublisherWidget(QWidget, object):
                         txt_history = artella.get_asset_history(txt)
                         txt_last_version = txt_history.versions[-1][0]
                         selected_version['textures/{0}'.format(os.path.basename(txt))] = int(txt_last_version)
-            else:
-                if not version_info:
-                    selected_version[os.path.join(cat, self._asset().name + '.ma')] = 1
-                else:
-                    selected_version[version_info.relative_path] = version_info.version
+            elif cat == 'shading':
+                published_textures_info = self._asset().get_max_versions(status='published', categories=['textures'])['server']
+                if published_textures_info is None:
+                    sp.logger.debug('Asset has not textures published yet! Before publishing shading files you need to publish textures!')
+                    break
 
-            artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
+                fixed_textures_path = list()
+                textures_version = new_version = '{0:03}'.format(published_textures_info['textures'])
+                textures_version_path = os.path.join(self._asset().asset_path, '__textures_v{0}__'.format(textures_version))
+                textures_path = os.path.join(textures_version_path, 'textures')
+                textures_path_status = artella.get_status(textures_path)
+                if textures_path_status and isinstance(textures_path_status, classes.ArtellaDirectoryMetaData):
+                    for txt in textures_path_status.references:
+                        new_text_path = artella.fix_path_by_project(path=os.path.join(textures_version_path, txt))
+                        fixed_textures_path.append(new_text_path)
+
+            # else:
+            #     if not version_info:
+            #         selected_version[os.path.join(cat, self._asset().name + '.ma')] = 1
+            #     else:
+            #         selected_version[version_info.relative_path] = version_info.version
+            #
+            # artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
 
 
 def run(asset=None):

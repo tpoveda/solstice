@@ -557,7 +557,6 @@ def run(restore=False):
     reload(solstice_published_info_widget)
     reload(solstice_sequencer)
 
-
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()
     if not solstice_artella_utils.check_artella_plugin_loaded():
@@ -585,8 +584,3 @@ def run(restore=False):
     pipelinizer_window.isActiveWindow()
 
     return pipelinizer_window
-
-
-# spigot = solstice_artella_utils.get_spigot_client()
-# rsp = spigot.execute(command_action='do', command_name='checkout', payload=uri)
-# rsp = spigot.execute(command_action='do', command_name='unlock', payload=uri)

@@ -23,6 +23,7 @@ import solstice_artella_classes as classes
 
 artella_maya_plugin_name = 'Artella.py'
 artella_app_name = 'lifecycler'
+artella_root_prefix = '$ART_LOCAL_ROOT'
 
 spigot_client = None
 
@@ -184,6 +185,18 @@ def get_artella_app_identifier():
         app_identifier = 'maya.{0}'.format(maya_version)
 
     return app_identifier
+
+
+def fix_path_by_project(path):
+    """
+    Fix given path and updates to make it relative to the Artella project
+    :param path: str, path to be fixed
+    :return: str
+    """
+
+    project_path = sp.get_solstice_project_path()
+    new_path = path.replace(project_path, artella_root_prefix)
+    return new_path
 
 
 def get_metadata():

@@ -23,7 +23,7 @@ import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_shaderviewer, solstice_shader
 from solstice_utils import solstice_maya_utils as utils
 from solstice_utils import solstice_image as img
-from solstice_utils import solstice_shader_utils
+from solstice_utils import solstice_shader_utils, solstice_artella_utils
 
 IGNORE_SHADERS = ['particleCloud1', 'shaderGlow1', 'defaultColorMgtGlobals', 'lambert1']
 IGNORE_ATTRS = ['computedFileTextureNamePattern']
@@ -411,8 +411,14 @@ class ShaderLibrary(solstice_windows.Window, object):
         top_layout = QHBoxLayout()
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(0)
+        top_layout.setAlignment(Qt.AlignTop)
         self.main_layout.addLayout(top_layout)
         top_layout.addItem(QSpacerItem(50, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self._export_asset_btn = QToolButton()
+        self._export_asset_btn.setText('Export Selected Asset Materials')
+        self._export_asset_btn.setMinimumHeight(40)
+        self._export_asset_btn.setMaximumHeight(40)
+        top_layout.addWidget(self._export_asset_btn)
         self._export_sel_btn = QToolButton()
         self._export_sel_btn.setText('Export Selected Materials')
         self._export_sel_btn.setMinimumWidth(40)
@@ -428,6 +434,7 @@ class ShaderLibrary(solstice_windows.Window, object):
         self.shader_viewer = solstice_shaderviewer.ShaderViewer()
         self.main_layout.addLayout(self.shader_viewer)
 
+        self._export_asset_btn.clicked.connect(self._export_selected_asset)
         self._export_sel_btn.clicked.connect(self._export_selected_shaders)
         self._export_all_btn.clicked.connect(self._export_all_shaders)
 
@@ -455,6 +462,33 @@ class ShaderLibrary(solstice_windows.Window, object):
     def get_shader_library_path():
         return os.path.join(sp.get_solstice_assets_path(), 'ShadersLibrary')
 
+    def _export_selected_asset(self):
+        shaders = list()
+
+        objs = cmds.ls(sl=True)
+        if len(objs) <= 0:
+            cmds.warning('Select asset before export shaders please!')
+            return
+
+        obj = objs[0]
+        if not cmds.objExists(obj) or not obj.endswith('_grp'):
+            cmds.warning('Select asset is not valid. Please select the main group of the asset in the shading file')
+
+        children = cmds.listRelatives(type='transform', allDescendents=True, fullPath=True)
+        all_shading_groups = list()
+        for child in children:
+            child_shapes = cmds.listRelatives(child, shapes=True, fullPath=True)
+            for shape in child_shapes:
+                shading_groups = cmds.listConnections(shape, type='shadingEngine')
+                for shading_grp in shading_groups:
+                    all_shading_groups.append(shading_grp)
+        all_shading_groups = list(set(all_shading_groups))
+
+        asset_shaders = list(set(cmds.ls(cmds.listConnections(all_shading_groups), materials=True)))
+
+
+
+
     def _export_selected_shaders(self):
         shaders = cmds.ls(sl=True, materials=True)
         ShaderExporter(shaders=shaders, parent=self).exec_()
@@ -467,8 +501,8 @@ class ShaderLibrary(solstice_windows.Window, object):
 
 # ============================================================================================================
 
-if not 'shader_library_window' in globals():
-    shader_library_window = None
+# if not 'shader_library_window' in globals():
+shader_library_window = None
 
 
 def shader_library_window_closed(object=None):
@@ -477,7 +511,7 @@ def shader_library_window_closed(object=None):
         shader_library_window.cleanup()
         shader_library_window.parent().setParent(None)
         shader_library_window.parent().deleteLater()
-    shader_library_window = None
+        shader_library_window = None
 
 
 def shader_library_window_destroyed(object=None):
@@ -491,6 +525,15 @@ def run(restore=False):
     reload(solstice_shaderviewer)
     reload(solstice_shader)
 
+    # Check that Artella plugin is loaded and, if not, we loaded it
+    solstice_artella_utils.update_artella_paths()
+    if not solstice_artella_utils.check_artella_plugin_loaded():
+        if not solstice_artella_utils.load_artella_maya_plugin():
+            pass
+
+    # Update Solstice Project Environment Variable
+    sp.update_solstice_project_path()
+
     global shader_library_window
     if shader_library_window is None:
         shader_library_window = ShaderLibrary()
@@ -502,7 +545,8 @@ def run(restore=False):
         mixin_ptr = OpenMayaUI.MQtUtil.findControl(shader_library_window.objectName())
         OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
     else:
-        shader_library_window.show(dockable=ShaderLibrary.dock, save=True, closeCallback='from solstice_tools import solstice_shaderlibrary\nsolstice_shaderlibrary.shader_library_window_closed()', uiScript='from solstice_tools import solstice_shaderlibrary\nsolstice_shaderlibrary.run(restore=True)')
+        # shader_library_window.show(dockable=ShaderLibrary.dock, save=True, closeCallback='from solstice_tools import solstice_shaderlibrary\nsolstice_shaderlibrary.shader_library_window_closed()', uiScript='from solstice_tools import solstice_shaderlibrary\nsolstice_shaderlibrary.run(restore=True)')
+        shader_library_window.show(dockable=ShaderLibrary.dock, save=True, closeCallback='from solstice_tools import solstice_shaderlibrary\nsolstice_shaderlibrary.shader_library_window_closed()')
 
     shader_library_window.window().raise_()
     shader_library_window.raise_()
