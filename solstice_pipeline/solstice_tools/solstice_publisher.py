@@ -9,7 +9,9 @@
 # ==================================================================="""
 
 import os
+import re
 import weakref
+from shutil import copyfile
 
 from Qt.QtCore import *
 from Qt.QtWidgets import *
@@ -23,6 +25,7 @@ from solstice_gui import solstice_dialog, solstice_splitters
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_artella_utils as artella
 from solstice_utils import solstice_artella_classes as classes
+from solstice_utils import solstice_naming_utils as naming
 from resources import solstice_resource
 
 
@@ -207,18 +210,70 @@ class AssetPublisherWidget(QWidget, object):
             elif cat == 'shading':
                 published_textures_info = self._asset().get_max_versions(status='published', categories=['textures'])['server']
                 if published_textures_info is None:
-                    sp.logger.debug('Asset has not textures published yet! Before publishing shading files you need to publish textures!')
+                    sp.logger.debug('Asset {} has not textures published yet! Before publishing shading files you need to publish textures!'.format(self._asset().name))
+                    break
+                if published_textures_info['textures'] is None:
+                    sp.logger.debug('Asset {} has not textures published yet! Before publishing shading files you need to publish textures!'.format(self._asset().name))
                     break
 
-                fixed_textures_path = list()
-                textures_version = new_version = '{0:03}'.format(published_textures_info['textures'])
+                working_path = os.path.join(self._asset().asset_path, '__working__', 'shading', self._asset().name + '_SHD.ma')
+                if self._asset().is_locked('shading', status='working'):
+                    sp.logger.debug('Shading file {} is locked! Aborting publishing ...'.format(working_path))
+
+                textures_mapping = dict()
+                textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
+                if os.path.exists(textures_path):
+                    textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+                    for txt in textures:
+                        fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
+                        format_txt = naming.format_path(fixed_txt)
+                        textures_mapping[format_txt] = None
+
+                textures_version = '{0:03}'.format(published_textures_info['textures'])
                 textures_version_path = os.path.join(self._asset().asset_path, '__textures_v{0}__'.format(textures_version))
                 textures_path = os.path.join(textures_version_path, 'textures')
                 textures_path_status = artella.get_status(textures_path)
                 if textures_path_status and isinstance(textures_path_status, classes.ArtellaDirectoryMetaData):
                     for txt in textures_path_status.references:
-                        new_text_path = artella.fix_path_by_project(path=os.path.join(textures_version_path, txt))
-                        fixed_textures_path.append(new_text_path)
+                        new_text_path = artella.fix_path_by_project(path=os.path.join(textures_version_path, txt), fullpath=True)
+                        for txt_key in textures_mapping.keys():
+                            if naming.format_path(txt) in naming.format_path(txt_key):
+                                textures_mapping[txt_key] = naming.format_path(new_text_path)
+
+                backup_file = copyfile(working_path, working_path + '_BACKUP')
+
+                artella.lock_asset(working_path)
+                try:
+                    data = ''
+                    with open(working_path, 'r') as f:
+                        data = f.read()
+                    for old_txt, new_txt in textures_mapping.items():
+                        maya_format_old_path = old_txt.replace('/', '\\\\')
+                        maya_format_new_path = new_txt.replace('/', '\\\\')
+                        data = data.replace(maya_format_old_path, maya_format_new_path)
+
+                        # We need to take in account that some textures are using <udim> tag
+                        maya_format_old_udim_path = re.sub("_\d\d\d\d.tx", "_<udim>.tx", maya_format_old_path)
+                        maya_format_new_udim_path = re.sub("_\d\d\d\d.tx", "_<udim>.tx", maya_format_new_path)
+                        data = data.replace(maya_format_old_udim_path, maya_format_new_udim_path)
+                    with open(working_path, 'w') as f:
+                        f.write(data)
+                except Exception as e:
+                    sp.logger.debug(str(e))
+                artella.unlock_asset(working_path)
+
+
+
+
+                #     with open(working_path, 'r') as f:
+                #         data = f.read()
+
+
+
+
+
+
+
 
             # else:
             #     if not version_info:

@@ -187,7 +187,7 @@ def get_artella_app_identifier():
     return app_identifier
 
 
-def fix_path_by_project(path):
+def fix_path_by_project(path, fullpath=False):
     """
     Fix given path and updates to make it relative to the Artella project
     :param path: str, path to be fixed
@@ -195,7 +195,9 @@ def fix_path_by_project(path):
     """
 
     project_path = sp.get_solstice_project_path()
-    new_path = path.replace(project_path, artella_root_prefix)
+    new_path = path.replace(project_path, artella_root_prefix+'\\')
+    if fullpath:
+        new_path = path.replace(project_path, artella_root_prefix+'/'+sp.solstice_project_id_full)
     return new_path
 
 
@@ -239,6 +241,10 @@ def get_status(filepath, as_json=False):
 
     if as_json:
         return rsp
+
+    # Artella is down!!!!!
+    if not rsp:
+        return None
 
     if 'data' in rsp:
         if '_latest'in rsp['data']:

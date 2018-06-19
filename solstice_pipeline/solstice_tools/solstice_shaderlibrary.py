@@ -70,6 +70,9 @@ class ShadingNetwork(ShaderIO, object):
     def load_network(cls, shader_file_path, existing_material=None):
         network_dict = cls.read(shader_file_path)
         for key in network_dict:
+            if key == 'icon':
+                continue
+
             as_type = network_dict[key]['asType']
             node_type = network_dict[key]['type']
             if existing_material is not None and as_type == 'asShader':
@@ -83,6 +86,9 @@ class ShadingNetwork(ShaderIO, object):
                 node = cls.create_shader_node(node_type=node_type, as_type=as_type, name=key)
 
         for key in network_dict:
+            if key == 'icon':
+                continue
+
             as_type = network_dict[key]['asType']
             if existing_material is not None and as_type == 'asShader':
                 cls._set_attrs(existing_material, network_dict[key], as_type)
@@ -90,6 +96,9 @@ class ShadingNetwork(ShaderIO, object):
                 cls._set_attrs(key, network_dict[key], as_type)
 
         for key in network_dict:
+            if key == 'icon':
+                continue
+
             as_type = network_dict[key]['asType']
             if existing_material is not None and as_type == 'asShader':
                 continue
@@ -434,7 +443,7 @@ class ShaderLibrary(solstice_windows.Window, object):
         self.shader_viewer = solstice_shaderviewer.ShaderViewer()
         self.main_layout.addLayout(self.shader_viewer)
 
-        self._export_asset_btn.clicked.connect(self._export_selected_asset)
+        # self._export_asset_btn.clicked.connect(self._export_selected_asset)
         self._export_sel_btn.clicked.connect(self._export_selected_shaders)
         self._export_all_btn.clicked.connect(self._export_all_shaders)
 
@@ -462,32 +471,62 @@ class ShaderLibrary(solstice_windows.Window, object):
     def get_shader_library_path():
         return os.path.join(sp.get_solstice_assets_path(), 'ShadersLibrary')
 
-    def _export_selected_asset(self):
-        shaders = list()
-
-        objs = cmds.ls(sl=True)
-        if len(objs) <= 0:
-            cmds.warning('Select asset before export shaders please!')
+    @staticmethod
+    def export_asset(asset=None):
+        asset_groups = cmds.ls('*_grp', type='transform')
+        if len(asset_groups) <= 0:
+            # sp.logger.debug('Asset {} has no valid groups'.format(asset.name()))
+            # sp.logger.debug('Asset {} has no valid groups'.format(asset.name()))
             return
 
-        obj = objs[0]
-        if not cmds.objExists(obj) or not obj.endswith('_grp'):
-            cmds.warning('Select asset is not valid. Please select the main group of the asset in the shading file')
-
-        children = cmds.listRelatives(type='transform', allDescendents=True, fullPath=True)
         all_shading_groups = list()
-        for child in children:
-            child_shapes = cmds.listRelatives(child, shapes=True, fullPath=True)
-            for shape in child_shapes:
-                shading_groups = cmds.listConnections(shape, type='shadingEngine')
-                for shading_grp in shading_groups:
-                    all_shading_groups.append(shading_grp)
-        all_shading_groups = list(set(all_shading_groups))
+        json_data = dict()
+        for grp in asset_groups:
+            json_data[grp] = dict()
+            children = cmds.listRelatives(grp, type='transform', allDescendents=True, fullPath=True)
+            for child in children:
+                child_shapes = cmds.listRelatives(child, shapes=True, fullPath=True)
+                for shape in child_shapes:
+                    json_data[grp][shape] = dict()
+                    shading_groups = cmds.listConnections(shape, type='shadingEngine')
+                    for shading_grp in shading_groups:
+                        shading_grp_mat = cmds.ls(cmds.listConnections(shading_grp), materials=True)
+                        json_data[grp][shape][shading_grp] = shading_grp_mat
+                        all_shading_groups.append(shading_grp)
 
-        asset_shaders = list(set(cmds.ls(cmds.listConnections(all_shading_groups), materials=True)))
+        asset_materials = list(set(cmds.ls(cmds.listConnections(all_shading_groups), materials=True)))
+
+        # Generate JSON shading file for asset
 
 
+        # Export asset shaders
+        shader_exporter = ShaderExporter(shaders=asset_materials)
+        shader_exporter._export_shaders()
 
+
+    # def _export_selected_asset(self):
+    #     shaders = list()
+    #
+    #     objs = cmds.ls(sl=True)
+    #     if len(objs) <= 0:
+    #         cmds.warning('Select asset before export shaders please!')
+    #         return
+    #
+    #     obj = objs[0]
+    #     if not cmds.objExists(obj) or not obj.endswith('_grp'):
+    #         cmds.warning('Select asset is not valid. Please select the main group of the asset in the shading file')
+    #
+    #     children = cmds.listRelatives(type='transform', allDescendents=True, fullPath=True)
+    #     all_shading_groups = list()
+    #     for child in children:
+    #         child_shapes = cmds.listRelatives(child, shapes=True, fullPath=True)
+    #         for shape in child_shapes:
+    #             shading_groups = cmds.listConnections(shape, type='shadingEngine')
+    #             for shading_grp in shading_groups:
+    #                 all_shading_groups.append(shading_grp)
+    #     all_shading_groups = list(set(all_shading_groups))
+    #
+    #     asset_shaders = list(set(cmds.ls(cmds.listConnections(all_shading_groups), materials=True)))
 
     def _export_selected_shaders(self):
         shaders = cmds.ls(sl=True, materials=True)

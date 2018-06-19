@@ -32,6 +32,7 @@ settings = None
 
 solstice_project_id = '2/2252d6c8-407d-4419-a186-cf90760c9967/'
 solstice_project_id_raw = '2252d6c8-407d-4419-a186-cf90760c9967'
+solstice_project_id_full = '_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'
 valid_categories = ['textures', 'model', 'shading', 'groom']            # NOTE: The order is important, textures MUST go first
 
 # =================================================================================

@@ -8,6 +8,8 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
+import os
+
 import maya.cmds as cmds
 
 
@@ -66,3 +68,13 @@ def find_available_name(name, suffix='', index=0, padding=0, letters=False, capi
         return find_available_name(name, suffix, index + 1, padding, letters, capital)
 
     return test_name
+
+
+def format_path(path):
+    """
+    Takes a path and format it to forward slashes
+    :param path: str
+    :return: str
+    """
+
+    return os.path.normpath(path).replace('\\', '/').replace('\t', '/t').replace('\n', '/n').replace('\a', '/a')
