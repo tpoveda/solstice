@@ -26,6 +26,7 @@ import tempfile
 from PySide.QtGui import *
 from PySide.QtCore import *
 
+
 class SolsticeLauncher(QObject, object):
 
     def __init__(self):
@@ -100,6 +101,7 @@ class SolsticeLauncher(QObject, object):
 
         # Create Solstice Configuration
         self._progress_text.setText('Creating Solstice Launcher Configuration ...')
+
         config = cfg.create_config(console=console)
 
         if config is None:
@@ -206,18 +208,20 @@ class SolsticeLauncher(QObject, object):
         try:
             import am.artella.spigot.spigot as spigot
         except ImportError as e:
-            console.write_error('Impossible to import Artella Python modules! Maybe Artelal is not installed properly. Contact TD please!')
+            console.write_error('Impossible to import Artella Python modules! Maybe Artella is not installed properly. Contact TD please!')
             return
 
         # Check Solstice Tools version ...
         self._progress_text.setText('Checking Solstice Tools Version ...')
         progress_bar.setValue(4)
         console.write('Checking Solstice Tools Version ...')
-        updater = solstice_updater.SolsticeUpdater(parent=self._splash)
+        updater = solstice_updater.SolsticeUpdater(config=config, parent=self._splash)
         main_layout.addWidget(updater)
         updater.show()
         app.processEvents()
+
         need_to_update = solstice_updater.check_solstice_tools_version(console=console, updater=updater)
+
         app.processEvents()
         time.sleep(1)
         updater.close()
@@ -230,7 +234,7 @@ class SolsticeLauncher(QObject, object):
             console.write('Updating Solstice Tools Solstice Tools ')
             updater.show()
             app.processEvents()
-            solstice_updater.update_solstice_tools(console=console, updater=updater)
+            valid_download = solstice_updater.update_solstice_tools(console=console, updater=updater)
             time.sleep(1)
             updater.close()
             updater._progress_bar.setValue(0)
@@ -238,11 +242,15 @@ class SolsticeLauncher(QObject, object):
 
             self._splash.close()
 
-            QMessageBox.information(None, 'Solstice Tools Updated' ,'Solstice Tools installed succesffully!')
-            # TODO: Show changelog
+            if valid_download:
+                QMessageBox.information(None, 'Solstice Pipeline Updated', 'Solstice Pipeline installed successfully!')
+            else:
+                QMessageBox.critical(None, 'Contact Solstice Pipeline Team!', 'Pipeline Tools Download server is not working" Please contact Solstice Pipeline Team!')
 
-            self._splash.show()
-            app.processEvents()
+        # TODO: Show changelog
+
+        self._splash.show()
+        app.processEvents()
 
         console.write('Setting Maya Environment Variables ...')
         self._progress_text.setText('Setting Maya Environment Variables ...')

@@ -8,7 +8,6 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from Qt.QtCore import *
 from Qt.QtWidgets import *
 try:
     from shiboken2 import wrapInstance
@@ -181,3 +180,104 @@ def remove_callback(callback_id):
 def dpi_scale(value):
     return _DPI_SCALE * value
 
+
+def shelf_exists(shelf_name):
+    """
+    Returns True if the given shelf name already exists or False otherwise
+    :param shelf_name: str, shelf name
+    :return: bool
+    """
+
+    return cmds.shelfLayout(shelf_name, exists=True)
+
+
+def delete_shelf(shelf_name):
+    """
+    Deletes given shelf by name, if exists
+    :param shelf_name: str, shelf name
+    """
+
+    if shelf_exists(shelf_name=shelf_name):
+        cmds.deleteUI(shelf_name)
+
+
+def create_shelf(name, parent_layout='ShelfLayout'):
+    """
+    Creates a new shelf parented on the given layout
+    :param name: str, name of the shelf to create
+    :param parent_layout: name of the parent shelf layout
+    :return: str
+    """
+
+    return cmds.shelfLayout(name, parent=parent_layout)
+
+
+def get_top_maya_shelf():
+    return mel.eval("global string $gShelfTopLevel; $temp = $gShelfTopLevel;")
+
+
+def get_all_shelves():
+    return cmds.tabLayout(get_top_maya_shelf(), query=True, ca=True)
+
+
+def get_current_shelf():
+    return cmds.tabLayout(get_top_maya_shelf(), query=True, st=True)
+
+
+def main_menu():
+    """
+    Returns Maya main menu
+    """
+
+    return mel.eval('$tmp=$gMainWindow')
+
+
+def get_menus():
+    """
+    Return a list with all Maya menus
+    :return: list<str>
+    """
+
+    return cmds.lsUI(menus=True)
+
+
+def remove_menu(menu_name):
+    """
+    Removes, if exists, a menu of Max
+    :param menu_name: str, menu name
+    """
+
+    for m in get_menus():
+        lbl = cmds.menu(m, query=True, label=True)
+        if lbl == menu_name:
+            cmds.deleteUI(m, menu=True)
+
+
+def check_menu_exists(menu_name):
+    """
+    Returns True if a menu with the given name already exists
+    :param menu_name: str, menu name
+    :return: bol
+    """
+
+    for m in get_menus():
+        lbl = cmds.menu(m, query=True, label=True)
+        if lbl == menu_name:
+            return True
+
+    return False
+
+
+def find_menu(menu_name):
+    """
+    Returns Menu instance by the given name
+    :param menu_name: str, menu of the name to search for
+    :return: nativeMenu
+    """
+
+    for m in get_menus():
+        lbl = cmds.menu(m, query=True, label=True)
+        if lbl == menu_name:
+            return m
+
+    return None

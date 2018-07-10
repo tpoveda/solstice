@@ -29,7 +29,7 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
         super(SolsticeConfig, self).__init__(*args, **kwargs)
 
         self._app_name = app_name.replace(' ', '_').lower()
-        self.config_file = utils.get_system_config_directory().joinpath('solstice_tools', self._app_name, 'config.ini')
+        self.config_file = utils.get_system_config_directory().joinpath('solstice_pipeline', self._app_name, 'config.ini')
 
         sp.logger.debug('{0}: Solstice Configuration File: {1}'.format(self._app_name, self.config_file))
         try:

@@ -58,6 +58,7 @@ class ShadingNetwork(ShaderIO, object):
         if shaders is None:
             shaders = cmds.ls(materials=True)
 
+        exported_shaders = list()
         for shader in shaders:
             if shader not in IGNORE_SHADERS:
                 shader_network = cls.get_shading_network(shader, shader)
@@ -65,6 +66,9 @@ class ShadingNetwork(ShaderIO, object):
                 out_file = os.path.join(shaders_path, shader + '.' + SHADER_EXT)
                 sp.logger.debug('Generating Shader {0} in {1}'.format(shader, out_file))
                 cls.write(shader_network, out_file)
+                exported_shaders.append(out_file)
+
+        return exported_shaders
 
     @classmethod
     def load_network(cls, shader_file_path, existing_material=None):
@@ -307,6 +311,8 @@ class ShaderWidget(QWidget, object):
             return
         os.remove(temp_file)
 
+
+
     @property
     def name(self):
         return self._name
@@ -344,10 +350,14 @@ class ShaderExporter(QDialog, object):
         export_btn.clicked.connect(self._export_shaders)
 
     def _export_shaders(self):
+        exported_shaders = list()
         for i in range(self._shaders_list.count()):
             item = self._shaders_list.item(i)
             item_widget = self._shaders_list.itemWidget(item)
-            item_widget.export()
+            exported_shader = item_widget.export()
+            exported_shaders.append(exported_shader)
+
+        return exported_shaders
 
 
 class ShaderViewerWidget(QWidget, object):
@@ -469,7 +479,7 @@ class ShaderLibrary(solstice_windows.Window, object):
 
     @staticmethod
     def get_shader_library_path():
-        return os.path.join(sp.get_solstice_assets_path(), 'ShadersLibrary')
+        return os.path.join(sp.get_solstice_assets_path(), 'Scripts', 'ST_ShaderLibrary', '__working__')
 
     @staticmethod
     def export_asset(asset=None):
@@ -497,11 +507,21 @@ class ShaderLibrary(solstice_windows.Window, object):
         asset_materials = list(set(cmds.ls(cmds.listConnections(all_shading_groups), materials=True)))
 
         # Generate JSON shading file for asset
+        asset_shading_path = os.path.join(asset._asset_path, '__working__', 'shading', asset.name+'_SHD')
+        asset_shading_file = os.path.join(asset_shading_path, asset.name+'.json')
+        if os.path.exists(asset_shading_path):
+            with open(asset_shading_file, 'w') as fp:
+                json.dump(json_data, fp)
 
-
-        # Export asset shaders
         shader_exporter = ShaderExporter(shaders=asset_materials)
-        shader_exporter._export_shaders()
+        shaders = shader_exporter._export_shaders()
+
+        if os.path.isfile(asset_shading_file):
+            return shaders, asset_shading_file
+
+        return [shaders, '']
+
+
 
 
     # def _export_selected_asset(self):

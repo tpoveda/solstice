@@ -485,7 +485,7 @@ class AssetWidget(QWidget, object):
                                     if int(max_versions['server'][local_name][txt].version) < int(v[1].version):
                                         max_versions['server'][local_name][txt] = v[1]
                     else:
-                        for v in local_versions.versions:
+                        for v in server_versions.versions:
                             if max_versions['server'][local_name] is None:
                                 max_versions['server'][local_name] = v[1]
                             else:
@@ -544,7 +544,11 @@ class AssetWidget(QWidget, object):
                         file_path = os.path.join(self.asset_path, '__{0}_v{1}__'.format(category, '{0:03}'.format(versions['server'][category])))
                     current_user_locker = artella.can_unlock(file_path=file_path)
 
-                    return versions['server'][category].locked_by, current_user_locker
+                    locked_by = versions['server'][category].locked_by
+                    if locked_by is None:
+                        current_user_locker = False
+
+                    return locked_by, current_user_locker
 
         return False, False
 

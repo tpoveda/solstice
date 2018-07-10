@@ -13,6 +13,7 @@ import pkgutil
 import datetime
 import importlib
 from types import ModuleType
+import xml.dom.minidom as minidom
 from collections import OrderedDict
 if sys.version_info[:2] > (2, 7):
     from importlib import reload
@@ -171,7 +172,7 @@ def create_solstice_settings():
 
     from solstice_utils import solstice_config
     global settings
-    settings = solstice_config.create_config('solstice_tools')
+    settings = solstice_config.create_config('solstice_pipeline')
 
 
 def create_solstice_info_window():
@@ -182,6 +183,50 @@ def create_solstice_info_window():
     from solstice_gui import solstice_info_dialog
     global info_dialog
     info_dialog = solstice_info_dialog.InfoDialog()
+
+
+def create_solstice_shelf():
+    """
+    Creates Solstice Tools shelf
+    """
+
+    solstice_pipeline.logger.debug('Building Solstice Tools Shelf ...')
+
+    from solstice_gui import solstice_shelf
+
+    try:
+        s_shelf = solstice_shelf.SolsticeShelf()
+        s_shelf.create(delete_if_exists=True)
+        shelf_file = get_solstice_shelf_file()
+        if shelf_file and os.path.isfile(shelf_file):
+            s_shelf.build(shelf_file=shelf_file)
+            s_shelf.set_as_active()
+    except Exception as e:
+        solstice_pipeline.logger.warning('Error during Solstice Shelf Creation: {}'.format(e))
+
+
+def create_solstice_menu():
+    """
+    Create Solstice Tools menu
+    """
+
+    solstice_pipeline.logger.debug('Building Solstice Tools Menu ...')
+
+    from solstice_gui import solstice_menu
+    from solstice_utils import solstice_maya_utils
+
+    try:
+        solstice_maya_utils.remove_menu('Solstice')
+    except Exception:
+        pass
+
+    try:
+        s_menu = solstice_menu.SolsticeMenu()
+        menu_file = get_solstice_menu_file()
+        if menu_file and os.path.isfile(menu_file):
+            s_menu.create_menu(file_path=menu_file, parent_menu='Solstice')
+    except Exception as e:
+        solstice_pipeline.logger.warning('Error during Solstice Menu Creation: {}'.format(e))
 
 
 def update_solstice_project_path():
@@ -214,6 +259,34 @@ def get_solstice_project_path():
     return os.environ.get('SOLSTICE_PROJECT')
 
 
+def get_solstice_shelf_file():
+    """
+    Returns Solstice Shelf File
+    :return: str
+    """
+
+    shelf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'shelf.xml')
+    if not os.path.exists(shelf_file):
+        solstice_pipeline.logger.warning('Shelf file: {} does not exists!'.format(shelf_file))
+        return False
+
+    return shelf_file
+
+
+def get_solstice_menu_file():
+    """
+    Returns Solstice Menu File
+    :return: str
+    """
+
+    menu_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'menu.json')
+    if not os.path.exists(menu_file):
+        solstice_pipeline.logger.warning('Menu file: {} does not exists!'.format(menu_file))
+        return False
+
+    return menu_file
+
+
 def get_solstice_assets_path():
     """
     Returns Solstice Project Assets path
@@ -241,7 +314,6 @@ def get_solstice_production_path():
     else:
         logger.debug('Production Path does not exists!: {0}'.format(production_path))
         return None
-
 
 
 def get_asset_version(name):
@@ -285,4 +357,6 @@ def init():
     reload_all()
     create_solstice_settings()
     create_solstice_info_window()
+    create_solstice_shelf()
+    create_solstice_menu()
 

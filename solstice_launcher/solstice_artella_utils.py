@@ -17,7 +17,6 @@ import psutil
 from PySide.QtGui import *
 from PySide.QtCore import *
 
-import solstice_launcher
 
 artella_maya_plugin_name = 'Artella.py'
 artella_app_name = 'lifecycler'

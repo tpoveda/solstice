@@ -44,6 +44,7 @@ def chunk_read(response, destination, console, chunk_size=8192, report_hook=None
     dst_file.close()
     return bytes_so_far
 
+
 def download_file(filename, destination, console, updater=None):
     console.write('Downloading file {0} to temporary folder -> {1}'.format(os.path.basename(filename), destination))
     try:
@@ -73,7 +74,7 @@ def download_file(filename, destination, console, updater=None):
         return False
 
 
-def unzipFile(filename, destination, console, removeFirst=True, removeSubfolders=None):
+def unzip_file(filename, destination, console, removeFirst=True, removeSubfolders=None):
     console.write('Unzipping file {} to --> {}'.format(filename, destination))
     try:
         if removeFirst and removeSubfolders:

@@ -37,14 +37,17 @@ def get_system_config_directory(console):
         config_directory = Path(os.getenv('XDG_CONFIG_HOME') or '~/.config')
 
     console.write('Fetching configruation directory for {}'.format(platform.system()))
-
     console.write('Getting Installed Solstice Tools version ...')
-    last_version = updater.check_current_solstice_tools_version(console=console)
 
-    if last_version:
-        return config_directory.joinpath(Path('solstice_launcher/{0}/.config'.format(last_version)))
-    else:
-        return config_directory.joinpath(Path('solstice_launcher/.config'))
+    return config_directory.joinpath(Path('solstice_launcher/.config'))
+
+    # The configuration file will be shared for new updates
+    # last_version = updater.check_current_solstice_tools_version(config=config, console=console)
+    #
+    # if last_version:
+    #     return config_directory.joinpath(Path('solstice_launcher/{0}/.config'.format(last_version)))
+    # else:
+    #     return config_directory.joinpath(Path('solstice_launcher/.config'))
 
 
 def get_maya_executables_from_installation_path(installation_path):

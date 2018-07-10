@@ -1,0 +1,27 @@
+{
+  "Pipeline" :
+  [
+  ],
+  "Modeling" :
+  [
+
+  ],
+  "Texturing" :
+  [
+
+  ],
+  "Animation" :
+  [
+
+  ],
+  "Utilities" :
+  [
+    {
+      "label" : "Snow Generator",
+      "command" : ""
+    }
+  ],
+  "Help" :
+  [
+  ]
+}

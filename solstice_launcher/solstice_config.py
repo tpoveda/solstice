@@ -37,13 +37,41 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
 
         self.config_file = config_file
         self._console = console
-        console.write('Solstice Configuration File: {}'.format(self.config_file))
+
+        console.write('Solstice Configuration File: {}'.format(config_file))
         try:
-            self.readfp(self.config_file.open('r'))
+            self.readfp(config_file.open('r'))
+            self.config_file = config_file
             console.write('Solstice Configuration File read successfully!')
+
+            # Check if the install path is valid. If not init settings path again
+            install_path = os.path.join(self.get(self.INSTALL, 'install_path'), 'solstice_pipeline')
+            if not os.path.exists(install_path):
+                console.write('Current installation path does not exists: {}. Reinstalling Solstice Tools ...'.format(install_path))
+                self._update()
+
         except IOError:
             console.write('Solstice Configuration file not found! Creating it...')
             self._create()
+
+    def _update(self):
+        """
+        Updates Solstice Configuration file
+        """
+
+        self.set(self.DEFAULTS, 'executable', None)
+        self.set(self.DEFAULTS, 'environment', None)
+        self.set(self.PATTERNS, 'exclude', ', '.join(self.EXCLUDE_PATTERNS))
+        self.set(self.PATTERNS, 'icon_ext', ', '.join(self.ICON_EXTENSIONS))
+        self.set(self.INSTALL, 'install_path', os.path.abspath(updater.SolsticeTools.set_installation_path()))
+
+        self.config_file.parent.mkdir(exist_ok=True)
+        self.config_file.touch()
+        with self.config_file.open('wb') as f:
+            self.write(f)
+
+        self._console.write_ok('Solstice Launcher has successfully created a new configuration file at: {}\n'.format(
+            str(self.config_file)))
 
     def _create(self):
         """
@@ -56,18 +84,8 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
         self.add_section(self.ENVIRONMENTS)
         self.add_section(self.EXECUTABLES)
         self.add_section(self.INSTALL)
-        self.set(self.DEFAULTS, 'executable', None)
-        self.set(self.DEFAULTS, 'environment', None)
-        self.set(self.PATTERNS, 'exclude', ', '.join(self.EXCLUDE_PATTERNS))
-        self.set(self.PATTERNS, 'icon_ext', ', '.join(self.ICON_EXTENSIONS))
-        self.set(self.INSTALL, 'install_path', updater.SolsticeTools.get_installation_path())
 
-        self.config_file.parent.mkdir(exist_ok=True)
-        self.config_file.touch()
-        with self.config_file.open('wb') as f:
-            self.write(f)
-
-        self._console.write_ok('Solstice Launcher has successfully created a new configuration file at: {}\n'.format(str(self.config_file)))
+        self._update()
 
     def get(self, section, option):
         try:
@@ -107,8 +125,8 @@ def create_config(console, config_file=None):
 
     if config_file is None:
         config_file = utils.get_system_config_directory(console=console)
-
     config = SolsticeConfig(config_file, console=console, allow_no_value=True)
+
     application_versions = utils.get_maya_2017_installation()
 
     if not application_versions:

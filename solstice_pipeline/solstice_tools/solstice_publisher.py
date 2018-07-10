@@ -26,6 +26,7 @@ from solstice_utils import solstice_image as img
 from solstice_utils import solstice_artella_utils as artella
 from solstice_utils import solstice_artella_classes as classes
 from solstice_utils import solstice_naming_utils as naming
+from solstice_tools import solstice_shaderlibrary
 from resources import solstice_resource
 
 
@@ -217,19 +218,32 @@ class AssetPublisherWidget(QWidget, object):
                     break
 
                 working_path = os.path.join(self._asset().asset_path, '__working__', 'shading', self._asset().name + '_SHD.ma')
-                if self._asset().is_locked('shading', status='working'):
+                if self._asset().is_locked('shading', status='working')[1]:
                     sp.logger.debug('Shading file {} is locked! Aborting publishing ...'.format(working_path))
+                    return
 
                 textures_mapping = dict()
-                textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
-                if os.path.exists(textures_path):
-                    textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
-                    for txt in textures:
-                        fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
-                        format_txt = naming.format_path(fixed_txt)
-                        textures_mapping[format_txt] = None
 
                 textures_version = '{0:03}'.format(published_textures_info['textures'])
+
+                # The first time we publish textures, the path of the textures'll point to the work in progress textures
+                if textures_version == 0:
+                    textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
+                    if os.path.exists(textures_path):
+                        textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+                        for txt in textures:
+                            fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
+                            format_txt = naming.format_path(fixed_txt)
+                            textures_mapping[format_txt] = None
+                else:
+                    textures_path = os.path.join(self._asset().asset_path, '__textures_v{0}__'.format(published_textures_info['textures']-1))
+                    if os.path.exists(textures_path):
+                        textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+                        for txt in textures:
+                            fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
+                            format_txt = naming.format_path(fixed_txt)
+                            textures_mapping[format_txt] = None
+
                 textures_version_path = os.path.join(self._asset().asset_path, '__textures_v{0}__'.format(textures_version))
                 textures_path = os.path.join(textures_version_path, 'textures')
                 textures_path_status = artella.get_status(textures_path)
@@ -262,26 +276,25 @@ class AssetPublisherWidget(QWidget, object):
                     sp.logger.debug(str(e))
                 artella.unlock_asset(working_path)
 
+                shaders, info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset())
+
+                print('Publishing {}'.format(shaders))
+                print('Publishing {}'.format(info))
 
 
 
                 #     with open(working_path, 'r') as f:
                 #         data = f.read()
-
-
-
-
-
-
-
-
             # else:
             #     if not version_info:
             #         selected_version[os.path.join(cat, self._asset().name + '.ma')] = 1
             #     else:
             #         selected_version[version_info.relative_path] = version_info.version
             #
-            # artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
+
+            artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
+            if cat == 'textures':
+                artella.synchronize_path(path=asset_path)
 
 
 def run(asset=None):

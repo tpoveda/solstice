@@ -565,6 +565,28 @@ def unlock_asset(file_path):
     return rsp
 
 
+def upload_new_asset_version(file_path, comment):
+    """
+    Adds a new file to the Artella server
+    :param file_path:
+    :param comment:
+    """
+
+    spigot = get_spigot_client()
+    payload = dict()
+    payload['cms_uri'] = artella.getCmsUri(file_path)
+    payload['comment'] = comment
+    payload = json.dumps(payload)
+
+    rsp = spigot.execute(command_action='do', command_name='upload', payload=payload)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+
+    sp.logger.debug(rsp)
+    return rsp
+
+
 def publish_asset(file_path, comment, selected_versions):
     """
     Publish a new version of the given asset
