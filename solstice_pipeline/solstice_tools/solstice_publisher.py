@@ -174,7 +174,6 @@ class AssetPublisherWidget(QWidget, object):
 
 
     def _publish(self):
-
         # max_versions = self._asset().get_max_versions(status='working')
         # server_versions = max_versions['server']
 

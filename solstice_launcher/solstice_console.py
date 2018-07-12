@@ -9,15 +9,14 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-import sys
 from io import StringIO
 import logging
 
 from PySide.QtGui import *
 from PySide.QtCore import *
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
+import solstice_logger
+import solstice_launcher_utils as utils
 
 
 class SolsticeConsole(QTextEdit, object):
@@ -33,6 +32,11 @@ class SolsticeConsole(QTextEdit, object):
             """
         )
 
+        self.logger = solstice_logger.Logger(
+            name='solstice_launcher',
+            path=str(utils.get_system_config_directory(as_path=True)),
+            level=solstice_logger.LoggerLevel.DEBUG)
+
     def write(self, msg):
         """
         Add message to the console's output, on a new line
@@ -42,44 +46,46 @@ class SolsticeConsole(QTextEdit, object):
         self.insertPlainText(msg + '\n')
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        logging.info(msg)
+        self.logger.debug(msg)
 
     def write_error(self, msg):
         """
         Adds an error message to the console
         :param msg: str
         """
+
         msg_html = "<font color=\"Red\">ERROR: " + msg + "\n</font><br>"
         msg = 'ERROR: ' + msg
         self.insertHtml(msg_html)
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        logging.error(msg)
+        self.logger.debug(msg)
 
     def write_ok(self, msg):
         """
         Adds an ok green message to the console
         :param msg: str
         """
+
         msg_html = "<font color=\"Lime\">: " + msg + "\n</font><br>"
         self.insertHtml(msg_html)
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        logging.info(msg)
+        self.logger.debug(msg)
 
     def set_info_level(self):
         """
         Sets console logging level to info
         """
 
-        logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.INFO)
 
     def set_debug_level(self):
         """
         Sets console logging level to debug
         """
 
-        logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.DEBUG)
 
     def __getattr__(self, attr):
         """

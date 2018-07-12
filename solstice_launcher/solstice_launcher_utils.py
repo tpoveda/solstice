@@ -24,7 +24,7 @@ DEF_MAYA_PATH_INSTALLATIONS = ['C://Program Files//Autodesk//Maya2017']
 DEF_MAYA_EXECUTABLE = 'maya.exe'
 
 
-def get_system_config_directory(console):
+def get_system_config_directory(console=None, as_path=False):
     """
     Returns platform specific configuration directory
     """
@@ -36,10 +36,14 @@ def get_system_config_directory(console):
     else:
         config_directory = Path(os.getenv('XDG_CONFIG_HOME') or '~/.config')
 
-    console.write('Fetching configruation directory for {}'.format(platform.system()))
-    console.write('Getting Installed Solstice Tools version ...')
+    if console:
+        console.write('Fetching configruation directory for {}'.format(platform.system()))
+        console.write('Getting Installed Solstice Tools version ...')
 
-    return config_directory.joinpath(Path('solstice_launcher/.config'))
+    if as_path:
+        return config_directory.joinpath(Path('solstice_launcher'))
+    else:
+        return config_directory.joinpath(Path('solstice_launcher/.config'))
 
     # The configuration file will be shared for new updates
     # last_version = updater.check_current_solstice_tools_version(config=config, console=console)
@@ -94,7 +98,10 @@ def get_maya_2017_installation():
             return None
     versions['2017'] = maya_executable
 
-    return versions
+    # We are not interested in supporting multiple Maya versions
+    # return versions
+
+    return maya_executable
 
 
 def str2bool(v):

@@ -11,97 +11,25 @@
 import os
 import platform
 import subprocess
-import ConfigParser
+
+from PySide.QtGui import *
+from PySide.QtCore import *
 
 import solstice_launcher_utils as utils
-import solstice_updater as updater
 
-
-class SolsticeConfig(ConfigParser.RawConfigParser, object):
+class SolsticeConfig(QSettings, object):
     """
     Configuration file for Solstice Short Film
     """
 
-    EXCLUDE_PATTERNS = ['__*', '*.']
-    ICON_EXTENSIONS = ['xpm', 'png', 'bmp', 'jpeg']
-
     # Sections
-    DEFAULTS = 'defaults'
     EXECUTABLES = 'executables'
-    PATTERNS = 'patterns'
     ENVIRONMENTS = 'environments'
-    INSTALL = 'installation'
 
-    def __init__(self, config_file, console, *args, **kwargs):
-        super(SolsticeConfig, self).__init__(*args, **kwargs)
-
-        self.config_file = config_file
-        self._console = console
-
-        console.write('Solstice Configuration File: {}'.format(config_file))
-        try:
-            self.readfp(config_file.open('r'))
-            self.config_file = config_file
-            console.write('Solstice Configuration File read successfully!')
-
-            # Check if the install path is valid. If not init settings path again
-            install_path = os.path.join(self.get(self.INSTALL, 'install_path'), 'solstice_pipeline')
-            if not os.path.exists(install_path):
-                console.write('Current installation path does not exists: {}. Reinstalling Solstice Tools ...'.format(install_path))
-                self._update()
-
-        except IOError:
-            console.write('Solstice Configuration file not found! Creating it...')
-            self._create()
-
-    def _update(self):
-        """
-        Updates Solstice Configuration file
-        """
-
-        self.set(self.DEFAULTS, 'executable', None)
-        self.set(self.DEFAULTS, 'environment', None)
-        self.set(self.PATTERNS, 'exclude', ', '.join(self.EXCLUDE_PATTERNS))
-        self.set(self.PATTERNS, 'icon_ext', ', '.join(self.ICON_EXTENSIONS))
-        self.set(self.INSTALL, 'install_path', os.path.abspath(updater.SolsticeTools.set_installation_path()))
-
-        self.config_file.parent.mkdir(exist_ok=True)
-        self.config_file.touch()
-        with self.config_file.open('wb') as f:
-            self.write(f)
-
-        self._console.write_ok('Solstice Launcher has successfully created a new configuration file at: {}\n'.format(
-            str(self.config_file)))
-
-    def _create(self):
-        """
-        If Solstice configuration file is not already created we create it
-        """
-
-        self._console.write('Initializing Solstice Launcher, creating configuration file...\n')
-        self.add_section(self.DEFAULTS)
-        self.add_section(self.PATTERNS)
-        self.add_section(self.ENVIRONMENTS)
-        self.add_section(self.EXECUTABLES)
-        self.add_section(self.INSTALL)
-
-        self._update()
-
-    def get(self, section, option):
-        try:
-            return ConfigParser.RawConfigParser.get(self, section, option)
-        except ConfigParser.NoOptionError:
-            return ''
-
-    def get_list(self, section, option):
-        """
-        Convert string value to list object
-        """
-
-        if self.has_option(section, option):
-            return self.get(section, option).replace(' ', '').split(',')
-        else:
-            raise KeyError('{} with {} does not exist!'.format(section, option))
+    def __init__(self, filename, window, console):
+        super(SolsticeConfig, self).__init__(str(filename), QSettings.IniFormat, window)
+        self.config_file = filename
+        console.write('Solstice Configuration File: {}'.format(filename))
 
     def edit(self):
         """
@@ -118,22 +46,21 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
             subprocess.call(call, self.config_file)
 
 
-def create_config(console, config_file=None):
+def create_config(console, window, config_file=None):
     """
     Construct the Solstice configuration object from necessary elements
     """
 
     if config_file is None:
         config_file = utils.get_system_config_directory(console=console)
-    config = SolsticeConfig(config_file, console=console, allow_no_value=True)
+    config = SolsticeConfig(filename=config_file, window=window, console=console)
 
     application_versions = utils.get_maya_2017_installation()
 
     if not application_versions:
         return None
 
-    for item in application_versions.items():
-        if not config.has_option(SolsticeConfig.EXECUTABLES, item[0]):
-            config.set(SolsticeConfig.EXECUTABLES, item[0], item[1])
+    # for item in application_versions.items():
+    config.setValue('executable', os.path.abspath(application_versions))
 
     return config

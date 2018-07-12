@@ -69,11 +69,13 @@ class SolsticeTools():
 
         try:
             if config:
-                install_path = config.get(config.INSTALL, 'install_path')
+                install_path = config.value('solstice_pipeline_install')
             else:
                 install_path = SolsticeTools.get_default_installation_path()
+                config.setValue('solstice_pipeline_install', install_path)
         except Exception:
-            return SolsticeTools.get_default_installation_path()
+            install_path = SolsticeTools.get_default_installation_path()
+            config.setValue('solstice_pipeline_install', install_path)
 
         return install_path
 
@@ -95,6 +97,7 @@ class SolsticeUpdater(QWidget, object):
         main_layout.addWidget(self._progress_bar)
         self._progress_bar.setMaximum(100)
         self._progress_bar.setTextVisible(False)
+        self._progress_bar.setStyleSheet("QProgressBar {border: 0px solid grey; border-radius:4px; padding:0px} QProgressBar::chunk {background: qlineargradient(x1: 0, y1: 1, x2: 1, y2: 1, stop: 0 rgb(245, 180, 148), stop: 1 rgb(75, 70, 170)); }")
 
         self._progress_text = QLabel('Downloading Solstice Tools ...')
         self._progress_text.setAlignment(Qt.AlignCenter)
@@ -197,7 +200,7 @@ def check_solstice_tools_version(console, updater, get_versions=False):
             installed_version = get_version(install_version)
 
             if installed_version and last_version_value <= installed_version:
-                console.write_ok('Current installed tools {0} are up-to-date (version in server {1}!'.format(install_version, last_version))
+                console.write_ok('Current installed tools {0} are up-to-date (version in server {1})!'.format(install_version, last_version))
 
             if get_versions:
                 return last_version, installed_version, False
@@ -267,26 +270,3 @@ def update_solstice_tools(console, updater):
             return True
     except Exception:
         return False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

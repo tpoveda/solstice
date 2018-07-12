@@ -11,16 +11,19 @@
 
 import maya.cmds as cmds
 import maya.mel as mel
-import MASH.api as mapi
-import MASH.undo as undo
-import MASHoutliner
-import mash_repro_utils
-import mash_repro_aetemplate
+
+try:
+    import MASH.api as mapi
+    import MASH.undo as undo
+    import MASHoutliner
+    import mash_repro_utils
+    import mash_repro_aetemplate
+except:
+    pass
 
 from solstice_utils import solstice_naming_utils as naming
 from solstice_utils import solstice_maya_utils
-reload(naming)
-reload(solstice_maya_utils)
+
 
 def get_mash_nodes():
     return cmds.ls(type='MASH_Waiter')
@@ -36,6 +39,7 @@ def create_mash_network(name='Solstice_Scatter', type='repro'):
     waiter_node = mel.eval('MASHnewNetwork("{0}")'.format(name))[0]
     mash_network = get_mash_network(waiter_node)
     return mash_network
+
 
 def get_mash_network(node_name):
     if cmds.objExists(node_name):
