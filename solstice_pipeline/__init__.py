@@ -9,16 +9,20 @@
 import os
 import re
 import sys
+import json
 import pkgutil
 import datetime
 import importlib
 from types import ModuleType
-import xml.dom.minidom as minidom
 from collections import OrderedDict
 if sys.version_info[:2] > (2, 7):
     from importlib import reload
 else:
     from imp import reload
+
+import maya.cmds as cmds
+import maya.mel as mel
+import maya.utils
 
 import solstice_pipeline
 
@@ -229,6 +233,23 @@ def create_solstice_menu():
         solstice_pipeline.logger.warning('Error during Solstice Menu Creation: {}'.format(e))
 
 
+def update_solstice_project():
+    """
+    Set the current Maya project to the path where Solstice is located inside Artella folder
+    """
+
+    try:
+        solstice_pipeline.logger.debug('Setting Solstice Project ...')
+        solstice_project_folder = os.environ.get('SOLSTICE_PROJECT', 'folder-not-defined')
+        if solstice_project_folder and os.path.exists(solstice_project_folder):
+            cmds.workspace(solstice_project_folder, openWorkspace=True)
+            solstice_pipeline.logger.debug('Solstice Project setup successfully! => {}'.format(solstice_project_folder))
+        else:
+            solstice_pipeline.logger.debug('Unable to set Solstice Project! => {}'.format(solstice_project_folder))
+    except Exception as e:
+        solstice_pipeline.logger.debug(str(e))
+
+
 def update_solstice_project_path():
     """
     Updates environment variable that stores Solstice Project path and returns
@@ -350,6 +371,73 @@ def register_asset(asset_name):
     return sync_time
 
 
+def init_solstice_environment_variables():
+    """
+    Initializes all necessary environment variables used in Solstice Tools
+    """
+
+    def handleMessage(jsonMsg):
+        try:
+            msg = json.loads(jsonMsg)
+
+            if type(msg) == dict:
+                command_name = msg['CommandName']
+                args = msg['CommandArgs']
+
+                if command_name == 'open':
+                    maya_file = args['path']
+                    opened_file = cmds.file(maya_file, open=True, force=True)
+                    scenefile_type = cmds.file(q=True, type=True)
+                    if type(scenefile_type) == list:
+                        scenefile_type = scenefile_type[0]
+                    filepath = maya_file.replace('\\', '/')
+                    mel.eval('$filepath = "{filepath}";'.format(filepath=filepath))
+                    mel.eval('addRecentFile $filepath "{scenefile_type}";'.format(scenefile_type=scenefile_type))
+                elif command_name == 'import':
+                    path = args['path']
+                    cmds.file(path, i=True, preserveReferences=True)
+                elif command_name == 'reference':
+                    path = args['path']
+                    use_rename = cmds.optionVar(q='referenceOptionsUseRenamePrefix')
+                    if use_rename:
+                        namespace = cmds.optionVar(q='referenceOptionsRenamePrefix')
+                        cmds.file(path, reference=True, namespace=namespace)
+                    else:
+                        filename = os.path.basename(path)
+                        namespace, _ = os.path.splitext(filename)
+                        cmds.file(path, reference=True, namespace=namespace)
+                else:
+                    solstice_pipeline.logger.debug("Unknown command: %s", command_name)
+
+        except Exception, e:
+            solstice_pipeline.logger.debug.warn("Error: %s", e)
+
+    def passMsgToMainThread(jsonMsg):
+        maya.utils.executeInMainThreadWithResult(handleMessage, jsonMsg)
+
+    from solstice_tools import solstice_changelog
+    from solstice_utils import solstice_artella_utils
+
+    solstice_pipeline.logger.debug('Initializing environment variables for Solstice Tools ...')
+    solstice_artella_utils.update_local_artella_root()
+
+    artella_var = os.environ.get('ART_LOCAL_ROOT')
+    solstice_pipeline.logger.debug('Artella environment variable is set to: {}'.format(artella_var))
+    if artella_var and os.path.exists(artella_var):
+        os.environ['SOLSTICE_PROJECT'] = '{}/_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'.format(artella_var)
+    else:
+        solstice_pipeline.logger.debug('Impossible to set Artella environment variables! Solstice Tools wont work correctly! Please contact TD!')
+
+    solstice_pipeline.logger.debug('=' * 100)
+    solstice_pipeline.logger.debug("Solstices Tools initialization completed!")
+    solstice_pipeline.logger.debug('=' * 100)
+    solstice_pipeline.logger.debug('*' * 100)
+    solstice_pipeline.logger.debug('-' * 100)
+    solstice_pipeline.logger.debug('\n')
+
+    if os.environ.get('SOLSTICE_PIPELINE_SHOW'):
+        solstice_changelog.run()
+
 def init():
     # update_paths()
     create_solstice_logger()
@@ -359,4 +447,8 @@ def init():
     create_solstice_info_window()
     create_solstice_shelf()
     create_solstice_menu()
+    init_solstice_environment_variables()
+    update_solstice_project()
+
+
 

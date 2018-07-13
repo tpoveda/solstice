@@ -1,0 +1,23 @@
+{
+ "1.0" :
+ [
+  "First version of Solstice Launcher released",
+  "Solstice Pipelinizer added which is a tool used to smooth the workflow between Maya and Artella",
+  "WIP version of Solstice Sequencer",
+  "Solstice Shader Library added and allow to export and import shaders in an easy way",
+  "Solstice Snow Generator Added",
+  "Solstice Tagger Tool added",
+  "Updated Solstice Updater with new UI and functionality",
+  "Added changelog system to Solstice Tools Updater Tool",
+  "Added unique windows and dialogs for Solstice Tools",
+  "Reimplemented all docking functionality for Solstice Tools"
+ ],
+ "2.0":
+ [
+  "Improve Solstice Deployer Tool to easily deploy new version of the tools to all artists",
+  "Added Solstice Picker Tool",
+  "Final version of Summer Picker",
+  "Final version of Winter Picker",
+  "Added facial picker for Summer and Winter"
+ ]
+}

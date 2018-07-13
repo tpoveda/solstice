@@ -1,0 +1,18 @@
+// --------------------------------------------------------------------
+// 4- Returns module from parsed control
+// --------------------------------------------------------------------
+
+global proc string vlRigIt_getModuleFromControl(string $control)
+{
+    string $module;
+    string $buffer[];
+    
+    string $sources[] = `connectionInfo -destinationFromSource ($control + ".message")`;
+    for ($source in $sources){
+        if (`gmatch $source "*moduleCtrlObjects*"`){
+			tokenize $source "." $buffer;
+			$module = $buffer[0];
+        }
+    }
+    return $module;
+}

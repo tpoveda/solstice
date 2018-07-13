@@ -1,0 +1,52 @@
+// **************************************************************************
+//
+// SCRIPT NAME: vl_resetTransformations
+// 
+// VERSION: 001
+// LAST MODIFIED: 01.11.2016
+// BY: Vincenzo Leombruno - vincleombruno@gmail.com
+//
+//
+// RELEASE NOTES:
+//
+// 1.0 - initial release
+// 
+//
+// USAGE NOTES:
+// just to copy/paste header of the script. Should be always up to date
+// please follow this convention :)
+//
+// **************************************************************************
+
+global proc vl_resetTransformations(string $nodesString)
+{
+	string $nodes[] = stringToStringArray($nodesString, ",");
+    string $transformAttrs[] = { "translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ", "scaleX", "scaleY", "scaleZ" };
+
+	for ($i=0;$i<size($nodes);$i++){
+        if (`objectType $nodes[$i]` == "transform"){
+            for ($attr in $transformAttrs){
+                if (!`getAttr -l ($nodes[$i] + "." + $attr)`){
+                    int $goOn = 0;
+                    string $connectionsL[] = `listConnections -s 1 -d 0 ($nodes[$i] + "." + $attr)`;
+                    if (`size($connectionsL)`){
+                        for ($conn in $connectionsL){
+                            if ( ( `objectType -isAType "animCurve" $conn` ) || (`objectType -isAType "pairBlend" $conn`) ){
+                                $goOn = 1;
+                            }
+                        }
+                    }else{
+                        $goOn = 1;
+                    }
+                    if ($goOn){
+                        if ( startsWith ($attr, "scale") ){
+                            setAttr ($nodes[$i] + "." + $attr) 1;
+                        }else{
+                            setAttr ($nodes[$i] + "." + $attr) 0;
+                        }
+                    }
+                }
+            }
+        }
+	}	
+}

@@ -1,0 +1,40 @@
+global proc vlRigIt_snapParent(string $object, int $parent, int $oldParent)
+{
+    		
+	string $oldSel[] = `ls -sl -l`;
+		
+	string $temp =  `createNode transform`;
+	string $tempCns[] = `parentConstraint $object $temp`;
+	delete $tempCns;
+	setAttr ($object + ".parent") $parent;
+	
+	string $posAttrL[] = {"translateX","translateY", "translateZ"};
+	string $rotAttrL[] = {"rotateX", "rotateY", "rotateZ"};
+
+	string $cmd = "parentConstraint ";
+	string $skipCmd = "";
+	int $posLocked, $rotLocked;
+	for ($i=0;$i<size($posAttrL);$i++){		
+		if ( `getAttr -l ($object + "." + $posAttrL[$i])` ){
+			$skipCmd = "-st \"x\" -st \"y\" -st \"z\" ";
+			$posLocked = 1;
+		}
+		if ( `getAttr -l ($object + "." + $rotAttrL[$i])` ){
+			$skipCmd += "-sr \"x\" -sr \"y\" -sr \"z\" ";
+			$rotLocked = 1;
+		}
+	}
+	
+	$cmd += ($skipCmd + $temp + " " + $object);
+	string $tempCns[] = `eval $cmd`;
+		
+	float $pos[] = `getAttr ($object + ".translate")`;
+	float $rot[] = `getAttr ($object + ".rotate")`;	
+	delete $tempCns $temp;
+	
+	if (!$posLocked){ setAttr ($object + ".translate") $pos[0] $pos[1] $pos[2]; }
+	if (!$rotLocked){ setAttr ($object + ".rotate") $rot[0] $rot[1] $rot[2]; }
+	
+	select -r $oldSel;
+}
+

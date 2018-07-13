@@ -1,0 +1,18 @@
+// --------------------------------------------------------------------
+// 2- Returns list of controls recursively from arg. moduleGroups list
+// --------------------------------------------------------------------
+global proc string[] vlRigIt_getControlsFromModuleList (string $moduleList[])
+{
+	string $ctrlList[];
+	for ($moduleGrp in $moduleList)
+	{
+		if (`attributeExists "moduleCtrlObjects" $moduleGrp`){
+			$ctrlList = stringArrayCatenate($ctrlList,`listConnections -d off -s on  ($moduleGrp + ".moduleCtrlObjects")`);	
+		}
+		if (`attributeExists "moduleCtrlGrps" $moduleGrp`){
+			string $newModuleCtrlGrps[] = `listConnections -d off -s on ($moduleGrp + ".moduleCtrlGrps")`;
+			$ctrlList = stringArrayCatenate($ctrlList, `vlRigIt_getControlsFromModuleList $newModuleCtrlGrps`);
+		}
+	}
+	return $ctrlList;
+}

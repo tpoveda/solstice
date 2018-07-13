@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <solstice_shelf>
     <!-- Basic Solstice Project Scripts -->
-    <shelfItem icon="update.png" cmds="from solstice_config import solstice_updater; reload(solstice_updater); solstice_updater.updateTools(True);" ann="Auto Update Solstice Tools" label=""/>
-    <shelfItem icon="setProject.png" cmds="from solstice_config import solstice_main; reload(solstice_main); solstice_main.updateSolsticeProject();" ann="Auto Setup Solstice Project" label=""/>
+    <shelfItem icon="setProject.png" cmds="import solstice_pipeline; solstice_pipeline.update_solstice_project();" ann="Auto Setup Solstice Project" label=""/>
     <shelfItem icon="" cmds="" ann="Separator" label=""/>
     <!-- Picker Scripts -->
     <shelfItem icon="picker.png" cmds="from solstice_utilities import solstice_pickers; solstice_pickers.initUI()" ann="Solstice Pickers" label=""/>

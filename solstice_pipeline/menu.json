@@ -12,7 +12,10 @@
   ],
   "Animation" :
   [
-
+    {
+      "label" : "Picker Tools",
+      "command" : ""
+    }
   ],
   "Utilities" :
   [

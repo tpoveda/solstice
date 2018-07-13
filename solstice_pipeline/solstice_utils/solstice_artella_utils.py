@@ -611,9 +611,24 @@ def publish_asset(file_path, comment, selected_versions):
     return rsp
 
 
+def within_artella_scene():
+    """
+    Returns True if the current Maya scene corresponds to a Artella Maya scene
+    :return: bool
+    """
+
+    current_scene = cmds.file(query=True, sn=True) or 'untitled'
+    sp.logger.debug('Current scene name: {}'.format(current_scene))
+    if 'artella' not in current_scene.lower():
+        return False
+    return True
+
+
 try:
     import Artella as artella
 except ImportError:
     load_artella_maya_plugin()
     update_artella_paths()
     import Artella as artella
+
+

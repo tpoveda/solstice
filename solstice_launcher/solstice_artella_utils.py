@@ -32,6 +32,7 @@ def update_artella_paths(console):
     """
 
     artella_folder = get_artella_data_folder()
+
     console.write('Updating Artella paths from: {0}'.format(artella_folder))
     for subdir, dirs, files in os.walk(artella_folder):
         if subdir not in sys.path:

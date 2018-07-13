@@ -46,7 +46,7 @@ class SolsticeConsole(QTextEdit, object):
         self.insertPlainText(msg + '\n')
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        self.logger.debug(msg)
+        self.logger.debug('{}\n'.format(msg))
 
     def write_error(self, msg):
         """
@@ -59,7 +59,7 @@ class SolsticeConsole(QTextEdit, object):
         self.insertHtml(msg_html)
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        self.logger.debug(msg)
+        self.logger.debug('{}\n'.format(msg))
 
     def write_ok(self, msg):
         """
@@ -71,7 +71,7 @@ class SolsticeConsole(QTextEdit, object):
         self.insertHtml(msg_html)
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        self.logger.debug(msg)
+        self.logger.debug('{}\n'.format(msg))
 
     def set_info_level(self):
         """

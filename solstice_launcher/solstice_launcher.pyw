@@ -84,6 +84,11 @@ class SolsticeLauncher(QObject, object):
         time.sleep(1)
 
         # Close already working Artella processes
+        console.write('Updating Artella Paths ...')
+        app.processEvents()
+        artella.update_artella_paths(console)
+        app.processEvents()
+
         console.write('Closing Artella App instances ...')
         app.processEvents()
         self._progress_text.setText('Closing Artella App instances ...')
@@ -94,10 +99,6 @@ class SolsticeLauncher(QObject, object):
 
         # Launch Artella App
         self._progress_text.setText('Launching Artella App ...')
-        console.write('Updating Artella Paths ...')
-        app.processEvents()
-        artella.update_artella_paths(console)
-        app.processEvents()
         console.write('Launching Artella App ...')
         app.processEvents()
         artella.launch_artella_app(console)
@@ -145,6 +146,7 @@ class SolsticeLauncher(QObject, object):
         app.processEvents()
 
         need_to_update = solstice_updater.check_solstice_tools_version(console=console, updater=updater)
+        os.environ['SOLSTICE_PIPELINE_SHOW'] = 'show'
 
         app.processEvents()
         time.sleep(1)
