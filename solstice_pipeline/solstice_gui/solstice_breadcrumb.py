@@ -10,7 +10,7 @@
 
 import os
 
-from Qt.QtWidgets import *
+from solstice_qt.QtWidgets import *
 
 import solstice_label
 from solstice_utils import solstice_python_utils as utils

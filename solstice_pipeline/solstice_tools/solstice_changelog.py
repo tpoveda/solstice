@@ -12,8 +12,8 @@ import os
 import json
 from collections import OrderedDict
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
 
 from solstice_gui import solstice_dialog, solstice_group, solstice_splitters
 

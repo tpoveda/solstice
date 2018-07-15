@@ -10,7 +10,6 @@
 
 import os
 import logging
-from logging.handlers import RotatingFileHandler
 import json
 
 import solstice_pipeline

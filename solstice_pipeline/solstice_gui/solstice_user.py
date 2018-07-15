@@ -8,9 +8,8 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
-from Qt.QtGui import *
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
 
 from resources import solstice_resource
 

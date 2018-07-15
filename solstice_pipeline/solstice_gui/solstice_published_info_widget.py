@@ -10,9 +10,9 @@
 
 from functools import partial
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
-from Qt.QtGui import *
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
+from solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
 from resources import solstice_resource

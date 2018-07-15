@@ -29,8 +29,8 @@ class Window(MayaQWidgetDockableMixin, QWidget):
     version = '1.0'
     dock = False
 
-    def __init__(self, name='SolsticeDockedWindow', **kwargs):
-        super(Window, self).__init__(parent=solstice_maya_utils.get_maya_window())
+    def __init__(self, name='SolsticeDockedWindow', parent=solstice_maya_utils.get_maya_window(), **kwargs):
+        super(Window, self).__init__(parent=parent)
 
         # Window needs to have a unique name to avoid problems with Maya workspaces
         win_name = '{0}_{1}'.format(name, uuid.uuid4())

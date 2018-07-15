@@ -8,14 +8,9 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-import os
-import json
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
-from Qt.QtGui import *
-
-import maya.cmds as cmds
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
 
 
 class SolsticeGroup(QGroupBox, object):

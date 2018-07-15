@@ -8,9 +8,9 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from Qt.QtCore import *
-from Qt.QtGui import *
-from Qt.QtWidgets import *
+from solstice_qt.QtCore import *
+from solstice_qt.QtGui import *
+from solstice_qt.QtWidgets import *
 
 
 class Splitter(QWidget, object):

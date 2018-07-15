@@ -10,8 +10,8 @@
 
 import os
 
-from Qt.QtWidgets import *
-from Qt.QtGui import *
+from solstice_qt.QtWidgets import *
+from solstice_qt.QtGui import *
 
 
 class ShaderWidget(QPushButton, object):

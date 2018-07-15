@@ -10,8 +10,8 @@
 
 from functools import partial
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya

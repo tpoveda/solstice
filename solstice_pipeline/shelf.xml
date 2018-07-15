@@ -4,7 +4,7 @@
     <shelfItem icon="setProject.png" cmds="import solstice_pipeline; solstice_pipeline.update_solstice_project();" ann="Auto Setup Solstice Project" label=""/>
     <shelfItem icon="" cmds="" ann="Separator" label=""/>
     <!-- Picker Scripts -->
-    <shelfItem icon="picker.png" cmds="from solstice_utilities import solstice_pickers; solstice_pickers.initUI()" ann="Solstice Pickers" label=""/>
+    <shelfItem icon="picker.png" cmds="from solstice_pipeline.solstice_tools import solstice_pickers; solstice_pickers.run()" ann="Solstice Pickers" label=""/>
     <!-- Utility Scripts -->
     <shelfItem icon="txtLinker.png" cmds="from solstice_utilities import solstice_texturesRelinker; reload(solstice_texturesRelinker); solstice_texturesRelinker.initUI();" ann="Solstice Textures Relinker Tool" label=""/>
     <shelfItem icon="sanityCheck.png" cmds="from solstice_utilities import solstice_sanityCheck; reload(solstice_sanityCheck); solstice_sanityCheck.sanityCheck(True);" ann="Solstice Sanity Check Tool" label=""/>

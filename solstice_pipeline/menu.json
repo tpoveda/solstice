@@ -14,7 +14,7 @@
   [
     {
       "label" : "Picker Tools",
-      "command" : ""
+      "command" : "from solstice_pipeline.solstice_tools import solstice_pickers; solstice_pickers.run()"
     }
   ],
   "Utilities" :

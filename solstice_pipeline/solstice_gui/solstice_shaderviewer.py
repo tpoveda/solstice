@@ -8,7 +8,7 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from Qt.QtWidgets import *
+from solstice_qt.QtWidgets import *
 
 
 class ShaderViewer(QGridLayout, object):

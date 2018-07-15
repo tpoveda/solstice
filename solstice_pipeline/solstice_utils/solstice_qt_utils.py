@@ -15,9 +15,9 @@ import subprocess
 import maya.cmds as cmds
 import maya.OpenMayaUI as OpenMayaUI
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
-from Qt import QtCompat
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
+from solstice_qt import QtCompat
 try:
     from shiboken import wrapInstance
 except ImportError:

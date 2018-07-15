@@ -10,12 +10,10 @@
 
 import uuid
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
 
-from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
-
-from solstice_utils import solstice_maya_utils, solstice_config
+from solstice_utils import solstice_maya_utils
 from resources import solstice_resource
 
 

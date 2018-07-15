@@ -8,7 +8,7 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from Qt.QtGui import *
+from solstice_qt.QtGui import *
 
 from solstice_gui import solstice_color
 

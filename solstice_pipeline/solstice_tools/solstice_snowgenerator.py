@@ -8,7 +8,7 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from Qt.QtWidgets import *
+from solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 import maya.mel as mel

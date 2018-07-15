@@ -10,7 +10,7 @@
 
 import os
 
-from Qt.QtWidgets import *
+from solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_sync_dialog

@@ -9,8 +9,8 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from Qt.QtGui import *
-from Qt.QtCore import *
+from solstice_qt.QtGui import *
+from solstice_qt.QtCore import *
 
 from solstice_gui import solstice_color
 

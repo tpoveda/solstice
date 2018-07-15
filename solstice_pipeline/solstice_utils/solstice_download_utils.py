@@ -10,8 +10,6 @@
 
 import os
 import urllib2
-import shutil
-import zipfile
 
 
 def chunk_report(bytes_so_far, chunk_size, total_size):

@@ -11,8 +11,8 @@
 import os
 from functools import partial
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
 
 from maya import cmds, OpenMaya
 
