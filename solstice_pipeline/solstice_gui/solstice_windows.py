@@ -107,3 +107,89 @@ class Window(MayaQWidgetDockableMixin, QWidget):
 
     def __del__(self):
         self.cleanup()
+
+
+class DockWindow(QMainWindow, object):
+    def __init__(self, name='SolsticeWindow', title='SolsticeWindow', parent=None, use_scroll=False):
+        super(DockWindow, self).__init__(parent)
+
+        self.setObjectName(name)
+        self.setWindowTitle(title)
+
+        self.main_layout = QVBoxLayout()
+        main_widget = QWidget()
+
+        self.docks = list()
+        self.connect_tab_change = True
+        self.tab_change_hide_show = True
+
+        if use_scroll:
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            scroll.setWidget(main_widget)
+            self._scroll_widget = scroll
+
+            main_widget.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
+            self.setCentralWidget(scroll)
+        else:
+            self.setCentralWidget(main_widget)
+
+        main_widget.setLayout(self.main_layout)
+        self.main_widget = main_widget
+        self.main_layout.expandingDirections()
+        self.main_layout.setContentsMargins(1,1,1,1)
+        self.main_layout.setSpacing(2)
+
+        self.custom_ui()
+
+    def keyPressEvent(self, event):
+        return
+
+    def custom_ui(self):
+        self.centralWidget().hide()
+        self.setTabPosition(Qt.TopDockWidgetArea, QTabWidget.East)
+        self.setDockOptions(self.AnimatedDocks | self.AllowTabbedDocks)
+
+    def _get_tab_bar(self):
+        children = self.children()
+        for child in children:
+            if isinstance(child, QTabBar):
+                return child
+
+    def _get_dock_widgets(self):
+        children = self.children()
+        found = list()
+        for child in children:
+            if isinstance(child, QDockWidget):
+                found.append(child)
+        return found
+
+    def _tab_changed(self, index):
+        if not self.tab_change_hide_show:
+            return
+        docks = self._get_dock_widgets()
+        docks[index].hide()
+        docks[index].show()
+
+    def add_dock(self, widget, name):
+        docks = self._get_dock_widgets()
+        for dock in docks:
+            if dock.windowTitle() == name:
+                dock.deleteLater()
+                dock.close()
+        dock_widget = QDockWidget(name, self)
+        dock_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        dock_widget.setAllowedAreas(Qt.TopDockWidgetArea)
+        dock_widget.setWidget(widget)
+        self.addDockWidget(Qt.TopDockWidgetArea, dock_widget)
+        if docks:
+            self.tabifyDockWidget(docks[-1], dock_widget)
+        dock_widget.show()
+        dock_widget.raise_()
+        tab_bar = self._get_tab_bar()
+        if tab_bar:
+            if self.connect_tab_change:
+                tab_bar.currentChanged.connect(self._tab_changed)
+                self.connect_tab_change = False
+            tab_bar.setCurrentIndex(0)
+        return dock_widget

@@ -7,7 +7,7 @@
     {
       "head1":
       {
-        "solstice_fkButton":
+        "FKButton":
         [
            {
             "x": -240,
@@ -51,7 +51,7 @@
       },
       "eyes1":
       {
-        "solstice_fkButton":
+        "FKButton":
         [
           {
             "x": -179,
@@ -85,7 +85,7 @@
             "color":[0,62,81]
           }
         ],
-        "solstice_commandButton":
+        "CommandButton":
         [
           {
             "x": -207,
@@ -127,7 +127,7 @@
       },
       "tongue1":
       {
-        "solstice_fkButton":
+        "FKButton":
         [
            {
             "x": "-117",
@@ -201,7 +201,7 @@
             "color":[255,255,110]
           }
         ],
-        "solstice_commandButton":
+        "CommandButton":
         [
           {
             "x": "-216",
@@ -218,7 +218,7 @@
       },
       "":
       {
-         "solstice_fkButton":
+         "FKButton":
         [
           {
             "x": "-265",
@@ -717,7 +717,7 @@
             "color":[255,206,0]
           }
         ],
-       "solstice_commandButton":
+       "CommandButton":
         [
           {
             "x": "-215",

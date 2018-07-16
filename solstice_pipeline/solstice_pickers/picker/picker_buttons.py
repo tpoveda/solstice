@@ -6,8 +6,6 @@
 #  Custom buttons used by the pickers
 # ==================================================================="""
 
-import os
-
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
@@ -19,7 +17,6 @@ import maya.utils as maya_utils
 from solstice_pipeline.solstice_pickers.picker import picker_colors as colors
 from solstice_pipeline.solstice_pickers.picker import picker_utils as utils
 from solstice_pipeline.solstice_pickers.picker import picker_commands as commands
-from solstice_pipeline.solstice_pickers.picker import picker_window
 
 
 class ButtonShape(object):
@@ -202,7 +199,6 @@ class BasePickerButton(QPushButton, object):
         else:
             self._control = self._namespace + ':' + self._control
 
-
     def get_control(self):
         if self.scene.namespace != '':
             return self.scene.namespace + ':' + self._control
@@ -243,6 +239,9 @@ class BasePickerButton(QPushButton, object):
         self._btn_info = btn_info
         self.move(btn_info['x'], btn_info['y'])
         self._text = btn_info['text']
+
+    def _get_part(self):
+        return self._part
 
     def get_part(self):
         for part in self.scene.parts:
@@ -286,7 +285,7 @@ class BasePickerButton(QPushButton, object):
     parent_ctrl = property(get_parent_ctrl, set_parent_ctrl)
     fk_ik_ctrl = property(get_fk_ik_control, set_fk_ik_control)
     info = property(get_info, set_info)
-    part = property(get_part, set_part)
+    part = property(_get_part, set_part)
     gizmo = property(get_gizmo, set_gizmo)
     side = property(get_side, set_side)
     command = property(get_command, set_command)
@@ -314,11 +313,11 @@ class BasePickerButton(QPushButton, object):
         # Paint button
         painter.setRenderHint(QPainter.Antialiasing)
 
-        gradient, offset = self._getCurrentGradientOffset()
+        gradient, offset = self._get_current_gradient_offset()
 
-        painter.setPen(self._pensBorder)
+        painter.setPen(self._pens_border)
         painter.setBrush(gradient[ButtonState.INNER])
-        self.paintInner(painter, x, y, width, height)
+        self.paint_inner(painter, x, y, width, height)
 
         # if self._selected:
         #     gradient = self._gradient[SELECTED]
@@ -346,7 +345,7 @@ class BasePickerButton(QPushButton, object):
 
         # Paint text
         if self._text != '':
-            text_width = self._font_metrics.width(self._text)
+            text_width = self.fontMetrics().width(self._text)
             text_height = self._font.pointSize()
 
             text_path = QPainterPath()
@@ -360,7 +359,7 @@ class BasePickerButton(QPushButton, object):
                 painter.setPen(self._pens_shadow)
                 painter.drawPath(text_path)
 
-                painter.setPen(self._pensText)
+                painter.setPen(self._pens_text)
                 painter.drawText(x, y + offset, width, height, alignment, self._text)
 
                 if glow_index > 0:
@@ -449,7 +448,7 @@ class BasePickerButton(QPushButton, object):
         Updates the hierarchy of the button
         """
 
-        self._hierarchy = self.get_hierarchY()
+        self._hierarchy = self.get_hierarchy()
 
     def add_child(self, btn):
         """
@@ -540,6 +539,8 @@ class BasePickerButton(QPushButton, object):
         """
         Select the hierarchy of the button
         """
+
+        from solstice_pipeline.solstice_pickers.picker import picker_window
 
         if len(self._hierarchy) > 0:
             for btn in self._hierarchy:
@@ -670,6 +671,8 @@ class ToggleButton(BasePickerButton, object):
         self._pressed = not self._pressed
         self.repaint()
 
+        self.toggleOn.emit() if self._pressed else self.toggleOff.emit()
+
     def paintEvent(self, event):
         super(ToggleButton, self).paintEvent(event)
         self._text = self._on_text if self._pressed is True else self._off_text
@@ -685,6 +688,48 @@ class ToggleButton(BasePickerButton, object):
             gradient = self._gradient[ButtonState.DOWN]
             offset = 1
         return gradient, offset
+
+
+class ToggleStateButton(BasePickerButton, object):
+    onOffToggle = Signal()
+    onOffUntoggle = Signal()
+
+    def __init__(self, x=0, y=0, text='', corner_radius=5, width=30, height=15, btn_info=None, parent=None):
+        super(ToggleStateButton, self).__init__(
+            x=x, y=y,
+            text=text,
+            width=width, height=height,
+            button_shape=ButtonShape.ROUNDED_SQUARE, radius=corner_radius, inner_color=colors.black,
+            btn_info=btn_info,
+            parent=parent
+        )
+
+    def set_info(self, btn_info):
+        super(ToggleStateButton, self).set_info(btn_info=btn_info)
+
+        self.control = btn_info['control']
+        self.width = btn_info['width']
+        self.height = btn_info['height']
+        self.radius = btn_info['radius']
+        self.gizmo = btn_info['gizmo']
+        self.part = btn_info['part']
+        self.side = btn_info['side']
+        if btn_info['color'] is not None:
+            self.inner_color = btn_info['color']
+        if btn_info['glowColor'] is not None:
+            self.glow_color = btn_info['glowColor']
+
+    def post_creation(self):
+        """
+        Method called after the button is added into the picker scene
+        """
+
+        self.on_off_btn = ToggleButton(x=116, y=52, radius=2, text='GIMAL', on_text='ON', off_text='OFF')
+        self.on_off_btn.width = 32
+        self.on_off_btn.height = 20
+        self.on_off_btn.inner_color = [100, 100, 100]
+        self.on_off_btn.glow_color = [255, 255, 255]
+        self.scene.add_button(self.on_off_btn)
 
 
 class CommandButton(BasePickerButton, object):
@@ -901,8 +946,8 @@ class FKIKSwitchButton(ToggleButton, object):
         """
 
         self.update_state()
-        self.part.fkSignal.connect(self.update_state)
-        self.part.ikSignal.connect(self.update_state)
+        self.get_part().fkSignal.connect(self.update_state)
+        self.get_part().ikSignal.connect(self.update_state)
 
     def get_info(self):
         """
@@ -911,7 +956,6 @@ class FKIKSwitchButton(ToggleButton, object):
 
         return None
 
-
     def switch_to_fk(self):
         """
         Switch current button to FK state
@@ -919,7 +963,7 @@ class FKIKSwitchButton(ToggleButton, object):
         :return:
         """
 
-        self.part.set_fk()
+        self.get_part().set_fk()
         sel = cmds.ls(sl=True)
         if len(sel) > 0:
             curr_ctrl = sel[0]
@@ -937,11 +981,11 @@ class FKIKSwitchButton(ToggleButton, object):
         :return:
         """
 
-        self.part.set_ik()
+        self.get_part().set_ik()
         sel = cmds.ls(sl=True)
         if len(sel) > 0:
             curr_ctrl = sel[0]
-            fk_ik_ctrl = self.part.get_button_by_name(curr_ctrl)
+            fk_ik_ctrl = self.get_part().get_button_by_name(curr_ctrl)
             if len(fk_ik_ctrl) > 0:
                 fk_ik_ctrl = fk_ik_ctrl[0].get_fk_ik_control()
                 if fk_ik_ctrl and cmds.objExists(fk_ik_ctrl):
@@ -953,8 +997,209 @@ class FKIKSwitchButton(ToggleButton, object):
         Update current state of the toggle button
         """
 
-        fk_ik_state = self.part.get_fk_ik(as_text=True)
+        fk_ik_state = self.get_part().get_fk_ik(as_text=True)
         if fk_ik_state == 'IK':
             self._pressed = True
         else:
             self.pressed = False
+
+
+class GimbalButton(ToggleStateButton, object):
+    def __init__(self, x=0, y=0, text='', corner_radius=5, width=30, height=15, btn_info=None, parent=None):
+
+        self.on_off_pos = QPoint(0, 0)
+
+        super(GimbalButton, self).__init__(
+            x=x, y=y,
+            text=text,
+            width=width, height=height,
+            corner_radius=corner_radius,
+            btn_info=btn_info,
+            parent=parent
+        )
+
+    def set_info(self, btn_info):
+        super(GimbalButton, self).set_info(btn_info=btn_info)
+        self.on_off_pos = [btn_info['x'] + 6, btn_info['y'] + 17]
+
+    def mousePressEvent(self, event):
+        self.update_state()
+        super(GimbalButton, self).mousePressEvent(event)
+
+    def post_creation(self):
+        super(GimbalButton, self).post_creation()
+
+        self.update_state()
+
+        # TODO: Check why this signal connect makes Maya crash
+        # self.onOffBtn.toggleOn.connect(partial(self.updateGimbalVisibility, True))
+        # self.onOffBtn.toggleOff.connect(partial(self.updateGimbalVisibility, False))
+
+    def update_state(self):
+        """
+        Update the current state of the toggle button
+        """
+
+        self.on_off_btn.move(self.on_off_pos[0], self.on_off_pos[1])
+
+        parts = ['', '']
+        if 'arm 'in str(self.get_part().name):
+            parts = ['wrist', 'arm']
+        elif 'leg' in str(self.get_part().name):
+            parts = ['ankle', 'foot']
+
+        fk_ik_state = self.get_part().get_fk_ik(as_text=True)
+        if fk_ik_state:
+            if 'ik' in self.control:
+                self.control = self.control.replace('ik_' + parts[0], 'ik_' + parts[1])
+            else:
+                self.control = self.control.replace('fk_' + parts[0], 'ik_' + parts[1])
+        else:
+            if 'ik' in self.control:
+                self.control = self.control.replace('ik_' + parts[0], 'fk_' + parts[0])
+            else:
+                self.control = self.control.replace('ik_' + parts[1], 'fk_' + parts[0])
+
+    def update_gimbal_visibility(self, is_enabled):
+
+        from solstice_pipeline.solstice_pickers.picker import picker_window
+
+        self.update_state()
+        ctrl = self.control.replace('_gimbalHelper', '')
+        window_picker = picker_window.window_picker
+        if window_picker and window_picker.namespace and window_picker.namespace.count() > 0:
+            ctrl = '{0}:{1}'.format(window_picker.namespace.currentText(), ctrl)
+        cmds.setAttr(ctrl + '.gimbalHelper', is_enabled)
+
+
+class KeyFKIKButton(BasePickerButton, object):
+    def __init__(self, x=0, y=0, text='', corner_radius=5, width=30, height=15, btn_info=None, parent=None):
+        super(KeyFKIKButton, self).__init__(
+            x=x, y=y,
+            text=text,
+            width=width, height=height,
+            button_shape=ButtonShape.ROUNDED_SQUARE, radius=corner_radius, inner_color=colors.black,
+            btn_info=btn_info,
+            parent=parent
+        )
+
+    def set_info(self, btn_info):
+        super(KeyFKIKButton, self).set_info(btn_info=btn_info)
+
+        self.width = btn_info['width']
+        self.height = btn_info['height']
+        self.radius = btn_info['radius']
+        self.part = btn_info['part']
+        self.side = btn_info['side']
+        if btn_info['color'] is not None:
+            self.inner_color = btn_info['color']
+        if btn_info['glowColor'] is not None:
+            self.glow_color = btn_info['glowColor']
+
+    def mousePressEvent(self, event):
+        super(KeyFKIKButton, self).mousePressEvent(event)
+
+        if cmds.objExists(self.control_group):
+            if cmds.attributeQuery('FK_IK', node=self.control_group, exists=True):
+                cmds.setKeyframe(self.control_group, attribute='FK_IK')
+
+
+class ModuleButton(BasePickerButton, object):
+    def __init__(self, x=0, y=0, text='', corner_radius=5, width=30, height=15, btn_info=None, parent=None):
+        super(ModuleButton, self).__init__(
+            x=x, y=y,
+            text=text,
+            width=width, height=height,
+            button_shape=ButtonShape.ROUNDED_SQUARE, radius=corner_radius, inner_color=colors.black,
+            btn_info=btn_info,
+            parent=parent
+        )
+
+    def set_info(self, btn_info):
+        super(ModuleButton, self).set_info(btn_info=btn_info)
+
+        self.width = btn_info['width']
+        self.height = btn_info['height']
+        self.radius = btn_info['radius']
+        self.part = btn_info['part']
+        self.side = btn_info['side']
+        if btn_info['color'] is not None:
+            self.inner_color = btn_info['color']
+        if btn_info['glowColor'] is not None:
+            self.glow_color = btn_info['glowColor']
+
+    def mousePressEvent(self, event):
+        super(ModuleButton, self).mousePressEvent(event)
+
+        from solstice_pipeline.solstice_pickers.picker import picker_window
+
+        module_ctrls = self.scene.get_part_controls(self.get_part(), self.side)
+        module_ctrl = module_ctrls[0]
+        if module_ctrl == '':
+            module_ctrl = module_ctrls[1]
+        window_picker = picker_window.window_picker
+        if window_picker and window_picker.namespace and window_picker.namespace.count() > 0:
+            module_ctrl = '{0}:{1}'.format(window_picker.namespace.currentText(), module_ctrl)
+        mel.eval('vlRigIt_selectModuleControls("{}")'.format(module_ctrl))
+
+
+class SelectButton(BasePickerButton, object):
+    def __init__(self, x=0, y=0, text='', corner_radius=5, width=30, height=15, btn_info=None, parent=None):
+        super(SelectButton, self).__init__(
+            x=x, y=y,
+            text=text,
+            width=width, height=height,
+            button_shape=ButtonShape.ROUNDED_SQUARE, radius=corner_radius, inner_color=colors.black,
+            btn_info=btn_info,
+            parent=parent
+        )
+
+    def set_info(self, btn_info):
+        super(SelectButton, self).set_info(btn_info=btn_info)
+
+        self.control = btn_info['control']
+        self.width = btn_info['width']
+        self.height = btn_info['height']
+        self.radius = btn_info['radius']
+        self.gizmo = btn_info['gizmo']
+        self.part = btn_info['part']
+        self.side = btn_info['side']
+        if btn_info['color'] is not None:
+            self.inner_color = btn_info['color']
+        if btn_info['glowColor'] is not None:
+            self.glow_color = btn_info['glowColor']
+
+    def mousePressEvent(self, event):
+        super(SelectButton, self).mousePressEvent(event)
+
+
+class KeySpaceSwitchButton(BasePickerButton, object):
+    def __init__(self, x=0, y=0, text='', corner_radius=5, width=30, height=15, btn_info=None, parent=None):
+        super(KeySpaceSwitchButton, self).__init__(
+            x=x, y=y,
+            text=text,
+            width=width, height=height,
+            button_shape=ButtonShape.ROUNDED_SQUARE, radius=corner_radius, inner_color=colors.black,
+            btn_info=btn_info,
+            parent=parent
+        )
+
+    def set_info(self, btn_info):
+        super(KeySpaceSwitchButton, self).set_info(btn_info=btn_info)
+
+        self.width = btn_info['width']
+        self.height = btn_info['height']
+        self.radius = btn_info['radius']
+        self.part = btn_info['part']
+        self.side = btn_info['side']
+        if btn_info['color'] is not None:
+            self.inner_color = btn_info['color']
+        if btn_info['glowColor'] is not None:
+            self.glow_color = btn_info['glowColor']
+
+    def mousePressEvent(self, event):
+        super(KeySpaceSwitchButton, self).mousePressEvent(event)
+
+        if cmds.objExists(self.control_group):
+            if cmds.attributeQuery('FK_IK', node=self.controL_group, exists=True):
+                cmds.setKeyframe(self.control_group, attribute='FK_IK')

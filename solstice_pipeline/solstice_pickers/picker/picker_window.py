@@ -15,8 +15,16 @@ from functools import partial
 
 import maya.cmds as cmds
 
+import solstice_pipeline as sp
 from solstice_pipeline.solstice_pickers.picker import picker_utils as utils
+from solstice_pipeline.solstice_gui import solstice_windows
+from solstice_pipeline.solstice_pickers.picker import picker_widget
 
+import solstice_studiolibrarymaya
+solstice_studiolibrarymaya.registerItems()
+solstice_studiolibrarymaya.enableMayaClosedEvent()
+import solstice_studiolibrarymaya.mayalibrarywidget
+import solstice_studiolibrary.librarywidget
 
 global window_picker
 
@@ -25,23 +33,46 @@ class PickerWindow(QWidget, object):
 
     instances = list()
 
-    def __init__(self, picker_name, picker_title, char_name, parent=None):
+    def __init__(self, picker_name, picker_title, char_name, data_path, images_path, parent=None, full_window=False):
+
         super(PickerWindow, self).__init__(parent=parent)
 
         PickerWindow._delete_instances()
         self.__class__.instances.append(weakref.proxy(self))
+        cmds.select(clear=True)
+
         self.picker_title = picker_title
         self.window_name = picker_name
         self.ui = parent
         self.char_name = char_name
-        cmds.select(clear=True)
+        self._data_path = data_path
+        self._images_path = images_path
+        self._full_window = full_window
+
+        self.body_picker_data = os.path.join(self._data_path, '{}_body_data.json'.format(self.char_name.lower()))
+        self.facial_picker_data = os.path.join(self._data_path, '{}_facial_data.json'.format(self.char_name.lower()))
+        self.body_picker = None
+        self.facial_picker = None
+
+        self.pickers_layout = None
+        self.dock_window = None
+
         self.custom_ui()
+
         global window_picker
         window_picker = self
 
         if not self._init_setup():
             self.close()
             return
+
+    def get_full_window(self):
+        return self._full_window
+
+    def set_full_window(self, full_window):
+        self._full_window = full_window
+
+    full_window = property(get_full_window, set_full_window)
 
     @staticmethod
     def _delete_instances():
@@ -99,6 +130,13 @@ class PickerWindow(QWidget, object):
 
         self.update_namespaces()
 
+        # ===============================================================================
+
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.load_pickers(full_window=self._full_window)
+        self.update_pickers()
+
     def update_namespaces(self):
         current_namespaces = cmds.namespaceInfo(listOnlyNamespaces=True, recurse=True)
         for ns in current_namespaces:
@@ -107,7 +145,73 @@ class PickerWindow(QWidget, object):
         self.namespace.setCurrentIndex(0)
 
     def load_pickers(self, full_window=False):
-        return
+
+        if self.body_picker:
+            self.body_picker.setParent(None)
+            self.body_picker.deleteLater()
+        if self.facial_picker:
+            self.facial_picker.setParent(None)
+            self.facial_picker.deleteLater()
+        if self.pickers_layout:
+            self.pickers_layout.setParent(None)
+            self.pickers_layout.deleteLater()
+        if self.dock_window:
+            docks = self.dock_window._get_dock_widgets()
+            for d in docks:
+                d.deleteLater()
+                d.close()
+            self.dock_window.setParent(None)
+            self.dock_window.deleteLater()
+            self.dock_window.close()
+            self.dock_window = None
+
+        self.pickers_layout = QHBoxLayout()
+        self.pickers_layout.setContentsMargins(5, 5, 5, 5)
+        self.pickers_layout.setSpacing(2)
+        self.main_layout.addLayout(self.pickers_layout)
+
+        self.dock_window = solstice_windows.DockWindow()
+        self.main_layout.addWidget(self.dock_window)
+
+        self.body_picker = self.get_body_picker()
+        self.facial_picker = self.get_facial_picker()
+
+        try:
+            self.pose_widget = solstice_studiolibrary.librarywidget.LibraryWidget.instance()
+        except Exception:
+            reload(solstice_studiolibrary.librarywidget)
+            self.pose_widget = solstice_studiolibrary.librarywidget.LibraryWidget.instance()
+
+        solstice_project_folder = os.environ.get('SOLSTICE_PROJECT')
+        if not os.path.exists(solstice_project_folder):
+            sp.update_solstice_project()
+            solstice_project_folder = os.environ.get('SOLSTICE_PROJECT')
+        if solstice_project_folder and os.path.exists(solstice_project_folder):
+            solstice_assets = os.path.join(solstice_project_folder, 'Asset')
+            if os.path.exists(solstice_assets):
+                anims = os.path.join(solstice_assets, 'AnimationLibrary')
+                if os.path.exists(anims):
+                    self.pose_widget.setPath(anims)
+                else:
+                    self.pose_widget.setPath(solstice_assets)
+            else:
+                self.pose_widget.setPath(solstice_project_folder)
+
+        if full_window:
+
+            main_pickers_widget = QWidget()
+            main_pickers_layout = QHBoxLayout()
+            main_pickers_widget.setLayout(main_pickers_layout)
+            self.pickers_layout.addLayout(main_pickers_layout)
+            for picker in [self.body_picker, self.facial_picker]:
+                main_pickers_layout.addWidget(picker)
+            self.add_tab(main_pickers_widget, 'Body & Facial')
+            self.add_tab(self.pose_widget, 'Pose Library')
+
+        else:
+            self.add_tab(self.body_picker, 'Body')
+            self.add_tab(self.facial_picker, 'Facial')
+            self.add_tab(self.pose_widget, 'Pose Library')
 
     def run(self):
         return self
@@ -125,3 +229,47 @@ class PickerWindow(QWidget, object):
         utils.load_script('vl_contextualMenuBuilder.mel')
 
         return True
+
+    def get_body_picker_data(self):
+        return self.body_picker_data
+
+    def get_facial_picker_data(self):
+        return self.facial_picker_data
+
+    def get_body_picker(self):
+        return picker_widget.Picker(
+            data_path=self.get_body_picker_data(),
+            image_path=os.path.join(self._images_path, '{}_body.svg'.format(self.char_name.lower())))
+
+
+    def get_facial_picker(self):
+        return picker_widget.Picker(
+            data_path=self.get_facial_picker_data(),
+            image_path=os.path.join(self._images_path, '{}_facial.svg'.format(self.char_name.lower())))
+
+
+    def update_pickers(self):
+        """
+        Update the state of the character pickers
+        """
+
+        for picker in [self.body_picker, self.facial_picker]:
+            picker.namespace = self.namespace.currentText()
+
+    def reload_data(self):
+        """
+        Relaod data used by pickers and recreate all the picker buttons and properties
+        TODO: Very slow function, avoid to use it
+        """
+
+        for picker in [self.body_picker, self.facial_picker]:
+            picker.reload_data()
+        self.body_picker.reload_data()
+
+    def add_dock(self, widget, name):
+        dock = self.dock_window.add_dock(widget=widget, name=name)
+        return dock
+
+    def add_tab(self, widget, name):
+        dock = self.add_dock(widget=widget, name=name)
+        dock.setFeatures(dock.DockWidgetMovable | dock.DockWidgetFloatable)

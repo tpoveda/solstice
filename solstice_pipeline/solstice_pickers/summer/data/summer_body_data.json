@@ -5,9 +5,9 @@
   {
     "parts":
     {
-      "head1":
+    "head1":
       {
-        "solstice_fkButton":
+        "FKButton":
         [
           {
             "x": "0",
@@ -30,7 +30,7 @@
             "color":[255,0,0]
           }
         ],
-        "solstice_ikButton":
+        "IKButton":
         [
           {
             "x": "45",
@@ -66,7 +66,7 @@
             "color":[255,255,0]
           }
         ],
-        "solstice_moduleButton":
+        "ModuleButton":
         [
           {
             "x": "-18",
@@ -80,126 +80,9 @@
           }
         ]
       },
-      "spine1":
-      {
-        "solstice_fkButton":
-        [
-          {
-            "x": "12",
-            "y": "-75",
-            "radius": "24",
-            "name": "spine2",
-            "type":"fk",
-            "parent": "spine1_fk_spine1_ctrl",
-            "gizmo": "rotate",
-            "color":[255,255,0]
-          },
-
-          {
-            "x": "12",
-            "y": "-50",
-            "radius": "24",
-            "name": "spine1",
-            "type":"fk",
-            "parent": "spine1_fk_spine0_ctrl",
-            "gizmo": "rotate",
-            "color":[255,255,0]
-          },
-          {
-            "x": "12",
-            "y": "-25",
-            "radius": "24",
-            "name": "spine0",
-            "type":"fk",
-            "parent": "spine1_fk_pelvis_ctrl",
-            "gizmo": "rotate",
-            "color":[255,255,0]
-          },
-          {
-            "x": "12",
-            "y": "0",
-            "radius": "24",
-            "name": "upperBody",
-            "type":"fk",
-            "gizmo": "rotate",
-            "color":[255,255,0]
-          },
-          {
-            "x": "-12",
-            "y": "-12",
-            "radius": "24",
-            "name": "pelvis",
-            "type":"fk",
-            "gizmo": "move",
-            "color":[0,0,255]
-          }
-        ],
-        "solstice_ikButton":
-        [
-          {
-            "x": "-12",
-            "y": "-62",
-            "radius": "24",
-            "name": "spine2",
-            "type":"ik",
-            "gizmo": "rotate",
-            "color":[0,0,255]
-          },
-          {
-            "x": "-12",
-            "y": "-37",
-            "radius": "24",
-            "name": "spine1",
-            "type":"ik",
-            "gizmo": "move",
-            "color":[0,0,255]
-          }
-        ],
-
-        "solstice_extraButton":
-        [
-          {
-            "x": "45",
-            "y": "-55",
-            "radius": "5",
-            "height":"20",
-            "width":"20",
-            "color":[255,255,0],
-            "name": "chestGeo",
-            "gizmo": "move",
-            "side": "L",
-            "mirror": "True",
-            "offset": [-5,0]
-          },
-          {
-            "x": "0",
-            "y": "20",
-            "radius": "5",
-            "height":"20",
-            "width":"20",
-            "color":[255,255,0],
-            "name": "C_bellyGeo",
-            "gizmo": "move"
-          }
-        ],
-
-        "solstice_moduleButton":
-        [
-          {
-            "x": "-25",
-            "y": "40",
-            "radius": "2",
-            "height":"22",
-            "width":"78",
-            "text":"SPINE",
-            "color":[100,100,100],
-            "glowColor":[255,255,255]
-          }
-        ]
-      },
       "arm1":
       {
-        "solstice_fkButton":
+        "FKButton":
         [
           {
             "x": "50",
@@ -254,7 +137,7 @@
             "FKIKControl":"L_arm1_ik_arm_ctrl"
           }
         ],
-        "solstice_ikButton":
+        "IKButton":
         [
           {
             "x": "181",
@@ -283,7 +166,7 @@
             "FKIKControl":"L_arm1_fk_wrist_ctrl"
           }
         ],
-        "solstice_extraButton":
+        "ExtraButton":
         [
            {
             "x": "115",
@@ -299,7 +182,7 @@
             "color":[255,0,0]
           }
         ],
-        "solstice_moduleButton":
+        "ModuleButton":
         [
           {
             "x": "180",
@@ -324,7 +207,7 @@
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_keyFkIkButton":
+        "KeyFKIKButton":
         [
           {
             "x": "218",
@@ -350,7 +233,7 @@
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_fkIkSwitcherButton":
+        "FKIKSwitchButton":
         [
           {
             "x": "180",
@@ -373,7 +256,7 @@
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_gimbalButton":
+        "GimbalButton":
         [
           {
             "x": "122",
@@ -392,7 +275,7 @@
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_keySpaceSwitchButton":
+        "KeySpaceSwitchButton":
         [
           {
             "x": "241",
@@ -417,7 +300,7 @@
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_commandButton":
+        "CommandButton":
         [
           {
             "x": "242",
@@ -427,7 +310,7 @@
             "radius": "2",
             "text":"Main",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "272",
@@ -437,7 +320,7 @@
             "radius": "2",
             "text":"World",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "303",
@@ -447,7 +330,7 @@
             "radius": "2",
             "text":"Pelvis",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "242",
@@ -457,7 +340,7 @@
             "radius": "2",
             "text":"Head",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "272",
@@ -467,7 +350,7 @@
             "radius": "2",
             "text":"Object",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-307",
@@ -477,7 +360,7 @@
             "radius": "2",
             "text":"Main",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-276",
@@ -487,7 +370,7 @@
             "radius": "2",
             "text":"World",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "-246",
@@ -497,7 +380,7 @@
             "radius": "2",
             "text":"Pelvis",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "-245",
@@ -507,7 +390,7 @@
             "radius": "2",
             "text":"Head",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-308",
@@ -517,13 +400,13 @@
             "radius": "2",
             "text":"Object",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           }
         ]
       },
       "finger1":
       {
-        "solstice_fkButton":
+        "FKButton":
         [
           {
             "x": "240",
@@ -578,7 +461,7 @@
       },
       "finger2":
       {
-        "solstice_fkButton":
+        "FKButton":
         [
           {
             "x": "216",
@@ -636,7 +519,7 @@
       },
       "finger3":
       {
-        "solstice_fkButton":
+        "FKButton":
         [
           {
             "x": "202",
@@ -694,7 +577,7 @@
       },
       "finger5":
       {
-        "solstice_fkButton":
+        "FKButton":
         [
           {
             "x": "188",
@@ -752,7 +635,7 @@
       },
       "leg1":
       {
-        "solstice_fkButton":
+        "FKButton":
         [
           {
             "x": "30",
@@ -809,7 +692,7 @@
             "parent":"L_leg1_fk_ankle_ctrl"
           }
         ],
-        "solstice_ikButton":
+        "IKButton":
         [
           {
             "x": "34",
@@ -825,7 +708,7 @@
             "FKIKControl":"L_leg1_fk_ankle_ctrl"
           }
         ],
-        "solstice_moduleButton":
+        "ModuleButton":
         [
           {
             "x": "109",
@@ -850,7 +733,7 @@
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_keyFkIkButton":
+        "KeyFKIKButton":
         [
           {
             "x": "147",
@@ -876,7 +759,7 @@
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_fkIkSwitcherButton":
+        "FKIKSwitchButton":
         [
           {
             "x": "109",
@@ -899,7 +782,7 @@
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_gimbalButton":
+        "GimbalButton":
         [
           {
             "x": "58",
@@ -918,7 +801,7 @@
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_keySpaceSwitchButton":
+        "KeySpaceSwitchButton":
         [
           {
             "x": "110",
@@ -943,7 +826,7 @@
             "glowColor":[255,255,255]
           }
         ],
-        "solstice_commandButton":
+        "CommandButton":
         [
           {
             "x": "-271",
@@ -953,7 +836,7 @@
             "radius": "2",
             "text":"GLOBAL",
             "color":[182,255,241],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-221",
@@ -963,7 +846,7 @@
             "radius": "2",
             "text":"MAIN",
             "color":[182,255,241],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectMainControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_main_control()"
           },
           {
             "x": "-165",
@@ -973,7 +856,7 @@
             "radius": "2",
             "text":"ALL",
             "color":[182,255,241],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectAllControls()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_all_controls()"
           },
           {
             "x": "-271",
@@ -983,7 +866,7 @@
             "radius": "2",
             "text":"BODY",
             "color":[182,255,241],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectBodyControls()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_body_controls()"
           },
           {
             "x": "-221",
@@ -993,7 +876,7 @@
             "radius": "2",
             "text":"FACE",
             "color":[182,255,241],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectFaceControls()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_face_controls()"
           },
           {
             "x": "-165",
@@ -1003,7 +886,7 @@
             "radius": "2",
             "text":"DYNAMIC",
             "color":[182,255,241],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectDynamicControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_dynamic_control()"
           },
           {
             "x": "-270",
@@ -1013,7 +896,7 @@
             "radius": "2",
             "text":"KEY SELECTED",
             "color":[252,0,66],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.setKeyframe()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.set_keyframe()"
           },
           {
             "x": "-165",
@@ -1023,7 +906,7 @@
             "radius": "2",
             "text":"CLEAR SELECTION",
             "color":[0,255,182],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.clearSelection()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.clear_selection()"
           },
            {
             "x": "110",
@@ -1033,7 +916,7 @@
             "radius": "2",
             "text":"Main",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "140",
@@ -1043,7 +926,7 @@
             "radius": "2",
             "text":"World",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "170",
@@ -1053,7 +936,7 @@
             "radius": "2",
             "text":"Pelvis",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "201",
@@ -1063,7 +946,7 @@
             "radius": "2",
             "text":"Object",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-219",
@@ -1073,7 +956,7 @@
             "radius": "2",
             "text":"Main",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-190",
@@ -1083,7 +966,7 @@
             "radius": "2",
             "text":"World",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "-160",
@@ -1093,7 +976,7 @@
             "radius": "2",
             "text":"Pelvis",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "-128",
@@ -1103,7 +986,7 @@
             "radius": "2",
             "text":"Object",
             "color":[100,100,100],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.selectGlobalControl()"
+            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
           }
         ]
       }

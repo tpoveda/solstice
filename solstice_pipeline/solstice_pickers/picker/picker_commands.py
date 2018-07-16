@@ -8,10 +8,12 @@
 
 import maya.cmds as cmds
 import maya.mel as mel
-from solstice_pipeline.solstice_pickers.picker import picker_window
 
 
 def select_control(ctrl_name, replace=True):
+
+    from solstice_pipeline.solstice_pickers.picker import picker_window
+
     window_picker = picker_window.window_picker
     if window_picker and window_picker.namespace and window_picker.namespace.count() > 0:
         ctrl = '{0}:{1}'.format(window_picker.namespace.currentText(), ctrl_name)
