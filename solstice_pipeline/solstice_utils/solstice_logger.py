@@ -111,5 +111,8 @@ class Logger(object):
         :return: str
         """
 
-        return os.path.join(solstice_pipeline.__path__[0], self._name + '.log')
+        from solstice_pipeline.solstice_utils import solstice_python_utils as utils
+
+        return os.path.join(utils.get_system_config_directory(), 'solstice_pipeline', self._name+'.log')
+
     # endregion

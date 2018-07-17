@@ -52,7 +52,7 @@ class TaggerWidget(QWidget, object):
 
 class SolsticeTagger(solstice_windows.Window, object):
 
-    name = 'Tagger'
+    name = 'Solstice_Tagger'
     title = 'Solstice Tools - Tagger'
     version = '1.0'
     docked = False
@@ -493,7 +493,4 @@ def run():
     reload(solstice_grid)
     reload(solstice_buttons)
     # try:
-    tagger = SolsticeTagger().run()
-    # except Exception as e:
-    #     sp.logger.debug(str(e))
-    #     OpenMaya.MMessage.removeCallback(tagger.selection_changed_callback)
+    SolsticeTagger.run()

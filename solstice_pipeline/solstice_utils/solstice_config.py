@@ -13,8 +13,7 @@ import platform
 import subprocess
 import ConfigParser
 
-import solstice_pipeline as sp
-from solstice_utils import solstice_python_utils as utils
+from solstice_pipeline.solstice_utils import solstice_python_utils as utils
 
 
 class SolsticeConfig(ConfigParser.RawConfigParser, object):
@@ -29,14 +28,14 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
         super(SolsticeConfig, self).__init__(*args, **kwargs)
 
         self._app_name = app_name.replace(' ', '_').lower()
-        self.config_file = utils.get_system_config_directory().joinpath('solstice_pipeline', self._app_name, 'config.ini')
+        self.config_file = os.path.join(utils.get_system_config_directory(), 'solstice_pipeline', self._app_name, 'config.ini')
 
-        sp.logger.debug('{0}: Solstice Configuration File: {1}'.format(self._app_name, self.config_file))
+        print('{0}: Solstice Configuration File: {1}'.format(self._app_name, self.config_file))
         try:
-            self.readfp(self.config_file.open('r'))
-            sp.logger.debug('{0}: Solstice Configuration File read successfully!'.format(self._app_name))
+            self.readfp(open(self.config_file, 'r'))
+            print('{0}: Solstice Configuration File read successfully!'.format(self._app_name))
         except IOError:
-            sp.logger.debug('{0}: Solstice Configuration file not found! Creating it...'.format(self._app_name))
+            print('{0}: Solstice Configuration file not found! Creating it...'.format(self._app_name))
             self._create()
 
     @property
@@ -48,18 +47,24 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
         If Solstice configuration file is not already created we create it
         """
 
-        sp.logger.debug('Initializing {0} Settings, creating configuration file...\n'.format(self._app_name))
+        print('Initializing {0} Settings, creating configuration file: {1}\n'.format(self._app_name, self.config_file))
 
         self.add_section(self._app_name)
 
-        self.config_file.parent.mkdir(parents=True, exist_ok=True)
-        self.config_file.touch()
+        try:
+            print('Creating Settings Folder: {}'.format(os.path.dirname(self.config_file)))
+            original_umask = os.umask(0)
+            os.makedirs(os.path.dirname(self.config_file), 0770)
+        finally:
+            os.umask(original_umask)
+        f = open(self.config_file, 'w')
+        f.close()
         self.update()
 
-        sp.logger.debug('{0} has successfully created a new configuration file at: {1}\n'.format(self._app_name, str(self.config_file)))
+        print('{0} has successfully created a new configuration file at: {1}\n'.format(self._app_name, str(self.config_file)))
 
     def update(self):
-        with self.config_file.open('wb') as f:
+        with open(self.config_file, 'wb') as f:
             self.write(f)
 
     def get(self, option, section=None):

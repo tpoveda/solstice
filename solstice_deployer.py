@@ -15,15 +15,15 @@ import re
 import sys
 import win32gui
 import compileall
-import subprocess
 import tempfile
+import subprocess
 import shutil
 import json
 from string import zfill
 from distutils.dir_util import copy_tree
 from win32com.shell import shell, shellcon
 
-pipeline_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+pipeline_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'solstice_pipeline')
 if pipeline_path not in sys.path:
     sys.path.append(pipeline_path)
 
@@ -38,7 +38,9 @@ def deploy_solstice_pipeline():
         print 'ERROR: Path "{}" does not exists! Aborting deployment ...'.format(folder_path)
         return
 
-    temp_path = tempfile.mkdtemp()
+    temp_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'temp_path')
+    if not os.path.exists(temp_path):
+        os.makedirs(temp_path)
     if not os.path.exists(temp_path):
         print 'ERROR: Error when creating temp folder {}. Aborting deployment ...!'.format(temp_path)
         return
@@ -69,14 +71,43 @@ def deploy_solstice_pipeline():
             if '.idea' in d:
                 shutil.rmtree(os.path.join(root, d))
 
-    zip_file = zip_dir('solstice_pipeline', temp_path)
-    with open(os.path.join(os.path.dirname(zip_file), 'setup.json'), 'wb') as f:
-        f.write(json.dumps({'lastVersion': new_version}, ensure_ascii=False))
-
-    version_folder_path = os.path.join(os.path.dirname(zip_file), new_version)
+    version_folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), new_version)
     if not os.path.exists(version_folder_path):
         os.makedirs(version_folder_path)
-    shutil.move(zip_file, os.path.join(version_folder_path, os.path.basename(zip_file)))
+
+    mac_folder = os.path.join(version_folder_path, 'mac')
+    if not os.path.exists(mac_folder):
+        os.makedirs(mac_folder)
+    win_folder = os.path.join(version_folder_path, 'win')
+    if not os.path.exists(win_folder):
+        os.makedirs(win_folder)
+
+    # MAC Version
+    mac_pipeline_path = os.path.join(mac_folder, 'solstice_pipeline')
+    if not os.path.exists(mac_pipeline_path):
+        os.makedirs(mac_pipeline_path)
+    shutil.copytree(solstice_pipeline_temp_path, os.path.join(mac_pipeline_path, 'solstice_pipeline'))
+
+    user_setup_file = os.path.join(mac_pipeline_path, 'solstice_pipeline', 'userSetup.py')
+    if os.path.isfile(user_setup_file):
+        shutil.copy2(user_setup_file, os.path.join(os.path.dirname(os.path.dirname(user_setup_file)), 'userSetup.py'))
+    os.remove(user_setup_file)
+    os.remove(user_setup_file.replace('.py', '.pyc'))
+
+    modules_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'modules')
+    if os.path.exists(modules_folder):
+        shutil.copytree(modules_folder, os.path.join(os.path.dirname(mac_pipeline_path), 'modules'))
+
+    mac_zip_file = zip_dir('solstice_pipeline_mac', os.path.dirname(mac_pipeline_path))
+    with open(os.path.join(os.path.dirname(mac_zip_file), 'setup.json'), 'wb') as f:
+        f.write(json.dumps({'lastVersion': new_version}, ensure_ascii=False))
+
+    # Windows Version
+    shutil.copytree(solstice_pipeline_temp_path, os.path.join(win_folder, 'solstice_pipeline'))
+
+    win_zip_file = zip_dir('solstice_pipeline', win_folder)
+    with open(os.path.join(os.path.dirname(win_zip_file), 'setup.json'), 'wb') as f:
+        f.write(json.dumps({'lastVersion': new_version}, ensure_ascii=False))
 
     # Create settings.json file
     last_version_dict = dict()
@@ -86,17 +117,19 @@ def deploy_solstice_pipeline():
         json.dump(last_version_dict, fl)
     fl.close()
 
+    shutil.rmtree(temp_path)
+    shutil.rmtree(version_folder_path)
+
     print 'Solstice Pipeline deployed successfully with version {}'.format(new_version)
 
-    try:
-        subprocess.check_call(['explorer', os.path.dirname(zip_file)])
-    except Exception:
-        pass
-
+    # try:
+    #     subprocess.check_call(['explorer', os.path.dirname(zip_file)])
+    # except Exception:
+    #     pass
 
 
 def get_solstice_pipeline_folder():
-    solstice_pipeline_default_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    solstice_pipeline_default_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'solstice_pipeline')
     solstice_pipeline_pidl, flags = shell.SHILCreateFromPath(solstice_pipeline_default_dir, 0)
 
     try:

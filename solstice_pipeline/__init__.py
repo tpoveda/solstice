@@ -10,10 +10,11 @@ import os
 import re
 import sys
 import json
+import glob
 import pkgutil
 import datetime
+import platform
 import importlib
-from types import ModuleType
 from collections import OrderedDict
 if sys.version_info[:2] > (2, 7):
     from importlib import reload
@@ -44,78 +45,60 @@ valid_categories = ['textures', 'model', 'shading', 'groom']            # NOTE: 
 
 
 def update_paths():
-    extra_paths = [os.path.join(root_path, 'externals'), os.path.join(root_path, 'icons')]
+    extra_paths = [os.path.join(root_path, 'externals'), os.path.join(root_path, 'resources', 'icons')]
     for path in extra_paths:
         if os.path.exists(path) and path not in sys.path:
-                sys.path.append(path)
+            print('Adding Path {} to SYS_PATH ...'.format(path))
+            sys.path.append(path)
+        else:
+            print('Path {} not added to SYS_PATH because it does not exists!'.format(path))
 
     for subdir, dirs, files in os.walk(root_path):
         if subdir not in sys.path:
             sys.path.append(subdir)
 
 
-def import_module(package_name):
-    try:
-        mod = importlib.import_module(package_name)
-        solstice_pipeline.logger.debug('Imported: {}'.format(package_name))
-        if mod and isinstance(mod, ModuleType):
-            return mod
-        return None
-    except (ImportError, AttributeError) as e:
-        solstice_pipeline.logger.debug('FAILED IMPORT: {} -> {}'.format(package_name, str(e)))
-        pass
+def get_module_names():
+    """
+    Return the name of all solstice_tools modules
+    :return: list<str>
+    """
+
+    root_name = os.path.basename(root_path)
+    ret = list()
+    for subdir, dirs, files in os.walk(root_path):
+        file_names = glob.glob(os.path.split(subdir)[0] + '/*/__init__.py')
+        for file_path in file_names:
+            directories = file_path.split(os.sep)
+            subdirectory = str.join(os.sep, directories[:directories.index(root_name)])
+            package_path = file_path.split(subdirectory)[1].replace('\\', '.')[1:].replace('.__init__.py', '').replace('.__init__.pyc', '')
+            ret.append(package_path)
+    return ret
 
 
-def import_modules(module_name, only_packages=False, order=[]):
-    names, paths = explore_package(module_name=module_name, only_packages=only_packages)
-    ordered_names = list()
-    ordered_paths = list()
-    temp_index = 0
-    i = -1
-    for o in order:
-        for n, p in zip(names, paths):
-            if str(n) == str(o):
-                i += 1
-                temp_index = i
-                ordered_names.append(n)
-                ordered_paths.append(p)
-            elif n.endswith(o):
-                ordered_names.insert(temp_index+1, n)
-                ordered_paths.insert(temp_index+1, n)
-                temp_index += 1
-            elif str(o) in str(n):
-                ordered_names.append(n)
-                ordered_paths.append(p)
+def import_modules():
+    mod_names = list(set(get_module_names()))
+    for mod_name in mod_names:
+        if 'userSetup' in mod_name:
+            continue
+        try:
+            importlib.import_module(mod_name)
+        except ImportError as e:
+            logger.debug('Impossible to import {} module'.format(mod_name))
+            logger.debug(str(e))
 
-    ordered_names.extend(names)
-    ordered_paths.extend(paths)
-
-    names_set = set()
-    paths_set = set()
-    module_names = [x for x in ordered_names if not (x in names_set or names_set.add(x))]
-    module_paths = [x for x in ordered_paths if not (x in paths_set or paths_set.add(x))]
-
-    reloaded_names = list()
-    reloaded_paths = list()
-    for n, p in zip(names, paths):
-        reloaded_names.append(n)
-        reloaded_paths.append(p)
-
-    for name, _ in zip(module_names, module_paths):
-        if name not in loaded_modules.keys():
-            mod = import_module(name)
-            if mod:
-                if isinstance(mod, ModuleType):
-                    loaded_modules[mod.__name__] = [os.path.dirname(mod.__file__), mod]
-                    reload_modules.append(mod)
-
-    for name, path in zip(module_names, module_paths):
-        order = list()
-        if name in loaded_modules.keys():
-            mod = loaded_modules[name][1]
-            if hasattr(mod, 'order'):
-                order = mod.order
-        import_modules(module_name=path, only_packages=False, order=order)
+        try:
+            mod = sys.modules[mod_name]
+            imported_mods = list()
+            for importer, mod_name, is_pkg in pkgutil.iter_modules(mod.__path__):
+                if 'userSetup' in mod_name:
+                    continue
+                mod_name = '{0}.{1}'.format(mod.__name__, mod_name)
+                imported_mod = importlib.import_module(mod_name)
+                imported_mods.append(imported_mod)
+                logger.debug('Module {} initialized!'.format(mod_name))
+        except Exception as e:
+            continue
 
 
 def reload_all():
@@ -124,38 +107,14 @@ def reload_all():
     Used to increase iteration times
     """
 
-    for mod in reload_modules:
+    for mod_name in get_module_names():
         try:
-            solstice_pipeline.logger.debug('Reloading module {0} ...'.format(mod))
+            if mod_name == 'solstice_pipeline':
+                continue
+            mod = sys.modules[mod_name]
             reload(mod)
-        except Exception as e:
-            solstice_pipeline.logger.debug('Impossible to import {0} module : {1}'.format(mod, str(e)))
-
-
-def explore_package(module_name, only_packages=False):
-    """
-    Load module iteratively
-    :param module_name: str, name of the module
-    :return: list<str>, list<str>, list of loaded module names and list of loaded module paths
-    """
-
-    module_names = list()
-    module_paths = list()
-
-    def foo(name, only_packages):
-        for importer, m_name, is_pkg in pkgutil.iter_modules([name]):
-            mod_path = name + "//" + m_name
-            mod_name = 'solstice_pipeline.' + os.path.relpath(mod_path, solstice_pipeline.__path__[0]).replace('\\', '.')
-            if only_packages:
-                if is_pkg:
-                    module_paths.append(mod_path)
-                    module_names.append(mod_name)
-            else:
-                module_paths.append(mod_path)
-                module_names.append(mod_name)
-    foo(module_name, only_packages)
-
-    return module_names, module_paths
+        except Exception:
+            continue
 
 
 def create_solstice_logger():
@@ -174,7 +133,7 @@ def create_solstice_settings():
     Creates a settings file that can be accessed globally by all tools
     """
 
-    from solstice_utils import solstice_config
+    from solstice_pipeline.solstice_utils import solstice_config
     global settings
     settings = solstice_config.create_config('solstice_pipeline')
 
@@ -415,18 +374,30 @@ def init_solstice_environment_variables():
     def passMsgToMainThread(jsonMsg):
         maya.utils.executeInMainThreadWithResult(handleMessage, jsonMsg)
 
-    from solstice_tools import solstice_changelog
-    from solstice_utils import solstice_artella_utils
+    from solstice_pipeline.solstice_utils import solstice_artella_utils
 
     solstice_pipeline.logger.debug('Initializing environment variables for Solstice Tools ...')
-    solstice_artella_utils.update_local_artella_root()
 
-    artella_var = os.environ.get('ART_LOCAL_ROOT')
-    solstice_pipeline.logger.debug('Artella environment variable is set to: {}'.format(artella_var))
-    if artella_var and os.path.exists(artella_var):
-        os.environ['SOLSTICE_PROJECT'] = '{}/_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'.format(artella_var)
+    try:
+        solstice_artella_utils.update_local_artella_root()
+        artella_var = os.environ.get('ART_LOCAL_ROOT')
+        solstice_pipeline.logger.debug('Artella environment variable is set to: {}'.format(artella_var))
+        if artella_var and os.path.exists(artella_var):
+            os.environ['SOLSTICE_PROJECT'] = '{}/_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'.format(artella_var)
+        else:
+            solstice_pipeline.logger.debug('Impossible to set Artella environment variables! Solstice Tools wont work correctly! Please contact TD!')
+    except Exception:
+        solstice_pipeline.logger.debug('Error while setting Solstice Environment Variables. Solstice Tools may not work properly!')
+
+    icons_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'icons')
+    if os.path.exists(icons_path):
+        if platform.system() == 'Darwin':
+            os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ':' + icons_path
+        else:
+            os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ';' + icons_path
+        solstice_pipeline.logger.debug('Artella Icons Folder "{}" added to Maya Icons Paths ...'.format(icons_path))
     else:
-        solstice_pipeline.logger.debug('Impossible to set Artella environment variables! Solstice Tools wont work correctly! Please contact TD!')
+        solstice_pipeline.logger.debug('Solstice Icons not found! Solstice Shelf maybe will not show icons! Please contact TD!')
 
     solstice_pipeline.logger.debug('=' * 100)
     solstice_pipeline.logger.debug("Solstices Tools initialization completed!")
@@ -436,19 +407,30 @@ def init_solstice_environment_variables():
     solstice_pipeline.logger.debug('\n')
 
     if os.environ.get('SOLSTICE_PIPELINE_SHOW'):
+        from solstice_pipeline.solstice_tools import solstice_changelog
         solstice_changelog.run()
 
+
+def update_tools():
+    from solstice_pipeline.solstice_utils import solstice_download_utils
+    solstice_download_utils.update_tools()
+
+
 def init():
-    # update_paths()
+    update_paths()
     create_solstice_logger()
-    import_modules(solstice_pipeline.__path__[0], only_packages=True, order=['solstice_pipeline.solstice_utils', 'solstice_pipeline.solstice_gui', 'solstice_pipeline.solstice_tools'])
+    import_modules()
     reload_all()
     create_solstice_settings()
+    init_solstice_environment_variables()
     create_solstice_info_window()
     create_solstice_shelf()
     create_solstice_menu()
-    init_solstice_environment_variables()
     update_solstice_project()
 
+    if platform.system() == 'Darwin':
+        from solstice_pipeline.solstice_tools import solstice_changelog
+        solstice_changelog.run()
+        cmds.evalDeferred('import solstice_pipeline; solstice_pipeline.update_tools()')
 
 

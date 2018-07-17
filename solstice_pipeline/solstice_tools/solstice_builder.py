@@ -16,16 +16,15 @@ from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
 
-import maya.OpenMayaUI as OpenMayaUI
-
 import solstice_pipeline as sp
 from solstice_gui import solstice_windows
 from solstice_gui import solstice_splitters
 from solstice_utils import solstice_image as img
 
+
 class SolsticeBuilder(solstice_windows.Window, object):
 
-    name = 'Solstice Builder'
+    name = 'Solstice_Builder'
     title = 'Solstice Tools - Solstice Builder'
     version = '1.0'
     docked = False
@@ -169,46 +168,10 @@ class AssetBuilder(QWidget, object):
     def _set_preview(self):
         pass
 
-# if not 'builder_window' in globals():
-builder_window = None
 
-
-def builder_window_closed(object=None):
-    global builder_window
-    if builder_window is not None:
-        builder_window.cleanup()
-        builder_window.parent().setParent(None)
-        builder_window.parent().deleteLater()
-        builder_window = None
-
-
-def builder_window_destroyed(object=None):
-    global builder_window
-    builder_window = None
-
-
-def run(restore=False):
-
+def run():
     reload(solstice_splitters)
     reload(img)
-
-    global builder_window
-    if builder_window is None:
-        builder_window = SolsticeBuilder()
-        builder_window.destroyed.connect(builder_window_destroyed)
-        builder_window.setProperty('saveWindowPref', True)
-
-    if restore:
-        parent = OpenMayaUI.MQtUtil.getCurrentParent()
-        mixin_ptr = OpenMayaUI.MQtUtil.findControl(builder_window.objectName())
-        OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
-    else:
-        builder_window.show(dockable=True, save=True, closeCallback='from solstice_tools import solstice_builder\nsolstice_builder.builder_window_closed()')
-
-        builder_window.window().raise_()
-        builder_window.raise_()
-        builder_window.isActiveWindow()
-
-    return builder_window
+    SolsticeBuilder.run()
 
 

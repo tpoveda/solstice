@@ -20,7 +20,6 @@ from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
-import maya.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser, solstice_published_info_widget, solstice_sync_dialog
@@ -111,7 +110,7 @@ class PipelinizerSettings(QDialog, object):
 
 class Pipelinizer(solstice_windows.Window, object):
 
-    name = 'Pipelinizer'
+    name = 'Solstice_Pipelinizer'
     title = 'Solstice Tools - Artella Pipeline'
     version = '1.0'
     docked = True
@@ -127,7 +126,7 @@ class Pipelinizer(solstice_windows.Window, object):
         self.set_logo('solstice_pipeline_logo')
 
         # Create Settings File
-        if self.settings.config_file.exists():
+        if os.path.isfile(self.settings.config_file):
             if not self.settings.has_option(self.settings.app_name, 'auto_check_published'):
                 self.settings.set(self.settings.app_name, 'auto_check_published', str(False))
             if not self.settings.has_option(self.settings.app_name, 'auto_check_working'):
@@ -138,10 +137,10 @@ class Pipelinizer(solstice_windows.Window, object):
 
         # User Icon
         # TODO: After creating the user database read the info for this user from that file
-        user_icon = solstice_user.UserWidget(name='Summer', role='Director')
-        user_icon.move(1100, 0)
-        user_icon.setStyleSheet("QWidget{background: transparent;}")
-        self._logo_scene.addWidget(user_icon)
+        # user_icon = solstice_user.UserWidget(name='Summer', role='Director')
+        # user_icon.move(1100, 0)
+        # user_icon.setStyleSheet("QWidget{background: transparent;}")
+        # self._logo_scene.addWidget(user_icon)
 
         # Top Menu Bar
         top_menu_layout = QGridLayout()
@@ -215,11 +214,11 @@ class Pipelinizer(solstice_windows.Window, object):
         categories_layout.setSpacing(0)
         categories_widget.setLayout(categories_layout)
 
-        asset_browser_widget = QWidget()
-        asset_browser_layout = QHBoxLayout()
-        asset_browser_layout.setContentsMargins(0, 0, 0, 0)
-        asset_browser_layout.setSpacing(0)
-        asset_browser_widget.setLayout(asset_browser_layout)
+        # asset_browser_widget = QWidget()
+        # asset_browser_layout = QHBoxLayout()
+        # asset_browser_layout.setContentsMargins(0, 0, 0, 0)
+        # asset_browser_layout.setSpacing(0)
+        # asset_browser_widget.setLayout(asset_browser_layout)
 
         sequences_widget = QWidget()
         sequences_widget.setObjectName('SequencerWidget')
@@ -229,7 +228,7 @@ class Pipelinizer(solstice_windows.Window, object):
         sequences_widget.setLayout(sequences_layout)
 
         self._tab_widget.addTab(categories_widget, 'Assets Manager')
-        self._tab_widget.addTab(asset_browser_widget, ' Assets Browser ')
+        # self._tab_widget.addTab(asset_browser_widget, ' Assets Browser ')
         self._tab_widget.addTab(sequences_widget, 'Sequence Manager')
 
         # ================== Asset Manager Widget
@@ -281,28 +280,28 @@ class Pipelinizer(solstice_windows.Window, object):
         categories_buttons['All'].setChecked(True)
 
         # ================== Asset Browser Widget
-        asset_viewer_splitter = QSplitter(Qt.Horizontal)
-        asset_browser_layout.addWidget(asset_viewer_splitter)
-
-        artella_server_widget = QWidget()
-        artella_server_layout = QHBoxLayout()
-        artella_server_layout.setContentsMargins(0, 0, 0, 0)
-        artella_server_layout.setSpacing(0)
-        # artella_server_layout.setAlignment(Qt.AlignTop)
-        artella_server_widget.setLayout(artella_server_layout)
-        artella_server_browser = solstice_assetbrowser.AssetBrowser(title='Artella Server Data')
-        artella_server_layout.addWidget(artella_server_browser)
-        asset_viewer_splitter.addWidget(artella_server_widget)
-
-        local_data_widget = QWidget()
-        local_data_layout = QHBoxLayout()
-        local_data_layout.setContentsMargins(0, 0, 0, 0)
-        local_data_layout.setSpacing(0)
-        local_data_layout.setAlignment(Qt.AlignTop)
-        local_data_widget.setLayout(local_data_layout)
-        local_data_browser = solstice_assetbrowser.AssetBrowser(title='       Local Data      ', root_path=sp.get_solstice_assets_path())
-        local_data_layout.addWidget(local_data_browser)
-        asset_viewer_splitter.addWidget(local_data_widget)
+        # asset_viewer_splitter = QSplitter(Qt.Horizontal)
+        # asset_browser_layout.addWidget(asset_viewer_splitter)
+        #
+        # artella_server_widget = QWidget()
+        # artella_server_layout = QHBoxLayout()
+        # artella_server_layout.setContentsMargins(0, 0, 0, 0)
+        # artella_server_layout.setSpacing(0)
+        # # artella_server_layout.setAlignment(Qt.AlignTop)
+        # artella_server_widget.setLayout(artella_server_layout)
+        # artella_server_browser = solstice_assetbrowser.AssetBrowser(title='Artella Server Data')
+        # artella_server_layout.addWidget(artella_server_browser)
+        # asset_viewer_splitter.addWidget(artella_server_widget)
+        #
+        # local_data_widget = QWidget()
+        # local_data_layout = QHBoxLayout()
+        # local_data_layout.setContentsMargins(0, 0, 0, 0)
+        # local_data_layout.setSpacing(0)
+        # local_data_layout.setAlignment(Qt.AlignTop)
+        # local_data_widget.setLayout(local_data_layout)
+        # local_data_browser = solstice_assetbrowser.AssetBrowser(title='       Local Data      ', root_path=sp.get_solstice_assets_path())
+        # local_data_layout.addWidget(local_data_browser)
+        # asset_viewer_splitter.addWidget(local_data_widget)
 
         # Sequence Manager Widget
         self._sequencer = solstice_sequencer.SolsticeSequencer()
@@ -534,8 +533,7 @@ def pipelinizer_window_destroyed(object=None):
     pipelinizer_window = None
 
 
-def run(restore=False):
-
+def run():
     reload(solstice_python_utils)
     reload(solstice_maya_utils)
     reload(solstice_artella_classes)
@@ -566,21 +564,4 @@ def run(restore=False):
     # Update Solstice Project Environment Variable
     sp.update_solstice_project_path()
 
-    global pipelinizer_window
-    if pipelinizer_window is None:
-        pipelinizer_window = Pipelinizer()
-        pipelinizer_window.destroyed.connect(pipelinizer_window_destroyed)
-        pipelinizer_window.setProperty('saveWindowPref', True)
-
-    if restore:
-        parent = OpenMayaUI.MQtUtil.getCurrentParent()
-        mixin_ptr = OpenMayaUI.MQtUtil.findControl(pipelinizer_window.objectName())
-        OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
-    else:
-        pipelinizer_window.show(dockable=Pipelinizer.dock, save=True, closeCallback='from solstice_tools import solstice_pipelinizer\nsolstice_pipelinizer.pipelinizer_window_closed()')
-
-    pipelinizer_window.window().raise_()
-    pipelinizer_window.raise_()
-    pipelinizer_window.isActiveWindow()
-
-    return pipelinizer_window
+    Pipelinizer.run()

@@ -32,7 +32,7 @@ from resources import solstice_resource
 
 class SolsticePublisher(solstice_dialog.Dialog, object):
 
-    name = 'Publisher'
+    name = 'Solstice_Publisher'
     title = 'Solstice Tools - Publisher'
     version = '1.0'
     docked = False

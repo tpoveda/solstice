@@ -8,11 +8,12 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-import uuid
+import inspect
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
 
+import maya.cmds as cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
 from solstice_utils import solstice_maya_utils, solstice_config
@@ -24,21 +25,18 @@ class Window(MayaQWidgetDockableMixin, QWidget):
     Class to create basic Maya docked windows
     """
 
-    name = 'Solstice Tools'
+    name = 'SolsticeDockedWindow'
     title = 'Solstice Tools'
     version = '1.0'
     dock = False
 
-    def __init__(self, name='SolsticeDockedWindow', parent=solstice_maya_utils.get_maya_window(), **kwargs):
+    def __init__(self, parent=solstice_maya_utils.get_maya_window(), **kwargs):
         super(Window, self).__init__(parent=parent)
 
-        # Window needs to have a unique name to avoid problems with Maya workspaces
-        win_name = '{0}_{1}'.format(name, uuid.uuid4())
-
         self.callbacks = list()
-        self.settings = solstice_config.create_config(self.name)
+        self.settings = solstice_config.create_config(self.__class__.name)
 
-        self.setObjectName(win_name)
+        self.setObjectName(self.__class__.name)
         self.setWindowTitle(kwargs.get('title', self.title))
         self.setWindowFlags(self.windowFlags() | Qt.Window)
         self.setFocusPolicy(Qt.StrongFocus)
@@ -107,6 +105,63 @@ class Window(MayaQWidgetDockableMixin, QWidget):
 
     def __del__(self):
         self.cleanup()
+
+    @classmethod
+    def window_closed(cls):
+        parent = solstice_maya_utils.get_maya_window()
+        children = parent.findChildren(QWidget)
+        instance = None
+        instance_workspace = None
+        for child in children:
+            if cls.name in child.objectName():
+                if not child.objectName().endswith('WorkspaceControl'):
+                    instance = child
+                    break
+                elif child.objectName().endswith('WorkspaceControl'):
+                    instance_workspace = child
+        if instance:
+            instance.cleanup()
+        if instance_workspace:
+            if cmds.workspaceControl(instance_workspace.objectName(), exists=True):
+                cmds.deleteUI(instance_workspace.objectName())
+
+    @classmethod
+    def run(cls):
+        parent = solstice_maya_utils.get_maya_window()
+        children = parent.findChildren(QWidget)
+        instance = None
+        for child in children:
+            if cls.name in child.objectName():
+                if not child.objectName().endswith('WorkspaceControl'):
+                    instance = child
+                    break
+        if instance is not None:
+            instance.window().close()
+
+        cls.window_closed()
+
+        instance = cls()
+        instance.setProperty('saveWindowPref', True)
+
+        close_command = """from solstice_qt.QtWidgets import *; 
+        from solstice_pipeline.solstice_utils import solstice_maya_utils;
+        parent=solstice_maya_utils.get_maya_window();
+        instance=parent.findChild(QWidget, "{}");
+        if instance:
+            instance.cleanup();
+            instance.parent().setParent(None);
+            instance.parent().deleteLater();""".format(cls.name)
+        close_command = inspect.cleandoc(close_command)
+
+        if cmds.workspaceControl(instance.objectName() + 'WorkspaceControl', exists=True):
+            cmds.deleteUI(instance.objectName() + 'WorkspaceControl')
+
+        instance.show(dockable=True, save=True, closeCallback=close_command)
+        instance.window().raise_()
+        instance.raise_()
+        instance.isActiveWindow()
+
+        return instance
 
 
 class DockWindow(QMainWindow, object):

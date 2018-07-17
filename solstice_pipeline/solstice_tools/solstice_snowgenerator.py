@@ -20,7 +20,7 @@ from solstice_gui import solstice_windows
 
 
 class SnowGenerator(solstice_windows.Window, object):
-    name = 'Snow Generator'
+    name = 'Solstice_SnowGenerator'
     title = 'Solstice Tools - Snow Generator'
     version = '1.0'
     docked = False
@@ -130,43 +130,5 @@ class SnowGenerator(solstice_windows.Window, object):
         mel.eval('doParticleToPoly;')
 
 
-# ============================================================================================================
-
-# if not 'snow_window' in globals():
-snow_window = None
-
-
-def snow_window_closed(object=None):
-    global snow_window
-    if snow_window is not None:
-        snow_window.cleanup()
-        snow_window.parent().setParent(None)
-        snow_window.parent().deleteLater()
-        snow_window = None
-
-
-def snow_window_destroyed(object=None):
-    global snow_window
-    snow_window = None
-
-
-def run(restore=False):
-
-    global snow_window
-    if snow_window is None:
-        snow_window = SnowGenerator()
-        snow_window.destroyed.connect(snow_window_destroyed)
-        snow_window.setProperty('saveWindowPref', True)
-
-    if restore:
-        parent = OpenMayaUI.MQtUtil.getCurrentParent()
-        mixin_ptr = OpenMayaUI.MQtUtil.findControl(snow_window.objectName())
-        OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
-    else:
-        snow_window.show(dockable=SnowGenerator.dock, save=True, closeCallback='from solstice_tools import solstice_snowgenerator\nsolstice_snowgenerator.snow_window_closed()')
-
-    snow_window.window().raise_()
-    snow_window.raise_()
-    snow_window.isActiveWindow()
-
-    return snow_window
+def run():
+    SnowGenerator.run()

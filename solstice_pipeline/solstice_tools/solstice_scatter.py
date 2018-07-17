@@ -26,7 +26,7 @@ from solstice_gui import solstice_asset
 
 class SolsticeScatter(solstice_windows.Window, object):
 
-    name = 'Scatter'
+    name = 'Solstice_Scatter'
     title = 'Solstice Tools - Scatter Tool'
     version = '1.0'
     docked = True
@@ -332,25 +332,7 @@ class SolsticeScatter(solstice_windows.Window, object):
             cmds.delete(instancer)
 
 
-# if not 'scatter_window' in globals():
-scatter_window = None
-
-
-def scatter_window_closed(object=None):
-    global scatter_window
-    if scatter_window is not None:
-        scatter_window.cleanup()
-        scatter_window.parent().setParent(None)
-        scatter_window.parent().deleteLater()
-        scatter_window = None
-
-
-def scatter_window_destroyed(object=None):
-    global scatter_window
-    scatter_window = None
-
-
-def run(restore=False):
+def run():
 
     reload(solstice_asset)
     reload(solstice_assetviewer)
@@ -365,21 +347,4 @@ def run(restore=False):
     # Update Solstice Project Environment Variable
     sp.update_solstice_project_path()
 
-    global scatter_window
-    if scatter_window is None:
-        scatter_window = SolsticeScatter()
-        scatter_window.destroyed.connect(scatter_window_destroyed)
-        scatter_window.setProperty('saveWindowPref', True)
-
-    if restore:
-        parent = OpenMayaUI.MQtUtil.getCurrentParent()
-        mixin_ptr = OpenMayaUI.MQtUtil.findControl(scatter_window.objectName())
-        OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
-    else:
-        scatter_window.show(dockable=True, save=True, closeCallback='from solstice_tools import solstice_scatter\nsolstice_scatter.scatter_window_closed()')
-
-        scatter_window.window().raise_()
-        scatter_window.raise_()
-        scatter_window.isActiveWindow()
-
-    return scatter_window
+    SolsticeScatter.run()

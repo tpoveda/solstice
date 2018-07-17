@@ -10,10 +10,8 @@
 
 from functools import partial
 
-from Qt.QtCore import *
-from Qt.QtWidgets import *
-
-import maya.OpenMayaUI as OpenMayaUI
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
 
 from solstice_gui import solstice_windows
 from resources import solstice_resource
@@ -21,7 +19,7 @@ from resources import solstice_resource
 
 class SolsticePickers(solstice_windows.Window, object):
 
-    name = 'Picker'
+    name = 'Solstice_Pickers'
     title = 'Solstice Tools - Picker Tool'
     version = '1.0'
     docked = False
@@ -64,40 +62,5 @@ class SolsticePickers(solstice_windows.Window, object):
             QMessageBox.information(self, '{} Picker'.format(character_name.capitalize()), '{} Picker is not created yet, wait for future updates!'.format(character_name.capitalize()))
 
 
-pickers_window = None
-
-
-def pickers_window_closed(object=None):
-    global pickers_window
-    if pickers_window is not None:
-        pickers_window.cleanup()
-        pickers_window.parent().setParent(None)
-        pickers_window.parent().deleteLater()
-        pickers_window = None
-
-
-def pickers_window_destroyed(object=None):
-    global pickers_window
-    pickers_window = None
-
-
-def run(restore=False):
-
-    global pickers_window
-    if pickers_window is None:
-        pickers_window = SolsticePickers()
-        pickers_window.destroyed.connect(pickers_window_destroyed)
-        pickers_window.setProperty('saveWindowPref', True)
-
-    if restore:
-        parent = OpenMayaUI.MQtUtil.getCurrentParent()
-        mixin_ptr = OpenMayaUI.MQtUtil.findControl(pickers_window.objectName())
-        OpenMayaUI.MQtUtil.addWidgetToMayaLayout(long(mixin_ptr), long(parent))
-    else:
-        pickers_window.show(dockable=True, save=True, closeCallback='from solstice_tools import solstice_pickers\nsolstice_pickers.pickers_window_closed()')
-
-        pickers_window.window().raise_()
-        pickers_window.raise_()
-        pickers_window.isActiveWindow()
-
-    return pickers_window
+def run():
+    SolsticePickers.run()

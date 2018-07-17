@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <solstice_shelf>
     <!-- Basic Solstice Project Scripts -->
-    <shelfItem icon="setProject.png" cmds="import solstice_pipeline; solstice_pipeline.update_solstice_project();" ann="Auto Setup Solstice Project" label=""/>
+    <shelfItem icon="setproject.png" cmds="import solstice_pipeline; solstice_pipeline.update_solstice_project();" ann="Auto Setup Solstice Project" label=""/>
     <shelfItem icon="" cmds="" ann="Separator" label=""/>
-    <!-- Picker Scripts -->
+    <!-- Pipeline Tools -->
+    <shelfItem icon="pipeline.png" cmds="from solstice_pipeline.solstice_tools import solstice_pipelinizer; solstice_pipelinizer.run()" ann="Solstice Pipelinizer Tool" label=""/>
+    <shelfItem icon="tagger.png" cmds="from solstice_pipeline.solstice_tools import solstice_tagger; reload(solstice_tagger); solstice_tagger.run();" ann="Solstice Tagger Tool" label=""/>
+    <shelfItem icon="sanitycheck.png" cmds="from solstice_pipeline.solstice_tools import solstice_sanitycheck; reload(solstice_sanitycheck); solstice_sanitycheck.sanityCheck(True);" ann="Solstice Sanity Check Tool" label=""/>
+    <shelfItem icon="" cmds="" ann="Separator" label=""/>
+    <!-- Animation Tools -->
     <shelfItem icon="picker.png" cmds="from solstice_pipeline.solstice_tools import solstice_pickers; solstice_pickers.run()" ann="Solstice Pickers" label=""/>
-    <!-- Utility Scripts -->
-    <shelfItem icon="txtLinker.png" cmds="from solstice_utilities import solstice_texturesRelinker; reload(solstice_texturesRelinker); solstice_texturesRelinker.initUI();" ann="Solstice Textures Relinker Tool" label=""/>
-    <shelfItem icon="sanityCheck.png" cmds="from solstice_utilities import solstice_sanityCheck; reload(solstice_sanityCheck); solstice_sanityCheck.sanityCheck(True);" ann="Solstice Sanity Check Tool" label=""/>
-    <shelfItem icon="snow.png" cmds="from solstice_utilities import solstice_snowcreator; reload(solstice_snowcreator); solstice_snowcreator.initUI();" ann="Solstice Snow Creator" label=""/>
+    <shelfItem icon="" cmds="" ann="Separator" label=""/>
+    <!-- Shading/Texture Tools -->
+    <shelfItem icon="shaders.png" cmds="from solstice_pipeline.solstice_tools import solstice_shaderlibrary; reload(solstice_shaderlibrary); solstice_shaderlibrary.run();" ann="Solstice Shader Library" label=""/>
+    <!-- Utility Tools -->
+    <shelfItem icon="scatter.png" cmds="from solstice_pipeline.solstice_tools import solstice_scatter; reload(solstice_scatter); solstice_scatter.run();" ann="Solstice Scatter Tool" label=""/>
+    <shelfItem icon="solsticesnow.png" cmds="from solstice_pipeline.solstice_tools import solstice_snowgenerator; reload(solstice_snowgenerator); solstice_snowgenerator.run();" ann="Solstice Snow Creator Tool" label=""/>
+
 </solstice_shelf>

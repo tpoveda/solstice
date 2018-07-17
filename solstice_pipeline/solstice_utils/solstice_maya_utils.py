@@ -8,6 +8,10 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
+import os
+import contextlib
+from collections import OrderedDict
+
 from solstice_qt.QtWidgets import *
 try:
     from shiboken2 import wrapInstance
@@ -50,6 +54,35 @@ class MCallbackIdWrapper(object):
         return 'MCallbackIdWrapper(%r)' % self.callback_id
 
 
+def maya_undo(fn):
+    """
+    Undo function decorator for Maya function calls
+    """
+
+    def wrapper(*args, **kwargs):
+        cmds.undoInfo(openChunk=True)
+        try:
+            ret = fn(*args, **kwargs)
+        finally:
+            cmds.undoInfo(closeChunk=True)
+        return ret
+
+    return wrapper
+
+
+@contextlib.contextmanager
+def maya_no_undo():
+    """
+    Disable undo functionality during the context
+    """
+
+    try:
+        cmds.undoInfo(stateWithoutFlush=False)
+        yield
+    finally:
+        cmds.undoInfo(stateWithoutFlush=True)
+
+
 def get_maya_api_version():
     """
     Returns Maya API version
@@ -67,7 +100,7 @@ def get_maya_window():
 
     ptr = OpenMayaUI.MQtUtil.mainWindow()
     if ptr is not None:
-        return wrapInstance(long(ptr), QMainWindow)
+        return wrapInstance(long(ptr), QWidget)
 
     return None
 
@@ -281,3 +314,127 @@ def find_menu(menu_name):
             return m
 
     return None
+
+
+def get_plugin_shapes():
+    """
+    Return all available plugin shapes
+    :return: dict, plugin shapes by their menu label and script name
+    """
+
+    filters = cmds.pluginDisplayFilter(query=True, listFilters=True)
+    labels = [cmds.pluginDisplayFilter(f, query=True, label=True) for f in filters]
+    return OrderedDict(zip(labels, filters))
+
+
+def get_current_scene_name():
+    """
+    Returns the name of the current scene opened in Maya
+    :return: str
+    """
+
+    scene_path = cmds.file(query=True, sceneName=True)
+    if scene_path:
+        return os.path.splitext(os.path.basename(scene_path))[0]
+
+    return None
+
+
+def get_current_camera():
+    """
+    Returns the currently active camera
+    :return: str, name of the active camera transform
+    """
+
+    panel = cmds.getPanel(withFocus=True)
+    if cmds.getPanel(typeOf=panel) == 'modelPanel':
+        cam = cmds.modelEditor(panel, query=True, camera=True)
+        if cam:
+            if cmds.nodeType(cam) == 'transform':
+                return cam
+            elif cmds.objectType(cam, isAType='shape'):
+                parent = cmds.listRelatives(cam, parent=True, fullPath=True)
+                if parent:
+                    return parent[0]
+
+    cam_shapes = cmds.ls(sl=True, type='camera')
+    if cam_shapes:
+        return cmds.listRelatives(cam_shapes, parent=True, fullPath=True)[0]
+
+    transforms = cmds.ls(sl=True, type='transform')
+    if transforms:
+        cam_shapes = cmds.listRelatives(transforms, shapes=True, type='camera')
+        if cam_shapes:
+            return cmds.listRelatives(cam_shapes, parent=True, fullPath=True)[0]
+
+
+def get_active_editor():
+    """
+    Returns the active editor panel of Maya
+    """
+
+    cmds.currentTime(cmds.currentTime(query=True))
+    panel = cmds.playblast(activeEditor=True)
+    return panel.split('|')[-1]
+
+
+def get_current_frame():
+    """
+    Return current Maya frame set in time slier
+    :return: int
+    """
+
+    return cmds.currentTime(query=True)
+
+
+def get_time_slider_range(highlighted=True, within_highlighted=True, highlighted_only=False):
+    """
+    Return the time range from Maya time slider
+    :param highlighted: bool, If True it will return a selected frame range (if there is any selection of more than one frame) else
+    it will return min and max playblack time
+    :param within_highlighted: bool, Maya returns the highlighted range end as a plus one value by default. If True, this is fixed by
+    removing one from the last frame number
+    :param highlighted_only: bool, If True, it wil return only highlighted frame range
+    :return: list<float, float>, [start_frame, end_frame]
+    """
+
+    if highlighted is True:
+        playback_slider = mel.eval("global string $gPlayBackSlider; " "$gPlayBackSlider = $gPlayBackSlider;")
+        if cmds.timeControl(playback_slider, query=True, rangeVisible=True):
+            highlighted_range = cmds.timeControl(playback_slider, query=True, rangeArray=True)
+            if within_highlighted:
+                highlighted_range[-1] -= 1
+            return highlighted_range
+
+    if not highlighted_only:
+        return [cmds.playbackOptions(query=True, minTime=True), cmds.playbackOptions(query=True, maxTime=True)]
+
+
+def get_current_render_layer():
+    """
+    Returns the current Maya render layer
+    :return: str
+    """
+
+    return cmds.editRenderLayerGlobals(query=True, currentRenderLayer=True)
+
+
+def get_playblast_formats():
+    """
+    Returns all formats available for Maya playblast
+    :return: list<str>
+    """
+
+    cmds.currentTime(cmds.currentTime(query=True))
+    return cmds.playblast(query=True, format=True)
+
+
+def get_playblast_compressions(format='avi'):
+    """
+    Returns playblast compression for the given format
+    :param format: str, format to check compressions for
+    :return: list<str>
+    """
+
+    cmds.currentTime(cmds.currentTime(query=True))
+    return mel.eval('playblast -format "{0}" -query -compression'.format(format))

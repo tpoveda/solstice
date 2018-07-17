@@ -12,14 +12,15 @@
 import os
 import sys
 import json
+import platform
 import subprocess
 import urllib2
 
 import maya.cmds as cmds
 
 import solstice_pipeline as sp
-import solstice_maya_utils as utils
-import solstice_artella_classes as classes
+from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
+from solstice_pipeline.solstice_utils import solstice_artella_classes as classes
 
 artella_maya_plugin_name = 'Artella.py'
 artella_app_name = 'lifecycler'
@@ -68,13 +69,15 @@ def get_artella_data_folder():
     :return: str
     """
 
-    # TODO: This should not work in MAC, find a cross-platform way of doing this
-    artella_folder = os.path.join(os.getenv('PROGRAMDATA'), 'Artella')
+    if platform.system() == 'Darwin':
+        artella_folder = os.path.join('/Applications', 'Artella.app', 'Contents', 'MacOS')
+    else:
+        artella_folder = os.path.join(os.getenv('PROGRAMDATA'), 'Artella')
     artella_folder = [os.path.join(artella_folder, name) for name in os.listdir(artella_folder) if os.path.isdir(os.path.join(artella_folder, name)) and name != 'ui']
     if len(artella_folder) == 1:
         artella_folder = artella_folder[0]
     else:
-        sp.logger.debug('Artella folder not found!')
+        sp.logger.debug('Artella folder: {} not valid!'.format(artella_folder))
 
     return artella_folder
 
@@ -95,7 +98,6 @@ def get_artella_dcc_plugin(dcc='maya'):
     :return: str
     """
 
-    artella_folder = get_artella_data_folder()
     return os.path.join(get_artella_plugins_folder(), dcc)
 
 
@@ -120,8 +122,11 @@ def launch_artella_app():
     else:
         artella_app_file = get_artella_app() + '.exe'
 
-    if os.path.isfile(artella_app_file):
-        subprocess.call([artella_app_file])
+    if sys.platform() == 'Darwin':
+        sp.logger.debug('Launch Artella Manually please!')
+    else:
+        if os.path.isfile(artella_app_file):
+            subprocess.call([artella_app_file])
 
 
 def connect_artella_app_to_spigot(cli=None):
@@ -148,6 +153,7 @@ def load_artella_maya_plugin():
     :return: bool
     """
 
+    sp.logger.debug('Loading Artella Maya Plugin ...')
     artella_maya_plugin_folder = get_artella_dcc_plugin(dcc='maya')
     artella_maya_plugin_file = os.path.join(artella_maya_plugin_folder, artella_maya_plugin_name)
     if os.path.isfile(artella_maya_plugin_file):
@@ -627,8 +633,11 @@ def within_artella_scene():
 try:
     import Artella as artella
 except ImportError:
-    load_artella_maya_plugin()
-    update_artella_paths()
-    import Artella as artella
+    try:
+        load_artella_maya_plugin()
+        update_artella_paths()
+        import Artella as artella
+    except Exception:
+        sp.logger.debug('Artella is not set up properly in your computer!')
 
 

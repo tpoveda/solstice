@@ -15,17 +15,17 @@ from collections import OrderedDict
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 
-from solstice_gui import solstice_dialog, solstice_group, solstice_splitters
+from solstice_gui import solstice_dialog, solstice_group
 
 
 class SolsticeChangelog(solstice_dialog.Dialog, object):
 
-    name = 'Changelog'
+    name = 'Solstice_Changelog'
     title = 'Solstice Tools - Changelog'
     version = '1.0'
     docked = False
 
-    def __init__(self, name='ChangelogWindow', parent=None, **kwargs):
+    def __init__(self, name='ChangelogWindow', parent=None):
         super(SolsticeChangelog, self).__init__(name=name, parent=parent)
 
     def custom_ui(self):
@@ -56,7 +56,6 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
         if not os.path.isfile(changelog_json_file):
             return
 
-        changelog_data = None
         with open(changelog_json_file, 'r') as f:
             changelog_data = json.load(f, object_pairs_hook=OrderedDict)
         if not changelog_data:
@@ -78,9 +77,6 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
             version_group.main_layout.addWidget(item_lbl)
 
         self.main_layout.addSpacing(5)
-
-
-
 
 
 def run():

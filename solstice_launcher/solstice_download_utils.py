@@ -9,13 +9,16 @@
 # ==================================================================="""
 
 import os
-import urllib2
+import re
 import shutil
+import urllib2
 import zipfile
 
 from PySide.QtGui import *
 from PySide.QtCore import *
 
+
+numbers = re.compile('\d+')
 
 def chunk_report(bytes_so_far, chunk_size, total_size, console, updater=None):
     percent = float(bytes_so_far) / total_size
@@ -45,7 +48,7 @@ def chunk_read(response, destination, console, chunk_size=8192, report_hook=None
     return bytes_so_far
 
 
-def download_file(filename, destination, console, updater=None):
+def download_file(filename, destination, console=None, updater=None):
     console.write('Downloading file {0} to temporary folder -> {1}'.format(os.path.basename(filename), destination))
     try:
         dst_folder = os.path.dirname(destination)

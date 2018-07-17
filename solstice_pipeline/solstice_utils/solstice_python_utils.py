@@ -11,13 +11,13 @@
 import os
 import re
 import ast
+import sys
 import json
 import platform
 import subprocess
 from tempfile import mkstemp
 from shutil import move
 
-from pathlib2 import Path
 
 iters = [list, tuple, set, frozenset]
 class _hack(tuple): pass
@@ -204,19 +204,40 @@ def get_system_config_directory():
     """
 
     if platform.system().lower() == 'windows':
-        config_directory = Path(os.getenv('APPDATA') or '~')
+        config_directory = os.getenv('APPDATA') or os.path.expanduser('~')
     elif platform.system().lower() == 'darwin':
-        config_directory = Path('~', 'Library', 'Preferences')
+        config_directory = os.path.join(os.path.expanduser('~'), 'Library', 'Preferences')
     else:
-        config_directory = Path(os.getenv('XDG_CONFIG_HOME') or '~/.config')
+        config_directory = os.getenv('XDG_CONFIG_HOME') or os.path.join(os.path.expanduser('~'), '.config')
 
     return config_directory
 
 
 def open_folder(path):
+    """
+    Open folder using OS default settings
+    :param path: str, folder path we want to open
+    """
+
     if platform.system() == "Windows":
         os.startfile(path)
     elif platform.system() == "Darwin":
         subprocess.Popen(["open", path])
     else:
         subprocess.Popen(["xdg-open", path])
+
+
+def open_file(file_path):
+    """
+    Open file using OS default settings
+    :param file_path: str, file path we want to open
+    """
+
+    if sys.platform.startswith('darwin'):
+        subprocess.call(('open', file_path))
+    elif os.name == 'nt':
+        os.startfile(file_path)
+    elif os.name == 'posix':
+        subprocess.call(('xdg-open', file_path))
+    else:
+        raise NotImplementedError('OS not supported: {}'.format(os.name))
