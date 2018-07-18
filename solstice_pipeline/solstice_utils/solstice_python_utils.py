@@ -253,3 +253,17 @@ def open_file(file_path):
         subprocess.call(('xdg-open', file_path))
     else:
         raise NotImplementedError('OS not supported: {}'.format(os.name))
+
+
+def file_has_info(file_path):
+    """
+    Check if the given file size is bigger than 1.0 byte
+    :param file_path: str, ful file path of the file to check
+    :return: bool
+    """
+
+    file_stats = os.stat(file_path)
+    if file_stats.st_size < 1:
+        return False
+
+    return True

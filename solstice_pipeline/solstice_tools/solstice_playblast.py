@@ -9,6 +9,8 @@
 import os
 import re
 import sys
+import glob
+import json
 import tempfile
 import contextlib
 from functools import partial
@@ -22,7 +24,7 @@ import maya.mel as mel
 import maya.OpenMaya as OpenMaya
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_gui import solstice_windows, solstice_label, solstice_accordion
+from solstice_pipeline.solstice_gui import solstice_windows, solstice_label, solstice_accordion, solstice_sync_dialog
 from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
 from solstice_pipeline.solstice_utils import solstice_python_utils as python
 from solstice_pipeline.resources import solstice_resource
@@ -106,7 +108,7 @@ class SolsticePlayblastWidget(QWidget, object):
 
         return {}
 
-    def get_inputs(self):
+    def get_inputs(self, as_preset=False):
         """
         Returns a dict with proper input variables as keys of the dictionary
         :return: dict
@@ -171,7 +173,7 @@ class SolsticeTimeRange(SolsticePlayblastWidget, object):
         self.mode.currentIndexChanged.connect(self._on_mode_changed)
         self.custom_frames.textChanged.connect(self._on_mode_changed)
 
-    def get_inputs(self, as_preset):
+    def get_inputs(self, as_preset=False):
         return {
             'time': self.mode.currentText(),
             'start_frame': self.start.value(),
@@ -329,7 +331,6 @@ class SolsticeTimeRange(SolsticePlayblastWidget, object):
         for callback in self._event_callbacks:
             try:
                 OpenMaya.MEventMessage.removeCallback(callback)
-                print('Removed callback ...')
             except RuntimeError as e:
                 sp.logger.error('Encounter error: {}'.format(e))
 
@@ -563,7 +564,7 @@ class SolsticeCodec(SolsticePlayblastWidget, object):
         self.format.currentIndexChanged.connect(self.optionsChanged)
         self.quality.valueChanged.connect(self.optionsChanged)
 
-    def get_inputs(self):
+    def get_inputs(self, as_preset=False):
         return self.get_outputs()
 
     def apply_inputs(self, attrs_dict):
@@ -650,7 +651,7 @@ class BasePlayblastOptions(SolsticePlayblastWidget, object):
             'isolate_view': False
         }
 
-    def get_inputs(self):
+    def get_inputs(self, as_preset=False):
         inputs = dict()
         for key, widget in self.widgets.items():
             state = widget.isChecked()
@@ -742,6 +743,8 @@ class PlayblastPreset(QWidget, object):
     id = 'Presets'
     label = 'Presets'
 
+    registered_paths = list()
+
     def __init__(self, inputs_getter, parent=None):
         super(PlayblastPreset, self).__init__(parent=parent)
 
@@ -785,10 +788,139 @@ class PlayblastPreset(QWidget, object):
         self.preset_config.clicked.connect(self.configOpened)
         self.presets.currentIndexChanged.connect(self.load_active_preset)
 
+        solstice_presets_folder = os.path.normpath(os.path.join(sp.get_solstice_project_path(), 'Assets', 'Scripts', 'PIPELINE', '__working__', 'PlayblastPresets'))
+        if not os.path.exists(solstice_presets_folder):
+            sp.logger.debug('Solstice Presets Path not found! Trying to sync through Artella!')
+            solstice_sync_dialog.SolsticeSyncPath(paths=[os.path.dirname(os.path.dirname(solstice_presets_folder))]).sync()
+        self.register_preset_path(solstice_presets_folder)
+
         self._process_presets()
 
-    def import_preset(self):
+    def get_inputs(self, as_preset=False):
+        if as_preset:
+            return {}
+        else:
+            current_index = self.presets.currentIndex()
+            selected = self.presets.itemData(current_index)
+            return {'selected': selected}
+
+    def apply_inputs(self, settings):
+        path = settings.get('selected', None)
+        index = self.presets.findData(path)
+        if index == -1:
+            if os.path.exists(path):
+                sp.logger.info('Adding previously selected preset explicitily: {}'.format(path))
+                self.add_preset(path)
+            else:
+                sp.logger.warning('Previously selected preset is not available: {}'.format(path))
+                index = 0
+
+        self.presets.setCurrentIndex(index)
+
+    @classmethod
+    def get_preset_paths(cls):
+        """
+        Returns existing registered preset paths
+        :return: list<str>, list of full paths
+        """
+
+        paths = list()
+        for path in cls.registered_paths:
+            if path in paths:
+                continue
+            if not os.path.exists(path):
+                continue
+            paths.append(path)
+
+        return paths
+
+    @classmethod
+    def register_preset_path(cls, path):
+        """
+        Add file path to registered presets
+        :param path: str, path of the preset file
+        """
+
+        if path in cls.registered_paths:
+            sp.logger.warning('Preset path already registered: "{}"'.format(path))
+            return
+        cls.registered_paths.append(path)
+
+        return path
+
+    @classmethod
+    def discover_presets(cls, paths=None):
+        """
+        Get the full list of files found in the registered preset folders
+        :param paths: list<str>, directories which stores preset files
+        :return: list<str>, valid JSON preset file paths
+        """
+
+        presets = list()
+        for path in paths or cls.get_preset_paths():
+            path = os.path.normpath(path)
+            if not os.path.isdir(path):
+                continue
+
+            glob_query = os.path.abspath(os.path.join(path, '*.json'))
+            file_names = glob.glob(glob_query)
+            for file_name in file_names:
+                if file_name.startswith('_'):
+                    continue
+                if not python.file_has_info(file_name):
+                    sp.logger.warning('File size is smaller than 1 byte for preset file: "{}"'.format(file_name))
+                    continue
+                if file_name not in presets:
+                    presets.append(file_name)
+
+        return presets
+
+    def get_presets(self):
+        """
+        Returns all currently listed presets
+        :return: list<str>
+        """
+
+        presets_list = [self.presets.itemText(i) for i in range(self.presets.count())]
+        return presets_list
+
+    def add_preset(self, filename):
         pass
+
+    def import_preset(self):
+        """
+        Load preset file sto override output values
+        """
+
+        path = self._default_browse_path()
+        filters = 'Text file (*.json)'
+        dialog = QFileDialog()
+        filename, _ = dialog.getOpenFileName(self, 'Open Playblast Preset File', path, filters)
+        if not filename:
+            return
+
+        self.add_preset(filename)
+
+        return self.load_active_preset()
+
+    def save_preset(self, inputs):
+        """
+        Save Playblast template on a file
+        :param inputs: dict
+        """
+
+        path = self._default_browse_path()
+        filters = 'Text file (*.json)'
+        filename, _ = QFileDialog.getSaveFileName(self, 'Save Playblast Preset File', path, filters)
+        if not filename:
+            return
+
+        with open(filename, 'w') as f:
+            json.dump(inputs, f, sort_keys=True, indent=4, separators=(',', ': '))
+
+        self.add_preset(filename)
+
+        return filename
 
     def load_active_preset(self):
         pass
@@ -796,8 +928,30 @@ class PlayblastPreset(QWidget, object):
     def _process_presets(self):
         pass
 
+    def _default_browse_path(self):
+        """
+        Returns the current browse path for save/load preset
+        If a preset is currently loaded it will use that specific path otherwise it will
+        go to the last registered preset path
+        :return: str, path to use as default browse location
+        """
+
+        current_index = self.presets.currentIndex()
+        path = self.presets.itemData(current_index)
+        if not path:
+            paths = self.get_preset_paths()
+            if paths:
+                path = paths[-1]
+
+        return path
+
     def _on_save_preset(self):
-        pass
+        """
+        Save playblast template to a file
+        """
+
+        inputs = self.inputs_getter(as_preset=True)
+        self.save_preset(inputs)
 
 
 class SolsticePlayBlast(solstice_windows.Window, object):
@@ -879,15 +1033,18 @@ class SolsticePlayBlast(solstice_windows.Window, object):
 
     def cleanup(self):
         super(SolsticePlayBlast, self).cleanup()
+        self._store_configuration()
         for widget in self.playblast_widgets:
-            widget.uninitialize()
+            if hasattr(widget, 'uninitialize'):
+                widget.uninitialize()
 
     def validate(self):
         errors = list()
         for widget in self.playblast_widgets:
-            widget_errors = widget.validate()
-            if widget_errors:
-                errors.extend(widget_errors)
+            if hasattr(widget, 'validate'):
+                widget_errors = widget.validate()
+                if widget_errors:
+                    errors.extend(widget_errors)
 
         if errors:
             message_title = '{} Validation Error(s)'.format(len(errors))
@@ -897,24 +1054,45 @@ class SolsticePlayBlast(solstice_windows.Window, object):
 
         return True
 
-    def get_inputs(self):
+    def get_inputs(self, as_preset=False):
         inputs = dict()
         config_widgets = self.playblast_widgets
+        config_widgets.append(self.preset_widget)
+        for widget in config_widgets:
+            widget_inputs = widget.get_inputs(as_preset=as_preset)
+            if not isinstance(widget_inputs, dict):
+                sp.logger.debug('Widget inputs are not a valid dictionary "{0}" : "{1}"'.format(widget.id, widget_inputs))
+                return
+            if not widget_inputs:
+                continue
+            inputs[widget.id] = widget_inputs
+
+        return inputs
 
     def apply_inputs(self, inputs):
-        pass
+        if not inputs:
+            return
+
+        widgets = self.playblast_widgets
+        widgets.append(self.preset_widget)
+        for widget in widgets:
+            widget_inputs = inputs.get(widget.id, None)
+            if not widget_inputs:
+                contextlib
+            widget.apply_inputs(widget_inputs)
 
     def get_outputs(self):
         outputs = dict()
         for widget in self.playblast_widgets:
-            widget_outputs = widget.get_outputs()
-            if not widget_outputs:
-                continue
-            for key, value in widget_outputs.items():
-                if isinstance(value, dict) and key in outputs:
-                    outputs[key].update(value)
-                else:
-                    outputs[key] = value
+            if hasattr(widget, 'get_outputs'):
+                widget_outputs = widget.get_outputs()
+                if not widget_outputs:
+                    continue
+                for key, value in widget_outputs.items():
+                    if isinstance(value, dict) and key in outputs:
+                        outputs[key].update(value)
+                    else:
+                        outputs[key] = value
 
         return outputs
 
@@ -928,7 +1106,29 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         self.config_dialog.show()
 
     def _read_configuration(self):
-        pass
+        inputs = dict()
+        path = self.settings.config_file
+        if not os.path.isfile(path) or os.stat(path).st_size == 0:
+            return inputs
+
+        for section in self.settings.sections():
+            if section == self.name.lower():
+                continue
+            inputs[section] = dict()
+            props = self.settings.items(section)
+            for prop in props:
+                inputs[section][str(prop[0])] = str(prop[1])
+
+        return inputs
+
+    def _store_configuration(self):
+        inputs = self.get_inputs(as_preset=False)
+        for widget_id, attrs_dict in inputs.items():
+            if not self.settings.has_section(widget_id):
+                self.settings.add_section(widget_id)
+            for attr_name, attr_value in attrs_dict.items():
+                self.settings.set(widget_id, attr_name, attr_value)
+        self.settings.update()
 
     def _build_configuration_dialog(self):
         """
@@ -940,7 +1140,8 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         QVBoxLayout(self.config_dialog)
 
     def _on_update_settings(self):
-        pass
+        self.optionsChanged.emit(self.get_outputs)
+        self.preset_widget.presets.setCurrentIndex(0)
 
     def _on_capture(self):
         valid = self.validate()

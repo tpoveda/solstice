@@ -51,12 +51,13 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
 
         self.add_section(self._app_name)
 
-        try:
-            print('Creating Settings Folder: {}'.format(os.path.dirname(self.config_file)))
-            original_umask = os.umask(0)
-            os.makedirs(os.path.dirname(self.config_file), 0770)
-        finally:
-            os.umask(original_umask)
+        if not os.path.exists(os.path.dirname(self.config_file)):
+            try:
+                print('Creating Settings Folder: {}'.format(os.path.dirname(self.config_file)))
+                original_umask = os.umask(0)
+                os.makedirs(os.path.dirname(self.config_file), 0770)
+            finally:
+                os.umask(original_umask)
         f = open(self.config_file, 'w')
         f.close()
         self.update()
