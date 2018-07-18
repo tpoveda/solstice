@@ -12,7 +12,6 @@ from solstice_qt.QtGui import *
 
 
 class Color(QColor, object):
-
     def __eq__(self, other):
         if other == self:
             return True

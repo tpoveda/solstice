@@ -9,6 +9,7 @@
 # ==================================================================="""
 
 import os
+import glob
 import contextlib
 from collections import OrderedDict
 
@@ -438,3 +439,161 @@ def get_playblast_compressions(format='avi'):
 
     cmds.currentTime(cmds.currentTime(query=True))
     return mel.eval('playblast -format "{0}" -query -compression'.format(format))
+
+
+def fix_playblast_output_path(file_path):
+    """
+    Workaround a bug in maya.cmds.playblast to return a correct playblast
+    When the `viewer` argument is set to False and maya.cmds.playblast does not
+    automatically open the playblasted file the returned filepath does not have
+    the file's extension added correctly.
+    To workaround this we just glob.glob() for any file extensions and assume
+    the latest modified file is the correct file and return it.
+    :param file_path: str
+    :return: str
+    """
+
+    if file_path is None:
+        sp.logger.warning('Playblast did not result in output path. Maybe it was interrupted!')
+        return
+
+    if not os.path.exists(file_path):
+        directory = os.path.dirname(file_path)
+        filename = os.path.basename(file_path)
+        parts = filename.split('.')
+        if len(parts) == 3:
+            query = os.path.join(directory, '{}.*.{}'.format(parts[0], parts[-1]))
+            files = glob.glob(query)
+        else:
+            files = glob.glob('{}.*'.format(file_path))
+
+        if not files:
+            raise RuntimeError('Could not find playblast from "{}"'.format(file_path))
+
+        file_path = max(files, key=os.path.getmtime)
+
+    return file_path
+
+
+def get_is_standalone():
+    return not hasattr(cmds, 'about') or cmds.about(batch=True)
+
+
+def get_active_panel():
+    """
+    Returns the current active modelPanel
+    :return: str, name of the model panel or raises an error if no active modelPanel iis found
+    """
+
+    panel = cmds.getPanel(withFocus=True)
+    if not panel or 'modelPanel' not in panel:
+        raise RuntimeError('No active model panel found!')
+
+    return panel
+
+
+def get_available_screen_size():
+    """
+    Returns available screen size without space occupied by task bar
+    """
+
+    if get_is_standalone():
+        return [0, 0]
+
+    rect = QDesktopWidget().screenGeometry(-1)
+    return [rect.width(), rect.height()]
+
+
+@contextlib.contextmanager
+def create_independent_panel(width, height, off_screen=False):
+    """
+    Creates a Maya panel window without decorations
+    :param width: int, width of panel
+    :param height: int, height of panel
+    :param off_screen: bool
+    with create_independent_panel(800, 600):
+        cmds.capture()
+    """
+
+    screen_width, screen_height = get_available_screen_size()
+    top_left = [int((screen_height-height)*0.5), int((screen_width-width)*0.5)]
+    window = cmds.window(width=width, height=height, topLeftCorner=top_left, menuBarVisible=False, titleBar=False, visible=not off_screen)
+    cmds.paneLayout()
+    panel = cmds.modelPanel(menuBarVisible=False, label='CapturePanel')
+    # Hide icons under panel menus
+    bar_layout = cmds.modelPanel(panel, query=True, barLayout=True)
+    cmds.frameLayout(bar_layout, edit=True, collapse=True)
+    if not off_screen:
+        cmds.showWindow(window)
+
+    # Set the modelEditor of the modelPanel as the active view, so it takes the playback focus
+    editor = cmds.modelPanel(panel, query=True, modelEditor=True)
+    cmds.modelEditor(editor, edit=True, activeView=True)
+    cmds.refresh(force=True)
+
+    try:
+        yield panel
+    finally:
+        cmds.deleteUI(panel, panel=True)
+        cmds.deleteUI(window)
+
+
+@contextlib.contextmanager
+def disable_inview_messages():
+    """
+    Disable in-view help messages during the context
+    """
+
+    original = cmds.optionVar(query='inViewMessageEnable')
+    cmds.optionVar(iv=('inViewMessageEnable', 0))
+    try:
+        yield
+    finally:
+        cmds.optionVar(iv=('inViewMessageEnable', original))
+
+
+@contextlib.contextmanager
+def maintain_camera_on_panel(panel, camera):
+    """
+    Tries to maintain given camera on given panel during the context
+    :param panel: str, name of the panel to focus camera on
+    :param camera: str, name of the camera we want to focus
+    """
+
+    state = dict()
+    if not get_is_standalone():
+        cmds.lookThru(panel, camera)
+    else:
+        state = dict((camera, cmds.getAttr(camera + '.rnd')) for camera in cmds.ls(type='camera'))
+        cmds.setAttr(camera + '.rnd', True)
+    try:
+        yield
+    finally:
+        for camera, renderable in state.items():
+            cmds.setAttr(camera + '.rnd', renderable)
+
+
+@contextlib.contextmanager
+def reset_time():
+    """
+    The time is reset once the context is finished
+    """
+
+    current_time = cmds.currentTime(query=True)
+    try:
+        yield
+    finally:
+        cmds.currentTime(current_time)
+
+
+@contextlib.contextmanager
+def isolated_nodes(nodes, panel):
+    """
+    Context manager used for isolating given nodes in  given panel
+    """
+
+    if nodes is not None:
+        cmds.isolateSelect(panel, state=True)
+        for obj in nodes:
+            cmds.isolateSelect(panel, addDagObject=obj)
+    yield

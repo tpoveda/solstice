@@ -28,6 +28,18 @@ of lists, tuples, sets, and Sets are available in this version of Python.
 """
 
 
+class classproperty(object):
+    """
+    Simplified way of creating getter and setters in Python
+    """
+
+    def __init__(self, getter):
+        self.getter = getter
+
+    def __get__(self, instance, owner):
+        return self.getter(owner)
+
+
 def string_to_dictionary(string):
     """
     Converts a dictionary string representation into a dictionary

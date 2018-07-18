@@ -15,6 +15,18 @@ from solstice_qt.QtGui import *
 from solstice_utils import solstice_qt_utils as utils
 
 
+class ClickLabel(QLabel, object):
+    """
+    This label emits a clicked signal when the user clicks on it
+    """
+
+    clicked = Signal()
+
+    def mousePressEvent(self, event):
+        self.clicked.emit()
+        super(ClickLabel, self).mousePressEvent(event)
+
+
 class ElidedLabel(QLabel, object):
     """
     This label elides text and adds ellipses if the text does not fit
