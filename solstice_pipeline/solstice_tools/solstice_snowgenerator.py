@@ -13,7 +13,6 @@ from solstice_qt.QtWidgets import *
 import maya.cmds as cmds
 import maya.mel as mel
 import pymel.core as pm
-import maya.OpenMayaUI as OpenMayaUI
 import maya.OpenMaya as OpenMaya
 
 from solstice_gui import solstice_windows

@@ -6,12 +6,12 @@
 #  Picker Window
 # ==================================================================="""
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
-
 import os
 import weakref
 from functools import partial
+
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 
