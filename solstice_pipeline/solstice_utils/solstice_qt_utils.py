@@ -17,6 +17,7 @@ import maya.OpenMayaUI as OpenMayaUI
 
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
+from solstice_qt.QtGui import *
 from solstice_qt import QtCompat
 try:
     from shiboken import wrapInstance
@@ -256,3 +257,14 @@ def clear_layout_widgets(layout):
             w = item.widget()
             if w:
                 w.setParent(None)
+
+
+def image_to_clipboard(path):
+    """
+    Copies the image at path to the system's global clipboard
+    :param path: str
+    """
+
+    image = QImage(path)
+    clipboard = QApplication.clipboard()
+    clipboard.setImage(image, mode=QClipboard.Clipboard)

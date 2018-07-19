@@ -267,3 +267,14 @@ def file_has_info(file_path):
         return False
 
     return True
+
+
+def load_json(file_path):
+    """
+    Open and read JSON and return readed values
+    :param file_path:  str
+    :return: dict
+    """
+
+    with open(file_path, 'r') as f:
+        return json.load(f)

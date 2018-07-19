@@ -27,7 +27,129 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_label, solstice_accordion, solstice_sync_dialog
 from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
 from solstice_pipeline.solstice_utils import solstice_python_utils as python
+from solstice_pipeline.solstice_utils import solstice_qt_utils
 from solstice_pipeline.resources import solstice_resource
+
+# ========================================================================================================
+
+CameraOptions = {
+    "displayGateMask": False,
+    "displayResolution": False,
+    "displayFilmGate": False,
+    "displayFieldChart": False,
+    "displaySafeAction": False,
+    "displaySafeTitle": False,
+    "displayFilmPivot": False,
+    "displayFilmOrigin": False,
+    "overscan": 1.0,
+    "depthOfField": False,
+}
+
+DisplayOptions = {
+    "displayGradient": True,
+    "background": (0.631, 0.631, 0.631),
+    "backgroundTop": (0.535, 0.617, 0.702),
+    "backgroundBottom": (0.052, 0.052, 0.052),
+}
+
+_DisplayOptionsRGB = set(["background", "backgroundTop", "backgroundBottom"])
+
+ViewportOptions = {
+    "rendererName": "vp2Renderer",
+    "fogging": False,
+    "fogMode": "linear",
+    "fogDensity": 1,
+    "fogStart": 1,
+    "fogEnd": 1,
+    "fogColor": (0, 0, 0, 0),
+    "shadows": False,
+    "displayTextures": True,
+    "displayLights": "default",
+    "useDefaultMaterial": False,
+    "wireframeOnShaded": False,
+    "displayAppearance": 'smoothShaded',
+    "selectionHiliteDisplay": False,
+    "headsUpDisplay": True,
+    "imagePlane": True,
+    "nurbsCurves": False,
+    "nurbsSurfaces": False,
+    "polymeshes": True,
+    "subdivSurfaces": False,
+    "planes": True,
+    "cameras": False,
+    "controlVertices": True,
+    "lights": False,
+    "grid": False,
+    "hulls": True,
+    "joints": False,
+    "ikHandles": False,
+    "deformers": False,
+    "dynamics": False,
+    "fluids": False,
+    "hairSystems": False,
+    "follicles": False,
+    "nCloths": False,
+    "nParticles": False,
+    "nRigids": False,
+    "dynamicConstraints": False,
+    "locators": False,
+    "manipulators": False,
+    "dimensions": False,
+    "handles": False,
+    "pivots": False,
+    "textures": False,
+    "strokes": False
+}
+
+Viewport2Options = {
+    "consolidateWorld": True,
+    "enableTextureMaxRes": False,
+    "bumpBakeResolution": 64,
+    "colorBakeResolution": 64,
+    "floatingPointRTEnable": True,
+    "floatingPointRTFormat": 1,
+    "gammaCorrectionEnable": False,
+    "gammaValue": 2.2,
+    "lineAAEnable": False,
+    "maxHardwareLights": 8,
+    "motionBlurEnable": False,
+    "motionBlurSampleCount": 8,
+    "motionBlurShutterOpenFraction": 0.2,
+    "motionBlurType": 0,
+    "multiSampleCount": 8,
+    "multiSampleEnable": False,
+    "singleSidedLighting": False,
+    "ssaoEnable": False,
+    "ssaoAmount": 1.0,
+    "ssaoFilterRadius": 16,
+    "ssaoRadius": 16,
+    "ssaoSamples": 16,
+    "textureMaxResolution": 4096,
+    "threadDGEvaluation": False,
+    "transparencyAlgorithm": 1,
+    "transparencyQuality": 0.33,
+    "useMaximumHardwareLights": True,
+    "vertexAnimationCache": 0
+}
+if mel.eval('getApplicationVersionAsFloat') > 2015:
+    ViewportOptions.update({
+        "motionTrails": False
+    })
+    Viewport2Options.update({
+        "hwFogAlpha": 1.0,
+        "hwFogFalloff": 0,
+        "hwFogDensity": 0.1,
+        "hwFogEnable": False,
+        "holdOutDetailMode": 1,
+        "hwFogEnd": 100.0,
+        "holdOutMode": True,
+        "hwFogColorR": 0.5,
+        "hwFogColorG": 0.5,
+        "hwFogColorB": 0.5,
+        "hwFogStart": 0.0,
+    })
+
+# ========================================================================================================
 
 
 class TimeRanges(object):
@@ -687,7 +809,32 @@ class PlayblastPreview(QWidget, object):
         self.setLayout(self.layout)
         self.layout.addWidget(self.preview)
 
-        self.preview.clicked.connect(self.refresh)
+        open_playblasts_folder_icon = solstice_resource.icon('movies_folder')
+        self.open_playblasts_folder_btn = QPushButton()
+        self.open_playblasts_folder_btn.setIcon(open_playblasts_folder_icon)
+        self.open_playblasts_folder_btn.setFixedWidth(25)
+        self.open_playblasts_folder_btn.setFixedHeight(25)
+        self.open_playblasts_folder_btn.setIconSize(QSize(25, 25))
+        self.open_playblasts_folder_btn.setToolTip('Open Playblasts Folder')
+        self.open_playblasts_folder_btn.setStatusTip('Open Playblasts Folder')
+        self.open_playblasts_folder_btn.setParent(self.preview)
+        self.open_playblasts_folder_btn.setStyleSheet("background-color: rgba(255, 255, 255, 0); border: 0px solid rgba(255,255,255,0);")
+        self.open_playblasts_folder_btn.move(5, 5)
+
+        sync_icon = solstice_resource.icon('sync')
+        self.sync_preview_btn = QPushButton()
+        self.sync_preview_btn.setIcon(sync_icon)
+        self.sync_preview_btn.setFixedWidth(25)
+        self.sync_preview_btn.setFixedHeight(25)
+        self.sync_preview_btn.setIconSize(QSize(25, 25))
+        self.sync_preview_btn.setToolTip('Sync Preview')
+        self.sync_preview_btn.setStatusTip('Sync Preview')
+        self.sync_preview_btn.setParent(self.preview)
+        self.sync_preview_btn.setStyleSheet("background-color: rgba(255, 255, 255, 0); border: 0px solid rgba(255,255,255,0);")
+        self.sync_preview_btn.move(32, 5)
+
+        # self.preview.clicked.connect(self.refresh)
+        self.sync_preview_btn.clicked.connect(self.refresh)
 
     def showEvent(self, event):
         self.refresh()
@@ -756,7 +903,7 @@ class PlayblastPreset(QWidget, object):
         self.setLayout(layout)
 
         self.presets = QComboBox()
-        self.presets.setFixedWidth(220)
+        self.presets.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.presets.addItem('*')
 
         save_icon = solstice_resource.icon('save')
@@ -780,7 +927,18 @@ class PlayblastPreset(QWidget, object):
         self.preset_config.setToolTip('Preset Configuration')
         self.preset_config.setStatusTip('Preset Configuration')
 
-        for widget in [self.presets, self.save, self.load, self.preset_config]:
+        vertical_separator = QFrame()
+        vertical_separator.setFrameShape(QFrame.VLine)
+        vertical_separator.setFrameShadow(QFrame.Sunken)
+
+        open_templates_folder_icon = solstice_resource.icon('overview')
+        self.open_templates_folder_btn = QPushButton()
+        self.open_templates_folder_btn.setIcon(open_templates_folder_icon)
+        self.open_templates_folder_btn.setFixedWidth(30)
+        self.open_templates_folder_btn.setToolTip('Open Templates Folder')
+        self.open_templates_folder_btn.setStatusTip('Open Templates Folder')
+
+        for widget in [self.presets, self.save, self.load, self.preset_config, vertical_separator, self.open_templates_folder_btn]:
             layout.addWidget(widget)
 
         self.save.clicked.connect(self._on_save_preset)
@@ -885,7 +1043,32 @@ class PlayblastPreset(QWidget, object):
         return presets_list
 
     def add_preset(self, filename):
-        pass
+        """
+        Add the filename to the presets list
+        :param filename: str
+        """
+
+        filename = os.path.normpath(filename)
+        if not os.path.exists(filename):
+            sp.logger.warning('Preset file does not exists: "{}"'.format(filename))
+            return
+
+        label = os.path.splitext(os.path.basename(filename))[0]
+        item_count = self.presets.count()
+
+        paths = [self.presets.itemData(i) for i in range(item_count)]
+        if filename in paths:
+            sp.logger.info('Preset is already in the presets list: "{}"'.format(filename))
+            item_index = paths.index(filename)
+        else:
+            self.presets.addItem(label, userData=filename)
+            item_index = item_count
+
+        self.presets.blockSignals(True)
+        self.presets.setCurrentIndex(item_index)
+        self.presets.blockSignals(False)
+
+        return item_index
 
     def import_preset(self):
         """
@@ -923,10 +1106,32 @@ class PlayblastPreset(QWidget, object):
         return filename
 
     def load_active_preset(self):
-        pass
+        """
+        Loads the active preset
+        :return: dict, preset inputs
+        """
+
+        current_index = self.presets.currentIndex()
+        filename = self.presets.itemData(current_index)
+        if not filename:
+            return {}
+
+        preset = python.load_json(filename)
+        self.presetLoaded.emit(preset)
+
+        self.presets.blockSignals(True)
+        self.presets.setCurrentIndex(current_index)
+        self.presets.blockSignals(False)
+
+        return preset
 
     def _process_presets(self):
-        pass
+        """
+        Adds all preset files from preset paths
+        """
+
+        for preset_file in self.discover_presets():
+            self.add_preset(preset_file)
 
     def _default_browse_path(self):
         """
@@ -1079,7 +1284,8 @@ class SolsticePlayBlast(solstice_windows.Window, object):
             widget_inputs = inputs.get(widget.id, None)
             if not widget_inputs:
                 contextlib
-            widget.apply_inputs(widget_inputs)
+            if widget_inputs:
+                widget.apply_inputs(widget_inputs)
 
     def get_outputs(self):
         outputs = dict()
@@ -1202,10 +1408,17 @@ def capture(**kwargs):
     overwrite = kwargs.get('overwrite', False)
     frame_padding = kwargs.get('frame_padding', 4)
     raw_frame_numbers = kwargs.get('raw_frame_numbers', False)
+    camera_options = kwargs.get('camera_options', None)
+    display_options = kwargs.get('display_options', None)
+    viewport_options = kwargs.get('viewport_options', None)
+    viewport2_options = kwargs.get('viewport2_options', None)
 
+    camera = camera or 'persp'
     if not cmds.objExists(camera):
         raise RuntimeError('Camera does not exists!'.format(camera))
 
+    width = width or cmds.getAttr('defaultResolution.width')
+    height = height or cmds.getAttr('defaultResolution.height')
     if maintain_aspect_ratio:
         ratio = cmds.getAttr('defaultResolution.deviceAspectRatio')
         height = round(width / ratio)
@@ -1224,7 +1437,7 @@ def capture(**kwargs):
     if frame is not None:
         playblast_kwargs['frame'] = frame
     if sound is not None:
-        playblast_kwargs['kwargs'] = sound
+        playblast_kwargs['sound'] = sound
 
     if frame and raw_frame_numbers:
         check = frame if isinstance(frame, (list, tuple)) else [frame]
@@ -1237,6 +1450,10 @@ def capture(**kwargs):
     with utils.create_independent_panel(width=width+padding, height=height+padding, off_screen=off_screen) as panel:
         cmds.setFocus(panel)
         with contextlib.nested(
+            _applied_viewport_options(viewport_options, panel),
+            _applied_camera_options(camera_options, panel),
+            _applied_display_options(display_options),
+            _applied_viewport2_options(viewport2_options),
             utils.disable_inview_messages(),
             utils.maintain_camera_on_panel(panel=panel, camera=camera),
             utils.isolated_nodes(nodes=isolate, panel=panel),
@@ -1286,6 +1503,92 @@ def capture_scene(options):
     return path
 
 
+def sna(*args, **kwargs):
+    """
+    Single frame playblast in an independent panel
+    """
+
+    frame = kwargs.pop('frame', cmds.currentTime(query=True))
+    kwargs['start_frame'] = frame
+    kwargs['end_frame'] = frame
+    kwargs['frame'] = frame
+    if not isinstance(frame, (int, float)):
+        raise TypeError('Frame must be a single frame (integer or float). For sequences use capture function.')
+
+    format = kwargs.pop('format', 'image')
+    compression = kwargs.get('compression', 'png')
+    viewer = kwargs.pop('viewer', False)
+    raw_frame_numbers = kwargs.pop('raw_frame_numbers', True)
+    kwargs['compression'] = compression
+    kwargs['format'] = format
+    kwargs['viewer'] = viewer
+    kwargs['raw_frame_numbers'] = raw_frame_numbers
+
+    clipboard = kwargs.get('clipboard', False)
+
+    output = capture(*args, **kwargs)
+
+    def replace(m):
+        return str(int(frame)).zfill(len(m.group()))
+
+    if clipboard:
+        solstice_qt_utils.image_to_clipboard(output)
+
+    return output
+
+
+def parse_view(panel):
+    """
+    Parse the scene, panel and camera looking for their current settings
+    :param panel: str
+    """
+
+    camera = cmds.modelPanel(panel, query=True, camera=True)
+    display_options = dict()
+    camera_options = dict()
+    viewport_options = dict()
+    viewport2_options = dict()
+
+    for key in DisplayOptions:
+        if key in _DisplayOptionsRGB:
+            display_options[key] = cmds.displayRGBColor(key, query=True)
+        else:
+            display_options[key] = cmds.displayPref(query=True, **{key: True})
+    for key in CameraOptions:
+        camera_options[key] = cmds.getAttr('{0}.{1}'.format(camera, key))
+    widgets = cmds.pluginDisplayFilter(query=True, listFilters=True)
+    for widget in widgets:
+        widget = str(widget)
+        state = cmds.modelEditor(panel, query=True, queryPluginObjects=widget)
+        viewport_options[widget] = state
+    for key in ViewportOptions:
+        viewport_options[key] = cmds.modelEditor(panel ,query=True, **{key: True})
+    for key in Viewport2Options.keys():
+        attr = 'hardwareRenderingGlobals.{}'.format(key)
+        try:
+            viewport2_options[key] = cmds.getAttr(attr)
+        except ValueError:
+            continue
+
+    return {
+        "camera": camera,
+        "display_options": display_options,
+        "camera_options": camera_options,
+        "viewport_options": viewport_options,
+        "viewport2_options": viewport2_options
+    }
+
+
+def parse_active_view():
+    """
+    Parses the current settings from the active view
+    :return: str
+    """
+
+    panel = utils.get_active_panel()
+    return parse_view(panel)
+
+
 def parse_current_scene():
     """
     Parse current Maya scene looking for settings related with play blasts
@@ -1307,6 +1610,202 @@ def parse_current_scene():
         'quality': cmds.optionVar(query='playblastQuality'),
         'sound': cmds.timeControl(time_control, query=True, sound=True) or None
     }
+
+
+def apply_view(panel, **options):
+    """
+    Apply options to panel
+    :param panel: str
+    :param options: dict
+    """
+
+    camera = cmds.modelPanel(query=True, camera=True)
+
+    display_options = options.get('display_options', {})
+    for key, value in display_options.items():
+        if key in _DisplayOptionsRGB:
+            cmds.displayRGBColor(key, *value)
+        else:
+            cmds.displayPref(**{key: value})
+    camera_options = options.get('camera_options', {})
+    for key, value in camera_options.items():
+        cmds.setAttr('{0}.{1}'.format(camera, key), value)
+    viewport_options = options.get('viewport_options', {})
+    for key, value in viewport_options.items():
+        cmds.modelEditor(panel, edit=True, **{key: value})
+    viewport2_options = options.get('viewport2_options', {})
+    for key, value in viewport2_options.items():
+        attr = 'hardwareRenderingGlobals.{}'.format(key)
+        cmds.setAttr(attr, value)
+
+
+def apply_scene(**options):
+    """
+    Apply options from scene
+    :param options: dict
+    """
+
+    if "start_frame" in options:
+        cmds.playbackOptions(minTime=options["start_frame"])
+
+    if "end_frame" in options:
+        cmds.playbackOptions(maxTime=options["end_frame"])
+
+    if "width" in options:
+        cmds.setAttr("defaultResolution.width", options["width"])
+
+    if "height" in options:
+        cmds.setAttr("defaultResolution.height", options["height"])
+
+    if "compression" in options:
+        cmds.optionVar(
+            stringValue=["playblastCompression", options["compression"]])
+
+    if "filename" in options:
+        cmds.optionVar(
+            stringValue=["playblastFile", options["filename"]])
+
+    if "format" in options:
+        cmds.optionVar(
+            stringValue=["playblastFormat", options["format"]])
+
+    if "off_screen" in options:
+        cmds.optionVar(
+            intValue=["playblastFormat", options["off_screen"]])
+
+    if "show_ornaments" in options:
+        cmds.optionVar(
+            intValue=["show_ornaments", options["show_ornaments"]])
+
+    if "quality" in options:
+        cmds.optionVar(
+            floatValue=["playblastQuality", options["quality"]])
+
+
+@contextlib.contextmanager
+def _applied_camera_options(options, panel):
+    """
+    Context manager for applying options to camera
+    :param options: dict
+    :param panel: str
+    """
+
+    camera = cmds.modelPanel(panel, query=True, camera=True)
+    options = dict(CameraOptions, **(options or {}))
+    old_options = dict()
+
+    for option in options.copy():
+        try:
+            old_options[option] = cmds.getAttr(camera + '.' + option)
+        except Exception as e:
+            sys.stderr.write('Could not get camera attribute for capture: "{}"'.format(option))
+
+    for option, value in options.items():
+        cmds.setAttr(camera + '.' + option, value)
+
+    try:
+        yield
+    finally:
+        if old_options:
+            for option, value in old_options.items():
+                cmds.setAttr(camera + '.' + option, value)
+
+
+@contextlib.contextmanager
+def _applied_display_options(options):
+    """
+    Context manager for setting background color display options
+    :param options: dict
+    """
+
+    options = dict(DisplayOptions, **(options or {}))
+    colors = ['background', 'backgroundTop', 'backgroundBottom']
+    preferences = ['displayGradient']
+    original = dict()
+
+    for color in colors:
+        original[color] = cmds.displayRGBColor(color, query=True) or []
+    for preference in preferences:
+        original[preference] = cmds.displayPref(query=True, **{preference: True})
+    for color in colors:
+        value = options[color]
+        cmds.displayRGBColor(color, *value)
+    for preference in preferences:
+        value = options[preference]
+        cmds.displayPref(**{preference: value})
+
+    try:
+        yield
+    finally:
+        for color in colors:
+            cmds.displayRGBColor(color, *original[color])
+        for preference in preferences:
+            cmds.displayPref(**{preference: original[preference]})
+
+
+@contextlib.contextmanager
+def _applied_viewport_options(options, panel):
+    """
+    Context manager for applying options to panel
+    :param options: dict
+    :param panel: str
+    """
+
+    options = dict(ViewportOptions, **(options or {}))
+    playblast_widgets = cmds.pluginDisplayFilter(query=True, listFilters=True)
+    widget_options = dict()
+    for widget in playblast_widgets:
+        if widget in options:
+            widget_options[widget] = options.pop(widget)
+
+    cmds.modelEditor(panel, edit=True, **options)
+
+    for widget, state in widget_options.items():
+        cmds.modelEditor(panel, edit=True, pluginObjects=(widget, state))
+
+    yield
+
+
+@contextlib.contextmanager
+def _applied_viewport2_options(options):
+    """
+    Context manager for setting viewport 2.0 options
+    :param options: dict
+    """
+
+    options = dict(Viewport2Options, **(options or {}))
+    original = dict()
+
+    for option in options.copy():
+        try:
+            original[option] = cmds.getAttr('hardwareRenderingGlobals.' + option)
+        except ValueError:
+            options.pop(option)
+    for option, value in options.items():
+        cmds.setAttr('hardwareRenderingGlobals.' + option, value)
+
+    try:
+        yield
+    finally:
+        for option, value in original.items():
+            cmds.setAttr('hardwareRenderingGlobals.' + option, value)
+
+
+@contextlib.contextmanager
+def _applied_view(panel, **options):
+    """
+    Apply options to panel
+    :param panel: str
+    :param options: dict
+    """
+
+    original = parse_view(panel)
+    apply_view(panel, **options)
+
+    try:
+        yield
+    finally:
+        apply_view(panel, **original)
 
 # ==================================================================================================================
 
