@@ -800,6 +800,7 @@ class AssetWidget(QWidget, object):
         if category == 'groom':
             return self.has_groom()
 
+
 class CharacterAsset(AssetWidget, object):
     def __init__(self, **kwargs):
         super(CharacterAsset, self).__init__(**kwargs)

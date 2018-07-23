@@ -14,9 +14,10 @@ from functools import partial
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 
-from maya import cmds, OpenMaya
+import maya.cmds as cmds
+import maya.OpenMaya as OpenMaya
 
-from solstice_gui import solstice_windows, solstice_grid, solstice_buttons
+from solstice_gui import solstice_windows, solstice_grid, solstice_buttons, solstice_label
 from solstice_utils import solstice_python_utils as utils
 from resources import solstice_resource
 
@@ -57,11 +58,12 @@ class SolsticeTagger(solstice_windows.Window, object):
     version = '1.0'
     docked = False
 
+    tag_attributes = ['types', 'selections', 'description']
+
     def __init__(self, name='TaggerWindow', parent=None, **kwargs):
 
-        self.selection_changed_callback = OpenMaya.MEventMessage.addEventCallback('SelectionChanged', self._on_selection_changed)
-
         super(SolsticeTagger, self).__init__(name=name, parent=parent, **kwargs)
+        self.add_callback(OpenMaya.MEventMessage.addEventCallback('SelectionChanged', self._on_selection_changed, self))
 
     def custom_ui(self):
         super(SolsticeTagger, self).custom_ui()
@@ -189,6 +191,25 @@ class SolsticeTagger(solstice_windows.Window, object):
         selection_editor_layout.addWidget(self._selection_grid)
         self._tagger_tabs.addTab(self._selection_editor_widget, 'Selections')
 
+        self._high_low_editor_widget = QWidget()
+        high_low_editor_layout = QVBoxLayout()
+        high_low_editor_layout.setContentsMargins(0, 0, 0, 0)
+        high_low_editor_layout.setSpacing(0)
+        self._high_low_editor_widget.setLayout(high_low_editor_layout)
+        high_layout = QHBoxLayout()
+        high_lbl = QLabel('High: ')
+        self.high_line = solstice_label.DragDropLine()
+        high_layout.addWidget(high_lbl)
+        high_layout.addWidget(self.high_line)
+        high_low_editor_layout.addLayout(high_layout)
+        low_layout = QHBoxLayout()
+        low_lbl = QLabel('Proxy: ')
+        self.low_line = solstice_label.DragDropLine()
+        low_layout.addWidget(low_lbl)
+        low_layout.addWidget(self.low_line)
+        high_low_editor_layout.addLayout(low_layout)
+        self._tagger_tabs.addTab(self._high_low_editor_widget, 'High/Proxy')
+
         self._description_editor_widget = QWidget()
         description_editor_layout = QVBoxLayout()
         description_editor_layout.setContentsMargins(0, 0, 0, 0)
@@ -207,15 +228,10 @@ class SolsticeTagger(solstice_windows.Window, object):
         bottom_layout.addWidget(select_tag_data_btn)
         bottom_layout.addWidget(remove_tag_data_btn)
 
-        save_info_btn = QPushButton('Save')
-        self.main_layout.addWidget(save_info_btn)
-
-
         # ================================================================================
 
-        save_info_btn.clicked.connect(self._save)
         self._description_text.textChanged.connect(partial(self.update_tag_data_info, 'description', None, None))
-        self._new_tagger_node_btn.clicked.connect(self._create_metadata_node_for_curr_selection)
+        self._new_tagger_node_btn.clicked.connect(self._update_metadata_node_for_curr_selection)
         select_tag_data_btn.clicked.connect(self._select_tag_data_node)
         remove_tag_data_btn.clicked.connect(self._remove_tag_data_node)
 
@@ -223,10 +239,6 @@ class SolsticeTagger(solstice_windows.Window, object):
 
         self._update_types()
         self._on_selection_changed()
-
-    def closeEvent(self, event):
-        OpenMaya.MMessage.removeCallback(self.selection_changed_callback)
-        super(SolsticeTagger, self).closeEvent(event)
 
     def _select_tag_data_node(self):
         tag_data_node = self.get_tag_data_node_from_curr_sel()
@@ -242,11 +254,11 @@ class SolsticeTagger(solstice_windows.Window, object):
         self.update_metadata_node()
         self._update_selected_tags()
 
-    def _save(self):
-        self.close()
-
     def _on_selection_changed(self, *args, **kwargs):
-        # try:
+        """
+        Function that is called each time the user changes scene selection
+        """
+
         sel = cmds.ls(sl=True)
         if len(sel) <= 0:
             self._curr_selection = 'scene'
@@ -289,6 +301,11 @@ class SolsticeTagger(solstice_windows.Window, object):
             self._selection_grid.add_widget_first_empty_cell(tag_widget)
 
     def set_tags_state(self, state=False):
+        """
+        Disables/Enables all check buttons for all tag properties
+        :param state: bool
+        """
+
         for i in range(self._type_grid.columnCount()):
             for j in range(self._type_grid.rowCount()):
                 container_w = self._type_grid.cellWidget(j, i)
@@ -306,9 +323,11 @@ class SolsticeTagger(solstice_windows.Window, object):
 
         tag_data_node = self.get_tag_data_node_from_curr_sel()
 
+        print(tag_data_node)
+
         self.set_tags_state(False)
 
-        if tag_data_node is not None:
+        if tag_data_node is not None and cmds.attributeQuery('types', node=tag_data_node, exists=True):
             types = cmds.getAttr(tag_data_node + '.types')
             selections = cmds.getAttr(tag_data_node + '.selections')
             description = cmds.getAttr(tag_data_node + '.description')
@@ -340,21 +359,27 @@ class SolsticeTagger(solstice_windows.Window, object):
 
         self._update_current_info()
 
-    def _create_metadata_node_for_curr_selection(self):
+    def _update_metadata_node_for_curr_selection(self):
 
         curr_selection = self._curr_selection
 
-        if self._curr_selection != 'scene':
-            new_tag_data_node = cmds.createNode('network', name='tag_data')
-            cmds.addAttr(new_tag_data_node, ln='node', at='message')
-            if not cmds.attributeQuery('tag_data', node=curr_selection, exists=True):
-                cmds.addAttr(curr_selection, ln='tag_data', at='message')
-            cmds.connectAttr(new_tag_data_node+'.node', curr_selection+'.tag_data')
+        if not self.curr_sel_has_metadata_node():
+            if self._curr_selection != 'scene':
+                new_tag_data_node = cmds.createNode('network', name='tag_data')
+                cmds.addAttr(new_tag_data_node, ln='node', at='message')
+                if not cmds.attributeQuery('tag_data', node=curr_selection, exists=True):
+                    cmds.addAttr(curr_selection, ln='tag_data', at='message')
+                cmds.connectAttr(new_tag_data_node+'.node', curr_selection+'.tag_data')
+                cmds.select(curr_selection)
+                self._update_metadata_node_for_curr_selection()
+            else:
+                new_tag_data_node = cmds.createNode('network', name='tag_data_scene')
+                cmds.select(clear=True)
         else:
-            new_tag_data_node = cmds.createNode('network', name='tag_data_scene')
-
-        for attr in ['types', 'selections', 'description']:
-            cmds.addAttr(new_tag_data_node, ln=attr, dt='string')
+            tag_data_node = self.get_tag_data_node_from_curr_sel()
+            for attr in self.tag_attributes:
+                if not cmds.attributeQuery(attr, node=tag_data_node, exists=True):
+                    cmds.addAttr(tag_data_node, ln=attr, dt='string')
 
         if curr_selection == 'scene':
             cmds.select(clear=True)
@@ -380,6 +405,9 @@ class SolsticeTagger(solstice_windows.Window, object):
         self._curr_info_image.setPixmap(self._ok_pixmap)
 
     def update_metadata_node(self):
+        """
+        If a valid Maya object is selected, tagger tabs is show or hide otherwise
+        """
 
         if self.curr_sel_has_metadata_node():
             self._tagger_widgets.setCurrentWidget(self._tagger_tabs)
@@ -388,6 +416,10 @@ class SolsticeTagger(solstice_windows.Window, object):
             self._new_tagger_node_btn.setText('Create Tag Data node for "{0}"?'.format(self._curr_selection))
 
     def curr_sel_has_metadata_node(self):
+        """
+        Returns True if the current selection has a valid tag data node associated to it or False otherwise
+        :return: bool
+        """
 
         if self._curr_selection == 'scene':
             if cmds.objExists('tag_data_scene'):
@@ -419,7 +451,7 @@ class SolsticeTagger(solstice_windows.Window, object):
 
         tag_data_node = self.get_tag_data_node_from_curr_sel()
 
-        if tag_data_node is not None:
+        if tag_data_node is not None and cmds.attributeQuery('types', node=tag_data_node, exists=True):
             types = cmds.getAttr(tag_data_node+'.types')
             selections = cmds.getAttr(tag_data_node+'.selections')
             if types is not None and types != '':
@@ -492,5 +524,5 @@ def run():
     reload(utils)
     reload(solstice_grid)
     reload(solstice_buttons)
-    # try:
+    reload(solstice_label)
     SolsticeTagger.run()

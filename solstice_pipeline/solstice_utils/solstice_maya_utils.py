@@ -10,6 +10,8 @@
 
 import os
 import glob
+import stat
+import shutil
 import contextlib
 from collections import OrderedDict
 
@@ -502,6 +504,52 @@ def get_available_screen_size():
 
     rect = QDesktopWidget().screenGeometry(-1)
     return [rect.width(), rect.height()]
+
+
+def clean_student_line(filename):
+    """
+    Clean the student line from the given Maya file name
+    :param filename: str
+    """
+
+    changed = False
+
+    if not os.path.exists(filename):
+        sp.logger.error('File "{}" does not exists!'.format(filename))
+        return False
+
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    step = len(lines)/4
+
+    for line in lines:
+        if 'createNode' in line:
+            sp.logger.info('File is already cleaned: no student line found!')
+            return False
+        if 'fileInfo' in line and 'student' in line:
+            break
+
+    no_student_filename = filename.replace('.ma', '.no_student.ma')
+    with open(no_student_filename, 'w') as f:
+        step_count = 0
+        for line in lines:
+            step_count += 1
+            if 'fileInfo' in line:
+                if 'student' in line:
+                    changed = True
+                    continue
+            f.write(line)
+            if step_count > step:
+                sp.logger.debug('Updating File: {}% ...'.format(100/(len(lines)/step_count)))
+                step += step
+
+    if changed:
+        os.chmod(filename, stat.S_IWUSR | stat.S_IREAD)
+        shutil.copy2(no_student_filename, filename)
+        os.remove(no_student_filename)
+        sp.logger.info('Student file cleaned successfully!')
+
+    return changed
 
 
 @contextlib.contextmanager

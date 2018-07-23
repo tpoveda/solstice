@@ -15,6 +15,42 @@ from solstice_qt.QtGui import *
 from solstice_utils import solstice_qt_utils as utils
 
 
+class DragDropLine(QLineEdit, object):
+    """
+    QLineEdit that supports drag and drop behaviour
+    """
+
+    def __init__(self, parent=None):
+        super(DragDropLine, self).__init__(parent)
+
+        self.setDragEnabled(True)
+        self.setReadOnly(True)
+
+    def dragEnterEvent(self, event):
+        """
+        Overrides QWidget dragEnterEvent to enable drop behaviour with file
+        :param event: QDragEnterEvent
+        :return:
+        """
+        data = event.mimeData()
+        urls = data.urls()
+        if (urls and urls[0].scheme() == 'file'):
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event):
+        data = event.mimeData()
+        urls = data.urls()
+        if (urls and urls[0].scheme() == 'file'):
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        data = event.mimeData()
+        urls = data.urls()
+        if (urls and urls[0].scheme() == 'file'):
+            self.setText(urls[0].toLocalFile())
+
+
+
 class ClickLabel(QLabel, object):
     """
     This label emits a clicked signal when the user clicks on it

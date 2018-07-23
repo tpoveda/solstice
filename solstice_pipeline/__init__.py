@@ -27,7 +27,6 @@ import maya.utils
 
 import solstice_pipeline
 
-root_path = os.path.dirname(os.path.abspath(__file__))
 loaded_modules = OrderedDict()
 reload_modules = list()
 logger = None
@@ -45,13 +44,14 @@ valid_categories = ['textures', 'model', 'shading', 'groom']            # NOTE: 
 
 
 def update_paths():
+    root_path = os.path.dirname(os.path.abspath(__file__))
     extra_paths = [os.path.join(root_path, 'externals'), os.path.join(root_path, 'resources', 'icons')]
     for path in extra_paths:
         if os.path.exists(path) and path not in sys.path:
             print('Adding Path {} to SYS_PATH ...'.format(path))
             sys.path.append(path)
         else:
-            print('Path {} not added to SYS_PATH because it does not exists!'.format(path))
+            print('Path {} not added to SYS_PATH because it does not exists or is already included in SYS_PATH!'.format(path))
 
     for subdir, dirs, files in os.walk(root_path):
         if subdir not in sys.path:
@@ -64,6 +64,7 @@ def get_module_names():
     :return: list<str>
     """
 
+    root_path = os.path.dirname(os.path.abspath(__file__))
     root_name = os.path.basename(root_path)
     ret = list()
     for subdir, dirs, files in os.walk(root_path):

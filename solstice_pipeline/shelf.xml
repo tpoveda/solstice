@@ -5,6 +5,7 @@
     <shelfItem icon="" cmds="" ann="Separator" label=""/>
     <!-- Pipeline Tools -->
     <shelfItem icon="pipeline.png" cmds="from solstice_pipeline.solstice_tools import solstice_pipelinizer; solstice_pipelinizer.run()" ann="Solstice Pipelinizer Tool" label=""/>
+    <shelfItem icon="" cmds="" ann="Separator" label=""/>
     <shelfItem icon="tagger.png" cmds="from solstice_pipeline.solstice_tools import solstice_tagger; reload(solstice_tagger); solstice_tagger.run();" ann="Solstice Tagger Tool" label=""/>
     <shelfItem icon="sanitycheck.png" cmds="from solstice_pipeline.solstice_tools import solstice_sanitycheck; reload(solstice_sanitycheck); solstice_sanitycheck.sanityCheck(True);" ann="Solstice Sanity Check Tool" label=""/>
     <shelfItem icon="" cmds="" ann="Separator" label=""/>

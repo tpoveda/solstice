@@ -70,6 +70,8 @@ class PublishedInfoWidget(QWidget, object):
         self._versions_layout.setContentsMargins(2, 2, 2, 2)
         self._versions_layout.setSpacing(2)
         self._versions_widget.setLayout(self._versions_layout)
+        self._versions_label = QLabel('')
+        self._versions_layout.addWidget(self._versions_label)
         bottom_splitter.addWidget(self._versions_widget)
 
         self.update_version_info()
@@ -185,28 +187,58 @@ class PublishedInfoWidget(QWidget, object):
             status = 'working'
             max_versions = self._asset.get_max_versions(status=status)
             categories_to_check = list()
+            textures_version_str = ''
             for f in sp.valid_categories:
                 for status_type in ['local', 'server']:
                     if f not in max_versions[status_type].keys():
                         continue
                     version_info = max_versions[status_type][f]
+                    if not version_info:
+                        continue
                     if f == 'textures':
-                        print(version_info)
+                        max_version = 0
+                        for txt_name, txt_version in version_info.items():
+                            if txt_version.version > max_version:
+                                max_version = txt_version.version
+                            textures_version_str += txt_name + ' : | ' + status_type.upper() + '| ' + 'v' + str(txt_version.version) + '\n'
+                        self._ui[status][f][status_type]['text'].setText('v{0}'.format(str(max_version)))
+                        self._ui[status][f]['status'].setPixmap(self._warning_pixmap)
+                        self._versions_label.setText(textures_version_str)
                     else:
-                        if not version_info:
-                            continue
                         self._ui[status][f][status_type]['text'].setText('v{0}'.format(str(version_info.version)))
                         self._ui[status][f]['status'].setPixmap(self._warning_pixmap)
-                        categories_to_check.append(f)
+                    categories_to_check.append(f)
+                    textures_version_str += '-----------------------\n'
 
                 for cat in categories_to_check:
                     max_local = max_versions['local'][cat]
                     max_server = max_versions['server'][cat]
 
-                    if max_local == max_server and max_local is not None and max_server is not None:
-                        self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
-                    if max_local > max_server or max_local is None and max_server is not None:
-                        self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
+                    if cat == 'textures':
+                        msg_str = ''
+                        valid_check = True
+                        for (local_txt_name, local_txt_version), (server_txt_name, server_txt_version) in zip(max_local.items(), max_server.items()):
+                            if local_txt_name == server_txt_name:
+                                if local_txt_version.version == server_txt_version.version:
+                                    msg_str += 'Texture {0} is updated: v{1}\n'.format(server_txt_name, server_txt_version.version)
+                                else:
+                                    valid_check = False
+                                    msg_str += 'Texture {0} is not updated: |LOCAL| v{1} |SERVER| v{2}'.format(server_txt_name, local_txt_version.version, server_txt_version.version)
+                            else:
+                                valid_check = False
+                                msg_str += 'Invalid Texture: {0} - {1}'.format(local_txt_name, server_txt_name)
+                        if valid_check:
+                            self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
+                            self._ui[status][cat]['status'].setToolTip('All textures are updated!')
+                        else:
+                            self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
+                            self._ui[status][cat]['status'].setToolTip(msg_str)
+                    else:
+                        if max_local is not None and max_server is not None and max_local.version == max_server.version:
+                            self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
+                            self._ui[status][cat]['status'].setToolTip('{} file is updated to last version: {}'.format(cat.title(), max_server.version))
+                        elif max_local is None and max_server is not None or max_local.version > max_server.version:
+                            self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
 
     def update_published_info(self):
         if self._check_published_info:

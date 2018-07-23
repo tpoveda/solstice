@@ -20,7 +20,7 @@ from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_shaderviewer, solstice_shader
+from solstice_gui import solstice_windows, solstice_shaderviewer
 from solstice_utils import solstice_maya_utils as utils
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_shader_utils, solstice_artella_utils
@@ -562,7 +562,6 @@ def run():
     reload(utils)
     reload(solstice_shader_utils)
     reload(solstice_shaderviewer)
-    reload(solstice_shader)
 
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()

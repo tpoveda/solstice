@@ -87,7 +87,7 @@ class AlembicExporter(QWidget, object):
         self.main_layout.addLayout(export_path_layout)
 
     def export(self, nodes, filename, start_frame=1, end_frame=24):
-        
+        pass
 
 
 class AlembicManager(solstice_windows.Window, object):

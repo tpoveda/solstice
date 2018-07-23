@@ -56,18 +56,18 @@ class Logger(object):
                 logging.basicConfig(format=format_) if format_ else logging.basicConfig()
             self._logger = logging.getLogger(self._name)
             self._logger.setLevel(self._level)
-            hdlr = logging.FileHandler(self.get_log_file(),  mode='w')
-            formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-            hdlr.setFormatter(formatter)
-            self._logger.addHandler(hdlr)
+            # hdlr = logging.FileHandler(self.get_log_file(),  mode='w')
+            # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+            # hdlr.setFormatter(formatter)
+            # self._logger.addHandler(hdlr)
         except Exception:
             logging.basicConfig(format=format_) if format_ else logging.basicConfig()
             self._logger = logging.getLogger(self._name)
             self._logger.setLevel(self._level)
-            hdlr = logging.FileHandler(self.get_log_file(), mode='w')
-            formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-            hdlr.setFormatter(formatter)
-            self._logger.addHandler(hdlr)
+            # hdlr = logging.FileHandler(self.get_log_file(), mode='w')
+            # formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+            # hdlr.setFormatter(formatter)
+            # self._logger.addHandler(hdlr)
 
     def enable(self):
         """
