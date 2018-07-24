@@ -2,18 +2,9 @@
 # # -*- coding: utf-8 -*-
 #
 # """ ==================================================================
+# Script Name: solstice_alembicmanager.py
 # by Tomas Poveda
-#  Tool to import/export alembic files for Solstice Short Film
-# ==================================================================="""
-
-
-#!/usr/bin/env python
-# # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_animtools.py
-# by Tomas Poveda
-# Tool that contains utility tools related with generic animation
+# Tool to export/import Alembic (.abc) files
 # ______________________________________________________________________
 # ==================================================================="""
 
