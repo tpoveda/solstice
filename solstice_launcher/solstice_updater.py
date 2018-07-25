@@ -202,11 +202,15 @@ def check_solstice_tools_version(console, updater, get_versions=False):
             if installed_version and last_version_value <= installed_version:
                 console.write_ok('Current installed tools {0} are up-to-date (version in server {1})!'.format(install_version, last_version))
 
-            if get_versions:
-                return last_version, installed_version, False
+                if get_versions:
+                    return last_version, installed_version, False
+                else:
+                    return False
             else:
-                return False
-
+                if get_versions:
+                    return last_version, installed_version, True
+                else:
+                    return True
         else:
             if get_versions:
                 return last_version, None, True
