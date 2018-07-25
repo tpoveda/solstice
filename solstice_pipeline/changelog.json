@@ -34,5 +34,9 @@
    "Added new version of Sanity Check Tool with basic functionality",
    "Added new tags into Solstice Tagger Tool",
    "Implemented first simple MetaData system for Solstice Assets"
- ]
+ ],
+  "4.0":
+  [
+    "Updated UI layout of Solstice Changelog"
+  ]
 }

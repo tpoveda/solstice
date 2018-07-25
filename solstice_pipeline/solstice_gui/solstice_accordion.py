@@ -442,7 +442,7 @@ class AccordionWidget(QScrollArea, object):
                 item = layout.itemAt(0)
 
                 # First we remove the item from the layout
-                w = item.widget()
+                w = item.widget
                 layout.removeItem(item)
 
                 # Second, close the widget and delete it
@@ -478,7 +478,7 @@ class AccordionWidget(QScrollArea, object):
 
     def item_at(self, index):
         layout = self.widget().layout()
-        if 0 < index < layout.count() - 1:
+        if 0 <= index < layout.count() - 1:
             return layout.itemAt(index).widget()
         return None
 
@@ -501,7 +501,7 @@ class AccordionWidget(QScrollArea, object):
             widget = None
             if 0 < index < layout.count() - 1:
                 item = layout.itemAt(index)
-                widget = item.widget()
+                widget = item.widget
                 layout.removeItem(item)
                 widget.close()
             self.setUpdatesEnabled(True)
@@ -513,7 +513,7 @@ class AccordionWidget(QScrollArea, object):
     def widget_at(self, index):
         item = self.item_at(index)
         if item:
-            return item.widget()
+            return item.widget
         return None
 
     def emit_item_collapsed(self, item):

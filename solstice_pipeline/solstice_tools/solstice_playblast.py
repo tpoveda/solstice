@@ -1283,7 +1283,7 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         for widget in widgets:
             widget_inputs = inputs.get(widget.id, None)
             if not widget_inputs:
-                contextlib
+                continue
             if widget_inputs:
                 widget.apply_inputs(widget_inputs)
 
@@ -1503,7 +1503,7 @@ def capture_scene(options):
     return path
 
 
-def sna(*args, **kwargs):
+def snap(*args, **kwargs):
     """
     Single frame playblast in an independent panel
     """
