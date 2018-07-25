@@ -37,8 +37,9 @@ class SolsticePublisher(solstice_dialog.Dialog, object):
     version = '1.0'
     docked = False
 
-    def __init__(self, name='PublisherWindow', asset=None, parent=None, **kwargs):
+    def __init__(self, name='PublisherWindow', asset=None, new_working_version=False, parent=None, **kwargs):
         self._asset = asset
+        self._new_working_version = new_working_version
 
         super(SolsticePublisher, self).__init__(name=name, parent=parent, **kwargs)
 
@@ -48,15 +49,16 @@ class SolsticePublisher(solstice_dialog.Dialog, object):
         super(SolsticePublisher, self).custom_ui()
         self.set_logo('solstice_publisher_logo')
         if self._asset:
-            asset_publisher = AssetPublisherWidget(asset=self._asset)
+            asset_publisher = AssetPublisherWidget(asset=self._asset, new_working_version=self._new_working_version)
             self.main_layout.addWidget(asset_publisher)
 
 
 class AssetPublisherWidget(QWidget, object):
-    def __init__(self, asset, parent=None):
+    def __init__(self, asset, new_working_version=False, parent=None):
         super(AssetPublisherWidget, self).__init__(parent=parent)
 
         self._asset = weakref.ref(asset)
+        self._new_working_version = new_working_version
 
         main_layout = QVBoxLayout()
         main_layout.setAlignment(Qt.AlignTop)
@@ -76,7 +78,10 @@ class AssetPublisherWidget(QWidget, object):
         main_layout.addWidget(self._asset_label)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
 
-        # self._versions = self._asset().get_max_published_versions(all_versions=True)
+        if not self._new_working_version:
+            self._versions = self._asset().get_max_published_versions(all_versions=True)
+        else:
+            self._versions = self._asset().get_max_working_versions(all_versions=True)
 
         versions_layout = QGridLayout()
         versions_layout.setContentsMargins(10, 10, 10, 10)
@@ -113,25 +118,32 @@ class AssetPublisherWidget(QWidget, object):
         main_layout.addWidget(self._comment_box)
 
         main_layout.addLayout(solstice_splitters.SplitterLayout())
-        self._publish_btn = QPushButton('Publish')
-        self._publish_btn.clicked.connect(self._publish)
+
+        if not self._new_working_version:
+            self._publish_btn = QPushButton('Publish')
+        else:
+            self._publish_btn = QPushButton('New Version')
+
+        if not self._new_working_version:
+            self._publish_btn.clicked.connect(self._publish)
+        else:
+            self._publish_btn.clicked.connect(self._new_version)
+
         main_layout.addWidget(self._publish_btn)
 
-        # self._update_versions()
+        self._update_versions()
 
         # =====================================================================================================
 
-        # for cat in sp.valid_categories:
-        #     asset_is_locked, current_user = self._asset().is_locked(category=cat, status='working')
-        #     if asset_is_locked:
-        #         if not current_user:
-        #             self._ui[cat]['check'].setChecked(False)
-        #             self._ui[cat]['current_version'].setText('LOCK')
-        #             self._ui[cat]['next_version'].setText('LOCK')
-        #             for name, w in self._ui[cat].items():
-        #                 w.setEnabled(False)
-    def _update_must_textures_checkbox(self):
-        print('hola')
+        for cat in sp.valid_categories:
+            asset_locked_by, current_user_can_lock = self._asset().is_locked(category=cat, status='working')
+            if asset_locked_by:
+                if not current_user_can_lock:
+                    self._ui[cat]['check'].setChecked(False)
+                    self._ui[cat]['current_version'].setText('LOCK')
+                    self._ui[cat]['next_version'].setText('LOCK')
+                    for name, w in self._ui[cat].items():
+                        w.setEnabled(False)
 
     def _update_versions(self):
         for cat, version in self._versions.items():
@@ -167,11 +179,43 @@ class AssetPublisherWidget(QWidget, object):
 
         self._publish_btn.setEnabled(publish_state)
 
+        # TODO: Textures for working assets is not ready (we should show a option to publish new version of individual
+        # TODO: textures. So for now, we disable it
+        if self._new_working_version:
+            self._ui['textures']['check'].setChecked(False)
+            self._ui['textures']['check'].setVisible(False)
+            self._ui['textures']['check'].setEnabled(False)
+
         self._ui['shading']['check'].setEnabled(True)
         if self._ui['textures']['check'].isChecked():
             self._ui['shading']['check'].setChecked(True)
             self._ui['shading']['check'].setEnabled(False)
 
+    def _new_version(self):
+        for cat in sp.valid_categories:
+            if not self._ui[cat]['check'].isChecked():
+                continue
+            if not self._asset().has_category(category=cat):
+                continue
+
+            asset_path = self._asset().asset_path
+            asset_path = os.path.join(asset_path, '__working__', cat)
+
+            comment = self._comment_box.toPlainText()
+            selected_version = dict()
+
+            if cat == 'textures':
+                pass
+            elif cat == 'shading':
+                asset_path = os.path.join(asset_path, self._asset().name + '_SHD.ma')
+            else:
+                asset_path = os.path.join(asset_path, self._asset().name + '.ma')
+
+            # TODO: Before uploading new version we should execute the sanity check
+
+            artella.lock_asset(file_path=asset_path)
+            artella.upload_new_asset_version(file_path=asset_path, comment=comment)
+            artella.unlock_asset(file_path=asset_path)
 
     def _publish(self):
         # max_versions = self._asset().get_max_versions(status='working')
@@ -296,6 +340,6 @@ class AssetPublisherWidget(QWidget, object):
                 artella.synchronize_path(path=asset_path)
 
 
-def run(asset=None):
-    publisher_dialog = SolsticePublisher(asset=asset)
+def run(asset=None, new_working_version=False):
+    publisher_dialog = SolsticePublisher(asset=asset, new_working_version=new_working_version)
     publisher_dialog.exec_()

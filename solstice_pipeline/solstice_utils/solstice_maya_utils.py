@@ -506,6 +506,29 @@ def get_available_screen_size():
     return [rect.width(), rect.height()]
 
 
+def file_has_student_line(filename):
+    """
+    Returns True if the given Maya file has a student license on it
+    :param filename: str
+    :return: bool
+    """
+
+    if not os.path.exists(filename):
+        sp.logger.error('File "{}" does not exists!'.format(filename))
+        return False
+
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+
+    for line in lines:
+        if 'createNode' in line:
+            return False
+        if 'fileInfo' in line and 'student' in line:
+            return True
+
+    return False
+
+
 def clean_student_line(filename):
     """
     Clean the student line from the given Maya file name
@@ -518,16 +541,13 @@ def clean_student_line(filename):
         sp.logger.error('File "{}" does not exists!'.format(filename))
         return False
 
+    if not file_has_student_line(filename=filename):
+        sp.logger.info('File is already cleaned: no student line found!')
+        return False
+
     with open(filename, 'r') as f:
         lines = f.readlines()
     step = len(lines)/4
-
-    for line in lines:
-        if 'createNode' in line:
-            sp.logger.info('File is already cleaned: no student line found!')
-            return False
-        if 'fileInfo' in line and 'student' in line:
-            break
 
     no_student_filename = filename.replace('.ma', '.no_student.ma')
     with open(no_student_filename, 'w') as f:

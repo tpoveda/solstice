@@ -38,9 +38,10 @@ def update_artella_paths():
     """
 
     artella_folder = get_artella_data_folder()
-    for subdir, dirs, files in os.walk(artella_folder):
-        if subdir not in sys.path:
-            sys.path.append(subdir)
+    if artella_folder is not None and os.path.exists(artella_folder):
+        for subdir, dirs, files in os.walk(artella_folder):
+            if subdir not in sys.path:
+                sys.path.append(subdir)
 
 
 def update_local_artella_root():
@@ -70,14 +71,16 @@ def get_artella_data_folder():
     """
 
     if platform.system() == 'Darwin':
-        artella_folder = os.path.join('/Applications', 'Artella.app', 'Contents', 'MacOS')
+        artella_folder = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', 'Artella')
     else:
         artella_folder = os.path.join(os.getenv('PROGRAMDATA'), 'Artella')
     artella_folder = [os.path.join(artella_folder, name) for name in os.listdir(artella_folder) if os.path.isdir(os.path.join(artella_folder, name)) and name != 'ui']
     if len(artella_folder) == 1:
         artella_folder = artella_folder[0]
+        sp.logger.debug('Artella folder: {} is valid!'.format(artella_folder))
     else:
         sp.logger.debug('Artella folder: {} not valid!'.format(artella_folder))
+        return None
 
     return artella_folder
 
@@ -541,6 +544,7 @@ def can_unlock(file_path):
     asset_info = asset_status.references.values()[0]
     locker_name = asset_info.locked_view
     user_id = get_current_user_id()
+
     if locker_name is not None and locker_name != user_id:
         return False
 
@@ -580,7 +584,7 @@ def upload_new_asset_version(file_path, comment):
 
     spigot = get_spigot_client()
     payload = dict()
-    payload['cms_uri'] = artella.getCmsUri(file_path)
+    payload['cms_uri'] = '/' + artella.getCmsUri(file_path)
     payload['comment'] = comment
     payload = json.dumps(payload)
 

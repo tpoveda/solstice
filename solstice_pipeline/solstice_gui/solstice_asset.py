@@ -103,8 +103,15 @@ class AssetInfo(QWidget, object):
         self.asset_tab.addTab(self.working_asset, 'Working')
         self.asset_tab.addTab(self.published_asset, 'Published')
         self._asset_published_info = solstice_published_info_widget.PublishedInfoWidget(asset=asset, check_published_info=check_published_info, check_working_info=check_working_info)
+
+        self._bottom_layout = QHBoxLayout()
         self._publish_btn = QPushButton('> PUBLISH NEW VERSION <')
+        self._new_working_version_btn = QPushButton('> NEW WORKING VERSION <')
+        self._bottom_layout.addWidget(self._publish_btn)
+        self._bottom_layout.addWidget(self._new_working_version_btn)
+
         self._publish_btn.clicked.connect(asset.publish)
+        self._new_working_version_btn.clicked.connect(asset.new_version)
 
         main_layout.addWidget(self._asset_info_lbl)
         main_layout.addWidget(self._asset_icon)
@@ -113,7 +120,7 @@ class AssetInfo(QWidget, object):
         main_layout.addLayout(solstice_splitters.SplitterLayout())
         main_layout.addWidget(self._asset_published_info)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
-        main_layout.addWidget(self._publish_btn)
+        main_layout.addLayout(self._bottom_layout)
         main_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Preferred, QSizePolicy.Expanding))
 
         # Uncomment if you want to check for locked/unlocked files each time
@@ -233,6 +240,9 @@ class AssetWidget(QWidget, object):
 
     def publish(self):
         solstice_publisher.run(asset=self)
+
+    def new_version(self):
+        solstice_publisher.run(asset=self, new_working_version=True)
 
     def contextMenuEvent(self, event):
         self.generate_context_menu()
@@ -356,8 +366,9 @@ class AssetWidget(QWidget, object):
 
                             # TODO: Create custom sync dialog
 
-                            ref_history = artella.get_asset_history(ref_path)
-                            server_data[category] = ref_history
+                            if os.path.isfile(ref_path):
+                                ref_history = artella.get_asset_history(ref_path)
+                                server_data[category] = ref_history
                 except Exception:
                     # This exception si launched if some server folder has no valid files. For example, if an asset
                     # does not have a grooming file. In those cases the server version data for that category is {}
@@ -393,7 +404,6 @@ class AssetWidget(QWidget, object):
         return max_local_versions
 
     def get_max_published_versions(self, all_versions=False, categories=None):
-
         if categories:
             if type(categories) not in [list]:
                 folders = [categories]
@@ -416,6 +426,37 @@ class AssetWidget(QWidget, object):
                     else:
                         if int(max_server_versions[f][0]) < int(version):
                             max_server_versions[f] = [int(version), version_folder]
+
+        return max_server_versions
+
+    def get_max_working_versions(self, all_versions=False, categories=None):
+        if categories:
+            if type(categories) not in [list]:
+                folders = [categories]
+            else:
+                folders = categories
+        else:
+            folders = sp.valid_categories
+
+        max_server_versions = dict()
+        for f in folders:
+            max_server_versions[f] = None
+
+        server_versions = self.get_server_versions(all_versions=all_versions, status='working')
+
+        for f, versions in server_versions.items():
+            if f == 'textures':
+                pass
+            else:
+                if not versions:
+                    continue
+                file_versions = versions.versions
+                for v in file_versions:
+                    if max_server_versions[f] is None:
+                        max_server_versions[f] = [int(v[0]), v[1].relative_path]
+                    else:
+                        if int(max_server_versions[f][0]) < int(v[0]):
+                            max_server_versions[f] = [int(v[0]), v[1].relative_path]
 
         return max_server_versions
 
@@ -533,22 +574,21 @@ class AssetWidget(QWidget, object):
                             file_path = os.path.join(self.asset_path, '__working__', 'textures', txt_data[0])
                         else:
                             file_path = os.path.join(self.asset_path, 'textures', txt_data[0])
-                        current_user_locker = artella.can_unlock(file_path=file_path)
+                        current_user_can_unlock = artella.can_unlock(file_path=file_path)
                         if txt_data[1].locked_by is not None:
-                            return True, current_user_locker
-                    return False, current_user_locker
+                            return True, current_user_can_unlock
+                        else:
+                            return False, current_user_can_unlock
                 else:
                     if status == 'working':
                         file_path = os.path.join(self.asset_path, '__working__', versions['server'][category].relative_path)
                     else:
                         file_path = os.path.join(self.asset_path, '__{0}_v{1}__'.format(category, '{0:03}'.format(versions['server'][category])))
-                    current_user_locker = artella.can_unlock(file_path=file_path)
 
+                    current_user_can_unlock = artella.can_unlock(file_path=file_path)
                     locked_by = versions['server'][category].locked_by
-                    if locked_by is None:
-                        current_user_locker = False
 
-                    return locked_by, current_user_locker
+                    return locked_by, current_user_can_unlock
 
         return False, False
 
@@ -668,9 +708,9 @@ class AssetWidget(QWidget, object):
             version_type = version_list[1]
             if sync_type != 'all':
                 if sync_type in version_type:
-                    paths_to_sync.append(os.path.join(self._asset_path, '__{0}__'.format(version_list[1])))
+                    paths_to_sync.append(os.path.join(self._asset_path, '{0}'.format(version_list[1])))
             else:
-                paths_to_sync.append(os.path.join(self._asset_path, '__{0}__'.format(version_list[1])))
+                paths_to_sync.append(os.path.join(self._asset_path, '{0}'.format(version_list[1])))
 
         solstice_sync_dialog.SolsticeSyncFile(files=paths_to_sync).sync()
         elapsed_time = time.time() - start_time
@@ -810,10 +850,8 @@ class CharacterAsset(AssetWidget, object):
         if not self._asset_info:
             return
 
-        self._working_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom', asset=self)
-        self._published_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom', asset=self)
-        # self._working_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'working'))
-        # self._published_groom_btn.clicked.connect(partial(self.open_asset_file, 'groom', 'pubilshed'))
+        self._working_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom', status='working', asset=self, check_lock_info=self._asset_info._check_lock_info)
+        self._published_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom', status='published', asset=self, check_lock_info=self._asset_info._check_lock_info)
 
     def has_groom(self):
         return True

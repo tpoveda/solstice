@@ -17,6 +17,7 @@ from solstice_qt.QtWidgets import *
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
+import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_grid, solstice_buttons, solstice_label
 from solstice_utils import solstice_python_utils as utils
 from resources import solstice_resource
@@ -471,6 +472,26 @@ class ShadersEditor(TaggerEditor, object):
         attr_exists = cmds.attributeQuery('shaders', node=tag_data_node, exists=True)
         if not attr_exists:
             cmds.addAttr(tag_data_node, ln='shaders', dt='string')
+
+        asset_groups = cmds.ls('*_grp', type='transform')
+        if len(asset_groups <= 0):
+            return
+
+        # all_shading_groups = list()
+        # json_data = dict()
+        # for grp in asset_groups:
+        #     json_data[grp] = dict()
+        #     children = cmds.listRelatives(grp, type='transform', allDescendents=True, fullPath=True)
+        #     for child in children:
+        #         child_shapes = cmds.listRelatives(child, shapes=True, fullPath=True)
+        #         for shape in child_shapes:
+        #             json_data[grp][shape] = dict()
+        #             shading_groups = cmds.listConnections(shape, type='shadingEngine')
+        #             for shading_grp in shading_groups:
+        #                 shading_grp_mat = cmds.ls(cmds.listConnections(shading_grp), materials=True)
+        #                 json_data[grp][shape][shading_grp] = shading_grp_mat
+
+
 
         # cmds.setAttr(tag_data_node + '.description', lock=False)
         # cmds.setAttr(tag_data_node + '.description', self._description_text.toPlainText(), type='string')

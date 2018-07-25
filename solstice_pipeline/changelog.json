@@ -22,5 +22,17 @@
   "Added WIP version of Solstice Scatter Tool",
   "Added Shaders Library Tool",
   "Added Solstice Tagger Tool"
+ ],
+ "3.0":
+ [
+   "Solstice Pipelinizer Tool now works properly with MacOS",
+   "Artella plugins and paths now are updated properly in MacOS when Solstice Tools are loaded",
+   "Fixed lock/unlock system on Solstice Pipelinizer",
+   "Added option to upload new working version of shading/models asset files from Solstice Pipelinizer",
+   "Now the working assets file info is showed properly when an asset is selected on Solstice Pipelinizer",
+   "Working files now can be synchronized directly using Solstice Pipelinizer",
+   "Added new version of Sanity Check Tool with basic functionality",
+   "Added new tags into Solstice Tagger Tool",
+   "Implemented first simple MetaData system for Solstice Assets"
  ]
 }

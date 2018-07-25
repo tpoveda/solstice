@@ -15,6 +15,7 @@ from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
 
+from solstice_utils import solstice_artella_utils as artella
 from resources import solstice_resource
 
 
@@ -109,18 +110,32 @@ class CategoryButtonWidget(QWidget, object):
 
     def update(self):
         if self._status == 'working':
-            asset_is_locked, current_user = self._asset().is_locked(category=self._category_name, status=self._status)
+
+            asset_locked_by, current_user_can_lock = self._asset().is_locked(category=self._category_name, status=self._status)
+
             self._lock_btn.blockSignals(True)
-            if asset_is_locked is not None and asset_is_locked:
+            if asset_locked_by is not None and asset_locked_by:
                 self._lock_btn.setChecked(True)
             else:
                 self._lock_btn.setChecked(False)
             self._lock_btn.blockSignals(False)
 
-            if not current_user:
+            print('CATEGORY: ', self._category_name)
+            print('CURRENT USER CAN LOCK: ', current_user_can_lock)
+
+            if not current_user_can_lock:
                 self._lock_btn.setEnabled(False)
+                self._lock_btn.setStyleSheet('QPushButton { border: 1px solid yellow; }')
+                self._lock_btn.setStatusTip('This file is locked by other Solstice team member!')
+                self._lock_btn.setToolTip('This file is locked by other Solstice team member!')
             else:
                 self._lock_btn.setEnabled(True)
+
+            if not current_user_can_lock and asset_locked_by is False:
+                self._lock_btn.setStyleSheet('QPushButton { border: 1px solid red; }')
+                self._lock_btn.setStatusTip('This file does not exists on Artella server yet!')
+                self._lock_btn.setToolTip('This file does not exists on Artella server yet!')
+
 
     def open_asset_file(self):
         if self._category_name == 'textures':

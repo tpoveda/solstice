@@ -237,8 +237,10 @@ class PublishedInfoWidget(QWidget, object):
                         if max_local is not None and max_server is not None and max_local.version == max_server.version:
                             self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
                             self._ui[status][cat]['status'].setToolTip('{} file is updated to last version: {}'.format(cat.title(), max_server.version))
-                        elif max_local is None and max_server is not None or max_local.version > max_server.version:
-                            self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
+                        # elif max_local is None and max_server is not None or max_local.version > max_server.version:
+                        elif max_local is not None and max_server is not None:
+                            if max_local.version > max_server.version:
+                                self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
 
     def update_published_info(self):
         if self._check_published_info:

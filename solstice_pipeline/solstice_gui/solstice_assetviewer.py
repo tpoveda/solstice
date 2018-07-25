@@ -105,6 +105,9 @@ class AssetViewer(solstice_grid.GridWidget, object):
 
         # TODO: Add list of ignored paths to avoid checking for JSON on paths that never will need JSON such as PIPELINE
 
+        if self._assets_paths is None or not os.path.exists(self._assets_paths):
+            return
+
         if os.path.exists(self._assets_paths):
             for root, dirs, files in os.walk(self._assets_paths):
                 if dirs and '__working__' in dirs:
