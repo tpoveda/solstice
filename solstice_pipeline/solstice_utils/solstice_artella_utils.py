@@ -344,7 +344,7 @@ def synchronize_path(path):
     :param path: str
     """
 
-    uri = get_cms_uri(path)
+    uri =  get_cms_uri(path)
     spigot = get_spigot_client()
     rsp = spigot.execute(command_action='do', command_name='updateCollection', payload=uri)
 

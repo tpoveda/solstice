@@ -124,6 +124,65 @@ class StudentLicenseCheck(SanityTask, object):
             sp.logger.warning('Impossible to fix Maya Student License Check')
 
 
+class SanityCheckGroup(QWidget, object):
+    def __init__(self, name, parent=None):
+        super(SanityCheckGroup, self).__init__(parent=parent)
+
+        self.name = name
+        self.checks = list()
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
+        self.setLayout(self.main_layout)
+
+        scroll_widget = QWidget()
+        self.scroll_layout = QVBoxLayout()
+        self.scroll_layout.setAlignment(Qt.AlignTop)
+        scroll_widget.setLayout(self.scroll_layout)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(scroll_widget)
+        scroll_widget.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
+        self.main_layout.addWidget(scroll)
+
+        self.check_btn = QPushButton('Check')
+        self.main_layout.addWidget(self.check_btn)
+        self.check_btn.clicked.connect(self._on_do_check)
+
+    def add_check(self, check):
+        self.scroll_layout.addWidget(check)
+        self.checks.append(check)
+
+    def _on_do_check(self):
+        for check in self.checks:
+            if check.should_be_checked():
+                valid_check = check.check()
+                if valid_check:
+                    check.valid_check()
+                else:
+                    check.invalid_check()
+                    check.show_fix_button()
+
+# ===========================================================================================================
+
+# TODO: Read SanityGroups from JSON file and create them dynamically
+
+
+class GeneralSanityCheck(SanityCheckGroup, object):
+    def __init__(self, parent=None):
+        super(GeneralSanityCheck, self).__init__(name='General', parent=parent)
+
+        self.add_check(StudentLicenseCheck())
+
+
+class ShadingSanityCheck(SanityCheckGroup, object):
+    def __init__(self, parent=None):
+        super(ShadingSanityCheck, self).__init__(name='Shading', parent=parent)
+
+# ===========================================================================================================
+
+
 class SanityCheck(solstice_windows.Window, object):
 
     name = 'Solstice_SanityCheck'
@@ -139,34 +198,16 @@ class SanityCheck(solstice_windows.Window, object):
 
         self.set_logo('solstice_sanitycheck_logo')
 
-        scroll_widget = QWidget()
-        scroll_layout = QVBoxLayout()
-        scroll_layout.setAlignment(Qt.AlignTop)
-        scroll_widget.setLayout(scroll_layout)
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(scroll_widget)
-        scroll_widget.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
-        self.main_layout.addWidget(scroll)
+        self.checks_tab = QTabWidget()
+        self.main_layout.addWidget(self.checks_tab)
 
-        self.checks = list()
-        self.checks.append(StudentLicenseCheck())
-        for check in self.checks:
-            scroll_layout.addWidget(check)
+        # =============================================================================
 
-        self.check_btn = QPushButton('Check')
-        self.main_layout.addWidget(self.check_btn)
-        self.check_btn.clicked.connect(self._on_do_check)
+        self.add_sanity_group(GeneralSanityCheck())
+        self.add_sanity_group(ShadingSanityCheck())
 
-    def _on_do_check(self):
-        for check in self.checks:
-            if check.should_be_checked():
-                valid_check = check.check()
-                if valid_check:
-                    check.valid_check()
-                else:
-                    check.invalid_check()
-                    check.show_fix_button()
+    def add_sanity_group(self, sanity_group):
+        self.checks_tab.addTab(sanity_group, sanity_group.name)
 
 
 def run():

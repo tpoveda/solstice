@@ -276,7 +276,6 @@ def get_solstice_assets_path():
 
     assets_path = os.path.join(get_solstice_project_path(), 'Assets')
     if os.path.exists(assets_path):
-        logger.debug('Getting Assets Path: {0}'.format(assets_path))
         return assets_path
     else:
         logger.debug('Asset Path does not exists!: {0}'.format(assets_path))

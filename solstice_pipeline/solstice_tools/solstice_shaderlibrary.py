@@ -11,47 +11,61 @@
 import os
 import re
 import json
+from functools import partial
 
 import maya.cmds as cmds
-import maya.OpenMayaUI as OpenMayaUI
 
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_shaderviewer
+from solstice_gui import solstice_windows, solstice_shaderviewer, solstice_sync_dialog, solstice_assetviewer
 from solstice_utils import solstice_maya_utils as utils
 from solstice_utils import solstice_image as img
-from solstice_utils import solstice_shader_utils, solstice_artella_utils
+from solstice_utils import solstice_python_utils, solstice_shader_utils, solstice_artella_utils, solstice_qt_utils
 
 IGNORE_SHADERS = ['particleCloud1', 'shaderGlow1', 'defaultColorMgtGlobals', 'lambert1']
 IGNORE_ATTRS = ['computedFileTextureNamePattern']
 SHADER_EXT = 'sshader'
 
 
-class ShaderIO(object):
+class ShadingNetwork(object):
     def __init__(self):
-        pass
+        super(ShadingNetwork, self).__init__()
 
     @staticmethod
-    def write(dict, file_dir):
+    def write(shader_dict, file_dir):
+        """
+        Writes given shader dict to the given JSON file
+        :param shader_dict: dict
+        :param file_dir: str
+        """
+
         with open(file_dir, 'w') as f:
-            json.dump(dict, f, indent=4, sort_keys=True)
+            json.dump(shader_dict, f, indent=4, sort_keys=True)
 
     @staticmethod
     def read(file_dir):
+        """
+        Reads shader info from given JSON file
+        :param file_dir: str
+        :return: dict
+        """
+
         with open(file_dir, 'r') as f:
             shader_dict = json.load(f)
         return shader_dict
 
-
-class ShadingNetwork(ShaderIO, object):
-    def __init__(self):
-        super(ShadingNetwork, self).__init__()
-
     @classmethod
     def write_network(cls, shaders_path, shaders=None, icon_path=None):
+        """
+        Writes shader network info to the given path
+        :param shaders_path: str, path where we want to store the shader
+        :param shaders: list<str>, list of shaders we want to store
+        :param icon_path: str, icon we want to show in the shader viewer
+        :return: list<str>, list of exported shaders
+        """
         if not os.path.exists(shaders_path):
             sp.logger.debug('ShaderLibrary: Shaders Path {0} is not valid! Aborting export!'.format(shaders_path))
 
@@ -61,8 +75,13 @@ class ShadingNetwork(ShaderIO, object):
         exported_shaders = list()
         for shader in shaders:
             if shader not in IGNORE_SHADERS:
+                # Get dict with all the info of the shader
                 shader_network = cls.get_shading_network(shader, shader)
+
+                # Store shader icon in base64 format
                 shader_network['icon'] = img.image_to_base64(icon_path)
+
+                # Export the shader in the given path and with the proper format
                 out_file = os.path.join(shaders_path, shader + '.' + SHADER_EXT)
                 sp.logger.debug('Generating Shader {0} in {1}'.format(shader, out_file))
                 cls.write(shader_network, out_file)
@@ -72,11 +91,17 @@ class ShadingNetwork(ShaderIO, object):
 
     @classmethod
     def load_network(cls, shader_file_path, existing_material=None):
+        """
+        Loads given shader file and creates a proper shader
+        :param shader_file_path: str, JSON shader file
+        :param existing_material:
+        """
+
+        # Get JSON dict from JSON shader file
         network_dict = cls.read(shader_file_path)
         for key in network_dict:
             if key == 'icon':
                 continue
-
             as_type = network_dict[key]['asType']
             node_type = network_dict[key]['type']
             if existing_material is not None and as_type == 'asShader':
@@ -87,22 +112,20 @@ class ShadingNetwork(ShaderIO, object):
                 nodeSG = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=key+'SG')
                 cmds.connectAttr(node+'.outColor', nodeSG+'.surfaceShader', force=True)
             else:
-                node = cls.create_shader_node(node_type=node_type, as_type=as_type, name=key)
+                cls.create_shader_node(node_type=node_type, as_type=as_type, name=key)
 
         for key in network_dict:
             if key == 'icon':
                 continue
-
             as_type = network_dict[key]['asType']
             if existing_material is not None and as_type == 'asShader':
-                cls._set_attrs(existing_material, network_dict[key], as_type)
+                cls._set_attrs(existing_material, network_dict[key])
             else:
-                cls._set_attrs(key, network_dict[key], as_type)
+                cls._set_attrs(key, network_dict[key])
 
         for key in network_dict:
             if key == 'icon':
                 continue
-
             as_type = network_dict[key]['asType']
             if existing_material is not None and as_type == 'asShader':
                 continue
@@ -140,10 +163,21 @@ class ShadingNetwork(ShaderIO, object):
 
     @classmethod
     def _attrs_to_dict(cls, shader_node, prefix):
-        attrs = {'asType': None, 'type': None, 'attr': dict(), 'connection':dict()}
+        """
+        Function that get all necessary attributes from shading node and stores them in dict
+        :param shader_node: str
+        :param prefix: str
+        :return: dict
+        """
+
+        attrs = {'asType': None, 'type': None, 'attr': dict(), 'connection': dict()}
         shader_attrs = cmds.listAttr(shader_node, multi=True)
+
+        # Shader object type
         attrs['type'] = cmds.objectType(shader_node)
-        attrs['asType'] = cls._get_shading_node_type(shader_node)
+
+        # Shading node type
+        attrs['asType'] = solstice_shader_utils.get_shading_node_type(shader_node)
         for attr in shader_attrs:
             if not cmds.connectionInfo('{0}.{1}'.format(shader_node, attr), isDestination=True):
                 try:
@@ -160,11 +194,10 @@ class ShadingNetwork(ShaderIO, object):
                 connected_node, connection = cmds.connectionInfo('{0}.{1}'.format(shader_node, attr), sourceFromDestination=True).split('.')
                 new_connection_name = connected_node + '_' + prefix + '.' + connection
                 attrs['connection'][attr] = new_connection_name
-
         return attrs
 
     @classmethod
-    def _set_attrs(cls, shader_node, attrs, as_type):
+    def _set_attrs(cls, shader_node, attrs):
         for attr in attrs['connection']:
             con_node, con_attr = attrs['connection'][attr].split('.')
             try:
@@ -206,16 +239,6 @@ class ShadingNetwork(ShaderIO, object):
                 except:
                     sp.logger.debug('ShaderLibrary: setAttr {0} skipped!'.format(attr))
                     continue
-
-    @staticmethod
-    def _get_shading_node_type(shader_node):
-        connections = cmds.listConnections(shader_node, source=False, destination=True)
-        if 'defaultTextureList1' in connections:
-            return 'asTexture'
-        if 'defaultShaderList1' in connections:
-            return 'asShader'
-        if 'defaultRenderUtilityList1' in connections:
-            return 'asUtility'
 
 
 class ShaderWidget(QWidget, object):
@@ -284,7 +307,6 @@ class ShaderWidget(QWidget, object):
         auto_gen_icon = QPushButton('Auto Icon')
         auto_gen_icon.setMaximumHeight(20)
         custom_icon_layout.addWidget(auto_gen_icon)
-
 
     def export(self):
 
@@ -361,10 +383,14 @@ class ShaderExporter(QDialog, object):
 
 
 class ShaderViewerWidget(QWidget, object):
+
+    clicked = Signal()
+
     def __init__(self, shader_name, parent=None):
         super(ShaderViewerWidget, self).__init__(parent=parent)
 
         self._name = shader_name
+        self._menu = None
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(5, 5, 5, 5)
@@ -392,17 +418,37 @@ class ShaderViewerWidget(QWidget, object):
 
         # =================================================================================================
 
-        shader_path = os.path.join(ShaderLibrary.get_shader_library_path(), shader_name+'.'+SHADER_EXT)
-        if not os.path.isfile(shader_path):
-            sp.logger.debug('Shader Data Path {0} for shader {1} is not valid!'.format(shader_path, shader_name))
+        self.shader_path = os.path.join(ShaderLibrary.get_shader_library_path(), shader_name+'.'+SHADER_EXT)
+        if not os.path.isfile(self.shader_path):
+            sp.logger.debug('Shader Data Path {0} for shader {1} is not valid!'.format(self.hader_path, shader_name))
             return
 
-        shader_data = ShaderIO.read(shader_path)
+        shader_data = ShadingNetwork.read(self.shader_path)
         shader_icon = shader_data['icon']
         if not shader_icon:
             return
         shader_icon = shader_icon.encode('utf-8')
         shader_btn.setIcon(QPixmap.fromImage(img.base64_to_image(shader_icon)))
+
+        # =================================================================================================
+
+        shader_btn.clicked.connect(self.clicked.emit)
+
+    def contextMenuEvent(self, event):
+        self._generate_context_menu()
+        if not self._menu:
+            return
+        self._menu.exec_(event.globalPos())
+
+    def open_shader_in_editor(self):
+        solstice_python_utils.open_file(self.shader_path)
+
+    def _generate_context_menu(self):
+        self._menu = QMenu(self)
+        open_in_editor = self._menu.addAction('Open Shader in external editor')
+        self._menu.addAction(open_in_editor)
+
+        open_in_editor.triggered.connect(self.open_shader_in_editor)
 
 
 class ShaderLibrary(solstice_windows.Window, object):
@@ -414,11 +460,18 @@ class ShaderLibrary(solstice_windows.Window, object):
 
     def __init__(self, name='ShaderManagerWindow', parent=None, **kwargs):
 
+        self._valid_state = True
         self._shader_library_path = self.get_shader_library_path()
         if not os.path.exists(self._shader_library_path):
-            print('PATH DOES NOT EXISTS!')
-            # TODO: Add MessageBox and asks the user if the want to download
-            # TODO: from Artella server the shaders folder
+            result = solstice_qt_utils.show_question(None, 'Shading Library Path not found!', 'Shaders Library Path is not sync! To start using this tool you should sync this folder first. Do you want to do it?')
+            if result == QMessageBox.Yes:
+                sp.logger.debug('Solstice Shader Library Path not found! Trying to sync through Artella!')
+                self.update_shaders_from_artella()
+                if not os.path.exists(self._shader_library_path):
+                    sp.logger.debug('Solstice Shader not found after sync. Something is wrong, please contact TD!')
+                    self._valid_state = False
+            else:
+                self._valid_state = False
 
         super(ShaderLibrary, self).__init__(name=name, parent=parent, **kwargs)
 
@@ -427,17 +480,16 @@ class ShaderLibrary(solstice_windows.Window, object):
 
         self.set_logo('solstice_shaderlibrary_logo')
 
+        self.main_layout.setAlignment(Qt.AlignTop)
+
         top_layout = QHBoxLayout()
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(0)
         top_layout.setAlignment(Qt.AlignTop)
         self.main_layout.addLayout(top_layout)
-        top_layout.addItem(QSpacerItem(50, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
-        self._export_asset_btn = QToolButton()
-        self._export_asset_btn.setText('Export Selected Asset Materials')
-        self._export_asset_btn.setMinimumHeight(40)
-        self._export_asset_btn.setMaximumHeight(40)
-        top_layout.addWidget(self._export_asset_btn)
+
+        top_layout.addItem(QSpacerItem(25, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+
         self._export_sel_btn = QToolButton()
         self._export_sel_btn.setText('Export Selected Materials')
         self._export_sel_btn.setMinimumWidth(40)
@@ -448,19 +500,57 @@ class ShaderLibrary(solstice_windows.Window, object):
         self._export_all_btn.setMinimumWidth(40)
         self._export_all_btn.setMaximumHeight(40)
         top_layout.addWidget(self._export_all_btn)
-        top_layout.addItem(QSpacerItem(50, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self._sync_shaders_btn = QToolButton()
+        self._sync_shaders_btn.setText('Sync Shaders from Artella')
+        self._sync_shaders_btn.setMinimumWidth(40)
+        self._sync_shaders_btn.setMaximumHeight(40)
+        top_layout.addWidget(self._sync_shaders_btn)
+        self._open_shaders_path_btn = QToolButton()
+        self._open_shaders_path_btn.setText('Open Shaders Library Path')
+        self._open_shaders_path_btn.setMinimumWidth(40)
+        self._open_shaders_path_btn.setMaximumHeight(40)
+        top_layout.addWidget(self._open_shaders_path_btn)
 
+        top_layout.addItem(QSpacerItem(25, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+
+        # ===========================================================================================
+
+        shader_splitter = QSplitter(Qt.Horizontal)
+        shader_splitter.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.main_layout.addWidget(shader_splitter)
+
+        shader_widget = QWidget()
         self.shader_viewer = solstice_shaderviewer.ShaderViewer()
-        self.main_layout.addLayout(self.shader_viewer)
+        self.shader_viewer.setAlignment(Qt.AlignTop)
+        shader_widget.setLayout(self.shader_viewer)
 
-        # self._export_asset_btn.clicked.connect(self._export_selected_asset)
+        self._asset_viewer = solstice_assetviewer.CategorizedAssetViewer(
+            item_pressed_callback=self._on_asset_click
+        )
+
+        shader_splitter.addWidget(self._asset_viewer)
+        shader_splitter.addWidget(shader_widget)
+
         self._export_sel_btn.clicked.connect(self._export_selected_shaders)
         self._export_all_btn.clicked.connect(self._export_all_shaders)
+        self._sync_shaders_btn.clicked.connect(self.update_shaders_from_artella)
+        self._open_shaders_path_btn.clicked.connect(self._open_shaders_path)
 
-        self.update_shader_library()
+        if self._valid_state:
+            self.update_shader_library()
+
+    def update_shaders_from_artella(self):
+        """
+        Connects to Artella and synchronize all the content located in the Shader Library path
+        """
+
+        solstice_sync_dialog.SolsticeSyncFile(files=[self._shader_library_path]).sync()
 
     def update_shader_library(self):
         sp.logger.debug('Updating Shaders ...')
+
+        self.shader_viewer.clear()
+
         for shader_file in os.listdir(self.get_shader_library_path()):
             if not shader_file.endswith('.'+SHADER_EXT):
                 continue
@@ -468,6 +558,7 @@ class ShaderLibrary(solstice_windows.Window, object):
             # if cmds.objExists(shader_name):
             #     continue
             shader_widget = ShaderViewerWidget(shader_name=shader_name)
+            shader_widget.clicked.connect(lambda: self.load_shader(shader_name=shader_name))
             self.shader_viewer.add_widget(shader_widget)
 
     def load_shader(self, shader_name):
@@ -479,13 +570,37 @@ class ShaderLibrary(solstice_windows.Window, object):
 
     @staticmethod
     def get_shader_library_path():
-        return os.path.join(sp.get_solstice_assets_path(), 'Scripts', 'ST_ShaderLibrary', '__working__')
+        """
+        Returns path where Solstice shaders JSON files are located
+        :return: str
+        """
+
+        return os.path.join(sp.get_solstice_assets_path(), 'Scripts', 'PIPELINE', '__working__', 'ShadersLibrary')
 
     @staticmethod
     def export_asset(asset=None):
+        """
+        Export all shaders info for the given asset
+        Generates 2 files:
+            1) Shader JSON files which will be stored inside Shaders Library Path
+            2) Asset Shader Description file which maps the asset geometry to their respective shader
+               This file is stored in the asset folder.
+        :param asset: SolsticeAsset
+        :return: list
+        """
+
+        if asset is None:
+            sp.logger.debug('Given Asset to export is not valid! Aborting operation ...')
+            return
+
+        try:
+            asset.open_asset_file(file_type='shading', status='working')
+        except Exception:
+            sp.logger.debug('Impossible to open Working Shading file for asset: {}'.format(asset.name))
+            return
+
         asset_groups = cmds.ls('*_grp', type='transform')
         if len(asset_groups) <= 0:
-            # sp.logger.debug('Asset {} has no valid groups'.format(asset.name()))
             # sp.logger.debug('Asset {} has no valid groups'.format(asset.name()))
             return
 
@@ -507,8 +622,8 @@ class ShaderLibrary(solstice_windows.Window, object):
         asset_materials = list(set(cmds.ls(cmds.listConnections(all_shading_groups), materials=True)))
 
         # Generate JSON shading file for asset
-        asset_shading_path = os.path.join(asset._asset_path, '__working__', 'shading', asset.name+'_SHD')
-        asset_shading_file = os.path.join(asset_shading_path, asset.name+'.json')
+        asset_shading_path = os.path.join(asset._asset_path, '__working__', 'shading')
+        asset_shading_file = os.path.join(asset_shading_path, asset.name+'_SHD.json')
         if os.path.exists(asset_shading_path):
             with open(asset_shading_file, 'w') as fp:
                 json.dump(json_data, fp)
@@ -521,33 +636,6 @@ class ShaderLibrary(solstice_windows.Window, object):
 
         return [shaders, '']
 
-
-
-
-    # def _export_selected_asset(self):
-    #     shaders = list()
-    #
-    #     objs = cmds.ls(sl=True)
-    #     if len(objs) <= 0:
-    #         cmds.warning('Select asset before export shaders please!')
-    #         return
-    #
-    #     obj = objs[0]
-    #     if not cmds.objExists(obj) or not obj.endswith('_grp'):
-    #         cmds.warning('Select asset is not valid. Please select the main group of the asset in the shading file')
-    #
-    #     children = cmds.listRelatives(type='transform', allDescendents=True, fullPath=True)
-    #     all_shading_groups = list()
-    #     for child in children:
-    #         child_shapes = cmds.listRelatives(child, shapes=True, fullPath=True)
-    #         for shape in child_shapes:
-    #             shading_groups = cmds.listConnections(shape, type='shadingEngine')
-    #             for shading_grp in shading_groups:
-    #                 all_shading_groups.append(shading_grp)
-    #     all_shading_groups = list(set(all_shading_groups))
-    #
-    #     asset_shaders = list(set(cmds.ls(cmds.listConnections(all_shading_groups), materials=True)))
-
     def _export_selected_shaders(self):
         shaders = cmds.ls(sl=True, materials=True)
         ShaderExporter(shaders=shaders, parent=self).exec_()
@@ -555,13 +643,21 @@ class ShaderLibrary(solstice_windows.Window, object):
     def _export_all_shaders(self):
         shaders = cmds.ls(materials=True)
         ShaderExporter(shaders=shaders, parent=self).exec_()
-        pass
+
+    def _open_shaders_path(self):
+        solstice_python_utils.open_folder(self.get_shader_library_path())
+
+    def _on_asset_click(self, asset):
+        sp.logger.debug('Generating Shading info for asset: {}'.format(asset.name))
+        self.export_asset(asset=asset)
+        self.update_shader_library()
 
 
 def run():
     reload(utils)
     reload(solstice_shader_utils)
     reload(solstice_shaderviewer)
+    reload(solstice_assetviewer)
 
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()

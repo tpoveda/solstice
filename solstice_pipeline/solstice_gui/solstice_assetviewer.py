@@ -190,3 +190,68 @@ class AssetViewer(solstice_grid.GridWidget, object):
                         # else:
 
 
+class CategorizedAssetViewer(QWidget, object):
+    def __init__(
+            self,
+            item_pressed_callback=None,
+            simple_assets=True,
+            checkable_assets=False,
+            show_only_published_assets=False,
+            parent=None):
+        super(CategorizedAssetViewer, self).__init__(parent=parent)
+
+        self.main_layout = QVBoxLayout()
+        self.setLayout(self.main_layout)
+
+        self._categories_widget = QWidget()
+        categories_layout = QVBoxLayout()
+        categories_layout.setContentsMargins(0, 0, 0, 0)
+        categories_layout.setSpacing(0)
+        self._categories_widget.setLayout(categories_layout)
+
+        main_categories_menu_layout = QHBoxLayout()
+        main_categories_menu_layout.setContentsMargins(0, 0, 0, 0)
+        main_categories_menu_layout.setSpacing(0)
+        categories_layout.addLayout(main_categories_menu_layout)
+
+        categories_menu = QWidget()
+        categories_menu_layout = QVBoxLayout()
+        categories_menu_layout.setContentsMargins(0, 0, 0, 0)
+        categories_menu_layout.setSpacing(0)
+        categories_menu_layout.setAlignment(Qt.AlignTop)
+        categories_menu.setLayout(categories_menu_layout)
+        main_categories_menu_layout.addWidget(categories_menu)
+
+        asset_viewer_layout = QVBoxLayout()
+        asset_viewer_layout.setContentsMargins(2, 2, 2, 2)
+        asset_viewer_layout.setSpacing(2)
+        main_categories_menu_layout.addLayout(asset_viewer_layout)
+
+        self._asset_viewer = AssetViewer(
+            assets_path=sp.get_solstice_assets_path(),
+            item_pressed_callback=item_pressed_callback,
+            simple_assets=simple_assets,
+            checkable_assets=checkable_assets,
+            show_only_published_assets=show_only_published_assets)
+
+        self._asset_viewer.setColumnCount(2)
+        self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        asset_viewer_layout.addWidget(self._asset_viewer)
+
+        self._categories_btn_group = QButtonGroup(self)
+        self._categories_btn_group.setExclusive(True)
+        categories = ['All', 'Background Elements', 'Characters', 'Props', 'Sets']
+        categories_buttons = dict()
+        for category in categories:
+            new_btn = QPushButton(category)
+            new_btn.toggled.connect(partial(self._change_category, category))
+            categories_buttons[category] = new_btn
+            categories_buttons[category].setCheckable(True)
+            categories_menu_layout.addWidget(new_btn)
+            self._categories_btn_group.addButton(new_btn)
+        categories_buttons['All'].setChecked(True)
+
+        self.main_layout.addWidget(self._categories_widget)
+
+    def _change_category(self, category, flag):
+        self._asset_viewer.change_category(category=category)

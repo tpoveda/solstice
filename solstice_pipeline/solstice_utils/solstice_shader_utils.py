@@ -20,6 +20,22 @@ except ImportError:
     from shiboken2 import wrapInstance
 
 
+def get_shading_node_type(shader_node):
+    """
+    Returns the type of shading node depending of the given shader node connections
+    :param shader_node: str
+    :return: str
+    """
+
+    connections = cmds.listConnections(shader_node, source=False, destination=True)
+    if 'defaultTextureList1' in connections:
+        return 'asTexture'
+    if 'defaultShaderList1' in connections:
+        return 'asShader'
+    if 'defaultRenderUtilityList1' in connections:
+        return 'asUtility'
+
+
 def get_shader_swatch(shader_name, render_size=100, swatch_width=100, swatch_height=100):
     """
     Returns a Shader watch as QWidget
@@ -65,7 +81,6 @@ def export_shader_swatch_as_image(shader_name, export_path=None, render_size=100
         # swatch.deleteLater()
         # swatch = None
         return swatch_pixmap
-
 
     if export_path is None:
         return None

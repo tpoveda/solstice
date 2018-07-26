@@ -29,3 +29,11 @@ class ShaderViewer(QGridLayout, object):
             else:
                 col += 1
         self.addWidget(widget, row, col)
+
+    def clear(self):
+        for i in range(self.count(), -1, -1):
+            item = self.itemAt(i)
+            if item is None:
+                continue
+            item.widget().setParent(None)
+            self.removeItem(item)

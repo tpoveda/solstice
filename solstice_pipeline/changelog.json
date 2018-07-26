@@ -37,6 +37,11 @@
  ],
   "4.0":
   [
-    "Updated UI layout of Solstice Changelog"
+    "Updated UI layout of Solstice Changelog",
+    "Now shaders can be created on the fly from JSON file directly from Solstice Shader Library Viewer",
+    "When Shader Library is launched, it checks if the ShadersLibrary folder is sync and if not, it will sync",
+    "Added Asset Viewer to Shader Library to be able to export shader info for each asset easily",
+    "Added button to access Shader Library path quickly inside Solstice Shader Library Tool",
+    "Added contextual menu item for Shader Widgets to open them in text editor"
   ]
 }

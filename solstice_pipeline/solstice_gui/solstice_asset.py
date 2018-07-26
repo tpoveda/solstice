@@ -245,10 +245,11 @@ class AssetWidget(QWidget, object):
         solstice_publisher.run(asset=self, new_working_version=True)
 
     def contextMenuEvent(self, event):
-        self.generate_context_menu()
-        if not self._menu:
-            return
-        self._menu.exec_(event.globalPos())
+        if not self._simple_mode:
+            self.generate_context_menu()
+            if not self._menu:
+                return
+            self._menu.exec_(event.globalPos())
 
     def get_local_versions(self, status='published', categories=None):
 
