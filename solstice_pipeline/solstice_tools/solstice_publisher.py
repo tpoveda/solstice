@@ -9,24 +9,18 @@
 # ==================================================================="""
 
 import os
-import re
 import weakref
-from shutil import copyfile
 
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
 
-import maya.cmds as cmds
-import maya.OpenMayaUI as OpenMayaUI
-
 import solstice_pipeline as sp
-from solstice_gui import solstice_dialog, solstice_splitters
-from solstice_utils import solstice_image as img
-from solstice_utils import solstice_artella_utils as artella
-from solstice_utils import solstice_artella_classes as classes
-from solstice_utils import solstice_naming_utils as naming
-from solstice_tools import solstice_shaderlibrary
+from solstice_pipeline.solstice_gui import solstice_dialog, solstice_splitters
+from solstice_pipeline.solstice_utils import solstice_image as img
+from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
+from solstice_pipeline.solstice_checks import solstice_shadingvalidator
+
 from resources import solstice_resource
 
 
@@ -78,11 +72,11 @@ class AssetPublisherWidget(QWidget, object):
         main_layout.addWidget(self._asset_label)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
 
-        if not self._new_working_version:
-            self._versions = self._asset().get_max_published_versions(all_versions=True)
-        else:
-            self._versions = self._asset().get_max_working_versions(all_versions=True)
-
+        # if not self._new_working_version:
+        #     self._versions = self._asset().get_max_published_versions(all_versions=True)
+        # else:
+        #     self._versions = self._asset().get_max_working_versions(all_versions=True)
+        #
         versions_layout = QGridLayout()
         versions_layout.setContentsMargins(10, 10, 10, 10)
         versions_layout.setSpacing(5)
@@ -130,22 +124,27 @@ class AssetPublisherWidget(QWidget, object):
             self._publish_btn.clicked.connect(self._new_version)
 
         main_layout.addWidget(self._publish_btn)
-
-        self._update_versions()
-
-        # =====================================================================================================
-
-        for cat in sp.valid_categories:
-            asset_locked_by, current_user_can_lock = self._asset().is_locked(category=cat, status='working')
-            if asset_locked_by:
-                if not current_user_can_lock:
-                    self._ui[cat]['check'].setChecked(False)
-                    self._ui[cat]['current_version'].setText('LOCK')
-                    self._ui[cat]['next_version'].setText('LOCK')
-                    for name, w in self._ui[cat].items():
-                        w.setEnabled(False)
+        #
+        # # Update version of the available asset files
+        # self._update_versions()
+        #
+        # # =====================================================================================================
+        #
+        # for cat in sp.valid_categories:
+        #     asset_locked_by, current_user_can_lock = self._asset().is_locked(category=cat, status='working')
+        #     if asset_locked_by:
+        #         if not current_user_can_lock:
+        #             self._ui[cat]['check'].setChecked(False)
+        #             self._ui[cat]['current_version'].setText('LOCK')
+        #             self._ui[cat]['next_version'].setText('LOCK')
+        #             for name, w in self._ui[cat].items():
+        #                 w.setEnabled(False)
 
     def _update_versions(self):
+        """
+        Gets the last versions of published asset files and updates the UI properly
+        """
+
         for cat, version in self._versions.items():
             if version is None:
                 curr_version_text = 'None'
@@ -202,7 +201,6 @@ class AssetPublisherWidget(QWidget, object):
             asset_path = os.path.join(asset_path, '__working__', cat)
 
             comment = self._comment_box.toPlainText()
-            selected_version = dict()
 
             if cat == 'textures':
                 pass
@@ -211,27 +209,16 @@ class AssetPublisherWidget(QWidget, object):
             else:
                 asset_path = os.path.join(asset_path, self._asset().name + '.ma')
 
-            # TODO: Before uploading new version we should execute the sanity check
-
             artella.lock_asset(file_path=asset_path)
             artella.upload_new_asset_version(file_path=asset_path, comment=comment)
             artella.unlock_asset(file_path=asset_path)
 
     def _publish(self):
-        # max_versions = self._asset().get_max_versions(status='working')
-        # server_versions = max_versions['server']
-
         for cat in sp.valid_categories:
             if not self._ui[cat]['check'].isChecked():
                 continue
             if not self._asset().has_category(category=cat):
                 continue
-
-            # version_info = server_versions[cat]
-
-            # TODO: When publishing shading files check that exists a Maya file that ends with
-            # TODO: _SHD. If not, we avoid the publication of that file because nomenclature is not
-            # TODO: valid
 
             asset_path = self._asset().asset_path
             new_version = int(self._ui[cat]['next_version'].text()[1:])
@@ -241,105 +228,105 @@ class AssetPublisherWidget(QWidget, object):
             comment = self._comment_box.toPlainText()
             selected_version = dict()
 
+            # ================================================================================================
+
             if cat == 'textures':
-                textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
-                if os.path.exists(textures_path):
-                    textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
-                    if len(textures) <= 0:
-                        continue
-                    for txt in textures:
-                        txt_history = artella.get_asset_history(txt)
-                        txt_last_version = txt_history.versions[-1][0]
-                        selected_version['textures/{0}'.format(os.path.basename(txt))] = int(txt_last_version)
+                pass
             elif cat == 'shading':
-                published_textures_info = self._asset().get_max_versions(status='published', categories=['textures'])['server']
-                if published_textures_info is None:
-                    sp.logger.debug('Asset {} has not textures published yet! Before publishing shading files you need to publish textures!'.format(self._asset().name))
+                check = solstice_shadingvalidator.ShadingValidator(asset=self._asset)
+                check.check()
+                if not check.is_valid():
                     break
-                if published_textures_info['textures'] is None:
-                    sp.logger.debug('Asset {} has not textures published yet! Before publishing shading files you need to publish textures!'.format(self._asset().name))
-                    break
-
                 working_path = os.path.join(self._asset().asset_path, '__working__', 'shading', self._asset().name + '_SHD.ma')
-                if self._asset().is_locked('shading', status='working')[1]:
-                    sp.logger.debug('Shading file {} is locked! Aborting publishing ...'.format(working_path))
-                    return
-
                 textures_mapping = dict()
+                # textures_version = '{0:03}'.format(published_textures_info['textures'])
 
-                textures_version = '{0:03}'.format(published_textures_info['textures'])
-
-                # The first time we publish textures, the path of the textures'll point to the work in progress textures
-                if textures_version == 0:
-                    textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
-                    if os.path.exists(textures_path):
-                        textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
-                        for txt in textures:
-                            fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
-                            format_txt = naming.format_path(fixed_txt)
-                            textures_mapping[format_txt] = None
-                else:
-                    textures_path = os.path.join(self._asset().asset_path, '__textures_v{0}__'.format(published_textures_info['textures']-1))
-                    if os.path.exists(textures_path):
-                        textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
-                        for txt in textures:
-                            fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
-                            format_txt = naming.format_path(fixed_txt)
-                            textures_mapping[format_txt] = None
-
-                textures_version_path = os.path.join(self._asset().asset_path, '__textures_v{0}__'.format(textures_version))
-                textures_path = os.path.join(textures_version_path, 'textures')
-                textures_path_status = artella.get_status(textures_path)
-                if textures_path_status and isinstance(textures_path_status, classes.ArtellaDirectoryMetaData):
-                    for txt in textures_path_status.references:
-                        new_text_path = artella.fix_path_by_project(path=os.path.join(textures_version_path, txt), fullpath=True)
-                        for txt_key in textures_mapping.keys():
-                            if naming.format_path(txt) in naming.format_path(txt_key):
-                                textures_mapping[txt_key] = naming.format_path(new_text_path)
-
-                backup_file = copyfile(working_path, working_path + '_BACKUP')
-
-                artella.lock_asset(working_path)
-                try:
-                    data = ''
-                    with open(working_path, 'r') as f:
-                        data = f.read()
-                    for old_txt, new_txt in textures_mapping.items():
-                        maya_format_old_path = old_txt.replace('/', '\\\\')
-                        maya_format_new_path = new_txt.replace('/', '\\\\')
-                        data = data.replace(maya_format_old_path, maya_format_new_path)
-
-                        # We need to take in account that some textures are using <udim> tag
-                        maya_format_old_udim_path = re.sub("_\d\d\d\d.tx", "_<udim>.tx", maya_format_old_path)
-                        maya_format_new_udim_path = re.sub("_\d\d\d\d.tx", "_<udim>.tx", maya_format_new_path)
-                        data = data.replace(maya_format_old_udim_path, maya_format_new_udim_path)
-                    with open(working_path, 'w') as f:
-                        f.write(data)
-                except Exception as e:
-                    sp.logger.debug(str(e))
-                artella.unlock_asset(working_path)
-
-                shaders, info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset())
-
-                print('Publishing {}'.format(shaders))
-                print('Publishing {}'.format(info))
-
-
-
-                #     with open(working_path, 'r') as f:
-                #         data = f.read()
-            # else:
-            #     if not version_info:
-            #         selected_version[os.path.join(cat, self._asset().name + '.ma')] = 1
-            #     else:
-            #         selected_version[version_info.relative_path] = version_info.version
-            #
-
-            artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
-            if cat == 'textures':
-                artella.synchronize_path(path=asset_path)
+        #
+        #     if cat == 'textures':
+        #         textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
+        #         if os.path.exists(textures_path):
+        #             textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+        #             if len(textures) <= 0:
+        #                 continue
+        #             for txt in textures:
+        #                 txt_history = artella.get_asset_history(txt)
+        #                 txt_last_version = txt_history.versions[-1][0]
+        #                 selected_version['textures/{0}'.format(os.path.basename(txt))] = int(txt_last_version)
+        #     elif cat == 'shading':
+        #         working_path = os.path.join(self._asset().asset_path, '__working__', 'shading', self._asset().name + '_SHD.ma')
+        #         if self._asset().is_locked('shading', status='working')[1]:
+        #             sp.logger.debug('Shading file {} is locked! Aborting publishing ...'.format(working_path))
+        #             return
+        #
+        #         textures_mapping = dict()
+        #
+        #         textures_version = '{0:03}'.format(published_textures_info['textures'])
+        #
+        #         # The first time we publish textures, the path of the textures'll point to the work in progress textures
+        #         if textures_version == 0:
+        #             textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
+        #             if os.path.exists(textures_path):
+        #                 textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+        #                 for txt in textures:
+        #                     fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
+        #                     format_txt = naming.format_path(fixed_txt)
+        #                     textures_mapping[format_txt] = None
+        #         else:
+        #             textures_path = os.path.join(self._asset().asset_path, '__textures_v{0}__'.format(published_textures_info['textures']-1))
+        #             if os.path.exists(textures_path):
+        #                 textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+        #                 for txt in textures:
+        #                     fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
+        #                     format_txt = naming.format_path(fixed_txt)
+        #                     textures_mapping[format_txt] = None
+        #
+        #         textures_version_path = os.path.join(self._asset().asset_path, '__textures_v{0}__'.format(textures_version))
+        #         textures_path = os.path.join(textures_version_path, 'textures')
+        #         textures_path_status = artella.get_status(textures_path)
+        #         if textures_path_status and isinstance(textures_path_status, classes.ArtellaDirectoryMetaData):
+        #             for txt in textures_path_status.references:
+        #                 new_text_path = artella.fix_path_by_project(path=os.path.join(textures_version_path, txt), fullpath=True)
+        #                 for txt_key in textures_mapping.keys():
+        #                     if naming.format_path(txt) in naming.format_path(txt_key):
+        #                         textures_mapping[txt_key] = naming.format_path(new_text_path)
+        #
+        #         backup_file = copyfile(working_path, working_path + '_BACKUP')
+        #
+        #         artella.lock_asset(working_path)
+        #         try:
+        #             data = ''
+        #             with open(working_path, 'r') as f:
+        #                 data = f.read()
+        #             for old_txt, new_txt in textures_mapping.items():
+        #                 maya_format_old_path = old_txt.replace('/', '\\\\')
+        #                 maya_format_new_path = new_txt.replace('/', '\\\\')
+        #                 data = data.replace(maya_format_old_path, maya_format_new_path)
+        #
+        #                 # We need to take in account that some textures are using <udim> tag
+        #                 maya_format_old_udim_path = re.sub("_\d\d\d\d.tx", "_<udim>.tx", maya_format_old_path)
+        #                 maya_format_new_udim_path = re.sub("_\d\d\d\d.tx", "_<udim>.tx", maya_format_new_path)
+        #                 data = data.replace(maya_format_old_udim_path, maya_format_new_udim_path)
+        #             with open(working_path, 'w') as f:
+        #                 f.write(data)
+        #         except Exception as e:
+        #             sp.logger.debug(str(e))
+        #         artella.unlock_asset(working_path)
+        #
+        #         shaders, info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset())
+        #
+        #         print('Publishing {}'.format(shaders))
+        #         print('Publishing {}'.format(info))
+        #
+        #     artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
+        #     if cat == 'textures':
+        #         artella.synchronize_path(path=asset_path)
 
 
 def run(asset=None, new_working_version=False):
+    reload(solstice_shadingvalidator)
+
+    from solstice_pipeline.solstice_checks import solstice_assetchecks
+    reload(solstice_assetchecks)
+
     publisher_dialog = SolsticePublisher(asset=asset, new_working_version=new_working_version)
     publisher_dialog.exec_()

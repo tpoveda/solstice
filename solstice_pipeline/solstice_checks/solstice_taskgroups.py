@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+# # -*- coding: utf-8 -*-
+#
+# """ ==================================================================
+# Script Name: solstice_task.py
+# by Tomas Poveda
+# Module that contains base class for creating sanity check tasks
+# ______________________________________________________________________
+# ==================================================================="""
+
+
+from solstice_qt.QtCore import *
+from solstice_qt.QtWidgets import *
+
+import solstice_pipeline as sp
+from solstice_pipeline.solstice_checks import solstice_studentcheck
+from solstice_pipeline.solstice_checks import solstice_assetchecks
+
+reload(solstice_assetchecks)
+
+
+class SanityCheckGroup(QWidget, object):
+
+    checkDone = Signal(object, bool)
+    checkFinished = Signal(bool)
+
+    def __init__(self, name, auto_fix=False, stop_on_error=False, parent=None):
+        super(SanityCheckGroup, self).__init__(parent=parent)
+
+        self.name = name
+        self.auto_fix = auto_fix
+        self.stop_on_error = stop_on_error
+        self.checks = list()
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
+        self.setLayout(self.main_layout)
+
+        scroll_widget = QWidget()
+        self.scroll_layout = QVBoxLayout()
+        self.scroll_layout.setAlignment(Qt.AlignTop)
+        scroll_widget.setLayout(self.scroll_layout)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(scroll_widget)
+        scroll_widget.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
+        self.main_layout.addWidget(scroll)
+
+        self.check_btn = QPushButton('Check')
+        self.main_layout.addWidget(self.check_btn)
+        self.check_btn.clicked.connect(self._on_do_check)
+
+    def add_check(self, check):
+        self.scroll_layout.addWidget(check)
+        self.checks.append(check)
+
+    def _on_do_check(self):
+
+        valid_check = True
+
+        for check in self.checks:
+            if check.should_be_checked():
+                valid_check = check.check()
+                if valid_check:
+                    check.valid_check()
+                    self.checkDone.emit(check, True)
+                else:
+                    check.invalid_check()
+                    check.show_fix_button()
+                    self.checkDone.emit(check, False)
+                    if self.stop_on_error:
+                        break
+                    valid_check = False
+
+        self.checkFinished.emit(valid_check)
+
+
+class GeneralSanityCheck(SanityCheckGroup, object):
+    def __init__(self, auto_fix=False, stop_on_error=False, parent=None):
+        super(GeneralSanityCheck, self).__init__(name='General', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
+
+        self.add_check(solstice_studentcheck.StudentLicenseCheck())
+
+
+class ModelRigSanityCheck(SanityCheckGroup, object):
+    def __init__(self, auto_fix=False, stop_on_error=False, parent=None):
+        super(ModelRigSanityCheck, self).__init__(name='ModelRig', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
+
+
+class ShadingSanityCheck(SanityCheckGroup, object):
+    def __init__(self, auto_fix=False, stop_on_error=False, parent=None):
+        super(ShadingSanityCheck, self).__init__(name='Shading', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
+
+
+class AssetPublishSantiyCheck(SanityCheckGroup, object):
+    def __init__(self, asset, file_type, auto_fix=False, stop_on_error=False, parent=None):
+        super(AssetPublishSantiyCheck, self).__init__(name='AssetPublish', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
+
+        self.add_check(solstice_assetchecks.ValidPublishedTextures(asset=asset, auto_fix=self.auto_fix))
+        self.add_check(solstice_assetchecks.NotLockedAsset(asset=asset, status='working', file_type=file_type, auto_fix=self.auto_fix))
