@@ -9,19 +9,195 @@
 # ==================================================================="""
 
 import os
+import re
 import weakref
+from shutil import copyfile
 
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_gui import solstice_dialog, solstice_splitters
+from solstice_pipeline.solstice_gui import solstice_dialog, solstice_splitters, solstice_spinner, solstice_console
 from solstice_pipeline.solstice_utils import solstice_image as img
 from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
-from solstice_pipeline.solstice_checks import solstice_shadingvalidator
+from solstice_pipeline.solstice_checks import solstice_shadingvalidator, solstice_texturesvalidator
+from solstice_pipeline.solstice_tasks import solstice_taskgroups, solstice_task
 
 from resources import solstice_resource
+
+
+class PublishTexturesTask(solstice_task.Task, object):
+    def __init__(self, asset, new_version, comment='Published textures with Solstice Publisher', auto_run=False, parent=None):
+        super(PublishTexturesTask, self).__init__(name='PublishTextures', auto_run=auto_run, parent=parent)
+
+        self._asset = asset
+        self._comment = comment
+        self._new_version = new_version
+        self.set_task_text('Publishing Textures ...')
+
+    def run(self):
+
+        self.write_ok('>>> PUBLISH TEXTURES LOG')
+        self.write_ok('------------------------------------')
+        check = solstice_texturesvalidator.TexturesValidator(asset=self._asset)
+        check.check()
+        if not check.is_valid():
+            return False
+
+        selected_version = dict()
+        asset_path = self._asset().asset_path
+        asset_path = os.path.join(asset_path, '__{0}_v{1}__ '.format('textures', self._new_version))
+        textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
+        if os.path.exists(textures_path):
+            textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+            if len(textures) <= 0:
+                return False
+            for txt in textures:
+                txt_history = artella.get_asset_history(txt)
+                txt_last_version = txt_history.versions[-1][0]
+                selected_version['textures/{0}'.format(os.path.basename(txt))] = int(txt_last_version)
+
+        sp.logger.debug('ASSET PATH: ')
+        sp.logger.debug(asset_path)
+        sp.logger.debug('COMMENT: ')
+        sp.logger.debug(self._comment)
+        sp.logger.debug('SELECTED VERSIONS: ')
+        sp.logger.debug(selected_version)
+
+        return True
+
+
+class PublishModelTask(solstice_task.Task, object):
+    def __init__(self, asset, comment='Published model with Solstice Publisher', auto_run=False, parent=None):
+        super(PublishModelTask, self).__init__(name='PublishModel', auto_run=auto_run, parent=parent)
+
+        self._asset = asset
+        self._comment = comment
+        self.set_task_text('Publishing Model ...')
+
+    def run(self):
+        return True
+
+
+class PublishShadingTask(solstice_task.Task, object):
+    def __init__(self, asset, comment='Published shading with Solstice Publisher', auto_run=False, parent=None):
+        super(PublishShadingTask, self).__init__(name='PublishShading', auto_run=auto_run, parent=parent)
+
+        self._asset = asset
+        self._comment = comment
+        self.set_task_text('Publishing Shading ...')
+
+    def run(self):
+
+        self.write_ok('>>> PUBLISH SHADING LOG')
+        self.write_ok('------------------------------------')
+        check = solstice_shadingvalidator.ShadingValidator(asset=self._asset)
+        check.check()
+        if not check.is_valid():
+            return False
+
+        # First we need to sync the published textures files
+        self.write('Syncing current published textures files of asset {}\n'.format(self._asset().name))
+        self._asset().sync(sync_type='textures', status='published')
+        working_path = os.path.join(self._asset().asset_path, '__working__', 'shading', self._asset().name + '_SHD.ma')
+        current_textures_path = self._asset().get_asset_textures()
+
+        # Create backup of the file
+        filename, extension = os.path.splitext(working_path)
+        backup_file = filename + '_BACKUP' + extension
+        self.write('Creating Shading backup file: {}\n'.format(backup_file))
+        copyfile(working_path, backup_file)
+
+        self.write('Locking shading file: {}\n'.format(working_path))
+        artella.lock_asset(working_path)
+        try:
+            with open(working_path, 'r') as f:
+                data = f.read()
+                data_lines = data.split(';')
+            new_lines = list()
+            self.write('=== Updating textures paths ===')
+            for line in data_lines:
+                line = str(line)
+                if 'setAttr ".ftn" -type "string"' in line:
+                    if line.endswith('.tx"') or line.endswith('.tiff"'):
+                        subs = re.findall(r'"(.*?)"', line)
+                        current_texture_path = subs[2]
+                        for txt in current_textures_path:
+                            texture_name = os.path.basename(current_texture_path)
+                            if texture_name in os.path.basename(txt):
+                                line = line.replace(current_texture_path, txt).replace('/', '\\\\')
+                                self.write('>>>>>>>>>>>>>>\n\t{0}'.format(os.path.normpath(current_texture_path)))
+                                self.write_ok('\t{0}\n'.format(os.path.normpath(txt)))
+                                self.write('>>>>>>>>>>>>>>\n')
+                new_lines.append(line+';')
+            with open(working_path, 'w') as f:
+                f.writelines(new_lines)
+        except Exception as e:
+            self.write('====================================\n')
+            self.write_error(e)
+            self.write('\nUnlocking shading file: {}\n'.format(working_path))
+            artella.unlock_asset(working_path)
+            return False
+
+        self.write('====================================\n')
+        self.write('\nUnlocking shading file: {}\n'.format(working_path))
+        artella.unlock_asset(working_path)
+        return True
+
+
+class PublishGroomTask(solstice_task.Task, object):
+    def __init__(self, asset, comment='Published groom with Solstice Publisher', auto_run=False, parent=None):
+        super(PublishGroomTask, self).__init__(name='PublishGroom', auto_run=auto_run, parent=parent)
+
+        self._asset = asset
+        self._comment = comment
+        self.set_task_text('Publishing Groom ...')
+
+    def run(self):
+        return False
+
+
+class PublishTaskGroup(solstice_taskgroups.TaskGroup, object):
+    def __init__(self, asset, categories_to_publish, log=None, auto_run=False, parent=None):
+        super(PublishTaskGroup, self).__init__(name='PublishAsset', log=log, parent=parent)
+
+        # # NOTE: First we need to update textures and if textures are updated we need to update also the shading
+        # # file. This is force in UI file (shading checkbox is automatically enabled if textures checkbox is enabled)
+        if categories_to_publish['textures']['check']:
+            categories_to_publish['shading']['check'] = True
+
+        for cat, cat_dict in categories_to_publish.items():
+            if cat_dict['check']:
+                if cat == 'textures':
+                    self.add_task(PublishTexturesTask(
+                        asset=asset,
+                        comment=cat_dict['comment'],
+                        new_version=cat_dict['new_version'],
+                        auto_run=auto_run
+
+                    ))
+                elif cat == 'model':
+                    self.add_task(PublishModelTask(
+                        asset=asset,
+                        comment=cat_dict['comment'],
+                        auto_run=auto_run
+                    ))
+                elif cat == 'shading':
+                    self.add_task(PublishShadingTask(
+                        asset=asset,
+                        comment=cat_dict['comment'],
+                        auto_run=auto_run
+                    ))
+                elif cat == 'groom':
+                    self.add_task(PublishGroomTask(
+                        asset=asset,
+                        comment=cat_dict['comment'],
+                        auto_run=auto_run
+                    ))
+
+        if auto_run:
+            self._on_do_task()
 
 
 class SolsticePublisher(solstice_dialog.Dialog, object):
@@ -37,8 +213,6 @@ class SolsticePublisher(solstice_dialog.Dialog, object):
 
         super(SolsticePublisher, self).__init__(name=name, parent=parent, **kwargs)
 
-        self.setMaximumWidth(200)
-
     def custom_ui(self):
         super(SolsticePublisher, self).custom_ui()
         self.set_logo('solstice_publisher_logo')
@@ -47,11 +221,14 @@ class SolsticePublisher(solstice_dialog.Dialog, object):
             self.main_layout.addWidget(asset_publisher)
 
 
-class AssetPublisherWidget(QWidget, object):
-    def __init__(self, asset, new_working_version=False, parent=None):
-        super(AssetPublisherWidget, self).__init__(parent=parent)
+class AssetPublisherVersionWidget(QWidget, object):
 
-        self._asset = weakref.ref(asset)
+    onPublish = Signal(dict)
+
+    def __init__(self, asset, new_working_version=False, parent=None):
+        super(AssetPublisherVersionWidget, self).__init__(parent=parent)
+
+        self._asset = asset
         self._new_working_version = new_working_version
 
         main_layout = QVBoxLayout()
@@ -62,21 +239,22 @@ class AssetPublisherWidget(QWidget, object):
 
         self._asset_icon = QLabel()
         self._asset_icon.setPixmap(
-        solstice_resource.pixmap('empty_file', category='icons').scaled(200, 200, Qt.KeepAspectRatio))
+            solstice_resource.pixmap('empty_file', category='icons').scaled(200, 200, Qt.KeepAspectRatio))
         self._asset_icon.setAlignment(Qt.AlignCenter)
-        if asset.icon:
-            self._asset_icon.setPixmap(QPixmap.fromImage(img.base64_to_image(asset._icon, image_format=asset._icon_format)).scaled(300, 300, Qt.KeepAspectRatio))
-        self._asset_label = QLabel(asset.name)
+        if self._asset().icon:
+            self._asset_icon.setPixmap(
+                QPixmap.fromImage(img.base64_to_image(self._asset()._icon, image_format=self._asset()._icon_format)).scaled(300, 300, Qt.KeepAspectRatio))
+        self._asset_label = QLabel(self._asset().name)
         self._asset_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self._asset_icon)
         main_layout.addWidget(self._asset_label)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
 
-        # if not self._new_working_version:
-        #     self._versions = self._asset().get_max_published_versions(all_versions=True)
-        # else:
-        #     self._versions = self._asset().get_max_working_versions(all_versions=True)
-        #
+        if not self._new_working_version:
+            self._versions = self._asset().get_max_published_versions(all_versions=True)
+        else:
+            self._versions = self._asset().get_max_working_versions(all_versions=True)
+
         versions_layout = QGridLayout()
         versions_layout.setContentsMargins(10, 10, 10, 10)
         versions_layout.setSpacing(5)
@@ -90,7 +268,8 @@ class AssetPublisherWidget(QWidget, object):
             self._ui[category]['current_version'] = QLabel('v0')
             self._ui[category]['current_version'].setAlignment(Qt.AlignCenter)
             self._ui[category]['separator'] = QLabel()
-            self._ui[category]['separator'].setPixmap(solstice_resource.pixmap('arrow_material', category='icons').scaled(QSize(24, 24)))
+            self._ui[category]['separator'].setPixmap(
+                solstice_resource.pixmap('arrow_material', category='icons').scaled(QSize(24, 24)))
             self._ui[category]['next_version'] = QLabel('v0')
             self._ui[category]['next_version'].setAlignment(Qt.AlignCenter)
             self._ui[category]['check'] = QCheckBox('')
@@ -124,21 +303,11 @@ class AssetPublisherWidget(QWidget, object):
             self._publish_btn.clicked.connect(self._new_version)
 
         main_layout.addWidget(self._publish_btn)
-        #
-        # # Update version of the available asset files
-        # self._update_versions()
-        #
-        # # =====================================================================================================
-        #
-        # for cat in sp.valid_categories:
-        #     asset_locked_by, current_user_can_lock = self._asset().is_locked(category=cat, status='working')
-        #     if asset_locked_by:
-        #         if not current_user_can_lock:
-        #             self._ui[cat]['check'].setChecked(False)
-        #             self._ui[cat]['current_version'].setText('LOCK')
-        #             self._ui[cat]['next_version'].setText('LOCK')
-        #             for name, w in self._ui[cat].items():
-        #                 w.setEnabled(False)
+
+        self._update_ui()
+
+        # Update version of the available asset files
+        self._update_versions()
 
     def _update_versions(self):
         """
@@ -214,119 +383,120 @@ class AssetPublisherWidget(QWidget, object):
             artella.unlock_asset(file_path=asset_path)
 
     def _publish(self):
+        categories_to_publish = dict()
         for cat in sp.valid_categories:
+            categories_to_publish[cat] = dict()
+            categories_to_publish[cat]['check'] = True
             if not self._ui[cat]['check'].isChecked():
-                continue
+                categories_to_publish[cat] = False
             if not self._asset().has_category(category=cat):
-                continue
+                categories_to_publish[cat]['check'] = False
 
-            asset_path = self._asset().asset_path
             new_version = int(self._ui[cat]['next_version'].text()[1:])
-            new_version = '{0:03}'.format(new_version)
-            asset_path = os.path.join(asset_path, '__{0}_v{1}__ '.format(cat, new_version))
+            categories_to_publish[cat]['new_version'] = '{0:03}'.format(new_version)
+            categories_to_publish[cat]['comment'] = self._comment_box.toPlainText()
 
-            comment = self._comment_box.toPlainText()
-            selected_version = dict()
+        self.onPublish.emit(categories_to_publish)
 
-            # ================================================================================================
 
-            if cat == 'textures':
-                pass
-            elif cat == 'shading':
-                check = solstice_shadingvalidator.ShadingValidator(asset=self._asset)
-                check.check()
-                if not check.is_valid():
-                    break
-                working_path = os.path.join(self._asset().asset_path, '__working__', 'shading', self._asset().name + '_SHD.ma')
-                textures_mapping = dict()
-                # textures_version = '{0:03}'.format(published_textures_info['textures'])
+    # #     if cat == 'textures':
+    # #         shaders, info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset())
 
-        #
-        #     if cat == 'textures':
-        #         textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
-        #         if os.path.exists(textures_path):
-        #             textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
-        #             if len(textures) <= 0:
-        #                 continue
-        #             for txt in textures:
-        #                 txt_history = artella.get_asset_history(txt)
-        #                 txt_last_version = txt_history.versions[-1][0]
-        #                 selected_version['textures/{0}'.format(os.path.basename(txt))] = int(txt_last_version)
-        #     elif cat == 'shading':
-        #         working_path = os.path.join(self._asset().asset_path, '__working__', 'shading', self._asset().name + '_SHD.ma')
-        #         if self._asset().is_locked('shading', status='working')[1]:
-        #             sp.logger.debug('Shading file {} is locked! Aborting publishing ...'.format(working_path))
-        #             return
-        #
-        #         textures_mapping = dict()
-        #
-        #         textures_version = '{0:03}'.format(published_textures_info['textures'])
-        #
-        #         # The first time we publish textures, the path of the textures'll point to the work in progress textures
-        #         if textures_version == 0:
-        #             textures_path = os.path.join(self._asset().asset_path, '__working__', 'textures')
-        #             if os.path.exists(textures_path):
-        #                 textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
-        #                 for txt in textures:
-        #                     fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
-        #                     format_txt = naming.format_path(fixed_txt)
-        #                     textures_mapping[format_txt] = None
-        #         else:
-        #             textures_path = os.path.join(self._asset().asset_path, '__textures_v{0}__'.format(published_textures_info['textures']-1))
-        #             if os.path.exists(textures_path):
-        #                 textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
-        #                 for txt in textures:
-        #                     fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
-        #                     format_txt = naming.format_path(fixed_txt)
-        #                     textures_mapping[format_txt] = None
-        #
-        #         textures_version_path = os.path.join(self._asset().asset_path, '__textures_v{0}__'.format(textures_version))
-        #         textures_path = os.path.join(textures_version_path, 'textures')
-        #         textures_path_status = artella.get_status(textures_path)
-        #         if textures_path_status and isinstance(textures_path_status, classes.ArtellaDirectoryMetaData):
-        #             for txt in textures_path_status.references:
-        #                 new_text_path = artella.fix_path_by_project(path=os.path.join(textures_version_path, txt), fullpath=True)
-        #                 for txt_key in textures_mapping.keys():
-        #                     if naming.format_path(txt) in naming.format_path(txt_key):
-        #                         textures_mapping[txt_key] = naming.format_path(new_text_path)
-        #
-        #         backup_file = copyfile(working_path, working_path + '_BACKUP')
-        #
-        #         artella.lock_asset(working_path)
-        #         try:
-        #             data = ''
-        #             with open(working_path, 'r') as f:
-        #                 data = f.read()
-        #             for old_txt, new_txt in textures_mapping.items():
-        #                 maya_format_old_path = old_txt.replace('/', '\\\\')
-        #                 maya_format_new_path = new_txt.replace('/', '\\\\')
-        #                 data = data.replace(maya_format_old_path, maya_format_new_path)
-        #
-        #                 # We need to take in account that some textures are using <udim> tag
-        #                 maya_format_old_udim_path = re.sub("_\d\d\d\d.tx", "_<udim>.tx", maya_format_old_path)
-        #                 maya_format_new_udim_path = re.sub("_\d\d\d\d.tx", "_<udim>.tx", maya_format_new_path)
-        #                 data = data.replace(maya_format_old_udim_path, maya_format_new_udim_path)
-        #             with open(working_path, 'w') as f:
-        #                 f.write(data)
-        #         except Exception as e:
-        #             sp.logger.debug(str(e))
-        #         artella.unlock_asset(working_path)
-        #
-        #         shaders, info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset())
-        #
-        #         print('Publishing {}'.format(shaders))
-        #         print('Publishing {}'.format(info))
-        #
-        #     artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
-        #     if cat == 'textures':
-        #         artella.synchronize_path(path=asset_path)
+    #         # artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
+    #         # if cat == 'textures':
+    #         #     artella.synchronize_path(path=asset_path)
+
+
+class AssetPublisherSummaryWidget(QWidget, object):
+    def __init__(self, asset, parent=None):
+        super(AssetPublisherSummaryWidget, self).__init__(parent=parent)
+
+        self._error_pixmap = solstice_resource.pixmap('error', category='icons')
+        self._ok_pixmap = solstice_resource.pixmap('ok', category='icons')
+
+        self._asset = asset
+
+        main_layout = QVBoxLayout()
+        main_layout.setAlignment(Qt.AlignTop)
+        main_layout.setContentsMargins(5, 5, 5, 5)
+        main_layout.setSpacing(2)
+        self.setLayout(main_layout)
+
+        self.task_group_layout = QVBoxLayout()
+        self.task_group_layout.setContentsMargins(0, 0, 0, 0)
+        self.task_group_layout.setSpacing(0)
+
+        main_layout.addLayout(self.task_group_layout)
+        main_layout.addLayout(solstice_splitters.SplitterLayout())
+        self._log = solstice_console.SolsticeConsole()
+        self._log.write_ok('> SOLSTICE PUBLISHER LOG <')
+        main_layout.addWidget(self._log)
+        main_layout.addLayout(solstice_splitters.SplitterLayout())
+        self._spinner = solstice_spinner.WaitSpinner()
+        main_layout.addWidget(self._spinner)
+
+    def set_task_group(self, task_group):
+        self.task_group_layout.addWidget(task_group)
+        task_group.set_log(self._log)
+        task_group.taskFinished.connect(self._on_task_finished)
+        task_group._on_do_task()
+
+    def _on_task_finished(self, valid):
+        self._spinner._timer.timeout.disconnect()
+        if valid:
+            self._spinner.thumbnail_label.setPixmap(self._ok_pixmap)
+        else:
+            self._spinner.thumbnail_label.setPixmap(self._error_pixmap)
+
+
+class AssetPublisherWidget(QWidget, object):
+    def __init__(self, asset, new_working_version=False, parent=None):
+        super(AssetPublisherWidget, self).__init__(parent=parent)
+
+        self._asset = weakref.ref(asset)
+
+        main_layout = QVBoxLayout()
+        main_layout.setAlignment(Qt.AlignTop)
+        main_layout.setContentsMargins(5, 5, 5, 5)
+        main_layout.setSpacing(2)
+        self.setLayout(main_layout)
+
+        self.stack_widget = QStackedWidget()
+        main_layout.addWidget(self.stack_widget)
+
+        self.version_widget = AssetPublisherVersionWidget(asset=self._asset, new_working_version=new_working_version)
+        self.summary_widget = AssetPublisherSummaryWidget(asset=self._asset)
+        self.version_widget.onPublish.connect(self._publish)
+
+        self.stack_widget.addWidget(self.version_widget)
+        self.stack_widget.addWidget(self.summary_widget)
+
+        # =====================================================================================================
+
+        for cat in sp.valid_categories:
+            asset_locked_by, current_user_can_lock = self._asset().is_locked(category=cat, status='working')
+            if asset_locked_by:
+                if not current_user_can_lock:
+                    self._ui[cat]['check'].setChecked(False)
+                    self._ui[cat]['current_version'].setText('LOCK')
+                    self._ui[cat]['next_version'].setText('LOCK')
+                    for name, w in self._ui[cat].items():
+                        w.setEnabled(False)
+
+    def _publish(self, categories_to_publish):
+        self.stack_widget.setCurrentIndex(1)
+        self.summary_widget.set_task_group(PublishTaskGroup(
+            asset=self._asset,
+            categories_to_publish=categories_to_publish,
+            log=self.summary_widget._log
+        ))
 
 
 def run(asset=None, new_working_version=False):
     reload(solstice_shadingvalidator)
-
     from solstice_pipeline.solstice_checks import solstice_assetchecks
     reload(solstice_assetchecks)
+    reload(solstice_spinner)
 
     publisher_dialog = SolsticePublisher(asset=asset, new_working_version=new_working_version)
     publisher_dialog.exec_()

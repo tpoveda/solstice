@@ -248,3 +248,12 @@ class ElidedLabel(QLabel, object):
         """
         return self._line_width
 
+
+class ThumbnailLabel(QLabel, object):
+    def __init__(self, parent=None):
+        super(ThumbnailLabel, self).__init__(parent=parent)
+
+    def setPixmap(self, pixmap):
+        if pixmap.height() > 55 or pixmap.width( )> 80:
+            pixmap = pixmap.scaled(QSize(80, 55), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        super(ThumbnailLabel, self).setPixmap(pixmap)

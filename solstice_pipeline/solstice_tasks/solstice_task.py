@@ -4,7 +4,7 @@
 # """ ==================================================================
 # Script Name: solstice_task.py
 # by Tomas Poveda
-# Module that contains base class for creating sanity check tasks
+# Module that contains base class for creating tasks
 # ______________________________________________________________________
 # ==================================================================="""
 
@@ -16,12 +16,14 @@ from solstice_pipeline.solstice_gui import solstice_splitters
 from solstice_pipeline.resources import solstice_resource
 
 
-class SanityTask(QWidget, object):
-    def __init__(self, name, auto_fix=False, parent=None):
-        super(SanityTask, self).__init__(parent=parent)
+class Task(QWidget, object):
+    def __init__(self, name, log=None, auto_run=False, parent=None):
+        super(Task, self).__init__(parent=parent)
 
         self._name = name
-        self._auto_fix = auto_fix
+        self._log = log
+        self._auto_run = auto_run
+        self._valid_task = False
         self._error_message = 'Task {0} finished with errors'.format(name)
 
         self._error_pixmap = solstice_resource.pixmap('error', category='icons').scaled(QSize(24, 24))
@@ -43,32 +45,18 @@ class SanityTask(QWidget, object):
         main_frame.setLayout(widget_layout)
         self.main_layout.addWidget(main_frame)
 
-        self.task_name_lbl = QLabel('[{}]'.format(self._name))
-        self.enable_check = QCheckBox()
-        self.enable_check.setChecked(True)
+        self.check_name_lbl = QLabel('[{}]'.format(self._name))
         self.image_lbl = QLabel()
         self.image_separator = solstice_splitters.get_horizontal_separator_widget()
         self.image_separator.setVisible(False)
         self.task_text = QLabel()
         self.task_text.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.fix_btn = QPushButton('FIX')
-        self.fix_btn.setVisible(False)
-        self.fix_btn.setFixedWidth(40)
-        self.fix_btn.clicked.connect(self.fix)
-        self.fix_separator = solstice_splitters.get_horizontal_separator_widget()
-        self.fix_separator.setVisible(False)
 
-        for widget in [self.task_name_lbl, self.enable_check, solstice_splitters.get_horizontal_separator_widget(), self.image_lbl, self.image_separator, self.task_text, self.fix_separator, self.fix_btn]:
+        for widget in [self.check_name_lbl, solstice_splitters.get_horizontal_separator_widget(), self.image_lbl, self.image_separator, self.task_text]:
             widget_layout.addWidget(widget)
 
-        if self._auto_fix:
-            self.fix_btn.setVisible(False)
-            self.fix_btn.setVisible(False)
-            self.enable_check.setVisible(False)
-            self.enable_check.setChecked(True)
-            self.image_separator.setVisible(False)
-
-            self.fix()
+        if self._auto_run:
+            self._valid_task = self.run()
 
     def get_name(self):
         return self._name
@@ -76,50 +64,50 @@ class SanityTask(QWidget, object):
     def set_error_message(self, message):
         self._error_message = message
 
+    def set_log(self, log):
+        self._log = log
+
+    def write(self, msg):
+        if self._log is None:
+            return
+        self._log.write(msg)
+        self.repaint()
+
+    def write_error(self, msg):
+        if self._log is None:
+            return
+        self._log.write_error(msg)
+        self.repaint()
+
+    def write_ok(self, msg):
+        if self._log is None:
+            return
+        self._log.write_ok(msg)
+        self.repaint()
+
     def get_error_message(self):
         return self._error_message
 
-    def check(self):
+    def run(self):
         return False
-
-    def fix(self):
-        valid_check = self.check()
-        if valid_check:
-            self.valid_check()
-            return True
-        else:
-            self.invalid_check()
-            self.show_fix_button()
-            return False
-
-    def should_be_checked(self):
-        do_check = self.enable_check.isChecked()
-        if do_check:
-            self.image_lbl.setText('')
-            self.image_lbl.setPixmap(self._wait_pixmap)
-            return True
-
-        return False
-
-    def show_fix_button(self):
-        self.fix_btn.setVisible(not self._auto_fix)
 
     def set_task_text(self, text):
         self.task_text.setText(text)
 
-    def invalid_check(self):
+    def fixing_task(self):
+        self.setStyleSheet('background-color: rgb(230, 220, 30);')
+        self.image_lbl.setText('')
+        self.image_lbl.setPixmap(self._warning_pixmap)
+        self.image_separator.setVisible(True)
+
+    def invalid_task(self):
         self.setStyleSheet('background-color: rgb(165, 90, 90);')
         self.image_lbl.setText('')
         self.image_lbl.setPixmap(self._error_pixmap)
         self.image_separator.setVisible(True)
-        self.fix_btn.setStyleSheet('background-color: rgb(90, 90, 90);')
-        self.fix_separator.setVisible(not self._auto_fix)
 
-    def valid_check(self):
+    def valid_task(self):
         self.setStyleSheet('background-color: rgb(45, 90, 45);')
         self.image_lbl.setText('')
         self.image_lbl.setPixmap(self._ok_pixmap)
         self.image_separator.setVisible(True)
-        self.fix_btn.setVisible(False)
-        self.fix_separator.setVisible(not self._auto_fix)
-

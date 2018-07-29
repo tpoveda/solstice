@@ -11,14 +11,15 @@
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 
-from solstice_pipeline.solstice_gui import solstice_dialog
+from solstice_pipeline.solstice_gui import solstice_dialog, solstice_splitters
 
 
 class SanityCheckValidator(solstice_dialog.Dialog, object):
 
     checkFinished = Signal()
 
-    def __init__(self):
+    def __init__(self, title='Validator'):
+        self._title = title
         super(SanityCheckValidator, self).__init__()
 
         self._valid_check = False
@@ -34,6 +35,11 @@ class SanityCheckValidator(solstice_dialog.Dialog, object):
     def custom_ui(self):
         super(SanityCheckValidator, self).custom_ui()
         self.set_logo('solstice_validator_logo')
+
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
+
+        self.title = solstice_splitters.Splitter(self._title.upper())
+        self.main_layout.addWidget(self.title)
 
         scroll_widget = QWidget()
         self.scroll_layout = QVBoxLayout()

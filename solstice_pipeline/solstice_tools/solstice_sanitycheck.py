@@ -13,7 +13,7 @@ from solstice_qt.QtWidgets import *
 from solstice_pipeline.solstice_utils import solstice_maya_utils
 from solstice_pipeline.solstice_gui import solstice_windows
 
-from solstice_pipeline.solstice_checks import solstice_taskgroups
+from solstice_tasks import solstice_taskgroups
 
 
 class SanityCheck(solstice_windows.Window, object):

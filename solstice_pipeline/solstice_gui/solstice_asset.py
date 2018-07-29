@@ -21,6 +21,8 @@ from solstice_qt.QtGui import *
 import solstice_pipeline as sp
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_artella_utils as artella
+from solstice_utils import solstice_artella_classes as classes
+from solstice_utils import solstice_naming_utils as naming
 from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_python_utils
 from solstice_gui import solstice_splitters, solstice_published_info_widget, solstice_sync_dialog, solstice_buttons
 from solstice_tools import solstice_publisher
@@ -636,6 +638,80 @@ class AssetWidget(QWidget, object):
             thread_result.append(rst)
         return rst
 
+    def get_asset_textures(self, status='working'):
+        """
+        Returns a dict of textures with the given status
+        :param status: str
+        :return: dict<str, str>
+        """
+
+        published_textures_info = self.get_max_versions(status='published', categories=['textures'])['server']
+        textures_version = published_textures_info['textures']
+        current_textures = list()
+
+        # The first time we publish textures, the path of the textures'll point to the work in progress textures
+        if textures_version == 0:
+            textures_path = os.path.join(self.asset_path, '__working__', 'textures')
+            if os.path.exists(textures_path):
+                textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+                for txt in textures:
+                    fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
+                    format_txt = naming.format_path(fixed_txt)
+                    current_textures.append(format_txt)
+        else:
+            textures_version = '{0:03}'.format(published_textures_info['textures'])
+            textures_path = os.path.join(self.asset_path, '__textures_v{0}__'.format(textures_version))
+            if os.path.exists(textures_path):
+                textures_path = os.path.join(textures_path, 'textures')
+                if os.path.exists(textures_path):
+                    textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+                    for txt in textures:
+                        fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
+                        format_txt = naming.format_path(fixed_txt)
+                        current_textures.append(format_txt)
+
+        return current_textures
+
+    def get_next_version_textures_paths(self):
+        """
+        Returns a dict with the current textures and other with the next version textures paths
+        :param status: str
+        :return: dict<str, str>, dict<str, str>
+        """
+
+        published_textures_info = self.get_max_versions(status='published', categories=['textures'])['server']
+        textures_version = published_textures_info['textures']
+        current_textures = list()
+
+        # The first time we publish textures, the path of the textures'll point to the work in progress textures
+        if textures_version == 0:
+            textures_path = os.path.join(self.asset_path, '__working__', 'textures')
+            if os.path.exists(textures_path):
+                textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+                for txt in textures:
+                    fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
+                    format_txt = naming.format_path(fixed_txt)
+                    current_textures.append(format_txt)
+        else:
+            textures_version_full = '{0:03}'.format(published_textures_info['textures'])
+            textures_path = os.path.join(self.asset_path, '__textures_v{0}__'.format(textures_version_full))
+            if os.path.exists(textures_path):
+                textures_path = os.path.join(textures_path, 'textures')
+                if os.path.exists(textures_path):
+                    textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
+                    for txt in textures:
+                        fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
+                        format_txt = naming.format_path(fixed_txt)
+                        current_textures.append(format_txt)
+
+        new_textures = list()
+        textures_version_old = '{0:03}'.format(published_textures_info['textures'])
+        textures_version_new = '{0:03}'.format(published_textures_info['textures']+1)
+        for txt in current_textures:
+            new_textures.append(txt.replace(textures_version_old, textures_version_new))
+
+        return current_textures, new_textures
+
     def generate_context_menu(self):
         """
         This class generates a context menu for the Asset widget depending of the asset
@@ -668,10 +744,10 @@ class AssetWidget(QWidget, object):
         self._menu.addAction(reference_asset_action)
 
         get_info_action.triggered.connect(self.get_asset_info)
-        sync_all_action.triggered.connect(partial(self.sync, 'all', False))
-        sync_model_action.triggered.connect(partial(self.sync, 'model', False))
-        sync_textures_action.triggered.connect(partial(self.sync, 'textures', False))
-        sync_shading_action.triggered.connect(partial(self.sync, 'shading', False))
+        sync_all_action.triggered.connect(partial(self.sync, 'all', 'all', False))
+        sync_model_action.triggered.connect(partial(self.sync, 'model', 'all', False))
+        sync_textures_action.triggered.connect(partial(self.sync, 'textures', 'all', False))
+        sync_shading_action.triggered.connect(partial(self.sync, 'shading', 'all', False))
         import_asset_action.triggered.connect(self.import_asset_file)
         reference_asset_action.triggered.connect(self.reference_asset_file)
 
@@ -684,7 +760,7 @@ class AssetWidget(QWidget, object):
         rsp = artella.get_status(self._asset_path, as_json=True)
         print(rsp)
 
-    def sync(self, sync_type='all', ask=False):
+    def sync(self, sync_type='all', status='all', ask=False):
 
         if sync_type != 'all' and sync_type != 'model' and sync_type != 'shading' and sync_type != 'textures':
             sp.logger.error('Synchronization type {0} is not valid!'.format(sync_type))
@@ -697,21 +773,25 @@ class AssetWidget(QWidget, object):
 
         start_time = time.time()
 
-        if sync_type == 'all':
-            paths_to_sync = [self._asset_path, os.path.join(self._asset_path, '__working__')]
-        else:
-            paths_to_sync = [os.path.join(self._asset_path, '__working__', sync_type)]
+        paths_to_sync = list()
+
+        if status == 'all' or status == 'working':
+            if sync_type == 'all':
+                paths_to_sync.append(os.path.join(self._asset_path, '__working__'))
+            else:
+                paths_to_sync.append(os.path.join(self._asset_path, '__working__', sync_type))
 
         max_versions = self.get_max_published_versions()
         for f, version_list in max_versions.items():
             if not version_list:
                 continue
             version_type = version_list[1]
-            if sync_type != 'all':
-                if sync_type in version_type:
+            if status == 'all' or status == 'published':
+                if sync_type != 'all':
+                    if sync_type in version_type:
+                        paths_to_sync.append(os.path.join(self._asset_path, '{0}'.format(version_list[1])))
+                else:
                     paths_to_sync.append(os.path.join(self._asset_path, '{0}'.format(version_list[1])))
-            else:
-                paths_to_sync.append(os.path.join(self._asset_path, '{0}'.format(version_list[1])))
 
         solstice_sync_dialog.SolsticeSyncFile(files=paths_to_sync).sync()
         elapsed_time = time.time() - start_time

@@ -13,15 +13,15 @@ import os
 import maya.cmds as cmds
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_checks import solstice_task
+from solstice_checks import solstice_check
 from solstice_pipeline.solstice_utils import solstice_maya_utils
 
 
-class StudentLicenseCheck(solstice_task.SanityTask, object):
+class StudentLicenseCheck(solstice_check.SanityCheckTask, object):
     def __init__(self, auto_fix=False, parent=None):
         super(StudentLicenseCheck, self).__init__(name='Student License Check', auto_fix=auto_fix, parent=parent)
 
-        self.set_task_text('Check Maya Student License')
+        self.set_check_text('Check Maya Student License')
 
     def check(self):
         scene_path = cmds.file(query=True, sn=True)

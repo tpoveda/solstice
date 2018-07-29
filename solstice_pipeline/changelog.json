@@ -38,10 +38,16 @@
   "4.0":
   [
     "Updated UI layout of Solstice Changelog",
+    "Added new Check and Task System for Solstice Tools",
+    "Solstice Light Rigs Tool can import current light rigs",
     "Now shaders can be created on the fly from JSON file directly from Solstice Shader Library Viewer",
     "When Shader Library is launched, it checks if the ShadersLibrary folder is sync and if not, it will sync",
     "Added Asset Viewer to Shader Library to be able to export shader info for each asset easily",
     "Added button to access Shader Library path quickly inside Solstice Shader Library Tool",
-    "Added contextual menu item for Shader Widgets to open them in text editor"
+    "Added contextual menu item for Shader Widgets to open them in text editor",
+    "Added Validator step to Solstice Publisher",
+    "Solstice Publisher shows feedback to the user during publishing",
+    "Solstice Publisher now support .txt textures automatic textures relinker",
+    "Added Publisher Tasks for shading, texturse and model for Solstice Publisher"
   ]
 }

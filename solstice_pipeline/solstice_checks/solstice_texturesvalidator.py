@@ -19,13 +19,13 @@ from solstice_pipeline.solstice_checks import solstice_validator
 from solstice_checks import solstice_checkgroups
 
 
-class ShadingValidator(solstice_validator.SanityCheckValidator, object):
+class TexturesValidator(solstice_validator.SanityCheckValidator, object):
     def __init__(self, asset):
-        super(ShadingValidator, self).__init__(title='Shading Validator')
+        super(TexturesValidator, self).__init__(title='Textures Validator')
 
         self._asset = asset
 
-        self._check = solstice_checkgroups.AssetPublishSantiyCheck(asset=self._asset, file_type='shading', auto_fix=True, stop_on_error=True)
+        self._check = solstice_checkgroups.TexturesSanityCheck(asset=self._asset, auto_fix=True, stop_on_error=True)
         self._check.check_btn.setVisible(False)
         self.scroll_layout.addWidget(self._check)
 
@@ -41,7 +41,7 @@ class ShadingValidator(solstice_validator.SanityCheckValidator, object):
         self._check.checkFinished.connect(self.check_finished)
 
     def _update_progress_bar(self):
-        super(ShadingValidator, self)._update_progress_bar()
+        super(TexturesValidator, self)._update_progress_bar()
         if self._event.is_set():
             self._timer.stop()
             self._progress_bar.setVisible(False)
@@ -54,10 +54,10 @@ class ShadingValidator(solstice_validator.SanityCheckValidator, object):
         if not self._asset:
             self.close()
             return False
-        super(ShadingValidator, self).check()
+        super(TexturesValidator, self).check()
         self._event = threading.Event()
         try:
-            threading.Thread(target=self.do_check, args=(self._event,), name='SolsticeShadingValidator').start()
+            threading.Thread(target=self.do_check, args=(self._event,), name='SolsticeTexturesValidator').start()
         except Exception as e:
             sp.logger.debug(str(e))
             sp.logger.debug(traceback.format_exc())
