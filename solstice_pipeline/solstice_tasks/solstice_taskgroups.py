@@ -23,6 +23,7 @@ class TaskGroup(QWidget, object):
         self.stop_on_error = stop_on_error
         self.tasks = list()
         self.log = log
+        self.valid = True
 
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -49,17 +50,21 @@ class TaskGroup(QWidget, object):
         self.log = log
 
     def _on_do_task(self):
-        valid_task = True
         for task in self.tasks:
             valid_task = task.run()
-            if valid_task:
-                task.valid_task()
-                self.taskDone.emit(task, True)
+            if self.valid:
+                if valid_task:
+                    task.valid_task()
+                    self.taskDone.emit(task, True)
+                else:
+                    task.invalid_task()
+                    self.taskDone.emit(task, False)
+                    if self.stop_on_error:
+                        break
+                    self.valid = False
             else:
                 task.invalid_task()
+                task.task_text.setText('>> ABORTED <<')
                 self.taskDone.emit(task, False)
-                if self.stop_on_error:
-                    break
-                valid_task = False
 
-        self.taskFinished.emit(valid_task)
+        self.taskFinished.emit(self.valid)

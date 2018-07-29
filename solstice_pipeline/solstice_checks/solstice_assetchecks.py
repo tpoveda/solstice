@@ -118,8 +118,6 @@ class AssetFileSync(solstice_check.SanityCheckTask, object):
         return valid_paths
 
     def fix(self):
-        super(AssetFileSync, self).fix()
-
         valid_paths = True
         for p in self.paths_to_sync:
             artella.synchronize_file(p)

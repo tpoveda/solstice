@@ -22,6 +22,7 @@ class SanityCheckGroup(QWidget, object):
 
     checkDone = Signal(object, bool)
     checkFinished = Signal(bool)
+    checkBeingFixed = Signal()
 
     def __init__(self, name, auto_fix=False, stop_on_error=False, parent=None):
         super(SanityCheckGroup, self).__init__(parent=parent)
@@ -74,10 +75,12 @@ class SanityCheckGroup(QWidget, object):
                     self.checkDone.emit(check, True)
                 else:
                     if self.auto_fix:
-                        curr_text = check.task_text.text()
-                        check.fixing_check()            # TODO: Move this into the task class?
+                        curr_text = check.check_text.text()
+                        check.check_text.setText('Fixing ...')
+                        check.fixing_check()
+                        self.checkBeingFixed.emit()
                         valid_check = check.fix()
-                        check.task_text.setText(curr_text)
+                        check.check_text.setText(curr_text)
                         if valid_check:
                             check.valid_check()
                             self.checkDone.emit(check, True)

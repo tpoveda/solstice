@@ -13,6 +13,7 @@ import re
 import ast
 import sys
 import json
+import stat
 import platform
 import subprocess
 from tempfile import mkstemp
@@ -278,3 +279,109 @@ def load_json(file_path):
 
     with open(file_path, 'r') as f:
         return json.load(f)
+
+
+def is_dir(directory):
+    """
+    Checks if the given directory is a directory or not
+    :param directory: str
+    :return: bool
+    """
+
+    if not directory:
+        return False
+
+    try:
+        mode = os.stat(directory)[stat.ST_MODE]
+        if stat.S_ISDIR(mode):
+            return True
+    except Exception:
+        return False
+
+    return False
+
+
+def is_file(file_path):
+    """
+    Checks if the given path is an existing file
+    :param file_path: str
+    :return: bool
+    """
+
+    if not file_path:
+        return False
+
+    try:
+        mode = os.stat(file_path)[stat.ST_MODE]
+        if stat.S_ISREG(mode):
+            return True
+    except Exception:
+        return False
+
+    return False
+
+
+def get_file_text(file_path):
+    """
+    Get the text stored in a file in a unique string (without parsing)
+    :param file_path: str
+    :return: str
+    """
+
+    open_file = open(file_path, 'r')
+    lines = ''
+
+    try:
+        lines = open_file.read()
+        open_file.close()
+    except Exception:
+        open_file.close()
+
+    return lines
+
+
+def get_file_size(filepath, round_value=2):
+    """
+    Returns the size of the given file
+    :param filepath: str
+    :param round_value: int, value to round size to
+    :return: str
+    """
+
+    size = os.path.getsize(filepath)
+    size_format = round(size * 0.000001, round_value)
+
+    return size_format
+
+
+def get_folder_size(directory, round_value=2):
+    """
+    Returns the size of the given folder
+    :param directory: str
+    :param round_value: int, value to round size to
+    :return: str
+    """
+
+    size = 0
+    for root, dirs, files in os.walk(directory):
+        for name in files:
+            size += get_file_size(os.path.join(root, name), round_value)
+
+    return size
+
+
+def get_size(path, round_value=2):
+    """
+    Return the size of the given directory or file path
+    :param path: str
+    :param round_value: int, value to round size to
+    :return: int
+    """
+
+    size = 0
+    if is_dir(path):
+        size = get_folder_size(path, round_value)
+    if is_file(path):
+        size = get_file_size(path, round_value)
+
+    return size

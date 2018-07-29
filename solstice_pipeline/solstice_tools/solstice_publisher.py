@@ -21,7 +21,8 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_dialog, solstice_splitters, solstice_spinner, solstice_console
 from solstice_pipeline.solstice_utils import solstice_image as img
 from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
-from solstice_pipeline.solstice_checks import solstice_shadingvalidator, solstice_texturesvalidator
+from solstice_pipeline.solstice_utils import solstice_python_utils as python
+from solstice_pipeline.solstice_checks import solstice_validators
 from solstice_pipeline.solstice_tasks import solstice_taskgroups, solstice_task
 
 from resources import solstice_resource
@@ -40,7 +41,7 @@ class PublishTexturesTask(solstice_task.Task, object):
 
         self.write_ok('>>> PUBLISH TEXTURES LOG')
         self.write_ok('------------------------------------')
-        check = solstice_texturesvalidator.TexturesValidator(asset=self._asset)
+        check = solstice_validators.TexturesValidator(asset=self._asset)
         check.check()
         if not check.is_valid():
             return False
@@ -58,12 +59,9 @@ class PublishTexturesTask(solstice_task.Task, object):
                 txt_last_version = txt_history.versions[-1][0]
                 selected_version['textures/{0}'.format(os.path.basename(txt))] = int(txt_last_version)
 
-        sp.logger.debug('ASSET PATH: ')
-        sp.logger.debug(asset_path)
-        sp.logger.debug('COMMENT: ')
-        sp.logger.debug(self._comment)
-        sp.logger.debug('SELECTED VERSIONS: ')
-        sp.logger.debug(selected_version)
+        self.write_ok('------------------------------------')
+        self.write_ok('TEXTURES PUBLISHED SUCCESFULLY!')
+        self.write_ok('------------------------------------\n\n')
 
         return True
 
@@ -92,7 +90,7 @@ class PublishShadingTask(solstice_task.Task, object):
 
         self.write_ok('>>> PUBLISH SHADING LOG')
         self.write_ok('------------------------------------')
-        check = solstice_shadingvalidator.ShadingValidator(asset=self._asset)
+        check = solstice_validators.ShadingValidator(asset=self._asset)
         check.check()
         if not check.is_valid():
             return False
@@ -126,23 +124,50 @@ class PublishShadingTask(solstice_task.Task, object):
                         for txt in current_textures_path:
                             texture_name = os.path.basename(current_texture_path)
                             if texture_name in os.path.basename(txt):
-                                line = line.replace(current_texture_path, txt).replace('/', '\\\\')
-                                self.write('>>>>>>>>>>>>>>\n\t{0}'.format(os.path.normpath(current_texture_path)))
-                                self.write_ok('\t{0}\n'.format(os.path.normpath(txt)))
-                                self.write('>>>>>>>>>>>>>>\n')
+                                if not os.path.normpath(txt) == os.path.normpath(current_texture_path):
+                                    line = line.replace(current_texture_path, txt).replace('/', '\\\\')
+                                    self.write('>>>>>>>>>>>>>>\n\t{0}'.format(os.path.normpath(current_texture_path)))
+                                    self.write_ok('\t{0}\n'.format(os.path.normpath(txt)))
+                                    self.write('>>>>>>>>>>>>>>\n')
                 new_lines.append(line+';')
+
+            # Create shading file with paths fixed
             with open(working_path, 'w') as f:
                 f.writelines(new_lines)
+
+            # Check that new shading file has a similar/close size in comparison with the original one
+            orig_size = python.get_size(backup_file)
+            new_size = python.get_size(working_path)
+            self.write('\nComparing backup and new shading file ...\n'.format(working_path))
+            self.write('Original Size: {}\n'.format(orig_size))
+            self.write('New Size: {}\n'.format(new_size))
+            diff_size = new_size - orig_size
+            if diff_size > 1000000:
+                self.write_error('New shading file is very different from the original: {}. Textures relink process was not successful!'.format(diff_size))
+                try:
+                    os.remove(working_path)
+                    os.rename(backup_file, working_path)
+                except Exception as e:
+                    self.write_error('Errow while recovering original shading file. Please sync shading file again!!')
+                return False
+            else:
+                self.write('Shading file size diff: {}'.format(diff_size))
+
         except Exception as e:
             self.write('====================================\n')
-            self.write_error(e)
+            self.write_error(str(e))
             self.write('\nUnlocking shading file: {}\n'.format(working_path))
             artella.unlock_asset(working_path)
             return False
 
-        self.write('====================================\n')
         self.write('\nUnlocking shading file: {}\n'.format(working_path))
+        self.write('====================================\n')
         artella.unlock_asset(working_path)
+
+        self.write_ok('------------------------------------')
+        self.write_ok('SHADING PUBLISHED SUCCESFULLY!')
+        self.write_ok('------------------------------------\n\n')
+
         return True
 
 
@@ -219,6 +244,11 @@ class SolsticePublisher(solstice_dialog.Dialog, object):
         if self._asset:
             asset_publisher = AssetPublisherWidget(asset=self._asset, new_working_version=self._new_working_version)
             self.main_layout.addWidget(asset_publisher)
+            asset_publisher.onPublishFinised.connect(self._on_publish_finished)
+
+    def _on_publish_finished(self):
+        # TODO: We should update the info of the asest when closing the publishing window
+        self.close()
 
 
 class AssetPublisherVersionWidget(QWidget, object):
@@ -388,7 +418,7 @@ class AssetPublisherVersionWidget(QWidget, object):
             categories_to_publish[cat] = dict()
             categories_to_publish[cat]['check'] = True
             if not self._ui[cat]['check'].isChecked():
-                categories_to_publish[cat] = False
+                categories_to_publish[cat]['check'] = False
             if not self._asset().has_category(category=cat):
                 categories_to_publish[cat]['check'] = False
 
@@ -408,6 +438,9 @@ class AssetPublisherVersionWidget(QWidget, object):
 
 
 class AssetPublisherSummaryWidget(QWidget, object):
+
+    onFinished = Signal()
+
     def __init__(self, asset, parent=None):
         super(AssetPublisherSummaryWidget, self).__init__(parent=parent)
 
@@ -415,6 +448,7 @@ class AssetPublisherSummaryWidget(QWidget, object):
         self._ok_pixmap = solstice_resource.pixmap('ok', category='icons')
 
         self._asset = asset
+        self._valid = True
 
         main_layout = QVBoxLayout()
         main_layout.setAlignment(Qt.AlignTop)
@@ -435,21 +469,43 @@ class AssetPublisherSummaryWidget(QWidget, object):
         self._spinner = solstice_spinner.WaitSpinner()
         main_layout.addWidget(self._spinner)
 
+        self.ok_widget = QWidget()
+        ok_splitter = solstice_splitters.SplitterLayout()
+        self.ok_widget.setLayout(ok_splitter)
+        self.ok_btn = QPushButton('Continue')
+        self.ok_btn.clicked.connect(self._on_do_ok)
+        main_layout.addWidget(self.ok_widget)
+        main_layout.addWidget(self.ok_btn)
+        self.ok_widget.setVisible(False)
+        self.ok_btn.setVisible(False)
+
     def set_task_group(self, task_group):
         self.task_group_layout.addWidget(task_group)
         task_group.set_log(self._log)
         task_group.taskFinished.connect(self._on_task_finished)
         task_group._on_do_task()
 
+    def _on_do_ok(self):
+        self.onFinished.emit()
+
     def _on_task_finished(self, valid):
+        if valid is False:
+            self._valid = valid
+
         self._spinner._timer.timeout.disconnect()
-        if valid:
+        if self._valid:
             self._spinner.thumbnail_label.setPixmap(self._ok_pixmap)
         else:
             self._spinner.thumbnail_label.setPixmap(self._error_pixmap)
 
+        self.ok_widget.setVisible(True)
+        self.ok_btn.setVisible(True)
+
 
 class AssetPublisherWidget(QWidget, object):
+
+    onPublishFinised = Signal()     # TODO: We should propagate if the publish has been valid or not?
+
     def __init__(self, asset, new_working_version=False, parent=None):
         super(AssetPublisherWidget, self).__init__(parent=parent)
 
@@ -471,17 +527,20 @@ class AssetPublisherWidget(QWidget, object):
         self.stack_widget.addWidget(self.version_widget)
         self.stack_widget.addWidget(self.summary_widget)
 
+        self.summary_widget.onFinished.connect(self._on_summary_finish)
+
         # =====================================================================================================
 
-        for cat in sp.valid_categories:
-            asset_locked_by, current_user_can_lock = self._asset().is_locked(category=cat, status='working')
-            if asset_locked_by:
-                if not current_user_can_lock:
-                    self._ui[cat]['check'].setChecked(False)
-                    self._ui[cat]['current_version'].setText('LOCK')
-                    self._ui[cat]['next_version'].setText('LOCK')
-                    for name, w in self._ui[cat].items():
-                        w.setEnabled(False)
+        # TODO: Uncomment after testing
+        # for cat in sp.valid_categories:
+        #     asset_locked_by, current_user_can_lock = self._asset().is_locked(category=cat, status='working')
+        #     if asset_locked_by:
+        #         if not current_user_can_lock:
+        #             self._ui[cat]['check'].setChecked(False)
+        #             self._ui[cat]['current_version'].setText('LOCK')
+        #             self._ui[cat]['next_version'].setText('LOCK')
+        #             for name, w in self._ui[cat].items():
+        #                 w.setEnabled(False)
 
     def _publish(self, categories_to_publish):
         self.stack_widget.setCurrentIndex(1)
@@ -491,9 +550,12 @@ class AssetPublisherWidget(QWidget, object):
             log=self.summary_widget._log
         ))
 
+    def _on_summary_finish(self):
+        self.onPublishFinised.emit()
+
 
 def run(asset=None, new_working_version=False):
-    reload(solstice_shadingvalidator)
+    reload(solstice_validators)
     from solstice_pipeline.solstice_checks import solstice_assetchecks
     reload(solstice_assetchecks)
     reload(solstice_spinner)
