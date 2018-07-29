@@ -26,6 +26,9 @@ class WaitSpinner(QWidget, object):
         self._spin_icons.append(solstice_resource.pixmap('thumb_loading_2', category='icons'))
         self._spin_icons.append(solstice_resource.pixmap('thumb_loading_3', category='icons'))
         self._spin_icons.append(solstice_resource.pixmap('thumb_loading_4', category='icons'))
+        self._spin_icons.append(solstice_resource.pixmap('thumb_loading_5', category='icons'))
+        self._spin_icons.append(solstice_resource.pixmap('thumb_loading_6', category='icons'))
+        self._spin_icons.append(solstice_resource.pixmap('thumb_loading_7', category='icons'))
 
         main_layout = QVBoxLayout()
         main_layout.setAlignment(Qt.AlignTop)
@@ -37,9 +40,9 @@ class WaitSpinner(QWidget, object):
         self.bg.setStyleSheet("#background {border-radius: 3px;border-style: solid;border-width: 1px;border-color: rgb(32,32,32);}")
         self.bg.setFrameShape(QFrame.StyledPanel)
         self.bg.setFrameShadow(QFrame.Raised)
-        frame_layout = QHBoxLayout()
-        frame_layout.setContentsMargins(4, 4, 4, 4)
-        self.bg.setLayout(frame_layout)
+        self.frame_layout = QHBoxLayout()
+        self.frame_layout.setContentsMargins(4, 4, 4, 4)
+        self.bg.setLayout(self.frame_layout)
         main_layout.addWidget(self.bg)
 
         self.thumbnail_label = solstice_label.ThumbnailLabel()
@@ -49,7 +52,7 @@ class WaitSpinner(QWidget, object):
         self.thumbnail_label.setPixmap(empty_thumb)
         self.thumbnail_label.setScaledContents(False)
         self.thumbnail_label.setAlignment(Qt.AlignCenter)
-        frame_layout.addWidget(self.thumbnail_label)
+        self.frame_layout.addWidget(self.thumbnail_label)
 
         self._current_spinner_index = 0
 
@@ -72,5 +75,5 @@ class WaitSpinner(QWidget, object):
     def _on_update_spinner(self):
         self.thumbnail_label.setPixmap(self._spin_icons[self._current_spinner_index])
         self._current_spinner_index += 1
-        if self._current_spinner_index == 4:
+        if self._current_spinner_index == 7:
             self._current_spinner_index = 0

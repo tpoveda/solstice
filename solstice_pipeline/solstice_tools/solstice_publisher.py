@@ -62,6 +62,7 @@ class PublishTexturesTask(solstice_task.Task, object):
         self.write_ok('------------------------------------')
         self.write_ok('TEXTURES PUBLISHED SUCCESFULLY!')
         self.write_ok('------------------------------------\n\n')
+        self.write('\n')
 
         return True
 
@@ -167,6 +168,7 @@ class PublishShadingTask(solstice_task.Task, object):
         self.write_ok('------------------------------------')
         self.write_ok('SHADING PUBLISHED SUCCESFULLY!')
         self.write_ok('------------------------------------\n\n')
+        self.write('\n')
 
         return True
 
@@ -232,7 +234,7 @@ class SolsticePublisher(solstice_dialog.Dialog, object):
     version = '1.0'
     docked = False
 
-    def __init__(self, name='PublisherWindow', asset=None, new_working_version=False, parent=None, **kwargs):
+    def __init__(self, name='SolsticePublisherWindow', asset=None, new_working_version=False, parent=None, **kwargs):
         self._asset = asset
         self._new_working_version = new_working_version
 
@@ -463,7 +465,8 @@ class AssetPublisherSummaryWidget(QWidget, object):
         main_layout.addLayout(self.task_group_layout)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
         self._log = solstice_console.SolsticeConsole()
-        self._log.write_ok('> SOLSTICE PUBLISHER LOG <')
+        self._log.write_ok('>>> SOLSTICE PUBLISHER LOG <<<\n')
+        self._log.write('\n')
         main_layout.addWidget(self._log)
         main_layout.addLayout(solstice_splitters.SplitterLayout())
         self._spinner = solstice_spinner.WaitSpinner()

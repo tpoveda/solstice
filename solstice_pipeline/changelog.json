@@ -48,6 +48,8 @@
     "Added Validator step to Solstice Publisher",
     "Solstice Publisher shows feedback to the user during publishing",
     "Solstice Publisher now support .txt textures automatic textures relinker",
-    "Added Publisher Tasks for shading, texturse and model for Solstice Publisher"
+    "Added Publisher Tasks for shading, textures and model for Solstice Publisher",
+    "Added user and light rigs assets to Solstice Builder Tool",
+    "Added User Login and Icon when the user is logged on Solstice Pipelinizer"
   ]
 }

@@ -48,9 +48,12 @@ class SanityCheckValidator(solstice_dialog.Dialog, object):
     def do_check(self, event):
         event.set()
 
+    def get_logo(self):
+        return 'solstice_validator_logo'
+
     def custom_ui(self):
         super(SanityCheckValidator, self).custom_ui()
-        self.set_logo('solstice_validator_logo')
+        self.set_logo(self.get_logo())
 
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
 
@@ -161,10 +164,8 @@ class TexturesValidator(SanityCheckValidator, object):
         self._check.checkDone.connect(self.update_log_text)
         self._check.checkFinished.connect(self.check_finished)
 
-    def custom_ui(self):
-        super(TexturesValidator, self).custom_ui()
-
-        self.set_logo('solstice_texturesvalidator_logo')
+    def get_logo(self):
+        return 'solstice_texturesvalidator_logo'
 
     def do_check(self, event):
         self._check._on_do_check()
@@ -188,10 +189,8 @@ class ShadingValidator(SanityCheckValidator, object):
         self._check.checkFinished.connect(self.check_finished)
         self._check.checkBeingFixed.connect(self._on_repaint)
 
-    def custom_ui(self):
-        super(ShadingValidator, self).custom_ui()
-
-        self.set_logo('solstice_shadingvalidator_logo')
+    def get_logo(self):
+        return 'solstice_shadingvalidator_logo'
 
     def check(self):
         if not self._asset:

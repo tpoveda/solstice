@@ -25,6 +25,8 @@ from solstice_pipeline.solstice_utils import solstice_artella_classes as classes
 artella_maya_plugin_name = 'Artella.py'
 artella_app_name = 'lifecycler'
 artella_root_prefix = '$ART_LOCAL_ROOT'
+artella_web = 'https://www.artella.com'
+artella_cms_url = 'https://cms-static.artella.com'
 
 spigot_client = None
 
@@ -632,6 +634,49 @@ def within_artella_scene():
     if 'artella' not in current_scene.lower():
         return False
     return True
+
+
+def get_user_avatar(user_id):
+    """
+    Downloads from Artella the avatar of the given user id
+    Only works if the user is loaded before to Artella
+    :param user_id: str
+    :return:
+    """
+
+    manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    manager.add_password(None, artella_cms_url, 'default', 'default')
+    auth = urllib2.HTTPBasicAuthHandler(manager)
+    opener = urllib2.build_opener(auth)
+    urllib2.install_opener(opener)
+    response = urllib2.urlopen('{0}/profile/{1}/avatarfull.img'.format(artella_cms_url, user_id))
+
+    return response
+
+
+def login_to_artella(user, password):
+    """
+    Login to Artella
+    :param user: str, user name
+    :param password: str, password
+    :return:
+    """
+
+    # TODO: This always returns True, so its completely uselss :(
+
+    manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+
+    artella_web = 'https://www.artella.com/project/2252d6c8-407d-4419-a186-cf90760c9967'
+    manager.add_password(None, artella_web, user, password)
+    auth = urllib2.HTTPBasicAuthHandler(manager)
+    opener = urllib2.build_opener(auth)
+    urllib2.install_opener(opener)
+    response = urllib2.urlopen(artella_web)
+    if response:
+        if response.getcode() == 200:
+            return True
+
+    return False
 
 
 try:

@@ -22,7 +22,7 @@ from solstice_qt.QtWidgets import *
 import maya.cmds as cmds
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser, solstice_published_info_widget, solstice_sync_dialog
+from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser, solstice_published_info_widget, solstice_login
 from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_artella_utils, solstice_image
 from solstice_tools import solstice_sequencer
 from resources import solstice_resource
@@ -119,6 +119,21 @@ class Pipelinizer(solstice_windows.Window, object):
         self._projects = None
         super(Pipelinizer, self).__init__(name=name, parent=parent, **kwargs)
 
+    def _get_separator(self):
+        v_div_w = QWidget()
+        v_div_l = QVBoxLayout()
+        v_div_l.setAlignment(Qt.AlignLeft)
+        v_div_l.setContentsMargins(0, 0, 0, 0)
+        v_div_l.setSpacing(0)
+        v_div_w.setLayout(v_div_l)
+        v_div = QFrame()
+        v_div.setMinimumHeight(30)
+        v_div.setFrameShape(QFrame.VLine)
+        v_div.setFrameShadow(QFrame.Sunken)
+        v_div_l.addWidget(v_div)
+        return v_div_w
+
+
     def custom_ui(self):
         super(Pipelinizer, self).custom_ui()
 
@@ -136,11 +151,9 @@ class Pipelinizer(solstice_windows.Window, object):
             self.settings.update()
 
         # User Icon
-        # TODO: After creating the user database read the info for this user from that file
-        # user_icon = solstice_user.UserWidget(name='Summer', role='Director')
-        # user_icon.move(1100, 0)
-        # user_icon.setStyleSheet("QWidget{background: transparent;}")
-        # self._logo_scene.addWidget(user_icon)
+        self.user_icon = solstice_user.UserWidget()
+        self.user_icon.move(1080, -5)
+        self._logo_scene.addWidget(self.user_icon)
 
         # Top Menu Bar
         top_menu_layout = QGridLayout()
@@ -148,14 +161,22 @@ class Pipelinizer(solstice_windows.Window, object):
         self.main_layout.addLayout(top_menu_layout)
         artella_project_btn = QToolButton()
         artella_project_btn.setText('Artella')
+        artella_project_btn.setIcon(solstice_resource.icon('artella'))
+        artella_project_btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         project_folder_btn = QToolButton()
         project_folder_btn.setText('Project')
+        project_folder_btn.setIcon(solstice_resource.icon('folder'))
+        project_folder_btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         synchronize_btn = QToolButton()
         synchronize_btn.setText('Synchronize')
         synchronize_btn.setPopupMode(QToolButton.InstantPopup)
+        synchronize_btn.setIcon(solstice_resource.icon('sync'))
+        synchronize_btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         settings_btn = QToolButton()
         settings_btn.setText('Settings')
-        for i, btn in enumerate([artella_project_btn, project_folder_btn, synchronize_btn, settings_btn]):
+        settings_btn.setIcon(solstice_resource.icon('settings'))
+        settings_btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        for i, btn in enumerate([self._get_separator(), artella_project_btn, self._get_separator(), project_folder_btn, self._get_separator(), synchronize_btn, self._get_separator(), settings_btn, self._get_separator()]):
             top_menu_layout.addWidget(btn, 0, i, 1, 1, Qt.AlignCenter)
 
         synchronize_menu = QMenu(self)
@@ -554,6 +575,7 @@ def run():
     reload(solstice_splitters)
     reload(solstice_published_info_widget)
     reload(solstice_sequencer)
+    reload(solstice_login)
 
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()

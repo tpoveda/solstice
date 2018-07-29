@@ -39,28 +39,51 @@ class SolsticeBuilder(solstice_windows.Window, object):
 
         self._asset_builder = AssetBuilder()
         self._user_builder = UserBuilder()
+        self._light_rig_builder = LightRigBuilder()
         tab_widget.addTab(self._asset_builder, 'Asset')
         tab_widget.addTab(self._user_builder, 'User')
+        tab_widget.addTab(self._light_rig_builder, 'Ligth Rig')
 
 
-class UserBuilder(QWidget, object):
-    def __init__(self, parent=None):
-        super(UserBuilder, self).__init__(parent=parent)
+class BuilderWidget(QWidget, object):
+    def __init__(self, name='Asset', parent=None):
+        super(BuilderWidget, self).__init__(parent=parent)
+
+        base_layout = QVBoxLayout()
+        base_layout.setContentsMargins(2, 2, 2, 2)
+        base_layout.setSpacing(2)
+        self.setLayout(base_layout)
+
 
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(2, 2, 2, 2)
         self.main_layout.setSpacing(2)
-        self.setLayout(self.main_layout)
+        base_layout.addLayout(self.main_layout)
+
+        bottom_layout = QHBoxLayout()
+        bottom_layout.setContentsMargins(2, 2, 2, 2)
+        bottom_layout.setSpacing(2)
+        base_layout.addLayout(solstice_splitters.SplitterLayout())
+        base_layout.addLayout(bottom_layout)
+
+        self.save_btn = QPushButton('Generate {} File'.format(name))
+        self.load_btn = QPushButton('Load {} File'.format(name))
+        bottom_layout.addWidget(self.save_btn)
+        bottom_layout.addWidget(self.load_btn)
+
+        self.save_btn.clicked.connect(self.save)
+        self.load_btn.clicked.connect(self.load)
+
+    def save(self):
+        pass
+
+    def load(self):
+        pass
 
 
-class AssetBuilder(QWidget, object):
+class AssetBuilder(BuilderWidget, object):
     def __init__(self, parent=None):
         super(AssetBuilder, self).__init__(parent=parent)
-
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(2, 2, 2, 2)
-        self.main_layout.setSpacing(2)
-        self.setLayout(self.main_layout)
 
         self._current_icon_path = None
         self._current_preview_path = None
@@ -93,26 +116,13 @@ class AssetBuilder(QWidget, object):
         self.main_layout.addWidget(self._description_text)
 
         self.main_layout.addItem(QSpacerItem(0, 5))
-        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
-
-        save_btn = QPushButton('Generate Asset File')
-        load_btn = QPushButton('Load Asset File')
-        self.main_layout.addItem(QSpacerItem(0, 10))
-        buttons_layout = QHBoxLayout()
-        buttons_layout.setContentsMargins(0, 0, 0, 0)
-        buttons_layout.setSpacing(5)
-        buttons_layout.addWidget(save_btn)
-        buttons_layout.addWidget(load_btn)
-        self.main_layout.addLayout(buttons_layout)
 
         # ============================================================================
 
         self._icon_btn.clicked.connect(self._set_icon)
         self._preview_btn.clicked.connect(self._set_preview)
-        save_btn.clicked.connect(self._save_asset)
-        load_btn.clicked.connect(self._load_asset)
 
-    def _save_asset(self):
+    def save(self):
         out_dict = dict()
         out_dict['asset'] = dict()
         if self._current_icon_path and os.path.isfile(self._current_icon_path):
@@ -135,7 +145,7 @@ class AssetBuilder(QWidget, object):
             # except Exception:
             #     pass
 
-    def _load_asset(self):
+    def load(self):
         load_file = QFileDialog.getOpenFileName(self, 'Select asset data file to open', sp.get_solstice_assets_path(), 'JSON Files (*.json)')[0]
         if os.path.isfile(load_file):
             data = None
@@ -167,6 +177,84 @@ class AssetBuilder(QWidget, object):
 
     def _set_preview(self):
         pass
+
+
+class UserBuilder(BuilderWidget, object):
+    def __init__(self, parent=None):
+        super(UserBuilder, self).__init__(name='User', parent=parent)
+
+        self._current_icon_path = None
+
+        self._icon_btn = QPushButton('Icon')
+        self._icon_btn.setMinimumSize(QSize(150, 150))
+        self._icon_btn.setMaximumSize(QSize(150, 150))
+        self._icon_btn.setIconSize(QSize(150, 150))
+        self._icon_btn.setIconSize(QSize(150, 150))
+        self.id_text = QTextEdit()
+        self.id_text.setPlaceholderText('ID')
+
+        icon_layout = QHBoxLayout()
+        icon_layout.setContentsMargins(5, 10, 5, 5)
+        self.main_layout.addLayout(icon_layout)
+        icon_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        icon_layout.addWidget(self._icon_btn, Qt.AlignCenter)
+        icon_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Expanding, QSizePolicy.Fixed))
+
+        self.main_layout.addWidget(self.id_text)
+
+        self.main_layout.addItem(QSpacerItem(0, 5))
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        # ============================================================================
+
+        self._icon_btn.clicked.connect(self._set_icon)
+
+    def _set_icon(self):
+        file_dialog = QFileDialog(self)
+        icon_file_path = file_dialog.getOpenFileName(self, 'Select Icon File', sp.get_solstice_assets_path(), 'PNG Files (*.png);; JPG Files (*.jpg)')
+        if icon_file_path and os.path.isfile(icon_file_path[0]):
+            self._icon_btn.setIcon(QIcon(QPixmap(icon_file_path[0])))
+            self._icon_btn.setText('')
+            self._current_icon_path = icon_file_path[0]
+
+
+class LightRigBuilder(BuilderWidget, object):
+    def __init__(self, parent=None):
+        super(LightRigBuilder, self).__init__(name='Light Rig', parent=parent)
+
+        self._current_icon_path = None
+
+        self._icon_btn = QPushButton('Icon')
+        self._icon_btn.setMinimumSize(QSize(150, 150))
+        self._icon_btn.setMaximumSize(QSize(150, 150))
+        self._icon_btn.setIconSize(QSize(150, 150))
+        self._icon_btn.setIconSize(QSize(150, 150))
+        self._description_text = QTextEdit()
+        self._description_text.setPlaceholderText('Description')
+
+        icon_layout = QHBoxLayout()
+        icon_layout.setContentsMargins(5, 10, 5, 5)
+        self.main_layout.addLayout(icon_layout)
+        icon_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        icon_layout.addWidget(self._icon_btn, Qt.AlignCenter)
+        icon_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Expanding, QSizePolicy.Fixed))
+
+        self.main_layout.addWidget(self._description_text)
+
+        self.main_layout.addItem(QSpacerItem(0, 5))
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        # ============================================================================
+
+        self._icon_btn.clicked.connect(self._set_icon)
+
+    def _set_icon(self):
+        file_dialog = QFileDialog(self)
+        icon_file_path = file_dialog.getOpenFileName(self, 'Select Icon File', sp.get_solstice_assets_path(), 'PNG Files (*.png);; JPG Files (*.jpg)')
+        if icon_file_path and os.path.isfile(icon_file_path[0]):
+            self._icon_btn.setIcon(QIcon(QPixmap(icon_file_path[0])))
+            self._icon_btn.setText('')
+            self._current_icon_path = icon_file_path[0]
 
 
 def run():
