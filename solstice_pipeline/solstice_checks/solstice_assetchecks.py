@@ -10,6 +10,8 @@
 
 import os
 
+import maya.cmds as cmds
+
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_checks import solstice_check
 from solstice_pipeline.solstice_utils import solstice_maya_utils
@@ -173,19 +175,6 @@ class UpdateAssetTextures(solstice_check.SanityCheckTask, object):
         pass
 
 
-class ModelAndShadingFileHasValidModels(solstice_check.SanityCheckTask, object):
-    def __init__(self, auto_fix=False, parent=None):
-        super(ModelAndShadingFileHasValidModels, self).__init__(name='Checking Model and Shading File', auto_fix=auto_fix, parent=parent)
-
-        self.set_check_text('Check if model and shading files shares the same models')
-
-    def check(self):
-        pass
-
-    def fix(self):
-        pass
-
-
 class StudentLicenseCheck(solstice_check.SanityCheckTask, object):
     def __init__(self, asset, file_type, status='working', auto_fix=False, parent=None):
         super(StudentLicenseCheck, self).__init__(name='Student License Check', auto_fix=auto_fix, parent=parent)
@@ -199,21 +188,23 @@ class StudentLicenseCheck(solstice_check.SanityCheckTask, object):
     def check(self):
 
         self._file_path = self._asset().get_asset_file(file_type=self._file_type, status=self._status)
-        if self._file_path is None or not os.path.exists(self._file_path):
+        if self._file_path is None or not os.path.isfile(self._file_path):
             return False
 
         return not solstice_maya_utils.file_has_student_line(filename=self._file_path)
 
     def fix(self):
-        if self._file_path is None or not os.path.exists(self._file_path):
+        if self._file_path is None or not os.path.isfile(self._file_path):
             return False
 
         artella.lock_asset(self._file_path)
         try:
-            solstice_maya_utils.clean_student_line(filename=self._file_path)
+            sp.logger.debug('Cleaning Student License from file: {}'.format(self._file_path))
+            self._valid_check = solstice_maya_utils.clean_student_line(filename=self._file_path)
             valid = super(StudentLicenseCheck, self).fix()
             if not valid:
                 sp.logger.warning('Impossible to fix Maya Student License Check')
+                artella.unlock_asset(self._file_path)
                 return False
         except Exception as e:
             artella.unlock_asset(self._file_path)

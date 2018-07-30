@@ -61,23 +61,33 @@ class PublishedInfoWidget(QWidget, object):
         self._main_layout.addLayout(bottom_layout)
         self._asset_description = QTextEdit()
         self._asset_description.setReadOnly(True)
+
         bottom_splitter = QSplitter(Qt.Horizontal)
         bottom_layout.addWidget(bottom_splitter)
         bottom_splitter.addWidget(self._asset_description)
+
+        scroll_layout = QVBoxLayout()
+        scroll_layout.setContentsMargins(2, 2, 2, 2)
+        scroll_layout.setSpacing(2)
+        scroll_layout.setAlignment(Qt.AlignTop)
         self._versions_widget = QWidget()
-        self._versions_widget.setVisible(False)
-        self._versions_layout = QVBoxLayout()
-        self._versions_layout.setContentsMargins(2, 2, 2, 2)
-        self._versions_layout.setSpacing(2)
-        self._versions_widget.setLayout(self._versions_layout)
+        self._versions_widget.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
+        self.scroll = QScrollArea()
+        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setFocusPolicy(Qt.NoFocus)
+        self.scroll.setWidget(self._versions_widget)
+        self.scroll.setVisible(False)
+        bottom_splitter.addWidget(self.scroll)
+        self._versions_widget.setLayout(scroll_layout)
         self._versions_label = QLabel('')
-        self._versions_layout.addWidget(self._versions_label)
-        bottom_splitter.addWidget(self._versions_widget)
+        scroll_layout.addWidget(self._versions_label)
 
         self.update_version_info()
 
     def update_versions_info(self, status, file_type):
-        self._versions_widget.setVisible(True)
+        self.scroll.setVisible(True)
 
     def update_version_info(self):
 
@@ -217,30 +227,38 @@ class PublishedInfoWidget(QWidget, object):
                     if cat == 'textures':
                         msg_str = ''
                         valid_check = True
-                        for (local_txt_name, local_txt_version), (server_txt_name, server_txt_version) in zip(max_local.items(), max_server.items()):
-                            if local_txt_name == server_txt_name:
-                                if local_txt_version.version == server_txt_version.version:
-                                    msg_str += 'Texture {0} is updated: v{1}\n'.format(server_txt_name, server_txt_version.version)
+                        if max_local and max_server:
+                            for (local_txt_name, local_txt_version), (server_txt_name, server_txt_version) in zip(max_local.items(), max_server.items()):
+                                if local_txt_name == server_txt_name:
+                                    if local_txt_version.version == server_txt_version.version:
+                                        msg_str += 'Texture {0} is updated: v{1}\n'.format(server_txt_name, server_txt_version.version)
+                                    else:
+                                        valid_check = False
+                                        msg_str += 'Texture {0} is not updated: |LOCAL| v{1} |SERVER| v{2}'.format(server_txt_name, local_txt_version.version, server_txt_version.version)
                                 else:
                                     valid_check = False
-                                    msg_str += 'Texture {0} is not updated: |LOCAL| v{1} |SERVER| v{2}'.format(server_txt_name, local_txt_version.version, server_txt_version.version)
+                                    msg_str += 'Invalid Texture: {0} - {1}'.format(local_txt_name, server_txt_name)
+                            if valid_check:
+                                self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
+                                self._ui[status][cat]['status'].setToolTip('All textures are updated!')
                             else:
-                                valid_check = False
-                                msg_str += 'Invalid Texture: {0} - {1}'.format(local_txt_name, server_txt_name)
-                        if valid_check:
-                            self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
-                            self._ui[status][cat]['status'].setToolTip('All textures are updated!')
+                                self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
+                                self._ui[status][cat]['status'].setToolTip(msg_str)
                         else:
-                            self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
-                            self._ui[status][cat]['status'].setToolTip(msg_str)
+                            if max_local is not None and max_server is not None and max_local.version == max_server.version:
+                                self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
+                                self._ui[status][cat]['status'].setToolTip('{} file is updated to last version: {}'.format(cat.title(), max_server.version))
+                            elif max_local is not None and max_server is not None:
+                                if max_local.version > max_server.version:
+                                    self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
                     else:
-                        if max_local is not None and max_server is not None and max_local.version == max_server.version:
-                            self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
-                            self._ui[status][cat]['status'].setToolTip('{} file is updated to last version: {}'.format(cat.title(), max_server.version))
-                        # elif max_local is None and max_server is not None or max_local.version > max_server.version:
-                        elif max_local is not None and max_server is not None:
+                        if max_local and max_server:
+                            if max_local.version == max_server.version:
+                                self._ui[status][cat]['status'].setPixmap(self._ok_pixmap)
                             if max_local.version > max_server.version:
                                 self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
+                        else:
+                            self._ui[status][cat]['status'].setPixmap(self._error_pixmap)
 
     def update_published_info(self):
         if self._check_published_info:

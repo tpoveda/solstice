@@ -172,6 +172,37 @@ class TexturesValidator(SanityCheckValidator, object):
         super(TexturesValidator, self).do_check(event)
 
 
+class ModelValidator(SanityCheckValidator, object):
+    def __init__(self, asset):
+        super(ModelValidator, self).__init__(
+            name='SolsticeModelValidator',
+            title='Model Validator'
+        )
+
+        self._asset = asset
+
+        self._check = solstice_checkgroups.AssetModelPublishSanityCheck(asset=self._asset, file_type='model', auto_fix=True, stop_on_error=True)
+        self._check.check_btn.setVisible(False)
+        self.scroll_layout.addWidget(self._check)
+
+        self._check.checkDone.connect(self.update_log_text)
+        self._check.checkFinished.connect(self.check_finished)
+        self._check.checkBeingFixed.connect(self._on_repaint)
+
+    def get_logo(self):
+        return 'solstice_modelvalidator_logo'
+
+    def check(self):
+        if not self._asset:
+            self.close()
+            return False
+        super(ModelValidator, self).check()
+
+    def do_check(self, event):
+        self._check._on_do_check()
+        super(ModelValidator, self).do_check(event)
+
+
 class ShadingValidator(SanityCheckValidator, object):
     def __init__(self, asset):
         super(ShadingValidator, self).__init__(

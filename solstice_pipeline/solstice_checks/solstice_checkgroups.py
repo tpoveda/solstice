@@ -100,7 +100,7 @@ class GeneralSanityCheck(SanityCheckGroup, object):
     def __init__(self, auto_fix=False, stop_on_error=False, parent=None):
         super(GeneralSanityCheck, self).__init__(name='General', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
 
-        self.add_check(solstice_studentcheck.StudentLicenseCheck())
+        # self.add_check(solstice_studentcheck.StudentLicenseCheck())
 
 
 class ModelRigSanityCheck(SanityCheckGroup, object):
@@ -134,3 +134,4 @@ class AssetModelPublishSanityCheck(SanityCheckGroup, object):
         super(AssetModelPublishSanityCheck, self).__init__(name='AssetPublish', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
 
         self.add_check(solstice_assetchecks.StudentLicenseCheck(asset=asset, status='working', file_type=file_type))
+        # self.add_check(solstice_assetchecks.ModelValidMainGroup(asset=asset, status='working', file_type=file_type, task=task))

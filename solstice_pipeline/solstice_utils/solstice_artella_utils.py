@@ -245,10 +245,13 @@ def get_status(filepath, as_json=False):
     spigot = get_spigot_client()
     rsp = spigot.execute(command_action='do', command_name='status', payload=uri)
     if isinstance(rsp, basestring):
-        rsp = json.loads(rsp)
-
-        # TODO: Print cannot be used because if we use threads Maya will crash, check if logger crash Maya
-        # sp.logger.debug(rsp)
+        try:
+            rsp = json.loads(rsp)
+        except Exception:
+            msg = 'Artella is not available at this moment ... Restart Maya and try again please!'
+            sp.logger.error(msg)
+            sp.message(msg)
+            return {}
 
     if as_json:
         return rsp

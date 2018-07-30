@@ -13,6 +13,8 @@ import re
 import weakref
 from shutil import copyfile
 
+import maya.cmds as cmds
+
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
@@ -76,6 +78,35 @@ class PublishModelTask(solstice_task.Task, object):
         self.set_task_text('Publishing Model ...')
 
     def run(self):
+        self.write_ok('>>> PUBLISH MODEL LOG')
+        self.write_ok('------------------------------------')
+        check = solstice_validators.ModelValidator(asset=self._asset)
+        check.check()
+        if not check.is_valid():
+            return False
+
+        # Check that model file has a main group with valid name
+        model_path = self._asset().get_asset_file(file_type='model', status='working')
+        if model_path is None or not os.path.isfile(model_path):
+            return False
+
+        self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
+        cmds.file(model_path, o=True, f=True)
+        if cmds.objExists(self._asset().name):
+            objs = cmds.ls(self._asset().name)
+            valid_obj = None
+            for obj in objs:
+                parent = cmds.listRelatives(obj, parent=True)
+                if parent is None:
+                    valid_obj = obj
+            if not valid_obj:
+                self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
+                return False
+        else:
+            self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
+            return False
+        self.write_ok('Asset main group is valid: {}'.format(self._asset().name))
+
         return True
 
 
@@ -95,6 +126,38 @@ class PublishShadingTask(solstice_task.Task, object):
         check.check()
         if not check.is_valid():
             return False
+
+        # Check that model and shading main groups are valid
+        model_path = self._asset().get_asset_file(file_type='model', status='working')
+        if model_path is None or not os.path.isfile(model_path):
+            self._asset().sync(sync_type='model', status='working')
+            if model_path is None or not os.path.isfile(model_path):
+                self.write_error('Asset model file does not exists!')
+                return False
+        shading_path = self._asset().get_asset_file(file_type='shading', status='working')
+        if shading_path is None or not os.path.isfile(shading_path):
+            self._asset().sync(sync_type='shading', status='working')
+            if shading_path is None or not os.path.isfile(model_path):
+                self.write_error('Asset shading file does not exists!')
+                return False
+
+        for file_path, file_type in zip([model_path, shading_path], ['model', 'shading']):
+            self.write('Checking if asset {0} file main group has a valid nomenclature: {1}'.format(file_type, self._asset().name))
+            cmds.file(file_path, o=True, f=True)
+            if cmds.objExists(self._asset().name):
+                objs = cmds.ls(self._asset().name)
+                valid_obj = None
+                for obj in objs:
+                    parent = cmds.listRelatives(obj, parent=True)
+                    if parent is None:
+                        valid_obj = obj
+                if not valid_obj:
+                    self.write_error('Asset {0} file main group is not valid. Please change it manually to {1}'.format(file_type, self._asset().name))
+                    return False
+            else:
+                self.write_error('Asset {0} file main group is not valid. Please change it manually to {1}'.format(file_type, self._asset().name))
+                return False
+            self.write_ok('Asset {0} main group is valid: {1}'.format(file_type, self._asset().name))
 
         # First we need to sync the published textures files
         self.write('Syncing current published textures files of asset {}\n'.format(self._asset().name))

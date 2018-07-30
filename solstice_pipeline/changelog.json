@@ -38,6 +38,7 @@
   "4.0":
   [
     "Updated UI layout of Solstice Changelog",
+    "Added Tray Icon to Solstice Tools",
     "Added new Check and Task System for Solstice Tools",
     "Solstice Light Rigs Tool can import current light rigs",
     "Now shaders can be created on the fly from JSON file directly from Solstice Shader Library Viewer",

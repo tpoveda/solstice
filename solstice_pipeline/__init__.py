@@ -15,6 +15,7 @@ import pkgutil
 import datetime
 import platform
 import importlib
+import webbrowser
 from collections import OrderedDict
 if sys.version_info[:2] > (2, 7):
     from importlib import reload
@@ -32,6 +33,7 @@ reload_modules = list()
 logger = None
 info_dialog = None
 settings = None
+tray = None
 
 # =================================================================================
 
@@ -192,6 +194,19 @@ def create_solstice_menu():
             s_menu.create_menu(file_path=menu_file, parent_menu='Solstice')
     except Exception as e:
         solstice_pipeline.logger.warning('Error during Solstice Menu Creation: {}'.format(e))
+
+
+def create_solstice_tray():
+    """
+    Create Solstice Pipeline tray
+    """
+
+    solstice_pipeline.logger.debug('Creating Solstice Tray ...')
+
+    from solstice_pipeline.solstice_gui import solstice_traymessage
+
+    global tray
+    tray = solstice_traymessage.SolsticeTrayMessage()
 
 
 def update_solstice_project():
@@ -431,6 +446,38 @@ def update_tools():
     solstice_download_utils.update_tools()
 
 
+def message(msg, title='Solstice Tools'):
+    if tray:
+        tray.show_message(title=title, msg=msg)
+
+
+def open_artella_project():
+    """
+    Opens Solstice Artella web page
+    """
+
+    project_url = 'https://www.artella.com/project/{0}/files'.format(solstice_project_id_raw)
+    webbrowser.open(project_url)
+
+
+def open_artella_documentation():
+    """
+    Opens Artella Documentation web page
+    """
+
+    documentation_url = 'https://solstice-short-film.gitbook.io/solstice/'
+    webbrowser.open(documentation_url)
+
+
+def open_solstice_web():
+    """
+    Open Official Solstice web page
+    """
+
+    solstice_url = 'http://www.solsticeshortfilm.com/'
+    webbrowser.open(solstice_url)
+
+
 def init():
     update_paths()
     create_solstice_logger()
@@ -441,6 +488,7 @@ def init():
     create_solstice_info_window()
     create_solstice_shelf()
     create_solstice_menu()
+    create_solstice_tray()
     update_solstice_project()
 
     if platform.system() == 'Darwin':
