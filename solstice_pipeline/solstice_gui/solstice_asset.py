@@ -798,11 +798,19 @@ class AssetWidget(QWidget, object):
         sp.logger.debug('{0} synchronized in {1} seconds'.format(self._name, elapsed_time))
         self.sync_finished.emit()
 
-    def open_asset_file(self, file_type, status):
-        if file_type != 'model' and file_type != 'textures' and file_type != 'shading' and file_type != 'shading':
-            return
-        if status != 'working' and status != 'published':
-            return
+    def get_asset_file(self, file_type, status):
+        """
+        Returns file to an asset file
+        :param file_type: str
+        :param status: str
+        :return: str
+        """
+
+        if file_type not in sp.valid_categories:
+            return None
+        if status not in sp.valid_status:
+            return None
+
         asset_name = self._name
         if file_type == 'shading':
             asset_name = self._name + '_SHD'
@@ -810,16 +818,20 @@ class AssetWidget(QWidget, object):
             asset_name = self._name + '_GROOMING'
         asset_name = asset_name + '.ma'
 
+        file_path = None
         if status == 'working':
-            working_path = os.path.join(self._asset_path, '__working__', file_type, asset_name)
-            if os.path.isfile(working_path):
-                artella.open_file_in_maya(file_path=working_path)
+            file_path = os.path.join(self._asset_path, '__working__', file_type, asset_name)
         elif status == 'published':
             local_max_versions = self.get_max_local_versions()
             if local_max_versions[file_type]:
-                published_path = os.path.join(self._asset_path, local_max_versions[file_type][1], file_type, asset_name)
-                if os.path.isfile(published_path):
-                    artella.open_file_in_maya(file_path=published_path)
+                file_path = os.path.join(self._asset_path, local_max_versions[file_type][1], file_type, asset_name)
+
+        return file_path
+
+    def open_asset_file(self, file_type, status):
+        file_path = self.get_asset_file(file_type=file_type, status=status)
+        if os.path.isfile(file_path):
+            artella.open_file_in_maya(file_path=file_path)
 
     def import_asset_file(self):
         asset_name = self._name + '.ma'

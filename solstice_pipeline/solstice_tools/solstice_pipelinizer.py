@@ -152,7 +152,7 @@ class Pipelinizer(solstice_windows.Window, object):
 
         # User Icon
         self.user_icon = solstice_user.UserWidget()
-        self.user_icon.move(1080, -5)
+        self.user_icon.move(1030, 5)
         self._logo_scene.addWidget(self.user_icon)
 
         # Top Menu Bar

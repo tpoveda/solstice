@@ -15,20 +15,24 @@ from solstice_pipeline.solstice_gui import solstice_label
 from resources import solstice_resource
 
 
+class SpinnerType(object):
+    Thumb = 'thumb'
+    Circle = 'circle'
+
 class WaitSpinner(QWidget, object):
-    def __init__(self, parent=None):
+    def __init__(self, spinner_type=SpinnerType.Thumb, parent=None):
         super(WaitSpinner, self).__init__(parent=parent)
 
         empty_thumb = solstice_resource.pixmap('empty_file', category='icons')
 
         self._spin_icons = list()
-        self._spin_icons.append(solstice_resource.pixmap('thumb_loading_1', category='icons'))
-        self._spin_icons.append(solstice_resource.pixmap('thumb_loading_2', category='icons'))
-        self._spin_icons.append(solstice_resource.pixmap('thumb_loading_3', category='icons'))
-        self._spin_icons.append(solstice_resource.pixmap('thumb_loading_4', category='icons'))
-        self._spin_icons.append(solstice_resource.pixmap('thumb_loading_5', category='icons'))
-        self._spin_icons.append(solstice_resource.pixmap('thumb_loading_6', category='icons'))
-        self._spin_icons.append(solstice_resource.pixmap('thumb_loading_7', category='icons'))
+
+        if spinner_type == SpinnerType.Thumb:
+            for i in range(7):
+                self._spin_icons.append(solstice_resource.pixmap('thumb_loading_{}'.format(i+1), category='icons'))
+        else:
+            for i in range(10):
+                self._spin_icons.append(solstice_resource.pixmap('circle_loading_{}'.format(i+1), category='icons'))
 
         main_layout = QVBoxLayout()
         main_layout.setAlignment(Qt.AlignTop)
@@ -75,5 +79,5 @@ class WaitSpinner(QWidget, object):
     def _on_update_spinner(self):
         self.thumbnail_label.setPixmap(self._spin_icons[self._current_spinner_index])
         self._current_spinner_index += 1
-        if self._current_spinner_index == 7:
+        if self._current_spinner_index == len(self._spin_icons):
             self._current_spinner_index = 0

@@ -16,14 +16,14 @@ from solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_dialog, solstice_splitters
-from solstice_checks import solstice_checkgroups
+from solstice_pipeline.solstice_checks import solstice_checkgroups
 
 
 class SanityCheckValidator(solstice_dialog.Dialog, object):
 
     checkFinished = Signal()
 
-    def __init__(self, name='Validator', title='Validator', auto_accept=True):
+    def __init__(self, name='Validator', title='Validator'):
         self.name = name
         self._title = title
         super(SanityCheckValidator, self).__init__()
@@ -181,7 +181,7 @@ class ShadingValidator(SanityCheckValidator, object):
 
         self._asset = asset
 
-        self._check = solstice_checkgroups.AssetPublishSantiyCheck(asset=self._asset, file_type='shading', auto_fix=True, stop_on_error=True)
+        self._check = solstice_checkgroups.AssetShadingPublishSantiyCheck(asset=self._asset, file_type='shading', auto_fix=True, stop_on_error=True)
         self._check.check_btn.setVisible(False)
         self.scroll_layout.addWidget(self._check)
 

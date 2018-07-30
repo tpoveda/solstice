@@ -13,7 +13,7 @@ from solstice_qt.QtWidgets import *
 from solstice_pipeline.solstice_utils import solstice_maya_utils
 from solstice_pipeline.solstice_gui import solstice_windows
 
-from solstice_tasks import solstice_taskgroups
+from solstice_checks import solstice_checkgroups
 
 
 class SanityCheck(solstice_windows.Window, object):
@@ -36,8 +36,8 @@ class SanityCheck(solstice_windows.Window, object):
 
         # =============================================================================
 
-        self.add_sanity_group(solstice_taskgroups.GeneralSanityCheck())
-        self.add_sanity_group(solstice_taskgroups.ShadingSanityCheck())
+        self.add_sanity_group(solstice_checkgroups.GeneralSanityCheck())
+        self.add_sanity_group(solstice_checkgroups.ShadingSanityCheck())
 
     def add_sanity_group(self, sanity_group):
         self.checks_tab.addTab(sanity_group, sanity_group.name)

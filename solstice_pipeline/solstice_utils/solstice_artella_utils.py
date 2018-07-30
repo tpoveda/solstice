@@ -679,6 +679,27 @@ def login_to_artella(user, password):
     return False
 
 
+def get_dependencies(file_path):
+    """
+    Returns a list with all the dependencies
+    :param file_path: str
+    :return: dict
+    """
+
+    spigot = get_spigot_client()
+    payload = dict()
+    payload['cms_uri'] = artella.getCmsUri(file_path)
+    payload = json.dumps(payload)
+
+    rsp = spigot.execute(command_action='do', command_name='getDependencies', payload=payload)
+
+    if isinstance(rsp, basestring):
+        rsp = json.loads(rsp)
+    sp.logger.debug(rsp)
+
+    return rsp
+
+
 try:
     import Artella as artella
 except ImportError:

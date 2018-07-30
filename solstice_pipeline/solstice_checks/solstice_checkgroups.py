@@ -118,11 +118,19 @@ class TexturesSanityCheck(SanityCheckGroup, object):
         super(TexturesSanityCheck, self).__init__(name='Textures', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
 
 
-class AssetPublishSantiyCheck(SanityCheckGroup, object):
+class AssetShadingPublishSantiyCheck(SanityCheckGroup, object):
     def __init__(self, asset, file_type, auto_fix=False, stop_on_error=False, parent=None):
-        super(AssetPublishSantiyCheck, self).__init__(name='AssetPublish', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
+        super(AssetShadingPublishSantiyCheck, self).__init__(name='AssetPublish', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
 
+        self.add_check(solstice_assetchecks.StudentLicenseCheck(asset=asset, status='working', file_type=file_type))
         self.add_check(solstice_assetchecks.ValidPublishedTextures(asset=asset, auto_fix=self.auto_fix))
         self.add_check(solstice_assetchecks.AssetFileSync(asset=asset, status='working', file_type=file_type, auto_fix=self.auto_fix))
         self.add_check(solstice_assetchecks.NotLockedAsset(asset=asset, status='working', file_type=file_type, auto_fix=self.auto_fix))
         self.add_check(solstice_assetchecks.TexturesFolderSync(asset=asset, auto_fix=self.auto_fix))
+
+
+class AssetModelPublishSanityCheck(SanityCheckGroup, object):
+    def __init__(self, asset, file_type, auto_fix=False, stop_on_error=False, parent=None):
+        super(AssetModelPublishSanityCheck, self).__init__(name='AssetPublish', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
+
+        self.add_check(solstice_assetchecks.StudentLicenseCheck(asset=asset, status='working', file_type=file_type))
