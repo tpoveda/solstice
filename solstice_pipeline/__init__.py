@@ -9,8 +9,8 @@
 import os
 import re
 import sys
-import json
 import glob
+import urllib2
 import pkgutil
 import datetime
 import platform
@@ -365,45 +365,6 @@ def init_solstice_environment_variables():
     Initializes all necessary environment variables used in Solstice Tools
     """
 
-    def handleMessage(jsonMsg):
-        try:
-            msg = json.loads(jsonMsg)
-
-            if type(msg) == dict:
-                command_name = msg['CommandName']
-                args = msg['CommandArgs']
-
-                if command_name == 'open':
-                    maya_file = args['path']
-                    opened_file = cmds.file(maya_file, open=True, force=True)
-                    scenefile_type = cmds.file(q=True, type=True)
-                    if type(scenefile_type) == list:
-                        scenefile_type = scenefile_type[0]
-                    filepath = maya_file.replace('\\', '/')
-                    mel.eval('$filepath = "{filepath}";'.format(filepath=filepath))
-                    mel.eval('addRecentFile $filepath "{scenefile_type}";'.format(scenefile_type=scenefile_type))
-                elif command_name == 'import':
-                    path = args['path']
-                    cmds.file(path, i=True, preserveReferences=True)
-                elif command_name == 'reference':
-                    path = args['path']
-                    use_rename = cmds.optionVar(q='referenceOptionsUseRenamePrefix')
-                    if use_rename:
-                        namespace = cmds.optionVar(q='referenceOptionsRenamePrefix')
-                        cmds.file(path, reference=True, namespace=namespace)
-                    else:
-                        filename = os.path.basename(path)
-                        namespace, _ = os.path.splitext(filename)
-                        cmds.file(path, reference=True, namespace=namespace)
-                else:
-                    solstice_pipeline.logger.debug("Unknown command: %s", command_name)
-
-        except Exception, e:
-            solstice_pipeline.logger.debug.warn("Error: %s", e)
-
-    def passMsgToMainThread(jsonMsg):
-        maya.utils.executeInMainThreadWithResult(handleMessage, jsonMsg)
-
     from solstice_pipeline.solstice_utils import solstice_artella_utils
 
     solstice_pipeline.logger.debug('Initializing environment variables for Solstice Tools ...')
@@ -476,6 +437,17 @@ def open_solstice_web():
 
     solstice_url = 'http://www.solsticeshortfilm.com/'
     webbrowser.open(solstice_url)
+
+
+def send_email(tool_info='Solstice Tools'):
+    webbrowser.open("mailto:%s?subject=%s" % ('tpoveda@cgart3d.com', urllib2.quote(tool_info)))
+
+
+def artella_is_available():
+    try:
+        return urllib2.urlopen('https://www.artella.com').getcode() == 200
+    except:
+        return False
 
 
 def init():

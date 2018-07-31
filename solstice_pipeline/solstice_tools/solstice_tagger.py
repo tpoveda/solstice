@@ -506,6 +506,8 @@ class SolsticeTagger(solstice_windows.Window, object):
     version = '1.0'
     docked = False
 
+    tagDataCreated = Signal()
+
     current_selection = 'scene'
     tag_attributes = ['types', 'selections', 'description']
 
@@ -788,12 +790,28 @@ class SolsticeTagger(solstice_windows.Window, object):
         self._curr_info_image.setPixmap(self._ok_pixmap)
 
     def _create_new_tag_data_node_for_current_selection(self):
+        self.create_new_tag_data_node_for_current_selection()
+        self.tagDataCreated.emit()
+        self._on_selection_changed()
 
-        curr_selection = self.current_selection
+    @classmethod
+    def create_new_tag_data_node_for_current_selection(cls, asset_type=None):
 
-        if not self.curr_sel_has_metadata_node():
-            if self.current_selection != 'scene':
+        if not cls.current_selection or cls.current_selection == 'scene':
+            cls.current_selection = cmds.ls(sl=True)
+            if cls.current_selection:
+                cls.current_selection = cls.current_selection[0]
+
+        curr_selection = cls.current_selection
+
+        if not cls.curr_sel_has_metadata_node():
+            if cls.current_selection != 'scene':
                 new_tag_data_node = cmds.createNode('network', name='tag_data')
+                cmds.addAttr(new_tag_data_node, ln='tag_type', dt='string')
+                cmds.setAttr(new_tag_data_node + '.tag_type', 'SOLSTICE_TAG', type='string')
+                cmds.setAttr(new_tag_data_node + '.tag_type', keyable=False)
+                cmds.setAttr(new_tag_data_node + '.tag_type', channelBox=False)
+                cmds.setAttr(new_tag_data_node + '.tag_type', lock=True)
                 cmds.addAttr(new_tag_data_node, ln='node', at='message')
                 if not cmds.attributeQuery('tag_data', node=curr_selection, exists=True):
                     cmds.addAttr(curr_selection, ln='tag_data', at='message')
@@ -803,6 +821,20 @@ class SolsticeTagger(solstice_windows.Window, object):
                 cmds.setAttr(curr_selection + '.tag_data', lock=True)
                 cmds.setAttr(new_tag_data_node + '.node', lock=True)
                 cmds.select(curr_selection)
+
+                if asset_type is not None and new_tag_data_node:
+                    attr_exists = cmds.attributeQuery('types', node=new_tag_data_node, exists=True)
+                    if not attr_exists:
+                        cmds.addAttr(new_tag_data_node, ln='types', dt='string')
+                    if asset_type == 'Props' or asset_type == 'props':
+                            cmds.setAttr(new_tag_data_node + '.types', 'prop', type='string')
+                    elif asset_type == 'Background Elements' or asset_type == 'background elements':
+                            cmds.setAttr(new_tag_data_node + '.types', 'background_element', type='string')
+                    elif asset_type == 'Character' or asset_type == 'character':
+                            cmds.setAttr(new_tag_data_node + '.types', 'character', type='string')
+                    elif asset_type == 'Light Rig' or asset_type == 'light rig':
+                            cmds.setAttr(new_tag_data_node + '.types', 'light_rig', type='string')
+
             else:
                 new_tag_data_node = cmds.createNode('network', name='tag_data_scene')
                 cmds.select(clear=True)
@@ -811,9 +843,6 @@ class SolsticeTagger(solstice_windows.Window, object):
             cmds.select(clear=True)
         else:
             cmds.select(curr_selection)
-
-        self._on_selection_changed()
-
 
 def run():
     reload(utils)

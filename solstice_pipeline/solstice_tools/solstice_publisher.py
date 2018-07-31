@@ -21,6 +21,7 @@ from solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_dialog, solstice_splitters, solstice_spinner, solstice_console
+from solstice_pipeline.solstice_utils import solstice_qt_utils, solstice_maya_utils
 from solstice_pipeline.solstice_utils import solstice_image as img
 from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
 from solstice_pipeline.solstice_utils import solstice_python_utils as python
@@ -70,11 +71,13 @@ class PublishTexturesTask(solstice_task.Task, object):
 
 
 class PublishModelTask(solstice_task.Task, object):
-    def __init__(self, asset, comment='Published model with Solstice Publisher', auto_run=False, parent=None):
+    def __init__(self, asset, new_version, selected_version, comment='Published model with Solstice Publisher', auto_run=False, parent=None):
         super(PublishModelTask, self).__init__(name='PublishModel', auto_run=auto_run, parent=parent)
 
         self._asset = asset
         self._comment = comment
+        self._selected_version = selected_version
+        self._new_version = new_version
         self.set_task_text('Publishing Model ...')
 
     def run(self):
@@ -85,29 +88,121 @@ class PublishModelTask(solstice_task.Task, object):
         if not check.is_valid():
             return False
 
-        # Check that model file has a main group with valid name
         model_path = self._asset().get_asset_file(file_type='model', status='working')
         if model_path is None or not os.path.isfile(model_path):
             return False
 
-        self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
-        cmds.file(model_path, o=True, f=True)
-        if cmds.objExists(self._asset().name):
-            objs = cmds.ls(self._asset().name)
+        can_unlock = artella.can_unlock(model_path)
+        if not can_unlock:
+            self.write_error('Asset model file is unlocked by another Solstice team member. Aborting publishing ...')
+            return False
+
+        artella.lock_file(model_path)
+        try:
+            # Clean unknown nodes and old plugins for the current scene
+            self.write('Cleaning unknown nodes from the asset scene ...')
+            unknown_nodes = cmds.ls(type='unknown')
+            if unknown_nodes and type(unknown_nodes) == list:
+                for i in unknown_nodes:
+                    if cmds.objExists(i):
+                        if not cmds.referenceQuery(i, isNodeReferenced=True):
+                            self.write_ok('Removing {} item ...'.format(i))
+                            cmds.delete(i)
+            self.write('Cleaning old plugins nodes from the asset scene ...')
+            old_plugins = cmds.unknownPlugin(query=True, list=True)
+            if old_plugins and type(old_plugins) == list:
+                for plugin in old_plugins:
+                    self.write_ok('Removing {} old plugin ...'.format(plugin))
+                    cmds.unknownPlugin(plugin, remove=True)
+
+            # Check that model file has a main group with valid name
+            self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
+            cmds.file(model_path, o=True, f=True)
             valid_obj = None
-            for obj in objs:
-                parent = cmds.listRelatives(obj, parent=True)
-                if parent is None:
-                    valid_obj = obj
+            if cmds.objExists(self._asset().name):
+                objs = cmds.ls(self._asset().name)
+                for obj in objs:
+                    parent = cmds.listRelatives(obj, parent=True)
+                    if parent is None:
+                        valid_obj = obj
+                if not valid_obj:
+                    self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
+                    return False
+            else:
+                self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
+                return False
+            self.write_ok('Asset main group is valid: {}'.format(self._asset().name))
+
+            # ============================================================================================================
+
+            # Check if main group has a valid tag node connected
+            self.write('Checking if asset has a valid tag data node connected to its main group')
             if not valid_obj:
                 self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
                 return False
-        else:
-            self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
-            return False
-        self.write_ok('Asset main group is valid: {}'.format(self._asset().name))
 
-        return True
+            valid_tag_data = False
+            main_group_connections = cmds.listConnections(valid_obj, source=True)
+            for connection in main_group_connections:
+                attrs = cmds.listAttr(connection, userDefined=True)
+                if attrs and type(attrs) == list:
+                    for attr in attrs:
+                        if attr == 'tag_type':
+                            valid_tag_data = True
+                            break
+
+            if not valid_tag_data:
+                self.write_error('Main group has not a valid tag data node connected to. Creating it ...')
+                try:
+                    from solstice_pipeline.solstice_tools import solstice_tagger
+                    cmds.select(valid_obj)
+                    solstice_tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(self._asset().category)
+                    cmds.select(clear=True)
+                    self.write('Tag Data Node created successfully!')
+                    self.write('Checking if Tag Data Node was created successfully ...')
+                    valid_tag_data = False
+                    main_group_connections = cmds.listConnections(valid_obj, source=True)
+                    for connection in main_group_connections:
+                        attrs = cmds.listAttr(connection, userDefined=True)
+                        if attrs and type(attrs) == list:
+                            for attr in attrs:
+                                if attr == 'tag_type':
+                                    valid_tag_data = True
+                    if not valid_tag_data:
+                        self.write_error('Impossible to create tag data node. Please contact TD team to fix this ...')
+                        return False
+                except Exception as e:
+                    self.write_error('Impossible to create tag data node. Please contact TD team to fix this ...')
+                    self.write_error(str(e))
+                    return False
+        except Exception as e:
+            artella.unlock_file(model_path)
+            return False
+
+        cmds.file(save=True, f=True)
+
+        if solstice_maya_utils.file_has_student_line(filename=model_path):
+            solstice_maya_utils.clean_student_line(filename=model_path)
+            if solstice_maya_utils.file_has_student_line(filename=model_path):
+                self.write_error('After updating model path the Student License could not be fixed again!')
+                return False
+
+        result = solstice_qt_utils.show_question(None, 'Publishing file {0}'.format(model_path), 'File validated successfully! Do you want to continue with the publish process?')
+        published_done = False
+        if result == QMessageBox.Yes:
+            version_name = '__model_v{}__'.format(self._new_version)
+            artella.publish_asset(asset_path=self._asset().asset_path, comment=self._comment, selected_versions=self._selected_version, version_name=version_name)
+            published_done = True
+
+        # After publishing it we unlock the file
+        artella.unlock_file(model_path)
+
+        if published_done:
+            self.write_ok('Publishing process completed succesfully!')
+        else:
+            self.write_error('Publishing process has been aborted by the user!')
+
+        return published_done
 
 
 class PublishShadingTask(solstice_task.Task, object):
@@ -172,7 +267,7 @@ class PublishShadingTask(solstice_task.Task, object):
         copyfile(working_path, backup_file)
 
         self.write('Locking shading file: {}\n'.format(working_path))
-        artella.lock_asset(working_path)
+        artella.lock_file(working_path)
         try:
             with open(working_path, 'r') as f:
                 data = f.read()
@@ -221,12 +316,12 @@ class PublishShadingTask(solstice_task.Task, object):
             self.write('====================================\n')
             self.write_error(str(e))
             self.write('\nUnlocking shading file: {}\n'.format(working_path))
-            artella.unlock_asset(working_path)
+            artella.unlock_file(working_path)
             return False
 
         self.write('\nUnlocking shading file: {}\n'.format(working_path))
         self.write('====================================\n')
-        artella.unlock_asset(working_path)
+        artella.unlock_file(working_path)
 
         self.write_ok('------------------------------------')
         self.write_ok('SHADING PUBLISHED SUCCESFULLY!')
@@ -257,6 +352,8 @@ class PublishTaskGroup(solstice_taskgroups.TaskGroup, object):
         if categories_to_publish['textures']['check']:
             categories_to_publish['shading']['check'] = True
 
+        selected_version = dict()
+
         for cat, cat_dict in categories_to_publish.items():
             if cat_dict['check']:
                 if cat == 'textures':
@@ -268,18 +365,29 @@ class PublishTaskGroup(solstice_taskgroups.TaskGroup, object):
 
                     ))
                 elif cat == 'model':
+
+                    status = artella.get_status(os.path.join(asset()._asset_path, '__working__', 'model'))
+                    if status and hasattr(status, 'references'):
+                        if status.references:
+                            for ref, ref_data in status.references.items():
+                                selected_version[ref] = ref_data.maximum_version
+
                     self.add_task(PublishModelTask(
                         asset=asset,
                         comment=cat_dict['comment'],
+                        selected_version=selected_version,
+                        new_version=cat_dict['new_version'],
                         auto_run=auto_run
                     ))
                 elif cat == 'shading':
+                    selected_version[cat + '/' + asset().name + '.ma'] = cat_dict['new_version_int']
                     self.add_task(PublishShadingTask(
                         asset=asset,
                         comment=cat_dict['comment'],
                         auto_run=auto_run
                     ))
                 elif cat == 'groom':
+                    selected_version[cat + '/' + asset().name + '.ma'] = cat_dict['new_version_int']
                     self.add_task(PublishGroomTask(
                         asset=asset,
                         comment=cat_dict['comment'],
@@ -473,9 +581,9 @@ class AssetPublisherVersionWidget(QWidget, object):
             else:
                 asset_path = os.path.join(asset_path, self._asset().name + '.ma')
 
-            artella.lock_asset(file_path=asset_path)
+            artella.lock_file(file_path=asset_path)
             artella.upload_new_asset_version(file_path=asset_path, comment=comment)
-            artella.unlock_asset(file_path=asset_path)
+            artella.unlock_file(file_path=asset_path)
 
     def _publish(self):
         categories_to_publish = dict()
@@ -490,6 +598,7 @@ class AssetPublisherVersionWidget(QWidget, object):
             new_version = int(self._ui[cat]['next_version'].text()[1:])
             categories_to_publish[cat]['new_version'] = '{0:03}'.format(new_version)
             categories_to_publish[cat]['comment'] = self._comment_box.toPlainText()
+            categories_to_publish[cat]['new_version_int'] = new_version
 
         self.onPublish.emit(categories_to_publish)
 

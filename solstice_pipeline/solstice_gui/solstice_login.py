@@ -132,7 +132,7 @@ class SolsticeLoginProcess(solstice_spinner.WaitSpinner, object):
         user_id = None
         data = python.load_json(user_login_file)
         if user_name not in data['users'.title()]:
-            artella.lock_asset(user_login_file)
+            artella.lock_file(user_login_file)
             try:
                 file_status = artella.get_status(user_login_file)
                 file_info = file_status.references.values()[0]
@@ -144,10 +144,10 @@ class SolsticeLoginProcess(solstice_spinner.WaitSpinner, object):
                 data['users'.title()][user_name] = user_id
                 python.write_json(user_login_file, data)
                 artella.upload_new_asset_version(user_login_file, 'Added user: {}'.format(user_name))
-                artella.unlock_asset(user_login_file)
+                artella.unlock_file(user_login_file)
             except Exception as e:
                 sp.logger.error(str(e))
-                artella.unlock_asset(user_login_file)
+                artella.unlock_file(user_login_file)
                 return False
         else:
             user_id = data['users'.title()][user_name]

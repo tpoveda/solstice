@@ -25,8 +25,7 @@ from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstic
 from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_artella_utils, solstice_image
 from solstice_tools import solstice_sequencer
 from resources import solstice_resource
-
-from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_browser_utils
+from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_browser_utils, solstice_worker
 from solstice_gui import solstice_label, solstice_breadcrumb, solstice_navigationwidget, solstice_filelistwidget, solstice_splitters
 
 
@@ -117,6 +116,8 @@ class Pipelinizer(solstice_windows.Window, object):
     def __init__(self, name='PipelinizerWindow', parent=None, **kwargs):
         self._projects = None
         super(Pipelinizer, self).__init__(name=name, parent=parent, **kwargs)
+
+        self.setWindowFlags(self.windowFlags() | Qt.WA_DeleteOnClose)
 
     def _get_separator(self):
         v_div_w = QWidget()
@@ -344,7 +345,18 @@ class Pipelinizer(solstice_windows.Window, object):
         sync_props_shading_action.triggered.connect(partial(self.sync_category, 'Props', 'shading', True, False))
         sync_props_textures_action.triggered.connect(partial(self.sync_category, 'Props', 'textures', True, False))
         settings_btn.clicked.connect(self.open_settings)
-        # =================================================================================================
+        self.user_icon.user_info.updatedAvailability.connect(self.update_ui)
+
+    def update_ui(self, artella_is_available):
+        # TODO: This is called each time we check to Artella availability through user icon widget
+        # TODO: If Artella is not enabled we should disable all the widgets of the UI and notify
+        # the user that Artella server is not available right now
+
+        return
+
+    def cleanup(self):
+        self.user_icon.destroy()                # We use it to clean timers stuff manually
+        super(Pipelinizer, self).cleanup()
 
     @staticmethod
     def open_project_in_artella():
@@ -369,6 +381,10 @@ class Pipelinizer(solstice_windows.Window, object):
                     continue
                 item = item.containedWidget.name
                 items.append(item)
+
+    def closeEvent(self, event):
+        print('hasdfasdfasfasdfasfasf')
+        super(Pipelinizer, self).closeEvent(event)
 
     def open_settings(self):
         """

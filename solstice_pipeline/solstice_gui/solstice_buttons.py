@@ -8,14 +8,14 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-import os
 import weakref
 
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
 
-from solstice_utils import solstice_artella_utils as artella
+import maya.cmds as cmds
+
 from resources import solstice_resource
 
 
@@ -148,3 +148,32 @@ class CategoryButtonWidget(QWidget, object):
             self._asset().lock(category=self._category_name, status=self._status)
         else:
             self._asset() .unlock(category=self._category_name, status=self._status)
+
+
+class ColorButton(QPushButton, object):
+    def __init__(self, colorR=1.0, colorG=0.0, colorB=0.0, parent=None):
+        super(ColorButton, self).__init__(parent=parent)
+        self._color = QColor.fromRgbF(colorR, colorG, colorB)
+        self.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum))
+        self._update_color()
+
+        self.clicked.connect(self.show_color_editor)
+
+    def get_color(self):
+        return self._color
+
+    def set_color(self, color):
+        self._color = color
+        self._update_color()
+
+    def show_color_editor(self):
+        cmds.colorEditor(rgbValue=(self._color.redF(), self._color.greenF(), self._color.blueF()))
+        if not cmds.colorEditor(query=True, result=True):
+            return
+        new_color = cmds.colorEditor(query=True, rgbValue=True)
+        self.color = QColor.fromRgbF(new_color[0], new_color[1], new_color[2])
+
+    def _update_color(self):
+        self.setStyleSheet('background-color:rgb({0},{1},{2});'.format(self._color.redF()*255, self._color.greenF()*255, self._color.blueF()*255))
+
+    color = property(get_color, set_color)

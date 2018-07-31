@@ -18,6 +18,32 @@ from solstice_pipeline.solstice_utils import solstice_maya_utils
 from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
 
 
+class AssetFileExists(solstice_check.SanityCheckTask, object):
+    def __init__(self, asset, file_type, status='working', auto_fix=False, parent=None):
+        super(AssetFileExists, self).__init__(name='Check if Asset File exists', auto_fix=auto_fix, parent=parent)
+
+        self._asset = asset
+        self._file_type = file_type
+        self._status = status
+        self._file_path = None
+        self.set_check_text('Check if asset {0} {1} file exists'.format(status, file_type))
+
+    def check(self):
+        self._file_path = self._asset().get_asset_file(file_type=self._file_type, status=self._status)
+        if self._file_path is None or not os.path.isfile(self._file_path):
+            return False
+
+        return True
+
+    def fix(self):
+        if self._file_path:
+            artella.synchronize_file(self._file_path)
+        if self._file_path is None or not os.path.isfile(self._file_path):
+            return False
+
+        return True
+
+
 class TexturesFolderSync(solstice_check.SanityCheckTask, object):
     def __init__(self, asset, auto_fix=False, parent=None):
         self._textures_path = list()
@@ -197,18 +223,18 @@ class StudentLicenseCheck(solstice_check.SanityCheckTask, object):
         if self._file_path is None or not os.path.isfile(self._file_path):
             return False
 
-        artella.lock_asset(self._file_path)
+        artella.lock_file(self._file_path)
         try:
             sp.logger.debug('Cleaning Student License from file: {}'.format(self._file_path))
             self._valid_check = solstice_maya_utils.clean_student_line(filename=self._file_path)
             valid = super(StudentLicenseCheck, self).fix()
             if not valid:
                 sp.logger.warning('Impossible to fix Maya Student License Check')
-                artella.unlock_asset(self._file_path)
+                artella.unlock_file(self._file_path)
                 return False
         except Exception as e:
-            artella.unlock_asset(self._file_path)
+            artella.unlock_file(self._file_path)
             return False
 
-        artella.unlock_asset(self._file_path)
+        artella.unlock_file(self._file_path)
         return True

@@ -233,14 +233,17 @@ def get_metadata():
     return metadata
 
 
-def get_status(filepath, as_json=False):
+def get_status(file_path, as_json=False):
     """
     Returns the status of  the given file path
-    :param filepath: str
+    :param file_path: str
     :return: str
     """
 
-    uri = get_cms_uri(filepath)
+    uri = get_cms_uri(file_path)
+    if not uri:
+        sp.logger.info('Unable to get cmds uri from path: {}'.format(file_path))
+        return False
 
     spigot = get_spigot_client()
     rsp = spigot.execute(command_action='do', command_name='status', payload=uri)
@@ -263,16 +266,14 @@ def get_status(filepath, as_json=False):
     if 'data' in rsp:
         if '_latest'in rsp['data']:
             # if 'SEQ' not in rsp['meta']['container_uri']:
-            status_metadata = classes.ArtellaAssetMetaData(metadata_path=filepath, status_dict=rsp)
+            status_metadata = classes.ArtellaAssetMetaData(metadata_path=file_path, status_dict=rsp)
             return status_metadata
 
-        status_metadata = classes.ArtellaDirectoryMetaData(metadata_path=filepath, status_dict=rsp)
+        status_metadata = classes.ArtellaDirectoryMetaData(metadata_path=file_path, status_dict=rsp)
     else:
         status_metadata = classes.ArtellaHeaderMetaData(header_dict=rsp['meta'])
 
     return status_metadata
-
-# return artella.getStatus(filepath)
 
 
 def get_cms_uri_current_file():
@@ -307,7 +308,6 @@ def get_cms_uri(path):
         sp.logger.error('Unable to get CMS uri from path: {0}'.format(path))
         return False
 
-    sp.logger.debug('Retrieved CMS uri: {0}'.format(cms_uri))
     req = json.dumps({'cms_uri': cms_uri})
     return req
 
@@ -515,11 +515,95 @@ def reference_file_in_maya(file_path, maya_version=2017):
     return rsp
 
 
-def lock_asset(file_path):
+def is_published(file_path):
+    """
+    Returns whether an absolute file path refers to a published asset
+    :param file_path: str, absolute path to a file
+    :return: bool
+    """
+
+    rsp = get_status(file_path=file_path, as_json=True)
+    meta = rsp.get('meta', {})
+    if meta.get('status') != 'OK':
+        sp.logger.info('Status is not OK: {}'.format(meta))
+        return False
+
+    return 'release_name' in meta
+
+
+def is_locked(file_path):
+    """
+    Returns whether an absolute file path refers to a locked asset in dit mode, and if the file is locked
+    by the current storage workspace
+    :param file_path: str, absolute path to a file
+    :return: bool
+    """
+
+    rsp = get_status(file_path=file_path)
+    meta = rsp.get('meta', {})
+    if meta.get('status') != 'OK':
+        sp.logger.info('Status is not OK: {}'.format(meta))
+        return False, False
+
+    file_path = meta.get('file_path', '')
+    if not file_path:
+        sp.logger.info('File path not found in response: {}'.format(meta))
+        return False, False
+
+    file_data = rsp.get('data', {}).get(file_path)
+    if not file_data:
+        sp.logger.info('File data not found in response: {}'.format(rsp.get('data', {}), ))
+        return
+    if file_data.get('locked') is True:
+        user_id = get_current_user_id()
+        return True, user_id == file_data.get('locked_view')
+
+    return False, False
+
+
+def lock_file(file_path=None, force=False):
     """
     Locks given file path
-    :param file_path:
+    :param file_path: str
+    :param force: bool
     """
+
+    if not file_path:
+        file_path = cmds.file(query=True, sceneName=True)
+    if not file_path:
+        sp.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
+        return False
+
+    file_published = is_published(file_path=file_path)
+    if file_published:
+        msg = 'Current file ({}) is published and cannot be edited'.format(os.path.basename(file_path))
+        sp.logger.info(msg)
+        sp.message(msg)
+        cmds.confirmDialog(title='Solstice Tools - Cannot Lock File', message=msg, button=['OK'])
+        return False
+
+    in_edit_mode, is_locked_by_me = is_locked(file_path=file_path)
+    can_write = os.access(file_path, os.W_OK)
+    if not can_write and is_locked_by_me:
+        msg = 'Unable to check local write permisions for file: {}'.format(file_path)
+        sp.logger.info(msg)
+        sp.message(msg)
+
+    if in_edit_mode and is_locked_by_me:
+        msg = 'Locked by another user or workspace: {}'.format(os.path.basename(file_path))
+        sp.logger.info(msg)
+        cmds.warning(msg)
+        cmds.confirmDialog(title='Solstice Tools - Failed to checkout (lock) file', msg=msg, button=['OK'])
+        return False
+    elif force or not in_edit_mode:
+        result = 'Yes'
+        if not force and not in_edit_mode:
+            msg = '{} needs to be in Edit mode to save your file. Would like to turn edit mode on now?'.format(os.path.basename(file_path))
+            sp.logger.info(msg)
+            sp.message(msg)
+            result = cmds.confirmDialog(title='Solstice Tools - Lock File', message=msg, button=['Yes', 'No'], cancelButton='No', dismissString='No')
+        if result != 'Yes':
+            return False
 
     spigot = get_spigot_client()
     payload = dict()
@@ -531,8 +615,16 @@ def lock_asset(file_path):
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
 
-    sp.logger.debug(rsp)
-    return rsp
+    sp.logger.debug('Server checkout response: {}'.format(rsp))
+
+    if rsp.get('meta', {}).get('status') != 'OK':
+        msg = 'Failed to lock {}'.format(os.path.basename(file_path))
+        sp.logger.info(msg)
+        cmds.warning(msg)
+        cmds.confirmDialog(title='Solstice Tools - Failed to Lock File', message=msg, button=['OK'])
+        return False
+
+    return True
 
 
 def get_current_user_id():
@@ -543,7 +635,7 @@ def get_current_user_id():
 
 
 def can_unlock(file_path):
-    asset_status = get_status(filepath=file_path)
+    asset_status = get_status(file_path=file_path)
     if not asset_status:
         return
     asset_info = asset_status.references.values()[0]
@@ -556,7 +648,7 @@ def can_unlock(file_path):
     return True
 
 
-def unlock_asset(file_path):
+def unlock_file(file_path):
     """
     Unlocks a given file path
     :param file_path:
@@ -580,39 +672,83 @@ def unlock_asset(file_path):
     return rsp
 
 
-def upload_new_asset_version(file_path, comment):
+def upload_new_asset_version(file_path=None, comment='Published new version with Solstice Tools'):
     """
     Adds a new file to the Artella server
     :param file_path:
     :param comment:
     """
 
-    spigot = get_spigot_client()
-    payload = dict()
-    payload['cms_uri'] = '/' + artella.getCmsUri(file_path)
-    payload['comment'] = comment
-    payload = json.dumps(payload)
+    maya_file = False
 
-    rsp = spigot.execute(command_action='do', command_name='upload', payload=payload)
+    if not file_path:
+        file_path = cmds.file(query=True, sceneName=True)
+        maya_file = True
+    if not file_path:
+        sp.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
+        return False
 
-    if isinstance(rsp, basestring):
-        rsp = json.loads(rsp)
+    msg = 'Making new version for {}'.format(file_path)
+    sp.logger.info(msg)
+    sp.message(msg)
+    if file_path is not None and file_path != '':
+        valid_lock = lock_file(file_path=file_path)
+        if not valid_lock:
+            return False
 
-    sp.logger.debug(rsp)
-    return rsp
+        cmds.file(save=True)
+
+        msg = 'Saving new file version on Artella Server: {}'.format(file_path)
+        sp.logger.info(msg)
+        sp.message(msg)
+        result = cmds.promptDialog(title='Solstice Tools - Save New Version on Artella Server', message=msg, button=['Save', 'Cancel'], cancelButton='Cancel', dismissString='Cancel', scrollableField=True)
+        if result == 'Save':
+            if comment is None:
+                comment = cmds.promptDialog(query=True, text=True)
+
+            spigot = get_spigot_client()
+            payload = dict()
+            cms_uri = artella.getCmsUri(file_path)
+            if not cms_uri.startswith('/'):
+                cms_uri = '/' + cms_uri
+            payload['cms_uri'] = cms_uri
+            payload['comment'] = comment
+            payload = json.dumps(payload)
+
+            rsp = spigot.execute(command_action='do', command_name='upload', payload=payload)
+            if isinstance(rsp, basestring) or type(rsp) == str:
+                rsp = json.loads(rsp)
+
+            if 'status' in rsp and 'meta' in rsp['status'] and rsp['status']['meta']['status'] != 'OK':
+                sp.logger.info('Make new version response: {}'.format(rsp))
+                msg = 'Failed to make new version of {}'.format(os.path.basename(file_path))
+                cmds.confirmDialog(title='Solstice Tools - Failed to Make New Version', message=msg, button=['OK'])
+                return False
+
+            lock_file(file_path=file_path, force=True)
+        else:
+            return False
+    else:
+        msg = 'The file has not been created yet'
+        sp.logger.debug(msg)
+        cmds.warning(msg)
+        cmds.confirmDialog(title='Solstice Tools - Failed to Make New Version', message=msg, button=['OK'])
+
+    return True
 
 
-def publish_asset(file_path, comment, selected_versions):
+def publish_asset(asset_path, comment, selected_versions, version_name):
     """
     Publish a new version of the given asset
-    :param file_path:
+    :param asset_path:
     :param comment:
     :param selected_versions:
+    :param version_name:
     """
 
     spigot = get_spigot_client()
     payload = dict()
-    payload['cms_uri'] = artella.getCmsUri(file_path)
+    payload['cms_uri'] = '/' + artella.getCmsUri(asset_path) + '/' + version_name
     payload['comment'] = comment
     payload['selectedVersions'] = selected_versions
     payload = json.dumps(payload)
@@ -689,18 +825,27 @@ def get_dependencies(file_path):
     :return: dict
     """
 
-    spigot = get_spigot_client()
-    payload = dict()
-    payload['cms_uri'] = artella.getCmsUri(file_path)
-    payload = json.dumps(payload)
+    if not file_path:
+        file_path = cmds.file(query=True, sceneName=True)
+    if not file_path:
+        sp.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
+        return False
 
-    rsp = spigot.execute(command_action='do', command_name='getDependencies', payload=payload)
+    if file_path is not None and file_path != '':
+        spigot = get_spigot_client()
+        payload = dict()
+        payload['cms_uri'] = artella.getCmsUri(file_path)
+        payload = json.dumps(payload)
 
-    if isinstance(rsp, basestring):
-        rsp = json.loads(rsp)
-    sp.logger.debug(rsp)
+        rsp = spigot.execute(command_action='do', command_name='getDependencies', payload=payload)
 
-    return rsp
+        if isinstance(rsp, basestring):
+            rsp = json.loads(rsp)
+        sp.logger.debug(rsp)
+
+        return rsp
+
+    return None
 
 
 try:

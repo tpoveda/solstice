@@ -21,10 +21,13 @@ from solstice_qt.QtGui import *
 
 import maya.cmds as cmds
 import maya.mel as mel
-import maya.OpenMaya as OpenMaya
+import maya.OpenMaya as OpenMayaV1
+import maya.api.OpenMaya as OpenMaya
+import maya.api.OpenMayaRender as OpenMayaRender
+import maya.api.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_gui import solstice_windows, solstice_label, solstice_accordion, solstice_sync_dialog
+from solstice_pipeline.solstice_gui import solstice_windows, solstice_label, solstice_buttons, solstice_accordion, solstice_sync_dialog, solstice_splitters
 from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
 from solstice_pipeline.solstice_utils import solstice_python_utils as python
 from solstice_pipeline.solstice_utils import solstice_qt_utils
@@ -444,15 +447,15 @@ class SolsticeTimeRange(SolsticePlayblastWidget, object):
         """
 
         callback = lambda x: self._on_mode_changed(emit=False)
-        current_frame = OpenMaya.MEventMessage.addEventCallback('timeChanged', callback)
-        time_range = OpenMaya.MEventMessage.addEventCallback('playbackRangeChanged', callback)
+        current_frame = OpenMayaV1.MEventMessage.addEventCallback('timeChanged', callback)
+        time_range = OpenMayaV1.MEventMessage.addEventCallback('playbackRangeChanged', callback)
         self._event_callbacks.append(current_frame)
         self._event_callbacks.append(time_range)
 
     def _remove_callbacks(self):
         for callback in self._event_callbacks:
             try:
-                OpenMaya.MEventMessage.removeCallback(callback)
+                OpenMayaV1.MEventMessage.removeCallback(callback)
             except RuntimeError as e:
                 sp.logger.error('Encounter error: {}'.format(e))
 
@@ -532,6 +535,7 @@ class SolsticeCameras(SolsticePlayblastWidget, object):
     def _on_set_active_camera(self):
         camera = utils.get_current_camera()
         self._on_refresh(camera=camera)
+        cmds.optionVar(sv=['solstice_playblast_camera', camera])
         # if cmds.objExists(camera):
         #     cmds.select(camera)
 
@@ -713,6 +717,231 @@ class SolsticeCodec(SolsticePlayblastWidget, object):
         format = self.format.currentText()
         self.compression.clear()
         self.compression.addItems(utils.get_playblast_compressions(format=format))
+
+
+class SolsticeMaskObject(object):
+
+    mask_plugin = 'solstice_playblast.py'
+    mask_node = 'SolsticeMask'
+    mask_transform = 'solsticemask'
+    mask_shape = 'solsticemask_shape'
+
+    def __init__(self):
+        super(SolsticeMaskObject, self).__init__()
+
+    @classmethod
+    def create_mask(cls):
+        if not cmds.pluginInfo('solstice_playblast.py', query=True, loaded=True):
+            try:
+                cmds.loadPlugin(cls.mask_plugin)
+            except Exception:
+                sp.logger.error('Failed to load SolsticeMask plugin!')
+                return
+
+        if not cls.get_mask():
+            transform_node = cmds.createNode('transform', name=cls.mask_transform)
+            cmds.createNode(cls.mask_node, name=cls.mask_shape, parent=transform_node)
+
+        cls.refresh_mask()
+
+    @classmethod
+    def get_mask(cls):
+        if cmds.pluginInfo(cls.mask_plugin, query=True, loaded=True):
+            nodes = cmds.ls(type=cls.mask_node)
+            if len(nodes) > 0:
+                return nodes[0]
+
+        return None
+
+    @classmethod
+    def delete_mask(cls):
+        mask = cls.get_mask()
+        if mask:
+            transform = cmds.listRelatives(mask, fullPath=True, parent=True)
+            if transform:
+                cmds.delete(transform)
+            else:
+                cmds.delete(mask)
+
+    @classmethod
+    def get_camera_name(cls):
+        if cmds.optionVar(exists='solstice_playblast_camera'):
+            return cmds.optionVar(query='solstice_playblast_camera')
+        else:
+            return ''
+
+    @classmethod
+    def get_label_text(cls):
+        if cmds.optionVar(exists='solstice_mask_'):
+            pass
+
+    @classmethod
+    def refresh_mask(cls):
+        mask = cls.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.camera'.format(mask), cls.get_camera_name(), type='string')
+
+
+class SolsticeMaskWidget(SolsticePlayblastWidget, object):
+
+    id = 'Mask'
+    label = 'Mask'
+
+    def __init__(self, parent=None):
+        super(SolsticeMaskWidget, self).__init__(parent=parent)
+
+    def custom_ui(self):
+        super(SolsticeMaskWidget, self).custom_ui()
+
+        self.enable_mask_cbx = QCheckBox('Enable')
+        self.main_layout.addWidget(self.enable_mask_cbx)
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        labels_layout = QVBoxLayout()
+        labels_group = QGroupBox('Labels')
+        labels_group.setLayout(labels_layout)
+        self.main_layout.addWidget(labels_group)
+
+        grid_layout = QGridLayout()
+        labels_layout.addLayout(grid_layout)
+
+        top_left_lbl = QLabel('Top Left: ')
+        top_center_lbl = QLabel('Top Center: ')
+        top_right_lbl = QLabel('Top Right: ')
+        bottom_left_lbl = QLabel('Bottom Left: ')
+        bottom_center_lbl = QLabel('Bottom Center: ')
+        bottom_right_lbl = QLabel('Bottom Right: ')
+        font_lbl = QLabel('Font: ')
+        color_lbl = QLabel('Color: ')
+        alpha_lbl = QLabel('Transparency: ')
+        scale_lbl = QLabel('Scale: ')
+
+        self.top_left_line = QLineEdit()
+        self.top_center_line = QLineEdit()
+        self.top_right_line = QLineEdit()
+        self.bottom_left_line = QLineEdit()
+        self.bottom_center_line = QLineEdit()
+        self.bottom_right_line = QLineEdit()
+        self.font_line = QLineEdit()
+        self.font_line.setReadOnly(True)
+        self.font_btn = QPushButton('...')
+        self.color_btn = solstice_buttons.ColorButton(colorR=1, colorG=1, colorB=1)
+        self.alpha_btn = solstice_buttons.ColorButton(colorR=1, colorG=1, colorB=1)
+        self.scale_spn = QDoubleSpinBox()
+        self.scale_spn.setRange(0.1, 2.0)
+        self.scale_spn.setValue(1.0)
+        self.scale_spn.setSingleStep(0.01)
+        self.scale_spn.setDecimals(2)
+        self.scale_spn.setMaximumWidth(80)
+
+        grid_layout.addWidget(top_left_lbl, 0, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(top_center_lbl, 1, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(top_right_lbl, 2, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(bottom_left_lbl, 3, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(bottom_center_lbl, 4, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(bottom_right_lbl, 5, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(font_lbl, 6, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(color_lbl, 7, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(alpha_lbl, 8, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(scale_lbl, 9, 0, alignment=Qt.AlignLeft)
+
+        grid_layout.addWidget(self.top_left_line, 0, 1)
+        grid_layout.addWidget(self.top_center_line, 1, 1)
+        grid_layout.addWidget(self.top_right_line, 2, 1)
+        grid_layout.addWidget(self.bottom_left_line, 3, 1)
+        grid_layout.addWidget(self.bottom_center_line, 4, 1)
+        grid_layout.addWidget(self.bottom_right_line, 5, 1)
+        grid_layout.addWidget(self.font_line, 6, 1)
+        grid_layout.addWidget(self.font_btn, 6, 2)
+        grid_layout.addWidget(self.font_btn, 6, 2)
+        grid_layout.addWidget(self.color_btn, 7, 1)
+        grid_layout.addWidget(self.alpha_btn, 8, 1)
+        grid_layout.addWidget(self.scale_spn, 9, 1)
+
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        # ========================================================================
+
+        borders_layout = QVBoxLayout()
+        borders_layout.setAlignment(Qt.AlignLeft)
+        borders_group = QGroupBox('Borders')
+        borders_group.setLayout(borders_layout)
+        self.main_layout.addWidget(borders_group)
+
+        cbx_layout = QHBoxLayout()
+        grid_layout_2 = QGridLayout()
+        borders_layout.addLayout(cbx_layout)
+        borders_layout.addLayout(grid_layout_2)
+
+        border_color_lbl = QLabel('Color: ')
+        border_alpha_lbl = QLabel('Transparency: ')
+        border_scale_lbl = QLabel('Scale: ')
+
+        self.top_cbx = QCheckBox('Top')
+        self.top_cbx.setChecked(True)
+        self.bottom_cbx = QCheckBox('Bottom')
+        self.bottom_cbx.setChecked(True)
+        cbx_layout.addWidget(self.top_cbx)
+        cbx_layout.addWidget(self.bottom_cbx)
+
+        self.border_color_btn = solstice_buttons.ColorButton(colorR=0, colorG=0, colorB=0)
+        self.border_color_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.border_alpha_btn = solstice_buttons.ColorButton(colorR=1, colorG=1, colorB=1)
+        self.border_scale_spn = QDoubleSpinBox()
+        self.border_scale_spn.setRange(0.5, 2.0)
+        self.border_scale_spn.setValue(1.0)
+        self.border_scale_spn.setSingleStep(0.01)
+        self.border_scale_spn.setDecimals(2)
+        self.border_scale_spn.setMaximumWidth(80)
+
+        grid_layout_2.addWidget(border_color_lbl, 0, 0, alignment=Qt.AlignLeft)
+        grid_layout_2.addWidget(border_alpha_lbl, 1, 0, alignment=Qt.AlignLeft)
+        grid_layout_2.addWidget(border_scale_lbl, 2, 0, alignment=Qt.AlignLeft)
+
+        grid_layout_2.addWidget(self.border_color_btn, 0, 1)
+        grid_layout_2.addWidget(self.border_alpha_btn, 1, 1)
+        grid_layout_2.addWidget(self.border_scale_spn, 2, 1)
+
+        # ========================================================================
+
+        counter_layout = QVBoxLayout()
+        counter_layout.setAlignment(Qt.AlignLeft)
+        counter_group = QGroupBox('Counter')
+        counter_group.setLayout(counter_layout)
+        self.main_layout.addWidget(counter_group)
+
+        self.enable_cbx = QCheckBox('Enable: ')
+        grid_layout_3 = QGridLayout()
+        counter_layout.addWidget(self.enable_cbx)
+        counter_layout.addLayout(grid_layout_3)
+
+        align_lbl = QLabel('Alignment: ')
+        padding_lbl = QLabel('Padding: ')
+
+        self.align_combo = QComboBox()
+        self.align_combo.addItem('Top-Left')
+        self.align_combo.addItem('Top-Right')
+        self.align_combo.addItem('Bottom-Left')
+        self.align_combo.addItem('Bottom-Right')
+        self.padding_spn = QSpinBox()
+        self.padding_spn.setRange(1, 6)
+        self.padding_spn.setValue(1)
+        self.padding_spn.setSingleStep(1)
+        self.padding_spn.setMaximumWidth(80)
+
+        grid_layout_3.addWidget(align_lbl, 0, 0, alignment=Qt.AlignLeft)
+        grid_layout_3.addWidget(padding_lbl, 1, 0, alignment=Qt.AlignLeft)
+
+        grid_layout_3.addWidget(self.align_combo, 0, 1)
+        grid_layout_3.addWidget(self.padding_spn, 1, 1)
+
+    def apply_inputs(self, attr_dict):
+        pass
+
+    def get_outputs(self):
+        return {}
 
 
 class DefaultPlayblastOptions(SolsticePlayblastWidget, object):
@@ -1216,8 +1445,9 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         self.resolution = SolsticeResolution()
         self.codec = SolsticeCodec()
         self.options = BasePlayblastOptions()
+        self.mask = SolsticeMaskWidget()
 
-        for widget in [self.time_range, self.cameras, self.resolution, self.codec, self.options]:
+        for widget in [self.time_range, self.cameras, self.resolution, self.codec, self.options, self.mask]:
             widget.initialize()
             widget.optionsChanged.connect(self._on_update_settings)
             self.playblastFinished.connect(widget.on_playblast_finished)
@@ -1809,10 +2039,375 @@ def _applied_view(panel, **options):
 
 # ==================================================================================================================
 
+def maya_useNewAPI():
+    """
+    The presence of this function tells Maya that the plugin produces, and
+    expects to be passed, objects created using the Maya Python API 2.0.
+    """
+    pass
+
+
+class MaskTextAlignment(object):
+    TopLeft = ['topLeftText', 'tlt']
+    TopCenter = ['topCenterText', 'tct']
+    TopRight = ['topRightText', 'trt']
+    BottomLeft = ['bottomLeftText', 'blt']
+    BottomCenter = ['bottomCenterText', 'bct']
+    BottomRight = ['bottomRightText', 'brt']
+
+
+class SolsticeMaskLocator(OpenMayaUI.MPxLocatorNode, object):
+    _NAME_ = 'SolsticeMask'
+    _ID_ = OpenMaya.MTypeId(0x1111B159)
+    _DRAW_DB_CLASSIFICATION_ = 'drawdb/geometry/SolsticeMask'
+    _DRAW_REGISTRANT_ID_ = 'SolsticeMaskNode'
+    _TEXT_ATTRS_ = [
+        MaskTextAlignment.TopLeft,
+        MaskTextAlignment.TopCenter,
+        MaskTextAlignment.TopRight,
+        MaskTextAlignment.BottomLeft,
+        MaskTextAlignment.BottomCenter,
+        MaskTextAlignment.BottomRight
+    ]
+
+    def __init__(self):
+        super(SolsticeMaskLocator, self).__init__()
+
+    @classmethod
+    def creator(cls):
+        return SolsticeMaskLocator()
+
+    @classmethod
+    def initialize(cls):
+        t_attr = OpenMaya.MFnTypedAttribute()
+        str_data = OpenMaya.MFnStringData()
+        n_attr = OpenMaya.MFnNumericAttribute()
+
+        test_attr = OpenMaya.MFnTypedAttribute()
+        str_test = OpenMaya.MFnStringData()
+        obj = str_test.create('')
+        camera_name = t_attr.create('camera', 'cam', OpenMaya.MFnData.kString, obj)
+        t_attr.writable = True
+        t_attr.storable = True
+        t_attr.keyable = False
+        SolsticeMaskLocator.addAttribute(camera_name)
+
+        counter_position = n_attr.create('counterPosition', 'cp', OpenMaya.MFnNumericData.kShort, 6)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        n_attr.setMin(0)
+        n_attr.setMax(6)
+        SolsticeMaskLocator.addAttribute(counter_position)
+
+        counter_padding = n_attr.create('counterPadding', 'cpd', OpenMaya.MFnNumericData.kShort, 4)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        n_attr.setMin(1)
+        n_attr.setMax(6)
+        SolsticeMaskLocator.addAttribute(counter_padding)
+
+        for i in range(len(cls._TEXT_ATTRS_)):
+            obj = str_data.create('Position {}'.format(str(i / 2 + 1).zfill(2)))
+            position = t_attr.create(cls._TEXT_ATTRS_[i][0], cls._TEXT_ATTRS_[i][1], OpenMaya.MFnData.kString, obj)
+            t_attr.writable = True
+            t_attr.storable = True
+            t_attr.keyable = True
+            SolsticeMaskLocator.addAttribute(position)
+
+        text_padding = n_attr.create('textPadding', 'tp', OpenMaya.MFnNumericData.kShort, 10)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        n_attr.setMin(0)
+        n_attr.setMax(50)
+        SolsticeMaskLocator.addAttribute(text_padding)
+
+        font_name = t_attr.create('fontName', 'ft', OpenMaya.MFnData.kString, str_data.create('Consolas'))
+        t_attr.writable = True
+        t_attr.storable = True
+        t_attr.keyable = True
+        SolsticeMaskLocator.addAttribute(font_name)
+
+        font_color = n_attr.createColor("fontColor", "fc")
+        n_attr.default = (1.0, 1.0, 1.0)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        SolsticeMaskLocator.addAttribute(font_color)
+
+        font_alpha = n_attr.create("fontAlpha", "fa", OpenMaya.MFnNumericData.kFloat, 1.0)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        n_attr.setMin(0.0)
+        n_attr.setMax(1.0)
+        SolsticeMaskLocator.addAttribute(font_alpha)
+
+        font_scale = n_attr.create("fontScale", "fs", OpenMaya.MFnNumericData.kFloat, 1.0)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        n_attr.setMin(0.1)
+        n_attr.setMax(2.0)
+        SolsticeMaskLocator.addAttribute(font_scale)
+
+        top_border = n_attr.create("topBorder", "tbd", OpenMaya.MFnNumericData.kBoolean, True)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        SolsticeMaskLocator.addAttribute(top_border)
+
+        bottom_border = n_attr.create("bottomBorder", "bbd", OpenMaya.MFnNumericData.kBoolean, True)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        SolsticeMaskLocator.addAttribute(bottom_border)
+
+        border_color = n_attr.createColor("borderColor", "bc")
+        n_attr.default = (0.0, 0.0, 0.0)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        SolsticeMaskLocator.addAttribute(border_color)
+
+        border_alpha = n_attr.create("borderAlpha", "ba", OpenMaya.MFnNumericData.kFloat, 1.0)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        n_attr.setMin(0.0)
+        n_attr.setMax(1.0)
+        SolsticeMaskLocator.addAttribute(border_alpha)
+
+        border_scale = n_attr.create("borderScale", "bs", OpenMaya.MFnNumericData.kFloat, 1.0)
+        n_attr.writable = True
+        n_attr.storable = True
+        n_attr.keyable = True
+        n_attr.setMin(0.5)
+        n_attr.setMax(2.0)
+        SolsticeMaskLocator.addAttribute(border_scale)
+
+
+class SolsticeMaskData(OpenMaya.MUserData, object):
+    def __init__(self):
+        super(SolsticeMaskData, self).__init__(False)
+
+
+class SolsticeMaskDrawOverride(OpenMayaRender.MPxDrawOverride, object):
+    _NAME_ = 'SolsticeMask_draw_override'
+
+    def __init__(self, obj):
+        super(SolsticeMaskDrawOverride, self).__init__(obj, SolsticeMaskDrawOverride.draw)
+
+    @staticmethod
+    def creator(obj):
+        return SolsticeMaskDrawOverride(obj)
+
+    @staticmethod
+    def draw(context, data):
+        return
+
+    def supportedDrawAPIs(self):
+        return OpenMayaRender.MRenderer.kAllDevices
+
+    def isBounded(self, obj_path, camera_path):
+        return False
+
+    def boundingBox(self, obj_path, camera_path):
+        return OpenMaya.MBoundingBox()
+
+    def hasUIDrawables(self):
+        return True
+
+    def prepareForDraw(self, obj_path, camera_path, frame_context, old_data):
+        data = old_data
+        if not isinstance(data, SolsticeMaskData):
+            data = SolsticeMaskData()
+
+        dag_node_fn = OpenMaya.MFnDagNode(obj_path)
+        data.camera_name = dag_node_fn.findPlug('camera', False).asString()
+        data.text_fields = list()
+        for i in range(len(SolsticeMaskLocator._TEXT_ATTRS_)):
+            data.text_fields.append(dag_node_fn.findPlug(SolsticeMaskLocator._TEXT_ATTRS_[i][0], False).asString())
+        counter_padding = dag_node_fn.findPlug('counterPadding', False).asInt()
+        if counter_padding < 1:
+            counter_padding = 1
+        elif counter_padding > 6:
+            counter_padding = 6
+        current_time = int(cmds.currentTime(query=True))
+        counter_position = dag_node_fn.findPlug('counterPosition', False).asInt()
+        if counter_position > 0 and counter_position <= len(SolsticeMaskLocator._TEXT_ATTRS_):
+            data.text_fields[counter_position-1] = '{}'.format(str(current_time).zfill(counter_padding))
+        data.text_padding = dag_node_fn.findPlug('textPadding', False).asInt()
+        data.font_name = dag_node_fn.findPlug('fontName', False).asString()
+        r = dag_node_fn.findPlug('fontColorR', False).asFloat()
+        g = dag_node_fn.findPlug('fontColorG', False).asFloat()
+        b = dag_node_fn.findPlug('fontColorB', False).asFloat()
+        a = dag_node_fn.findPlug('fontAlpha', False).asFloat()
+        data.font_color = OpenMaya.MColor((r, g, b, a))
+        data.font_scale = dag_node_fn.findPlug('fontScale', False).asFloat()
+        br = dag_node_fn.findPlug('borderColorR', False).asFloat()
+        bg = dag_node_fn.findPlug('borderColorG', False).asFloat()
+        bb = dag_node_fn.findPlug('borderColorB', False).asFloat()
+        ba = dag_node_fn.findPlug('borderAlpha', False).asFloat()
+        data.border_color = OpenMaya.MColor((br, bg, bb , ba))
+        data.border_scale = dag_node_fn.findPlug('borderScale', False).asFloat()
+        data.top_border = dag_node_fn.findPlug('topBorder', False).asBool()
+        data.bottom_border = dag_node_fn.findPlug('bottomBorder', False).asBool()
+
+        return data
+
+    def addUIDrawables(self, obj_path, draw_manager, frame_context, data):
+        if not isinstance(data, SolsticeMaskData):
+            return
+
+        icon_names = draw_manager.getIconNames()
+
+        draw_manager.icon(OpenMaya.MPoint(50, 50), icon_names[5], 1.0)
+
+        camera_path = frame_context.getCurrentCameraPath()
+        camera = OpenMaya.MFnCamera(camera_path)
+        if data.camera_name and self.camera_exists(data.camera_name) and not self.is_camera_match(camera_path, data.camera_name):
+            return
+
+        camera_aspect_ratio = camera.aspectRatio()
+        device_aspect_ratio = cmds.getAttr('defaultResolution.deviceAspectRatio')
+        vp_x, vp_y, vp_width, vp_height = frame_context.getViewportDimensions()
+        vp_half_width = vp_width * 0.5
+        vp_half_height = vp_height * 0.5
+        vp_aspect_ratio = vp_width / float(vp_height)
+
+        scale = 1.0
+
+        if camera.filmFit == OpenMaya.MFnCamera.kHorizontalFilmFit:
+            mask_width = vp_width / camera.overscan
+            mask_height = mask_width / device_aspect_ratio
+        elif camera.filmFit == OpenMaya.MFnCamera.kVerticalFilmFit:
+            mask_height = vp_height / camera.overscan
+            mask_width = mask_height * device_aspect_ratio
+        elif camera.filmFit == OpenMaya.MFnCamera.kFillFilmFit:
+            if vp_aspect_ratio < camera_aspect_ratio:
+                if camera_aspect_ratio < device_aspect_ratio:
+                    scale = camera_aspect_ratio / vp_aspect_ratio
+                else:
+                    scale = device_aspect_ratio / vp_aspect_ratio
+            elif camera_aspect_ratio > device_aspect_ratio:
+                scale = device_aspect_ratio / camera_aspect_ratio
+            mask_width = vp_width / camera.overscan * scale
+            mask_height = mask_width / device_aspect_ratio
+        elif camera.filmFit == OpenMaya.MFnCamera.kOverscanFilmFit:
+            if vp_aspect_ratio < camera_aspect_ratio:
+                if camera_aspect_ratio < device_aspect_ratio:
+                    scale = camera_aspect_ratio / vp_aspect_ratio
+                else:
+                    scale = device_aspect_ratio / vp_aspect_ratio
+            elif camera_aspect_ratio > device_aspect_ratio:
+                scale = device_aspect_ratio / camera_aspect_ratio
+
+            mask_height = vp_height / camera.overscan / scale
+            mask_width = mask_height * device_aspect_ratio
+        else:
+            OpenMaya.MGlobal.displayError('SolsticeShotMask: Unknown Film Fit value')
+            return
+
+        mask_half_width = mask_width * 0.5
+        mask_x = vp_half_width - mask_half_width
+        mask_half_height = 0.5 * mask_height
+        mask_bottom_y = vp_half_height - mask_half_height
+        mask_top_y = vp_half_height + mask_half_height
+        border_height = int(0.05 * mask_height * data.border_scale)
+        background_size = (int(mask_width), border_height)
+
+        draw_manager.beginDrawable()
+        draw_manager.setFontName(data.font_name)
+        draw_manager.setFontSize(int((border_height - border_height * 0.15) * data.font_scale))
+        draw_manager.setColor(data.font_color)
+
+        print(data.border_color)
+
+        if data.top_border:
+            self.draw_border(draw_manager, OpenMaya.MPoint(mask_x, mask_top_y - border_height), background_size, data.border_color)
+        if data.bottom_border:
+            self.draw_border(draw_manager, OpenMaya.MPoint(mask_x, mask_bottom_y), background_size, data.border_color)
+
+        self.draw_text(draw_manager, OpenMaya.MPoint(mask_x + data.text_padding, mask_top_y - border_height), data.text_fields[0], OpenMayaRender.MUIDrawManager.kLeft, background_size)
+        self.draw_text(draw_manager, OpenMaya.MPoint(vp_half_width, mask_top_y - border_height), data.text_fields[1], OpenMayaRender.MUIDrawManager.kCenter, background_size)
+        self.draw_text(draw_manager, OpenMaya.MPoint(mask_x + mask_width - data.text_padding, mask_top_y - border_height), data.text_fields[2], OpenMayaRender.MUIDrawManager.kRight, background_size)
+        self.draw_text(draw_manager, OpenMaya.MPoint(mask_x + data.text_padding, mask_bottom_y), data.text_fields[3], OpenMayaRender.MUIDrawManager.kLeft, background_size)
+        self.draw_text(draw_manager, OpenMaya.MPoint(vp_half_width, mask_bottom_y), data.text_fields[4], OpenMayaRender.MUIDrawManager.kCenter, background_size)
+        self.draw_text(draw_manager, OpenMaya.MPoint(mask_x + mask_width - data.text_padding, mask_bottom_y), data.text_fields[5], OpenMayaRender.MUIDrawManager.kRight, background_size)
+
+        draw_manager.endDrawable()
+
+    def draw_border(self, draw_manager, position, background_size, color):
+        draw_manager.text2d(position, ' ', alignment=OpenMayaRender.MUIDrawManager.kLeft, backgroundSize=background_size, backgroundColor=color)
+
+    def draw_text(self, draw_manager, position, text, alignment, background_size):
+        if len(text) > 0:
+            draw_manager.text2d(position, text, alignment=alignment, backgroundSize=background_size, backgroundColor=OpenMaya.MColor((0.0, 0.0, 0.0, 0.0)))
+
+    def camera_exists(self, name):
+        return name in cmds.listCameras()
+
+    def is_camera_match(self, camera_path, name):
+        path_name = camera_path.fullPathName()
+        split_path_name = path_name.split('|')
+        if len(split_path_name) >= 1:
+            if split_path_name[-1] == name:
+                return True
+        if len(split_path_name) >= 2:
+            if split_path_name[-2] == name:
+                return True
+
+        return False
+
+
+def initializePlugin(obj):
+    plugin_fn = OpenMaya.MFnPlugin(obj, 'Solstice Short Film', '1.0', 'Any')
+    try:
+        plugin_fn.registerNode(
+            SolsticeMaskLocator._NAME_,
+            SolsticeMaskLocator._ID_,
+            SolsticeMaskLocator.creator,
+            SolsticeMaskLocator.initialize,
+            OpenMaya.MPxNode.kLocatorNode,
+            SolsticeMaskLocator._DRAW_DB_CLASSIFICATION_
+        )
+    except Exception:
+        OpenMaya.MGlobal.displayError('Failed to register node: {}'.format(SolsticeMaskLocator._NAME_))
+
+    try:
+        OpenMayaRender.MDrawRegistry.registerDrawOverrideCreator(
+            SolsticeMaskLocator._DRAW_DB_CLASSIFICATION_,
+            SolsticeMaskLocator._DRAW_REGISTRANT_ID_,
+            SolsticeMaskDrawOverride.creator
+        )
+    except Exception:
+        OpenMaya.MGlobal.displayError('Failed to register draw override: {}'.format(SolsticeMaskDrawOverride._NAME_))
+
+
+def uninitializePlugin(obj):
+    plugin_fn = OpenMaya.MFnPlugin(obj)
+    try:
+        OpenMayaRender.MDrawRegistry.deregisterDrawOverrideCreator(
+            SolsticeMaskLocator._DRAW_DB_CLASSIFICATION_,
+            SolsticeMaskLocator._DRAW_REGISTRANT_ID_
+        )
+    except Exception:
+        OpenMaya.MGlobal.displayError('Failed to deregister draw override: {}'.format(SolsticeMaskDrawOverride._NAME_))
+
+    try:
+        plugin_fn.deregisterNode(SolsticeMaskLocator._ID_)
+    except Exception:
+        OpenMaya.MGlobal.displayError('Failed to unregister node: {}'.format(SolsticeMaskLocator._NAME_))
+
+# ==================================================================================================================
 
 def run():
     reload(solstice_accordion)
     reload(solstice_label)
+    reload(solstice_buttons)
     reload(utils)
     reload(python)
     SolsticePlayBlast.run()

@@ -12,7 +12,6 @@ from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_checks import solstice_studentcheck
 from solstice_pipeline.solstice_checks import solstice_assetchecks
 
 reload(solstice_assetchecks)
@@ -87,7 +86,8 @@ class SanityCheckGroup(QWidget, object):
                             continue
 
                     check.invalid_check()
-                    check.show_fix_button()
+                    if not self.auto_fix:
+                        check.show_fix_button()
                     self.checkDone.emit(check, False)
                     if self.stop_on_error:
                         break
@@ -133,5 +133,6 @@ class AssetModelPublishSanityCheck(SanityCheckGroup, object):
     def __init__(self, asset, file_type, auto_fix=False, stop_on_error=False, parent=None):
         super(AssetModelPublishSanityCheck, self).__init__(name='AssetPublish', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
 
+        self.add_check(solstice_assetchecks.AssetFileExists(asset=asset, status='working', file_type=file_type))
         self.add_check(solstice_assetchecks.StudentLicenseCheck(asset=asset, status='working', file_type=file_type))
         # self.add_check(solstice_assetchecks.ModelValidMainGroup(asset=asset, status='working', file_type=file_type, task=task))
