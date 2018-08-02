@@ -148,6 +148,8 @@ class AssetViewer(solstice_grid.GridWidget, object):
                             checkable=self._checkable_assets
                         )
 
+                        # ===========================================================================================================
+                        # TODO: Refactor this piece of awful code
                         # We connect this signal to allow Pipelinizer Tool update its asset info widget after syncronizing
                         # This is a very bad way but it works for now!
                         try:
@@ -165,7 +167,11 @@ class AssetViewer(solstice_grid.GridWidget, object):
                                 new_asset.setVisible(False)
                         if self._item_pressed_callback:
                             new_asset._asset_btn.clicked.connect(partial(self._item_pressed_callback, new_asset))
+                            new_asset.publishFinished.connect(partial(self._item_pressed_callback, new_asset, True, True))
+                            new_asset.newVersionFinished.connect(partial(self._item_pressed_callback, new_asset, True, True))
                         self.add_asset(new_asset)
+                        # ===========================================================================================================
+
 
                         # if category == 'All':
                         #     asset_data = utils.read_json(asset_data_file)

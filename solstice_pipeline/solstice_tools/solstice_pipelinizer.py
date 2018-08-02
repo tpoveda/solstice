@@ -133,7 +133,6 @@ class Pipelinizer(solstice_windows.Window, object):
         v_div_l.addWidget(v_div)
         return v_div_w
 
-
     def custom_ui(self):
         super(Pipelinizer, self).custom_ui()
 
@@ -235,12 +234,6 @@ class Pipelinizer(solstice_windows.Window, object):
         categories_layout.setSpacing(0)
         categories_widget.setLayout(categories_layout)
 
-        # asset_browser_widget = QWidget()
-        # asset_browser_layout = QHBoxLayout()
-        # asset_browser_layout.setContentsMargins(0, 0, 0, 0)
-        # asset_browser_layout.setSpacing(0)
-        # asset_browser_widget.setLayout(asset_browser_layout)
-
         sequences_widget = QWidget()
         sequences_widget.setObjectName('SequencerWidget')
         sequences_layout = QVBoxLayout()
@@ -249,7 +242,6 @@ class Pipelinizer(solstice_windows.Window, object):
         sequences_widget.setLayout(sequences_layout)
 
         self._tab_widget.addTab(categories_widget, 'Assets Manager')
-        # self._tab_widget.addTab(asset_browser_widget, ' Assets Browser ')
         self._tab_widget.addTab(sequences_widget, 'Sequence Manager')
 
         # ================== Asset Manager Widget
@@ -300,30 +292,6 @@ class Pipelinizer(solstice_windows.Window, object):
             self._categories_btn_group.addButton(new_btn)
         categories_buttons['All'].setChecked(True)
 
-        # ================== Asset Browser Widget
-        # asset_viewer_splitter = QSplitter(Qt.Horizontal)
-        # asset_browser_layout.addWidget(asset_viewer_splitter)
-        #
-        # artella_server_widget = QWidget()
-        # artella_server_layout = QHBoxLayout()
-        # artella_server_layout.setContentsMargins(0, 0, 0, 0)
-        # artella_server_layout.setSpacing(0)
-        # # artella_server_layout.setAlignment(Qt.AlignTop)
-        # artella_server_widget.setLayout(artella_server_layout)
-        # artella_server_browser = solstice_assetbrowser.AssetBrowser(title='Artella Server Data')
-        # artella_server_layout.addWidget(artella_server_browser)
-        # asset_viewer_splitter.addWidget(artella_server_widget)
-        #
-        # local_data_widget = QWidget()
-        # local_data_layout = QHBoxLayout()
-        # local_data_layout.setContentsMargins(0, 0, 0, 0)
-        # local_data_layout.setSpacing(0)
-        # local_data_layout.setAlignment(Qt.AlignTop)
-        # local_data_widget.setLayout(local_data_layout)
-        # local_data_browser = solstice_assetbrowser.AssetBrowser(title='       Local Data      ', root_path=sp.get_solstice_assets_path())
-        # local_data_layout.addWidget(local_data_browser)
-        # asset_viewer_splitter.addWidget(local_data_widget)
-
         # Sequence Manager Widget
         self._sequencer = solstice_sequencer.SolsticeSequencer()
         sequences_layout.addWidget(self._sequencer)
@@ -350,7 +318,7 @@ class Pipelinizer(solstice_windows.Window, object):
     def update_ui(self, artella_is_available):
         # TODO: This is called each time we check to Artella availability through user icon widget
         # TODO: If Artella is not enabled we should disable all the widgets of the UI and notify
-        # the user that Artella server is not available right now
+        # TODO: the user that Artella server is not available right now
 
         return
 
@@ -491,7 +459,13 @@ class Pipelinizer(solstice_windows.Window, object):
             if self.settings.has_option(self.settings.app_name, 'auto_check_lock'):
                 check_lock_info = strtobool(self.settings.get('auto_check_lock'))
 
-            info_widget = asset.get_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info, check_lock_info=check_lock_info)
+            try:
+                info_widget = asset.get_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info, check_lock_info=check_lock_info)
+            except Exception as e:
+                msg = 'Impossible to retrieve info from Artella. Please try it later'
+                cmds.warning(msg)
+                sp.logger.debug(msg)
+                sp.logger.error(str(e))
             if not info_widget:
                 return
 

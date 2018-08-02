@@ -141,7 +141,9 @@ class AssetInfo(QWidget, object):
 
 class AssetWidget(QWidget, object):
 
-    sync_finished = Signal()
+    syncFinished = Signal()
+    publishFinished = Signal()
+    newVersionFinished = Signal()
 
     def __init__(self, **kwargs):
         parent = kwargs['parent'] if 'parent' in kwargs else None
@@ -241,10 +243,14 @@ class AssetWidget(QWidget, object):
         print('\t  Is Checkable: {0}'.format(self._checkable))
 
     def publish(self):
-        solstice_publisher.run(asset=self)
+        result = solstice_publisher.run(asset=self)
+        if result:
+            self.publishFinished.emit()
 
     def new_version(self):
-        solstice_publisher.run(asset=self, new_working_version=True)
+        result = solstice_publisher.run(asset=self, new_working_version=True)
+        if result:
+            self.newVersionFinished.emit()
 
     def contextMenuEvent(self, event):
         if not self._simple_mode:
@@ -796,7 +802,7 @@ class AssetWidget(QWidget, object):
         solstice_sync_dialog.SolsticeSyncFile(files=paths_to_sync).sync()
         elapsed_time = time.time() - start_time
         sp.logger.debug('{0} synchronized in {1} seconds'.format(self._name, elapsed_time))
-        self.sync_finished.emit()
+        self.syncFinished.emit()
 
     def get_asset_file(self, file_type, status):
         """
@@ -890,7 +896,7 @@ class AssetWidget(QWidget, object):
 
         self._folder_btn.clicked.connect(partial(artella.explore_file, self._asset_path))
         self._artella_btn.clicked.connect(self.open_asset_artella_url)
-        self._check_btn.clicked.connect(self.sync_finished.emit)
+        self._check_btn.clicked.connect(self.syncFinished.emit)
 
     def open_asset_artella_url(self):
 

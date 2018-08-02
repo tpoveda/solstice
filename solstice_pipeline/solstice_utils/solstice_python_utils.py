@@ -385,3 +385,20 @@ def get_size(path, round_value=2):
         size = get_file_size(path, round_value)
 
     return size
+
+
+def add_unique_postfix(fn):
+    if not os.path.exists(fn):
+        return fn
+
+    path, name = os.path.split(fn)
+    name, ext = os.path.splitext(name)
+
+    make_fn = lambda i: os.path.join(path, '%s_%d%s' % (name, i, ext))
+
+    for i in xrange(2, sys.maxint):
+        uni_fn = make_fn(i)
+        if not os.path.exists(uni_fn):
+            return uni_fn
+
+    return None

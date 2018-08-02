@@ -93,7 +93,7 @@ class UserInfoWidget(QWidget, object):
         painter.drawPixmap(105, 68, 15, 15, self._os_icon)
         painter.setBrush(self._artella_color)
         painter.setPen(self._artella_color)
-        painter.drawEllipse(122, 70, 6, 6)
+        painter.drawEllipse(122, 72, 6, 6)
         painter.end()
 
     def _check_artella_avilability(self):

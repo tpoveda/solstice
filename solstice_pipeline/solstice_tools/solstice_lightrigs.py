@@ -49,7 +49,7 @@ class LightRigManager(solstice_windows.Window, object):
     docked = False
 
     def __init__(self, name='LightRigWindow', parent=None, **kwargs):
-        super(LightRigManager, self).__init__(name=name, parent=parent)
+        super(LightRigManager, self).__init__(name=name, parent=parent, **kwargs)
 
     def custom_ui(self):
         super(LightRigManager, self).custom_ui()

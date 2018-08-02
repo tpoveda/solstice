@@ -539,24 +539,28 @@ def is_locked(file_path):
     :return: bool
     """
 
+
+    # TODO: Check if the status is a DirectoryOne or a Header one
+
     rsp = get_status(file_path=file_path)
-    meta = rsp.get('meta', {})
-    if meta.get('status') != 'OK':
-        sp.logger.info('Status is not OK: {}'.format(meta))
-        return False, False
+    if rsp:
+        if rsp.header.status != 'OK':
+            sp.logger.info('Status is not OK: {}'.format(rsp))
+            return False, False
 
-    file_path = meta.get('file_path', '')
+    file_path = rsp.header.file_path or ''
     if not file_path:
-        sp.logger.info('File path not found in response: {}'.format(meta))
+        sp.logger.info('File path not found in response: {}'.format(rsp))
         return False, False
 
-    file_data = rsp.get('data', {}).get(file_path)
-    if not file_data:
-        sp.logger.info('File data not found in response: {}'.format(rsp.get('data', {}), ))
-        return
-    if file_data.get('locked') is True:
-        user_id = get_current_user_id()
-        return True, user_id == file_data.get('locked_view')
+    for ref, ref_data in rsp.references.items():
+        file_data = ref_data.path
+        if not file_data:
+            sp.logger.info('File data not found in response: {}'.format(rsp.get('data', {}), ))
+            return
+        if ref_data.locked:
+            user_id = get_current_user_id()
+            return True, user_id == ref_data.locked_view
 
     return False, False
 
@@ -585,15 +589,15 @@ def lock_file(file_path=None, force=False):
     in_edit_mode, is_locked_by_me = is_locked(file_path=file_path)
     can_write = os.access(file_path, os.W_OK)
     if not can_write and is_locked_by_me:
-        msg = 'Unable to check local write permisions for file: {}'.format(file_path)
+        msg = 'Unable to check local write permissions for file: {}'.format(file_path)
         sp.logger.info(msg)
         sp.message(msg)
 
-    if in_edit_mode and is_locked_by_me:
+    if in_edit_mode and not is_locked_by_me:
         msg = 'Locked by another user or workspace: {}'.format(os.path.basename(file_path))
         sp.logger.info(msg)
         cmds.warning(msg)
-        cmds.confirmDialog(title='Solstice Tools - Failed to checkout (lock) file', msg=msg, button=['OK'])
+        cmds.confirmDialog(title='Solstice Tools - Failed to checkout (lock) file', message=msg, button=['OK'])
         return False
     elif force or not in_edit_mode:
         result = 'Yes'
@@ -622,6 +626,30 @@ def lock_file(file_path=None, force=False):
         sp.logger.info(msg)
         cmds.warning(msg)
         cmds.confirmDialog(title='Solstice Tools - Failed to Lock File', message=msg, button=['OK'])
+        return False
+
+    return True
+
+
+def upload_file(file_path, comment):
+    spigot = get_spigot_client()
+    payload = dict()
+    cms_uri = artella.getCmsUri(file_path)
+    if not cms_uri.startswith('/'):
+        cms_uri = '/' + cms_uri
+    payload['cms_uri'] = cms_uri
+    payload['comment'] = comment
+    payload = json.dumps(payload)
+
+    rsp = spigot.execute(command_action='do', command_name='upload', payload=payload)
+    if isinstance(rsp, basestring) or type(rsp) == str:
+        rsp = json.loads(rsp)
+
+    if rsp.get('status', {}).get('meta', {}).get('status') != 'OK':
+        msg = 'Failed to publish version to Artella {}'.format(os.path.basename(file_path))
+        sp.logger.info(msg)
+        cmds.warning(msg)
+        cmds.confirmDialog(title='Solstice Tools - Failed to Upload Bug. Restart Solstice Tools please!', message=msg, button=['OK'])
         return False
 
     return True

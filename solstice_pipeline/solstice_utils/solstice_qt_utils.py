@@ -245,6 +245,15 @@ def show_question(parent, title, question):
     return QMessageBox.question(parent, title, question, flags)
 
 
+def show_error(parent, title, error):
+    """
+    Show a error QMessageBox with the given error
+    :return:
+    """
+
+    return QMessageBox.critical(parent, title, error)
+
+
 def clear_layout_widgets(layout):
     """
     Removes all the widgets added in the given layout
@@ -268,3 +277,18 @@ def image_to_clipboard(path):
     image = QImage(path)
     clipboard = QApplication.clipboard()
     clipboard.setImage(image, mode=QClipboard.Clipboard)
+
+
+def get_horizontal_separator():
+    v_div_w = QWidget()
+    v_div_l = QVBoxLayout()
+    v_div_l.setAlignment(Qt.AlignLeft)
+    v_div_l.setContentsMargins(0, 0, 0, 0)
+    v_div_l.setSpacing(0)
+    v_div_w.setLayout(v_div_l)
+    v_div = QFrame()
+    v_div.setMinimumHeight(30)
+    v_div.setFrameShape(QFrame.VLine)
+    v_div.setFrameShadow(QFrame.Sunken)
+    v_div_l.addWidget(v_div)
+    return v_div_w
