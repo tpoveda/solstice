@@ -123,7 +123,7 @@ class SanityCheckValidator(solstice_dialog.Dialog, object):
         else:
             # self._progress_text.setVisible(False)
             self._progress_text.setText('VALIDATION CHECK FAILED!')
-            self._progress_text.setStyleSheet('background-color: rgb(45, 90, 45);')
+            self._progress_text.setStyleSheet('background-color: rgb(165, 90, 90);')
             self._log_text.setVisible(True)
 
     def _on_ok(self):

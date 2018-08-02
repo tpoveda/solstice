@@ -761,9 +761,14 @@ def unlock_file(file_path):
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
 
-    if rsp.get('meta', {}).get('status') != 'OK':
-        msg = 'Failed to unlock {}'.format(os.path.basename(file_path))
-        sp.logger.info(msg)
+    # if rsp.get('status', {}).get('meta', {}).get('status') != 'OK':
+
+    if rsp:
+        if rsp.get('meta', {}).get('status') != 'OK':
+            msg = 'Failed to unlock {}'.format(os.path.basename(file_path))
+            sp.logger.info(msg)
+            return False
+    else:
         return False
 
     return True

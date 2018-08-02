@@ -54,6 +54,7 @@
     "Added User Login and Icon when the user is logged on Solstice Pipelinizer",
     "Updated the way Solstice Piplinizer open asset files and folders",
     "Improve the stabilty of Solstice Pipelinizer",
-    "Solstice Pipelinizer now launchs automatically Artella app (only works in Windows for now)"
+    "Solstice Pipelinizer now launches automatically Artella app (only works in Windows for now)",
+    "Added Proxy/Hires tag data info into Solstice Tagger Tool"
   ]
 }

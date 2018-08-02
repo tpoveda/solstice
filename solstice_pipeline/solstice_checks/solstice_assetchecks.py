@@ -31,6 +31,9 @@ class AssetFileExists(solstice_check.SanityCheckTask, object):
     def check(self):
         self._file_path = self._asset().get_asset_file(file_type=self._file_type, status=self._status)
         if self._file_path is None or not os.path.isfile(self._file_path):
+            error_msg = 'File Path {} does not exists!\nCheck the nomenclature of the file please!'.format(self._file_path)
+            sp.logger.error(error_msg)
+            self.set_error_message(error_msg)
             return False
 
         return True
@@ -56,6 +59,9 @@ class TexturesFolderSync(solstice_check.SanityCheckTask, object):
         published_textures_info = self._asset().get_max_versions(status='published', categories=['textures'])['server']
         textures_version = published_textures_info['textures']
         if textures_version is None:
+            error_msg = 'Textures Path folder has invalid textures or no textures at all!'.format(self._textures_path)
+            sp.logger.error(error_msg)
+            self.set_error_message(error_msg)
             return False
 
         self._textures_path.append(os.path.join(self._asset().asset_path, '__working__', 'textures'))
@@ -79,7 +85,6 @@ class TexturesFolderSync(solstice_check.SanityCheckTask, object):
         for p in self._textures_path:
             artella.synchronize_file(p)
             sp.register_asset(p)
-
             if os.path.exists(p):
                 if len(os.listdir(p)) <= 0:
                     valid_paths = False
@@ -157,7 +162,7 @@ class NotLockedAsset(solstice_check.SanityCheckTask, object):
         current_user_can_unlock = self._asset().is_locked(self._file_type, status=self._status)[1]
         if not current_user_can_unlock:
             error_message = 'Asset {0} | {1} {2} file is locked!'.format(self._asset().name, self._status, self._file_type)
-            sp.logger.debug(error_message)
+            sp.logger.error(error_message)
             self.set_error_message(error_message)
             return False
 
@@ -188,19 +193,6 @@ class ValidPublishedTextures(solstice_check.SanityCheckTask, object):
         super(ValidPublishedTextures, self).fix()
 
 
-class UpdateAssetTextures(solstice_check.SanityCheckTask, object):
-    def __init__(self, auto_fix=False, parent=None):
-        super(UpdateAssetTextures, self).__init__(name='Updating Texture Paths', auto_fix=auto_fix, parent=parent)
-
-        self.set_check_text('Update textures path to new version if necessary')
-
-    def check(self):
-        pass
-
-    def fix(self):
-        pass
-
-
 class StudentLicenseCheck(solstice_check.SanityCheckTask, object):
     def __init__(self, asset, file_type, status='working', auto_fix=False, parent=None):
         super(StudentLicenseCheck, self).__init__(name='Student License Check', auto_fix=auto_fix, parent=parent)
@@ -215,6 +207,9 @@ class StudentLicenseCheck(solstice_check.SanityCheckTask, object):
 
         self._file_path = self._asset().get_asset_file(file_type=self._file_type, status=self._status)
         if self._file_path is None or not os.path.isfile(self._file_path):
+            error_msg = 'File Path {} does not exists!'.format(self._file_path)
+            sp.logger.error(error_msg)
+            self.set_error_message(error_msg)
             return False
 
         return not solstice_maya_utils.file_has_student_line(filename=self._file_path)

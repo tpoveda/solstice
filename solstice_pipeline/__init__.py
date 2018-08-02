@@ -432,6 +432,15 @@ def open_artella_project():
     webbrowser.open(project_url)
 
 
+def open_production_tracker():
+    """
+    Open Solstice Production Tracker
+    """
+
+    production_url = 'https://docs.google.com/spreadsheets/d/1kUPsHsPJwVY0s9uEcZCwXb5rlwUiHezgRT_m4obldOM/edit#gid=0'
+    webbrowser.open(production_url)
+
+
 def open_artella_documentation():
     """
     Opens Artella Documentation web page

@@ -30,13 +30,15 @@ class SolsticeTrayMessage(solstice_dialog.Dialog, object):
         self._solstice_tools_icon = solstice_resource.icon('solstice_tools')
         _email_icon = solstice_resource.icon('message')
         _documentation_icon = solstice_resource.icon('documentation')
+        _production_icon = solstice_resource.icon('production')
 
         self.doc_action = QAction(_documentation_icon, 'Solstice Documentation', self, statusTip='Open Solstice Documentation webpage', triggered=self._on_open_solstice_documentation)
         self.web_action = QAction(_solstice_icon, 'Solstice Web', self, statusTip='Open Solstice Official webpage', triggered=self._on_open_solstice_web)
         self.project_action = QAction(_artella_icon, 'Solstice Artella Project', self, statusTip='Open Solstice Artella project webpage', triggered=self._on_open_solstice_artella_project)
         self.email_action = QAction(_email_icon, 'Send Email', self, statusTip='Send Email to Solstice TD team', triggered=self._on_send_email)
+        self.production_action = QAction(_production_icon, 'Solstice Production Tracker', self, statusTip='Open Solstice Production Tracker', triggered=self._on_open_solstice_production_tracker)
         self.tray_icon_menu = QMenu(self)
-        for action in [self.doc_action, self.web_action, self.project_action, self.email_action]:
+        for action in [self.doc_action, self.web_action, self.project_action, self.email_action, self.production_action]:
             self.tray_icon_menu.addAction(action)
 
         self.tray_icon = QSystemTrayIcon(self)
@@ -70,3 +72,7 @@ class SolsticeTrayMessage(solstice_dialog.Dialog, object):
     @staticmethod
     def _on_open_solstice_artella_project():
         sp.open_artella_project()
+
+    @staticmethod
+    def _on_open_solstice_production_tracker():
+        sp.open_production_tracker()

@@ -12,6 +12,7 @@ import os
 import glob
 import stat
 import shutil
+import functools
 import contextlib
 from collections import OrderedDict
 
@@ -62,15 +63,15 @@ def maya_undo(fn):
     Undo function decorator for Maya function calls
     """
 
+    @functools.wraps(fn)
     def wrapper(*args, **kwargs):
-        cmds.undoInfo(openChunk=True)
         try:
-            ret = fn(*args, **kwargs)
+            cmds.undoInfo(openChunk=True)
+            return fn(*args, **kwargs)
         finally:
             cmds.undoInfo(closeChunk=True)
-        return ret
 
-    return wrapper
+    return lambda *args, **kwargs: utils.executeDeferred(wrapper, *args, **kwargs)
 
 
 @contextlib.contextmanager

@@ -364,18 +364,153 @@ class HighProxyEditor(TaggerEditor, object):
         self.main_layout.setSpacing(0)
         self.setLayout(self.main_layout)
 
-        high_layout = QHBoxLayout()
-        high_lbl = QLabel('High: ')
-        self.high_line = solstice_label.DragDropLine()
-        high_layout.addWidget(high_lbl)
-        high_layout.addWidget(self.high_line)
-        self.main_layout.addLayout(high_layout)
         low_layout = QHBoxLayout()
         low_lbl = QLabel('Proxy: ')
         self.low_line = solstice_label.DragDropLine()
+        self.low_line.setReadOnly(True)
         low_layout.addWidget(low_lbl)
         low_layout.addWidget(self.low_line)
         self.main_layout.addLayout(low_layout)
+        high_layout = QHBoxLayout()
+        high_lbl = QLabel('High: ')
+        self.high_line = solstice_label.DragDropLine()
+        self.high_line.setReadOnly(True)
+        high_layout.addWidget(high_lbl)
+        high_layout.addWidget(self.high_line)
+        self.main_layout.addLayout(high_layout)
+
+        self.check_btn = QPushButton('Update Proxy/Hires groups')
+        self.main_layout.addWidget(self.check_btn)
+
+        self.check_btn.clicked.connect(partial(self.update_data, None))
+
+        # self.low_line.textChanged.connect(partial(self.update_data, None))
+        # self.high_line.textChanged.connect(partial(self.update_data, None))
+
+    def update_tag_buttons_state(self):
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        if tag_data_node is None  or not cmds.objExists(tag_data_node):
+            return
+
+        attr_exists = cmds.attributeQuery('proxy', node=tag_data_node, exists=True)
+        if attr_exists:
+            proxy_group = cmds.listConnections(tag_data_node + '.proxy')
+            if proxy_group:
+                proxy_group = proxy_group[0]
+            if proxy_group is not None and cmds.objExists(proxy_group):
+                self.low_line.setText(proxy_group)
+
+        attr_exists = cmds.attributeQuery('hires', node=tag_data_node, exists=True)
+        if attr_exists:
+            hires_group = cmds.listConnections(tag_data_node + '.hires')
+            if hires_group:
+                hires_group = hires_group[0]
+            if hires_group is not None and cmds.objExists(hires_group):
+                self.high_line.setText(hires_group)
+
+    def update_data(self, data, *args, **kwargs):
+        self.update_proxy_group()
+        self.update_hires_group()
+        self.update_tag_buttons_state()
+
+    @staticmethod
+    def update_proxy_group(tag_data=None):
+
+        if not tag_data:
+            tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+            if tag_data_node is None or not cmds.objExists(tag_data_node):
+                return
+        else:
+            if not cmds.objExists(tag_data):
+                sp.logger.error('Tag Data {} does not exists in current scene!'.format(tag_data))
+                return False
+            tag_data_node = tag_data
+
+        attr_exists = cmds.attributeQuery('proxy', node=tag_data_node, exists=True)
+        if not attr_exists:
+            cmds.addAttr(tag_data_node, ln='proxy', at='message')
+
+        sel_name = cmds.ls(SolsticeTagger.current_selection, long=True)
+        if len(sel_name) > 1:
+            sp.logger.error('Multiple assets with same name: {}'.format(SolsticeTagger.current_selection))
+            return False
+        sel_name = sel_name[0]
+
+        # Check proxy group connection
+        proxy_path = None
+        if cmds.objExists(sel_name):
+            name = sel_name.split('|')[-1]
+            proxy_name = '{}_proxy_grp'.format(name)
+            for obj in cmds.listRelatives(sel_name, allDescendents=True, type='transform', fullPath=True):
+                base_name = obj.split('|')[-1]
+                if base_name == proxy_name:
+                    if proxy_path is None:
+                        proxy_path = obj
+                    else:
+                        sp.logger.error('Multiple proxy groups in the asset. Asset only can have one proxy group: {}'.format(proxy_name))
+                        return False
+        if proxy_path is None or not cmds.objExists(proxy_path):
+            sp.logger.error('Proxy Group not found!')
+            return False
+        try:
+            cmds.setAttr(tag_data_node + '.proxy', lock=False)
+            cmds.connectAttr(proxy_path + '.message', tag_data_node + '.proxy', force=True)
+        except Exception:
+            pass
+
+        cmds.setAttr(tag_data_node + '.proxy', lock=True)
+
+        return True
+
+    @staticmethod
+    def update_hires_group(tag_data=None):
+        if not tag_data:
+            tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+            if tag_data_node is None or not cmds.objExists(tag_data_node):
+                return
+        else:
+            if not cmds.objExists(tag_data):
+                sp.logger.error('Tag Data {} does not exists in current scene!'.format(tag_data))
+                return False
+            tag_data_node = tag_data
+
+        attr_exists = cmds.attributeQuery('hires', node=tag_data_node, exists=True)
+        if not attr_exists:
+            cmds.addAttr(tag_data_node, ln='hires', at='message')
+
+        sel_name = cmds.ls(SolsticeTagger.current_selection, long=True)
+        if len(sel_name) > 1:
+            sp.logger.error('Multiple assets with same name: {}'.format(SolsticeTagger.current_selection))
+            return False
+        sel_name = sel_name[0]
+
+        # Check hires group connection
+        hires_path = None
+        if cmds.objExists(sel_name):
+            name = sel_name.split('|')[-1]
+            hires_name = '{}_hires_grp'.format(name)
+            for obj in cmds.listRelatives(sel_name, allDescendents=True, type='transform', fullPath=True):
+                base_name = obj.split('|')[-1]
+                if base_name == hires_name:
+                    if hires_path is None:
+                        hires_path = obj
+                    else:
+                        sp.logger.error(
+                            'Multiple hires groups in the asset. Asset only can have one hires group: {}'.format(
+                                hires_name))
+                        return False
+        if hires_path is None or not cmds.objExists(hires_path):
+            sp.logger.error('Hires Group not found!')
+            return False
+        try:
+            cmds.setAttr(tag_data_node + '.hires', lock=False)
+            cmds.connectAttr(hires_path + '.message', tag_data_node + '.hires', force=True)
+        except Exception:
+            pass
+
+        cmds.setAttr(tag_data_node + '.hires', lock=True)
+
+        return True
 
 
 class DescriptionEditor(TaggerEditor, object):
@@ -620,7 +755,7 @@ class SolsticeTagger(solstice_windows.Window, object):
         self._tagger_tabs.addTab(self.name_editor, 'Name')
         self._tagger_tabs.addTab(self.type_editor, 'Type')
         self._tagger_tabs.addTab(self.selection_editor, 'Selections')
-        self._tagger_tabs.addTab(self.high_proxy_editor, 'High/Proxy')
+        self._tagger_tabs.addTab(self.high_proxy_editor, 'Proxy/High')
         self._tagger_tabs.addTab(self.description_editor, 'Description')
         self._tagger_tabs.addTab(self.shaders_editor, 'Shaders')
 
@@ -668,11 +803,15 @@ class SolsticeTagger(solstice_windows.Window, object):
         return tagger_file
 
     @classmethod
-    def get_tag_data_node_from_curr_sel(cls):
+    def get_tag_data_node_from_curr_sel(cls, new_selection=None):
         """
         Returns the tag data node associated to the current selected Maya object
         :return: variant, None || str
         """
+
+        if new_selection:
+            if cmds.objExists(new_selection):
+                cls.current_selection = new_selection
 
         if cls.current_selection == 'scene':
             try:
@@ -834,6 +973,7 @@ class SolsticeTagger(solstice_windows.Window, object):
                             cmds.setAttr(new_tag_data_node + '.types', 'character', type='string')
                     elif asset_type == 'Light Rig' or asset_type == 'light rig':
                             cmds.setAttr(new_tag_data_node + '.types', 'light_rig', type='string')
+                    cmds.setAttr(new_tag_data_node + '.types', lock=True)
 
             else:
                 new_tag_data_node = cmds.createNode('network', name='tag_data_scene')
