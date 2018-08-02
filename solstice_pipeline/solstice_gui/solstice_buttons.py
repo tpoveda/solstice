@@ -120,9 +120,6 @@ class CategoryButtonWidget(QWidget, object):
                 self._lock_btn.setChecked(False)
             self._lock_btn.blockSignals(False)
 
-            print('CATEGORY: ', self._category_name)
-            print('CURRENT USER CAN LOCK: ', current_user_can_lock)
-
             if not current_user_can_lock:
                 self._lock_btn.setEnabled(False)
                 self._lock_btn.setStyleSheet('QPushButton { border: 1px solid yellow; }')

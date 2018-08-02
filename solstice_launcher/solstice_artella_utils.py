@@ -34,10 +34,11 @@ def update_artella_paths(console):
     artella_folder = get_artella_data_folder()
 
     console.write('Updating Artella paths from: {0}'.format(artella_folder))
-    for subdir, dirs, files in os.walk(artella_folder):
-        if subdir not in sys.path:
-            console.write('Adding Artella path: {0}'.format(subdir))
-            sys.path.append(subdir)
+    if artella_folder is not None and os.path.exists(artella_folder):
+        for subdir, dirs, files in os.walk(artella_folder):
+            if subdir not in sys.path:
+                console.write('Adding Artella path: {0}'.format(subdir))
+                sys.path.append(subdir)
 
 
 def get_artella_data_folder():
@@ -105,7 +106,6 @@ def get_artella_dcc_plugin(dcc='maya'):
     :return: str
     """
 
-    artella_folder = get_artella_data_folder()
     return os.path.join(get_artella_plugins_folder(), dcc)
 
 

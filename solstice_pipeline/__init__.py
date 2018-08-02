@@ -245,13 +245,24 @@ def get_solstice_project_path():
     Returns Solstice Project path
     :return: str
     """
+
+    from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
+
     env_var = os.environ.get('SOLSTICE_PROJECT', None)
     if env_var is None:
         update_solstice_project_path()
 
     env_var = os.environ.get('SOLSTICE_PROJECT', None)
     if env_var is None:
-        raise RuntimeError('Solstice Project not setted up properly. Is Artella running? Contact TD!')
+        try:
+            artella.launch_artella_app()
+            artella.load_artella_maya_plugin()
+            update_solstice_project_path()
+        except Exception as e:
+            raise RuntimeError('Solstice Project not setted up properly. Is Artella running? Contact TD!')
+        env_var = os.environ.get('SOLSTICE_PROJECT', None)
+        if env_var is None:
+            raise RuntimeError('Solstice Project not setted up properly. Is Artella running? Contact TD!')
 
     return os.environ.get('SOLSTICE_PROJECT')
 

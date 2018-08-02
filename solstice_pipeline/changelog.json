@@ -53,6 +53,7 @@
     "Added user and light rigs assets to Solstice Builder Tool",
     "Added User Login and Icon when the user is logged on Solstice Pipelinizer",
     "Updated the way Solstice Piplinizer open asset files and folders",
-    "Improve the stabilty of Solstice Pipelinizer"
+    "Improve the stabilty of Solstice Pipelinizer",
+    "Solstice Pipelinizer now launchs automatically Artella app (only works in Windows for now)"
   ]
 }

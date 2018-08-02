@@ -12,9 +12,13 @@
 import os
 import sys
 import json
-import platform
-import subprocess
 import urllib2
+try:
+    import psutil
+except:
+    pass
+
+from solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 
@@ -40,9 +44,12 @@ def update_artella_paths():
     """
 
     artella_folder = get_artella_data_folder()
+
+    sp.logger.debug('Updating Artella paths from: {0}'.format(artella_folder))
     if artella_folder is not None and os.path.exists(artella_folder):
         for subdir, dirs, files in os.walk(artella_folder):
             if subdir not in sys.path:
+                sp.logger.debug('Adding Artella path: {0}'.format(subdir))
                 sys.path.append(subdir)
 
 
@@ -72,17 +79,27 @@ def get_artella_data_folder():
     :return: str
     """
 
-    if platform.system() == 'Darwin':
-        artella_folder = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', 'Artella')
+    # TODO: This should not work in MAC, find a cross-platform way of doing this
+    artella_folder = os.path.join(os.getenv('PROGRAMDATA'), 'Artella')
+
+    artella_app_version = None
+    version_file = os.path.join(artella_folder, 'version_to_run_next')
+    if os.path.isfile(version_file):
+        with open(version_file) as f:
+            artella_app_version = f.readline()
+
+    if artella_app_version is not None:
+        artella_folder = os.path.join(artella_folder, artella_app_version)
     else:
-        artella_folder = os.path.join(os.getenv('PROGRAMDATA'), 'Artella')
-    artella_folder = [os.path.join(artella_folder, name) for name in os.listdir(artella_folder) if os.path.isdir(os.path.join(artella_folder, name)) and name != 'ui']
-    if len(artella_folder) == 1:
-        artella_folder = artella_folder[0]
-        sp.logger.debug('Artella folder: {} is valid!'.format(artella_folder))
-    else:
-        sp.logger.debug('Artella folder: {} not valid!'.format(artella_folder))
-        return None
+        artella_folder = [os.path.join(artella_folder, name) for name in os.listdir(artella_folder) if os.path.isdir(os.path.join(artella_folder, name)) and name != 'ui']
+        if len(artella_folder) == 1:
+            artella_folder = artella_folder[0]
+        else:
+            sp.logger.info('Artella folder not found!')
+
+    sp.logger.debug('ARTELLA FOLDER: {}'.format(artella_folder))
+    if not os.path.exists(artella_folder):
+        QMessageBox.information(None, 'Artella App Folder {} does not exists! Solstice Launcher will continue but maybe will not as it should. Please contact Solstice TD to check this problem!')
 
     return artella_folder
 
@@ -116,22 +133,70 @@ def get_artella_app():
     return os.path.join(artella_folder, artella_app_name)
 
 
+def get_artella_program_folder():
+    """
+    Returns folder where Artella shortcuts are located
+    :return: str
+    """
+
+    # TODO: This only works on Windows, find a cross-platform way of doing this
+
+    return os.path.join(os.environ['PROGRAMDATA'], 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Artella')
+
+
+def get_artella_launch_shortcut():
+    """
+    Returns path where Launch Artella shortcut is located
+    :return: str
+    """
+
+    # TODO: This only works on Windows, find a cross-platform way of doing this
+
+    return os.path.join(get_artella_program_folder(), 'Launch Artella.lnk')
+
+
 def launch_artella_app():
     """
     Executes Artella App
     """
 
     # TODO: This should not work in MAC, find a cross-platform way of doing this
+
     if os.name == 'mac':
+        sp.logger.info('Launch Artella App: does not supports MAC yet')
+        QMessageBox.information(None, 'Solstice Tools do not support automatically Artella Launch for Mac. Please close Maya, launch Artella manually, and start Maya again!')
         artella_app_file = get_artella_app() + '.bundle'
     else:
-        artella_app_file = get_artella_app() + '.exe'
+        #  Executing Artella executable directly does not work
+        # artella_app_file = get_artella_app() + '.exe'
+        artella_app_file = get_artella_launch_shortcut()
 
-    if sys.platform() == 'Darwin':
-        sp.logger.debug('Launch Artella Manually please!')
-    else:
-        if os.path.isfile(artella_app_file):
-            subprocess.call([artella_app_file])
+    artella_app_file = artella_app_file
+    sp.logger.info('Artella App File: {0}'.format(artella_app_file))
+
+    if os.path.isfile(artella_app_file):
+        sp.logger.info('Launching Artella App ...')
+        sp.logger.debug('Artella App File: {0}'.format(artella_app_file))
+        os.startfile(artella_app_file.replace('\\', '//'))
+
+
+def close_all_artella_app_processes(console):
+    """
+    Closes all Artella app (lifecycler.exe) processes
+    :return:
+    """
+
+    # TODO: This only works with Windows and has a dependency on psutil library
+    # TODO: Find a cross-platform way of doing this
+    try:
+        for proc in psutil.process_iter():
+            if proc.name() == artella_app_name + '.exe':
+                sp.logger.debug('Killing Artella App process: {}'.format(proc.name()))
+                proc.kill()
+        return True
+    except:
+        sp.logger.error('Impossible to close Artella app instances because psutil library is not available!')
+        return False
 
 
 def connect_artella_app_to_spigot(cli=None):
