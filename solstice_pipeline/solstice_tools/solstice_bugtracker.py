@@ -121,7 +121,8 @@ class BugTracker(solstice_dialog.Dialog, object):
 
         msg = self.trace_text.toPlainText()
         msg += '\n----------------------------\n'
-        msg += 'Bug Name: {}\n'.format(os.path.basename(bugs_path))
+        msg += 'Bug Name: {}\n'.format(os.path.basename(bug_path))
+        msg += 'Date: {}\n'.format(current_time)
         webbrowser.open("mailto:%s?subject=%s" % ('tpoveda@cgart3d.com', urllib2.quote(str(msg))))
 
         self.close()

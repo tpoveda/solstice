@@ -91,30 +91,60 @@ class PublishTexturesTask(solstice_task.Task, object):
                 self.write_error('Impossible to lock texture file {}. Maybe it is locked by other user!'.format(txt))
                 return False
 
-        self.write('Getting textures versions to publish ...')
-        selected_versions = dict()
-        for txt in textures:
-            status = artella.get_status(txt)
-            txt_history = artella.get_asset_history(txt)
-            txt_last_version = txt_history.versions[-1][0]
-            # selected_versions['']
+        try:
+            self.write('Getting textures versions to publish ...')
+            selected_versions = dict()
+            for txt in textures:
+                status = artella.get_status(txt)
+                if status:
+                    if status.references:
+                        for ref, ref_data in status.references.items():
+                            selected_versions[ref_data.relative_path] = ref_data.maximum_version
 
-        # result = solstice_qt_utils.show_question(None, 'Publishing textures {0}'.format(textures_path), 'Textures validated successfully! Do you want to continue with the publish process?')
-        # published_done = False
-        # if result == QMessageBox.Yes:
-        #     new_version_path = os.path.join(self._asset().asset_path, '__{0}_v{1}__ '.format('textures', self._new_version))
+            result = solstice_qt_utils.show_question(None, 'Publishing textures {0}'.format(textures_path), 'Textures validated successfully! Do you want to continue with the publish process?')
+            published_done = False
+            if result == QMessageBox.Yes:
+                version_name = '__textures_v{}__'.format(self._new_version)
+                artella.publish_asset(asset_path=self._asset().asset_path, comment=self._comment, selected_versions=selected_versions, version_name=version_name)
 
-        # for txt in textures:
-        #     txt_history = artella.get_asset_history(txt)
-        #     txt_last_version = txt_history.versions[-1][0]
-        #     selected_version['textures/{0}'.format(os.path.basename(txt))] = int(txt_last_version)
+                # We sync the new file
+                new_sync_file = os.path.join(self._asset().asset_path, version_name)
+                if not os.path.exists(new_sync_file):
+                    solstice_sync_dialog.SolsticeSyncFile(files=[new_sync_file]).sync()
+                if not os.path.exists(new_sync_file):
+                    self.write_error('Impossible to sync the new published textures. Do it manually later please!')
+                published_done = True
 
-        self.write_ok('------------------------------------')
-        self.write_ok('TEXTURES PUBLISHED SUCCESFULLY!')
-        self.write_ok('------------------------------------\n\n')
-        self.write('\n')
+            # After publishing if we unlock the textures
+            self.write('Unlocking texture files ...')
+            for txt in textures:
+                valid_unlock = artella.unlock_file(txt, force=True)
+                if not valid_unlock:
+                    self.write_error('Impossible to unlock texture file {}. Maybe it is locked by other user!'.format(txt))
+                    return False
 
-        return True
+            if published_done:
+                self.write_ok('Publishing textures process completed successfully!')
+            else:
+                self.write_error('Publishing textures process has been aborted by user!')
+
+            self.write_ok('------------------------------------')
+            self.write_ok('TEXTURES PUBLISHED SUCCESSFULLY!')
+            self.write_ok('------------------------------------\n\n')
+            self.write('\n')
+
+            return published_done
+        except Exception as e:
+            self.write_error('Error while publishing textures files. Reverting process ...')
+            sp.logger.error(str(e))
+            self.write('Unlocking texture files ...')
+            for txt in textures:
+                valid_unlock = artella.unlock_file(txt, force=True)
+                if not valid_unlock:
+                    self.write_error(
+                        'Impossible to unlock texture file {}. Maybe it is locked by other user!'.format(txt))
+                    return False
+            return False
 
 
 class PublishModelTask(solstice_task.Task, object):
@@ -240,6 +270,9 @@ class PublishModelTask(solstice_task.Task, object):
                     self.write_error(str(e))
                     return False
         except Exception as e:
+            self.write_error('Error while publishing textures files. Reverting process ...')
+            sp.logger.error(str(e))
+            self.write('Unlocking model file ...')
             artella.unlock_file(model_path)
             return False
 
@@ -274,19 +307,23 @@ class PublishModelTask(solstice_task.Task, object):
             new_sync_file = os.path.join(self._asset().asset_path, version_name)
             if not os.path.exists(new_sync_file):
                 solstice_sync_dialog.SolsticeSyncFile(files=[new_sync_file]).sync()
-                # artella.synchronize_file(file_path=new_sync_file)
             if not os.path.exists(new_sync_file):
-                self.write_error('Impossible to sync the new published file. Do it manually later please!')
-
+                self.write_error('Impossible to sync the new published model. Do it manually later please!')
             published_done = True
 
         # After publishing it we unlock the file
+        self.write('Unlocking model file ...')
         artella.unlock_file(model_path)
 
         if published_done:
-            self.write_ok('Publishing process completed succesfully!')
+            self.write_ok('Publishing model process completed successfully!')
         else:
-            self.write_error('Publishing process has been aborted by the user!')
+            self.write_error('Publishing model process has been aborted by the user!')
+
+        self.write_ok('------------------------------------')
+        self.write_ok('MODEL PUBLISHED SUCCESSFULLY!')
+        self.write_ok('------------------------------------\n\n')
+        self.write('\n')
 
         return published_done
 
@@ -577,15 +614,7 @@ class AssetPublisherVersionWidget(QWidget, object):
             self._publish_btn = QPushButton('New Version')
 
         if not self._new_working_version:
-            try:
-                # self._publish_btn.clicked.connect(self._publish)
-                print(asdfasdf)
-            except Exception as e:
-                from solstice_pipeline.solstice_tools import solstice_bugtracker as bug
-                reload(bug)
-                bug.run(traceback.format_exc())
-
-
+            self._publish_btn.clicked.connect(self._publish)
         else:
             self._publish_btn.clicked.connect(self._new_version)
 
@@ -647,45 +676,52 @@ class AssetPublisherVersionWidget(QWidget, object):
             self._ui['shading']['check'].setEnabled(False)
 
     def _new_version(self):
-        for cat in sp.valid_categories:
-            if not self._ui[cat]['check'].isChecked():
-                continue
-            if not self._asset().has_category(category=cat):
-                continue
+        try:
+            for cat in sp.valid_categories:
+                if not self._ui[cat]['check'].isChecked():
+                    continue
+                if not self._asset().has_category(category=cat):
+                    continue
 
-            asset_path = self._asset().asset_path
-            asset_path = os.path.join(asset_path, '__working__', cat)
+                asset_path = self._asset().asset_path
+                asset_path = os.path.join(asset_path, '__working__', cat)
 
-            comment = self._comment_box.toPlainText()
+                comment = self._comment_box.toPlainText()
 
-            if cat == 'textures':
-                pass
-            elif cat == 'shading':
-                asset_path = os.path.join(asset_path, self._asset().name + '_SHD.ma')
-            else:
-                asset_path = os.path.join(asset_path, self._asset().name + '.ma')
+                if cat == 'textures':
+                    pass
+                elif cat == 'shading':
+                    asset_path = os.path.join(asset_path, self._asset().name + '_SHD.ma')
+                else:
+                    asset_path = os.path.join(asset_path, self._asset().name + '.ma')
 
-            artella.lock_file(file_path=asset_path)
-            artella.upload_new_asset_version(file_path=asset_path, comment=comment)
-            artella.unlock_file(file_path=asset_path)
+                artella.lock_file(file_path=asset_path)
+                artella.upload_new_asset_version(file_path=asset_path, comment=comment)
+                artella.unlock_file(file_path=asset_path)
+        except Exception:
+            from solstice_pipeline.solstice_tools import solstice_bugtracker as bug
+            bug.run(traceback.format_exc())
 
     def _publish(self):
-        categories_to_publish = dict()
-        for cat in sp.valid_categories:
-            categories_to_publish[cat] = dict()
-            categories_to_publish[cat]['check'] = True
-            if not self._ui[cat]['check'].isChecked():
-                categories_to_publish[cat]['check'] = False
-            if not self._asset().has_category(category=cat):
-                categories_to_publish[cat]['check'] = False
+        try:
+            categories_to_publish = dict()
+            for cat in sp.valid_categories:
+                categories_to_publish[cat] = dict()
+                categories_to_publish[cat]['check'] = True
+                if not self._ui[cat]['check'].isChecked():
+                    categories_to_publish[cat]['check'] = False
+                if not self._asset().has_category(category=cat):
+                    categories_to_publish[cat]['check'] = False
 
-            new_version = int(self._ui[cat]['next_version'].text()[1:])
-            categories_to_publish[cat]['new_version'] = '{0:03}'.format(new_version)
-            categories_to_publish[cat]['comment'] = self._comment_box.toPlainText()
-            categories_to_publish[cat]['new_version_int'] = new_version
+                new_version = int(self._ui[cat]['next_version'].text()[1:])
+                categories_to_publish[cat]['new_version'] = '{0:03}'.format(new_version)
+                categories_to_publish[cat]['comment'] = self._comment_box.toPlainText()
+                categories_to_publish[cat]['new_version_int'] = new_version
 
-        self.onPublish.emit(categories_to_publish)
-
+            self.onPublish.emit(categories_to_publish)
+        except Exception:
+            from solstice_pipeline.solstice_tools import solstice_bugtracker as bug
+            bug.run(traceback.format_exc())
 
     # #     if cat == 'textures':
     # #         shaders, info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset())

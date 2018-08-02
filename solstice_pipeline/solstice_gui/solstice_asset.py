@@ -554,11 +554,11 @@ class AssetWidget(QWidget, object):
                     if status == 'working':
                         for txt_name, txt_data in versions['server'][category].items():
                             file_path = os.path.join(self.asset_path, '__working__', txt_data.relative_path)
-                            artella.lock_file(file_path=file_path)
+                            artella.lock_file(file_path=file_path, force=True)
                 else:
                     if status == 'working':
                         file_path = os.path.join(self.asset_path, '__working__', versions['server'][category].relative_path)
-                        artella.lock_file(file_path=file_path)
+                        artella.lock_file(file_path=file_path, force=True)
 
     def unlock(self, category, status='working'):
         versions = self.get_max_versions(status=status, categories=category)

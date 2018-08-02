@@ -696,8 +696,12 @@ def unlock_file(file_path):
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
 
-    sp.logger.debug(rsp)
-    return rsp
+    if rsp.get('meta', {}).get('status') != 'OK':
+        msg = 'Failed to unlock {}'.format(os.path.basename(file_path))
+        sp.logger.info(msg)
+        return False
+
+    return True
 
 
 def upload_new_asset_version(file_path=None, comment='Published new version with Solstice Tools'):
