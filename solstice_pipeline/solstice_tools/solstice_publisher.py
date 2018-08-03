@@ -10,6 +10,8 @@
 
 import os
 import re
+import json
+import time
 import weakref
 import traceback
 from shutil import copyfile
@@ -95,22 +97,44 @@ class PublishTexturesTask(solstice_task.Task, object):
                 return False
 
         try:
-            self.write('Getting textures versions to publish ...')
-            selected_versions = dict()
-            for txt in textures:
-                status = artella.get_status(txt)
-                if status:
-                    if status.references:
-                        for ref, ref_data in status.references.items():
-                            selected_versions[ref_data.relative_path] = ref_data.maximum_version
-
             result = solstice_qt_utils.show_question(None, 'Publishing textures {0}'.format(textures_path), 'Textures validated successfully! Do you want to continue with the publish process?')
             published_done = False
             if result == QMessageBox.Yes:
+
+                # We create new version for textures
+                valid_new_versions = True
+                for txt in textures:
+                    if valid_new_versions:
+                        valid_new_version = artella.upload_new_asset_version(txt, comment=self._comment)
+                        if not valid_new_version:
+                            self.write_error('Error while creating new texture version for texture {}. Please contact TD!'.format(txt))
+                            self.write('Unlocking texture file: {}'.format(txt))
+                            artella.unlock_file(txt)
+                            return False
+                        else:
+                            solstice_sync_dialog.SolsticeSyncFile(files=[txt]).sync()
+                            if not os.path.exists(txt):
+                                self.write_error('Impossible to sync the new texture version. Do it manually later please!')
+                    else:
+                        self.write_error('Aborting texture published: {}'.formar(txt))
+                        self.write('Unlocking texture file: {}'.format(txt))
+                        artella.unlock_file(txt)
+
+                if not valid_new_versions:
+                    return False
+
+                # Publish textures and sync them
+                self.write('Getting textures versions to publish ...')
+                selected_versions = dict()
+                for txt in textures:
+                    status = artella.get_status(txt)
+                    if status:
+                        if status.references:
+                            for ref, ref_data in status.references.items():
+                                selected_versions[ref_data.relative_path] = ref_data.maximum_version
+
                 version_name = '__textures_v{}__'.format(self._new_version)
                 artella.publish_asset(asset_path=self._asset().asset_path, comment=self._comment, selected_versions=selected_versions, version_name=version_name)
-
-                # We sync the new file
                 new_sync_file = os.path.join(self._asset().asset_path, version_name)
                 if not os.path.exists(new_sync_file):
                     solstice_sync_dialog.SolsticeSyncFile(files=[new_sync_file]).sync()
@@ -144,8 +168,7 @@ class PublishTexturesTask(solstice_task.Task, object):
             for txt in textures:
                 valid_unlock = artella.unlock_file(txt)
                 if not valid_unlock:
-                    self.write_error(
-                        'Impossible to unlock texture file {}. Maybe it is locked by other user!'.format(txt))
+                    self.write_error('Impossible to unlock texture file {}. Maybe it is locked by other user!'.format(txt))
                     return False
             return False
 
@@ -161,7 +184,7 @@ class PublishModelTask(solstice_task.Task, object):
 
     def run(self):
 
-        from solstice_pipeline.solstice_tools import solstice_tagger
+        from solstice_pipeline.solstice_tools import solstice_tagger, solstice_shaderlibrary
 
         self.write_ok('>>> PUBLISH MODEL LOG')
         self.write_ok('------------------------------------')
@@ -402,6 +425,8 @@ class PublishModelTask(solstice_task.Task, object):
         tag_data_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(new_selection=valid_obj)
         if not tag_data_node or not cmds.objExists(tag_data_node):
             self.write_error('Impossible to get tag data of current selection: {}!'.format(tag_data_node))
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
             return False
 
         # Connect proxy group to tag data node
@@ -411,6 +436,8 @@ class PublishModelTask(solstice_task.Task, object):
             self.write_ok('Proxy group connected to tag data node successfully!')
         else:
             self.write_error('Error while connecting Proxy Group to tag data node!  Check Maya editor for more info about the error!')
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
             return False
 
         # Connect hires group to tag data node
@@ -420,9 +447,83 @@ class PublishModelTask(solstice_task.Task, object):
             self.write_ok('Hires group connected to tag data node successfully!')
         else:
             self.write_error('Error while connecting hires group to tag data node! Check Maya editor for more info about the error!')
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
             return False
 
-        self.write('Saving change to model file ...')
+        # Getting shaders info data
+        shaders_file = solstice_shaderlibrary.ShaderLibrary.get_asset_shader_file_path(asset=self._asset())
+        if not os.path.exists(shaders_file):
+            self.write_error('Shaders JSON file for asset {0} does not exists: {1}'.format(self._asset().name, shaders_file))
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
+            return False
+
+        shader_data = None
+        with open(shaders_file) as f:
+            shader_data = json.load(f)
+        if shader_data is None:
+            self.write_error('Shaders JSON file for asset {0} is not valid: {1}'.format(self._asset().name, shaders_file))
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
+            return False
+        self.write_ok('Shaders JSON data loaded successfully!')
+
+        # Checking if shader data is valid
+        self.write('Checking if shading meshes names and hires model meshes names are the same')
+        check_meshes = dict()
+        for shading_mesh, shading_group in shader_data.items():
+            shading_name = shading_mesh.split('|')[-1]
+            check_meshes[shading_mesh] = False
+            for model_mesh in hires_meshes:
+                mesh_name = model_mesh.split('|')[-1]
+                if shading_name == mesh_name:
+                    check_meshes[shading_mesh] = True
+
+        valid_meshes = True
+        for mesh_name, mesh_check in check_meshes.items():
+            if mesh_check is False:
+                self.write_error('Mesh {} not found in both model and shading file ...'.format(mesh_name))
+                valid_meshes = False
+        if not valid_meshes:
+            self.write_error('Some shading meshes and model hires meshes are missed. Please contact TD!')
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
+            return False
+        else:
+            self.write_ok('Shading Meshes and Model Hires meshes are valid!')
+
+        # Create if necessary shaders attribute in model tag data node
+        if not tag_data_node or not cmds.objExists(tag_data_node):
+            self.write_error('Tag data does not exists in the current scene!'.format(tag_data_node))
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
+            return False
+
+        attr_exists = cmds.attributeQuery('shaders', node=tag_data_node, exists=True)
+        if attr_exists:
+            self.write('Unlocking shaders tag data attribute on tag data node: {}'.format(tag_data_node))
+            cmds.setAttr(tag_data_node + '.shaders', lock=False)
+        else:
+            self.write('Creating shaders attribute on tag data node: {}'.format(tag_data_node))
+            cmds.addAttr(tag_data_node, ln='shaders', dt='string')
+            attr_exists = cmds.attributeQuery('shaders', node=tag_data_node, exists=True)
+            if not attr_exists:
+                self.write_error('No Shaders attribute found on model tag data node: {}'.format(tag_data_node))
+                self.write('Unlocking model file ...')
+                artella.unlock_file(model_path)
+                return False
+            else:
+                self.write_ok('Shaders attribute created successfully on tag data node!')
+
+        self.write('Storing shaders data into shaders tag data node attribute ...')
+        cmds.setAttr(tag_data_node + '.shaders', str(shader_data), type='string')
+        cmds.setAttr(tag_data_node + '.shaders', lock=True)
+        self.write_ok('Shaders data added to model tag data node successfully!')
+
+        # ===============================================================================================================================
+
+        self.write('Saving changes to model file ...')
         if cmds.file(query=True, modified=True):
             cmds.file(save=True, f=True)
 
@@ -433,24 +534,37 @@ class PublishModelTask(solstice_task.Task, object):
                 self.write_error('After updating model path the Student License could not be fixed again!')
                 return False
 
-        self.write('Getting model file version to publish ...')
-        selected_versions = dict()
-        status = artella.get_status(model_path)
-        if status and hasattr(status, 'references'):
-            if status.references:
-                for ref, ref_data in status.references.items():
-                    selected_versions[ref] = ref_data.maximum_version
-        if not selected_versions:
-            self.write_error('No model file version to publish. Aborting publishing ...')
-            return False
-
         result = solstice_qt_utils.show_question(None, 'Publishing file {0}'.format(model_path), 'File validated successfully! Do you want to continue with the publish process?')
         published_done = False
         if result == QMessageBox.Yes:
+
+            # Upload new version to Artella and sync it
+            valid_new_version = artella.upload_new_asset_version(model_path, comment=self._comment)
+            if not valid_new_version:
+                self.write_error('Error while creating new model file version. Please contact TD!')
+                self.write('Unlocking model file ...')
+                artella.unlock_file(model_path)
+                return False
+            solstice_sync_dialog.SolsticeSyncFile(files=[model_path]).sync()
+            if not os.path.exists(model_path):
+                self.write_error('Impossible to sync the new published model. Do it manually later please!')
+
+            # Publish new version and sync it
+            self.write('Getting model file version to publish ...')
+            selected_versions = dict()
+            status = artella.get_status(model_path)
+            if status and hasattr(status, 'references'):
+                if status.references:
+                    for ref, ref_data in status.references.items():
+                        selected_versions[ref] = ref_data.maximum_version
+            if not selected_versions:
+                self.write_error('No model file version to publish. Aborting publishing ...')
+                self.write('Unlocking model file ...')
+                artella.unlock_file(model_path)
+                return False
+
             version_name = '__model_v{}__'.format(self._new_version)
             artella.publish_asset(asset_path=self._asset().asset_path, comment=self._comment, selected_versions=selected_versions, version_name=version_name)
-
-            # We sync the new file
             new_sync_file = os.path.join(self._asset().asset_path, version_name)
             if not os.path.exists(new_sync_file):
                 solstice_sync_dialog.SolsticeSyncFile(files=[new_sync_file]).sync()
@@ -485,7 +599,7 @@ class PublishShadingTask(solstice_task.Task, object):
 
     def run(self):
 
-        from solstice_pipeline.solstice_tools import solstice_tagger
+        from solstice_pipeline.solstice_tools import solstice_shaderlibrary
 
         self.write_ok('>>> PUBLISH SHADING LOG')
         self.write_ok('------------------------------------')
@@ -514,6 +628,13 @@ class PublishShadingTask(solstice_task.Task, object):
         can_unlock = artella.can_unlock(shading_path)
         if not can_unlock:
             self.write_error('Asset shading file is locked by another Solstice team member or wokspace. Aborting publishing ...')
+            return False
+
+        # Check model file can be unlocked
+        self.write('Check if model file is already locked by other user or workspace ...')
+        can_unlock = artella.can_unlock(model_path)
+        if not can_unlock:
+            self.write_error('Asset model file is locked by another Solstice team member or wokspace. Aborting publishing ...')
             return False
 
         # Check if files have a valid main group
@@ -550,60 +671,6 @@ class PublishShadingTask(solstice_task.Task, object):
         if not valid_obj:
             self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
             return False
-
-        model_proxy_group = None
-        model_hires_group = None
-        model_proxy_mesh = None
-        model_hires_meshes = list()
-        self.write('Opening model file in Maya ...')
-        cmds.file(model_path, o=True, f=True)
-        tag_data_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(new_selection=valid_obj)
-        if not tag_data_node or not cmds.objExists(tag_data_node):
-            self.write_error('Impossible to get tag data of current selection: {}!'.format(tag_data_node))
-            return False
-
-        self.write('Getting proxy mesh from tag data node ...')
-        attr_exists = cmds.attributeQuery('proxy', node=tag_data_node, exists=True)
-        if not attr_exists:
-            self.write_error('Model Tag Data node has not a proxy connection. Model file is not set up yet. Please contact TD!')
-            return False
-        model_proxy_group = cmds.listConnections(tag_data_node + '.proxy')
-        if model_proxy_group:
-            model_proxy_group = model_proxy_group[0]
-        if model_proxy_group is not None and cmds.objExists(model_proxy_group):
-            for obj in cmds.listRelatives(model_proxy_group, children=True, type='transform', shapes=False, noIntermediate=True, fullPath=True):
-                if cmds.objExists(obj):
-                    shapes = cmds.listRelatives(obj, shapes=True)
-                    if shapes:
-                        if model_proxy_mesh is None:
-                            model_proxy_mesh = obj
-                        else:
-                            self.write_error('Multiple proxy meshes in model file. Asset only can have one proxy mesh! Please contact TD!')
-                            return False
-        if model_proxy_mesh is None or not cmds.objExists(model_proxy_mesh):
-            self.write_error('Proxy mesh not found in model file! Please contact TD!')
-            return False
-        self.write_ok('Proxy Mesh found on model file: {}'.format(model_proxy_mesh))
-
-        self.write('Getting hiresh meshes from tag data node ...')
-        attr_exists = cmds.attributeQuery('hires', node=tag_data_node, exists=True)
-        if not attr_exists:
-            self.write_error('Model Tag Data has not a hires connection. Model file is not set up yet. Please contact TD team!')
-            return False
-        model_hires_group = cmds.listConnections(tag_data_node + '.hires')
-        if model_hires_group:
-            model_hires_group = model_hires_group[0]
-        if model_hires_group is not None and cmds.objExists(model_hires_group):
-            for obj in cmds.listRelatives(model_hires_group, children=True, type='transform', shapes=False, noIntermediate=True, fullPath=True):
-                if cmds.objExists(obj):
-                    shapes = cmds.listRelatives(obj, shapes=True)
-                    if shapes:
-                        self.write('Found hires mesh on model file: {}'.format(obj))
-                        model_hires_meshes.append(obj)
-        if len(model_hires_meshes) <= 0:
-            self.write_error('Hires meshes not found on model file!')
-            return False
-        self.write_ok('Found {} hires meshes on model file!'.format(len(model_hires_meshes)))
 
         # Lock shading file
         self.write('Locking shading file ...')
@@ -658,7 +725,7 @@ class PublishShadingTask(solstice_task.Task, object):
 
             # Open shading file scene
             self.write('Opening shading file in Maya ...')
-            artella.open_file_in_maya(file_path=shading_path)
+            cmds.file(shading_path, o=True, f=True)
 
             # Clean unknown nodes and old plugins for the current scene
             self.write('Cleaning unknown nodes from the asset scene ...')
@@ -706,34 +773,103 @@ class PublishShadingTask(solstice_task.Task, object):
                 return False
             self.write_ok('Asset main group is valid: {}\n'.format(self._asset().name))
 
+            # Check model file proxy and hires meshes
+            if not valid_obj:
+                self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
+                return False
+
+            shading_meshes = list()
+            self.write('Getting meshes of shading file ...')
+            for obj in cmds.listRelatives(valid_obj, children=True, type='transform', shapes=False, noIntermediate=True, fullPath=True):
+                if cmds.objExists(obj):
+                    shapes = cmds.listRelatives(obj, shapes=True)
+                    if shapes:
+                        self.write('Found mesh on shading file: {}'.format(obj))
+                        shading_meshes.append(obj)
+            self.write_ok('Found {} meshes on shading file!'.format(len(shading_meshes)))
+
+            # Export shaders
+            self.write('Exporting Shaders ...')
+            shaders, info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset(), shading_meshes=shading_meshes)
+            if info is None or not os.path.exists(info):
+                self.write_error('Model Shader JSON file was not generated successfully. Plase contact TD!')
+                self.write('Unlocking shading file ...')
+                artella.unlock_file(shading_path)
+                return False
+            self.write_ok('Asset shaders exported successfully!')
+            self.write_ok('Model Shader JSON file: {}'.format(info))
+            self.write_ok('Exported Shaders: {}'.format(shaders))
+
         except Exception as e:
             self.write_error('Error while publishing shading files. Reverting process ...')
-            sp.logger.error(str(e))
             self.write('Unlocking shading file ...')
             artella.unlock_file(shading_path)
             return False
 
-        self.write('Saving change to shading file ...')
+        # Save changes on shading file
+        self.write('Saving changes to shading file ...')
         if cmds.file(query=True, modified=True):
             cmds.file(save=True, f=True)
-
-        self.write('Check if we need to clean Student License again ...')
-        if solstice_maya_utils.file_has_student_line(filename=shading_path):
-            solstice_maya_utils.clean_student_line(filename=shading_path)
+            self.write_ok('Changes to shading file stored successfully!')
+            self.write('Check if we need to clean Student License again ...')
             if solstice_maya_utils.file_has_student_line(filename=shading_path):
-                self.write_error('After updating model path the Student License could not be fixed again!')
+                solstice_maya_utils.clean_student_line(filename=shading_path)
+                if solstice_maya_utils.file_has_student_line(filename=shading_path):
+                    self.write_error('After updating shading path the Student License could not be fixed again!')
+                    return False
+
+        result = solstice_qt_utils.show_question(None, 'Publishing file {}'.format(shading_path), 'File validated successfully! Do you want to continue with the publish process?')
+        published_done = False
+        if result == QMessageBox.Yes:
+
+            # Upload new version to Artella and sync it
+            valid_new_version = artella.upload_new_asset_version(shading_path, comment=self._comment)
+            if not valid_new_version:
+                self.write_error('Error while creating new shading file version. Please contact TD!')
+                self.write('Unlocking shading file ...')
+                artella.unlock_file(shading_path)
                 return False
+            solstice_sync_dialog.SolsticeSyncFile(files=[shading_path]).sync()
+            if not os.path.exists(shading_path):
+                self.write_error('Impossible to sync the new published model. Do it manually later please!')
+
+            # Publish new version and sync it
+            self.write('Getting shading file version to publish ...')
+            selected_versions = dict()
+            status = artella.get_status(shading_path)
+            if status and hasattr(status, 'references'):
+                if status.references:
+                    for ref, ref_data in status.references.items():
+                        selected_versions[ref] = ref_data.maximum_version
+            if not selected_versions:
+                self.write_error('No shading file version to publish. Aborting publishing ...')
+                self.write('Unlocking shading file ...')
+                artella.unlock_file(shading_path)
+                return False
+
+            version_name = '__shading_v{}__'.format(self._new_version)
+            artella.publish_asset(asset_path=self._asset().asset_path, comment=self._comment, selected_versions=selected_versions, version_name=version_name)
+            new_sync_file = os.path.join(self._asset().asset_path, version_name)
+            if not os.path.exists(new_sync_file):
+                solstice_sync_dialog.SolsticeSyncFile(files=[new_sync_file]).sync()
+            if not os.path.exists(new_sync_file):
+                self.write_error('Impossible to sync the new published shading. Do it manually later please!')
+            published_done = True
 
         # After publishing it we unlock the shading file
         self.write('Unlocking shading file ...')
         artella.unlock_file(shading_path)
 
-        self.write_ok('------------------------------------')
-        self.write_ok('SHADING PUBLISHED SUCCESSFULLY!')
-        self.write_ok('------------------------------------\n\n')
-        self.write('\n')
+        if published_done:
+            self.write_ok('Publishing shading process completed successfully!')
+            self.write_ok('------------------------------------')
+            self.write_ok('SHADING PUBLISHED SUCCESSFULLY!')
+            self.write_ok('------------------------------------\n\n')
+            self.write('\n')
+        else:
+            self.write_error('Publishing shading process has been aborted by the user!')
 
-        return True
+        return published_done
 
 
 class PublishGroomTask(solstice_task.Task, object):
@@ -754,8 +890,11 @@ class PublishTaskGroup(solstice_taskgroups.TaskGroup, object):
 
         # # NOTE: First we need to update textures and if textures are updated we need to update also the shading
         # # file. This is force in UI file (shading checkbox is automatically enabled if textures checkbox is enabled)
+        # Same with shading and model file
         if categories_to_publish['textures']['check']:
             categories_to_publish['shading']['check'] = True
+        if categories_to_publish['shading']['check']:
+            categories_to_publish['model']['check'] = True
 
         for cat, cat_dict in categories_to_publish.items():
             if cat_dict['check']:
@@ -766,15 +905,15 @@ class PublishTaskGroup(solstice_taskgroups.TaskGroup, object):
                         new_version=cat_dict['new_version'],
                         auto_run=auto_run
                     ))
-                elif cat == 'model':
-                    self.add_task(PublishModelTask(
+                elif cat == 'shading':
+                    self.add_task(PublishShadingTask(
                         asset=asset,
                         comment=cat_dict['comment'],
                         new_version=cat_dict['new_version'],
                         auto_run=auto_run
                     ))
-                elif cat == 'shading':
-                    self.add_task(PublishShadingTask(
+                elif cat == 'model':
+                    self.add_task(PublishModelTask(
                         asset=asset,
                         comment=cat_dict['comment'],
                         new_version=cat_dict['new_version'],
@@ -954,9 +1093,13 @@ class AssetPublisherVersionWidget(QWidget, object):
             self._ui['textures']['check'].setEnabled(False)
 
         self._ui['shading']['check'].setEnabled(True)
+        self._ui['model']['check'].setEnabled(True)
         if self._ui['textures']['check'].isChecked():
             self._ui['shading']['check'].setChecked(True)
             self._ui['shading']['check'].setEnabled(False)
+        if self._ui['shading']['check'].isChecked():
+            self._ui['model']['check'].setChecked(True)
+            self._ui['model']['check'].setEnabled(False)
 
     def _new_version(self):
         try:
@@ -977,6 +1120,11 @@ class AssetPublisherVersionWidget(QWidget, object):
                     asset_path = os.path.join(asset_path, self._asset().name + '_SHD.ma')
                 else:
                     asset_path = os.path.join(asset_path, self._asset().name + '.ma')
+
+                if self._ui['textures']['check']:
+                    result = solstice_qt_utils.show_question(None, 'New Textures Version', 'Are you sure you want to create new version of textures? All of them will be versioned and this can take a lof of memory in Artella server. To publish single textures files do it directly thorugh Artella')
+                    if result == QMessageBox.No:
+                        continue
 
                 artella.lock_file(file_path=asset_path)
                 artella.upload_new_asset_version(file_path=asset_path, comment=comment)
@@ -1001,17 +1149,15 @@ class AssetPublisherVersionWidget(QWidget, object):
                 categories_to_publish[cat]['comment'] = self._comment_box.toPlainText()
                 categories_to_publish[cat]['new_version_int'] = new_version
 
+            if categories_to_publish['textures']['check']:
+                result = solstice_qt_utils.show_question(None, 'Publishing Files', 'Are you sure you want to publish textures? All of them will be versioned and this can take a lof of memory in Artella server. To publish single textures files do it directly thorugh Artella')
+                if result == QMessageBox.No:
+                    return
+
             self.onPublish.emit(categories_to_publish)
         except Exception:
             from solstice_pipeline.solstice_tools import solstice_bugtracker as bug
             bug.run(traceback.format_exc())
-
-    # #     if cat == 'textures':
-    # #         shaders, info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset())
-
-    #         # artella.publish_asset(file_path=asset_path, comment=comment, selected_versions=selected_version)
-    #         # if cat == 'textures':
-    #         #     artella.synchronize_path(path=asset_path)
 
 
 class AssetPublisherSummaryWidget(QWidget, object):

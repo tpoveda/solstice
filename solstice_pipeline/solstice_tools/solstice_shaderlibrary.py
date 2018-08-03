@@ -325,15 +325,17 @@ class ShaderWidget(QWidget, object):
         self._shader_swatch.render(px)
         temp_file = os.path.join(ShaderLibrary.get_shader_library_path(), 'tmp.png')
         px.save(temp_file)
+        exported_shaders = None
         try:
-            ShadingNetwork.write_network(shaders_path=shader_library_path, shaders=[self._name], icon_path=temp_file)
+            network = ShadingNetwork.write_network(shaders_path=shader_library_path, shaders=[self._name], icon_path=temp_file)
+            exported_shaders = network
         except Exception as e:
             sp.logger.debug('Aborting shader export: {0}'.format(str(e)))
             os.remove(temp_file)
             return
         os.remove(temp_file)
 
-
+        return exported_shaders
 
     @property
     def name(self):
@@ -377,7 +379,7 @@ class ShaderExporter(QDialog, object):
             item = self._shaders_list.item(i)
             item_widget = self._shaders_list.itemWidget(item)
             exported_shader = item_widget.export()
-            exported_shaders.append(exported_shader)
+            exported_shaders.extend(exported_shader)
 
         return exported_shaders
 
@@ -578,7 +580,21 @@ class ShaderLibrary(solstice_windows.Window, object):
         return os.path.join(sp.get_solstice_assets_path(), 'Scripts', 'PIPELINE', '__working__', 'ShadersLibrary')
 
     @staticmethod
-    def export_asset(asset=None):
+    def get_asset_shader_file_path(asset):
+        """
+        Returns shaders JSON file path of the given asset
+        If does not ensures that the file already exists
+        :param asset:
+        :return: str
+        """
+
+        asset_shading_path = os.path.join(asset._asset_path, '__working__', 'shading')
+        asset_shading_file = os.path.join(asset_shading_path, asset.name + '_SHD.json')
+
+        return asset_shading_file
+
+    @staticmethod
+    def export_asset(asset=None, shading_meshes=None):
         """
         Export all shaders info for the given asset
         Generates 2 files:
@@ -599,32 +615,41 @@ class ShaderLibrary(solstice_windows.Window, object):
             sp.logger.debug('Impossible to open Working Shading file for asset: {}'.format(asset.name))
             return
 
-        asset_groups = cmds.ls('*_grp', type='transform')
-        if len(asset_groups) <= 0:
-            # sp.logger.debug('Asset {} has no valid groups'.format(asset.name()))
-            return
-
         all_shading_groups = list()
         json_data = dict()
-        for grp in asset_groups:
-            json_data[grp] = dict()
-            children = cmds.listRelatives(grp, type='transform', allDescendents=True, fullPath=True)
-            for child in children:
-                child_shapes = cmds.listRelatives(child, shapes=True, fullPath=True)
-                for shape in child_shapes:
-                    json_data[grp][shape] = dict()
+        if shading_meshes:
+            for mesh in shading_meshes:
+                json_data[mesh] = dict()
+                shapes = cmds.listRelatives(mesh, shapes=True, fullPath=True)
+                for shape in shapes:
+                    json_data[mesh][shape] = dict()
                     shading_groups = cmds.listConnections(shape, type='shadingEngine')
                     for shading_grp in shading_groups:
                         shading_grp_mat = cmds.ls(cmds.listConnections(shading_grp), materials=True)
-                        json_data[grp][shape][shading_grp] = shading_grp_mat
+                        json_data[mesh][shape][shading_grp] = shading_grp_mat
                         all_shading_groups.append(shading_grp)
+        else:
+            asset_groups = cmds.ls('*_grp', type='transform')
+            if len(asset_groups) <= 0:
+                return
+            for grp in asset_groups:
+                json_data[grp] = dict()
+                children = cmds.listRelatives(grp, type='transform', allDescendents=True, fullPath=True)
+                for child in children:
+                    child_shapes = cmds.listRelatives(child, shapes=True, fullPath=True)
+                    for shape in child_shapes:
+                        json_data[grp][shape] = dict()
+                        shading_groups = cmds.listConnections(shape, type='shadingEngine')
+                        for shading_grp in shading_groups:
+                            shading_grp_mat = cmds.ls(cmds.listConnections(shading_grp), materials=True)
+                            json_data[grp][shape][shading_grp] = shading_grp_mat
+                            all_shading_groups.append(shading_grp)
 
         asset_materials = list(set(cmds.ls(cmds.listConnections(all_shading_groups), materials=True)))
 
         # Generate JSON shading file for asset
-        asset_shading_path = os.path.join(asset._asset_path, '__working__', 'shading')
-        asset_shading_file = os.path.join(asset_shading_path, asset.name+'_SHD.json')
-        if os.path.exists(asset_shading_path):
+        asset_shading_file = ShaderLibrary.get_asset_shader_file_path(asset=asset)
+        if os.path.isfile(asset_shading_file):
             with open(asset_shading_file, 'w') as fp:
                 json.dump(json_data, fp)
 
@@ -634,7 +659,7 @@ class ShaderLibrary(solstice_windows.Window, object):
         if os.path.isfile(asset_shading_file):
             return shaders, asset_shading_file
 
-        return [shaders, '']
+        return shaders, ''
 
     def _export_selected_shaders(self):
         shaders = cmds.ls(sl=True, materials=True)

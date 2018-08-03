@@ -254,6 +254,15 @@ def show_error(parent, title, error):
     return QMessageBox.critical(parent, title, error)
 
 
+def show_info(parent, title, info):
+    """
+    Show a info QMessageBox with the given info
+    :return:
+    """
+
+    return QMessageBox.information(parent, title, info)
+
+
 def clear_layout_widgets(layout):
     """
     Removes all the widgets added in the given layout

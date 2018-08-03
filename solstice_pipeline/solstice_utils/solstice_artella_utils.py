@@ -781,6 +781,8 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
     :param comment:
     """
 
+    from solstice_pipeline.solstice_utils import solstice_maya_utils
+
     maya_file = False
 
     if not file_path:
@@ -798,38 +800,45 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
         if not valid_lock:
             return False
 
-        cmds.file(save=True)
+        if cmds.file(query=True, modified=True):
+            cmds.file(save=True, f=True)
+            if solstice_maya_utils.file_has_student_line(filename=file_path):
+                solstice_maya_utils.clean_student_line(filename=file_path)
+                if solstice_maya_utils.file_has_student_line(filename=file_path):
+                    sp.logger.error('After updating model path the Student License could not be fixed again!')
+                    return False
 
         msg = 'Saving new file version on Artella Server: {}'.format(file_path)
         sp.logger.info(msg)
         sp.message(msg)
-        result = cmds.promptDialog(title='Solstice Tools - Save New Version on Artella Server', message=msg, button=['Save', 'Cancel'], cancelButton='Cancel', dismissString='Cancel', scrollableField=True)
-        if result == 'Save':
-            if comment is None:
+        if comment is None:
+            result = cmds.promptDialog(title='Solstice Tools - Save New Version on Artella Server', message=msg, button=['Save', 'Cancel'], cancelButton='Cancel', dismissString='Cancel', scrollableField=True)
+            if result == 'Save':
                 comment = cmds.promptDialog(query=True, text=True)
-
-            spigot = get_spigot_client()
-            payload = dict()
-            cms_uri = artella.getCmsUri(file_path)
-            if not cms_uri.startswith('/'):
-                cms_uri = '/' + cms_uri
-            payload['cms_uri'] = cms_uri
-            payload['comment'] = comment
-            payload = json.dumps(payload)
-
-            rsp = spigot.execute(command_action='do', command_name='upload', payload=payload)
-            if isinstance(rsp, basestring) or type(rsp) == str:
-                rsp = json.loads(rsp)
-
-            if 'status' in rsp and 'meta' in rsp['status'] and rsp['status']['meta']['status'] != 'OK':
-                sp.logger.info('Make new version response: {}'.format(rsp))
-                msg = 'Failed to make new version of {}'.format(os.path.basename(file_path))
-                cmds.confirmDialog(title='Solstice Tools - Failed to Make New Version', message=msg, button=['OK'])
+            else:
                 return False
 
-            lock_file(file_path=file_path, force=True)
-        else:
+        spigot = get_spigot_client()
+        payload = dict()
+        cms_uri = artella.getCmsUri(file_path)
+        if not cms_uri.startswith('/'):
+            cms_uri = '/' + cms_uri
+        payload['cms_uri'] = cms_uri
+        payload['comment'] = comment
+        payload = json.dumps(payload)
+
+        rsp = spigot.execute(command_action='do', command_name='upload', payload=payload)
+        if isinstance(rsp, basestring) or type(rsp) == str:
+            rsp = json.loads(rsp)
+
+        if 'status' in rsp and 'meta' in rsp['status'] and rsp['status']['meta']['status'] != 'OK':
+            sp.logger.info('Make new version response: {}'.format(rsp))
+            msg = 'Failed to make new version of {}'.format(os.path.basename(file_path))
+            cmds.confirmDialog(title='Solstice Tools - Failed to Make New Version', message=msg, button=['OK'])
             return False
+
+        unlock_file(file_path=file_path)
+
     else:
         msg = 'The file has not been created yet'
         sp.logger.debug(msg)
