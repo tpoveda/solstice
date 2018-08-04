@@ -364,18 +364,21 @@ class AssetWidget(QWidget, object):
                 try:
                     for ref_name, ref_data in asset_data.references.items():
                         if category == 'textures':
-                            ref_path = os.path.join(server_path, ref_data.name)
-
                             # TODO: Create custom sync dialog
-
+                            ref_path = os.path.join(server_path, ref_data.name)
                             ref_history = artella.get_asset_history(ref_path)
                             server_data[category][ref_data.name] = ref_history
-                        else:
+                        elif category == 'shading':
                             ref_path = os.path.join(server_path, ref_data.name)
-
+                            file_name = os.path.basename(ref_path)
+                            if os.path.isfile(ref_path) and file_name == '{}_SHD.ma'.format(self.name):
+                                ref_history = artella.get_asset_history(ref_path)
+                                server_data[category] = ref_history
+                        else:
                             # TODO: Create custom sync dialog
-
-                            if os.path.isfile(ref_path):
+                            ref_path = os.path.join(server_path, ref_data.name)
+                            file_name = os.path.basename(ref_path)
+                            if os.path.isfile(ref_path) and file_name == '{}.ma'.format(self.name):
                                 ref_history = artella.get_asset_history(ref_path)
                                 server_data[category] = ref_history
                 except Exception:

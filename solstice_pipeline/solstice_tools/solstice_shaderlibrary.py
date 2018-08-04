@@ -11,7 +11,6 @@
 import os
 import re
 import json
-from functools import partial
 
 import maya.cmds as cmds
 
@@ -24,6 +23,7 @@ from solstice_gui import solstice_windows, solstice_shaderviewer, solstice_sync_
 from solstice_utils import solstice_maya_utils as utils
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_python_utils, solstice_shader_utils, solstice_artella_utils, solstice_qt_utils
+
 
 IGNORE_SHADERS = ['particleCloud1', 'shaderGlow1', 'defaultColorMgtGlobals', 'lambert1']
 IGNORE_ATTRS = ['computedFileTextureNamePattern']
@@ -84,7 +84,29 @@ class ShadingNetwork(object):
                 # Export the shader in the given path and with the proper format
                 out_file = os.path.join(shaders_path, shader + '.' + SHADER_EXT)
                 sp.logger.debug('Generating Shader {0} in {1}'.format(shader, out_file))
+
+                upload_new_version = True
+                # if os.path.isfile(out_file):
+                #     temp_file, temp_filename = tempfile.mkstemp()
+                #     cls.write(shader_network, temp_filename)
+                #     if filecmp.cmp(out_file, temp_filename):
+                #         sp.logger.debug('Shader file already exists and have same size. No new shader file will be generated!')
+                #         result = solstice_qt_utils.show_question(None, 'New Shader File Version', 'Shader File {} already exists with same file size! Do you want to upload it to Artella anyways?'.format(shader))
+                #         if result == QMessageBox.No:
+                #             upload_new_version = False
+                #     else:
+                #         sp.logger.debug('Writing shader file: {}'.format(out_file))
+                #         cls.write(shader_network, out_file)
+                # else:
+                solstice_artella_utils.lock_file(out_file, force=True)
+                sp.logger.debug('Writing shader file: {}'.format(out_file))
                 cls.write(shader_network, out_file)
+
+                if upload_new_version:
+                    sp.logger.debug('Creating new shader version in Artella: {}'.format(out_file))
+                    solstice_artella_utils.upload_new_asset_version(out_file, comment='New Shader {} version'.format(shader))
+                    solstice_artella_utils.unlock_file(out_file)
+
                 exported_shaders.append(out_file)
 
         return exported_shaders
@@ -203,7 +225,7 @@ class ShadingNetwork(object):
             try:
                 cmds.connectAttr('{0}.{1}'.format(con_node, con_attr), '{0}.{1}'.format(shader_node, attr), force=True)
             except Exception:
-                sp.logger.debug('ShaderLibrary: Attribute Conection {0} skipped!'.format(attr))
+                sp.logger.debug('ShaderLibrary: Attribute Connection {0} skipped!'.format(attr))
                 continue
 
         if 'notes' not in attrs['attr'] and cmds.objExists(shader_node) and cmds.attributeQuery('notes', node=shader_node, exists=True):
@@ -242,12 +264,15 @@ class ShadingNetwork(object):
 
 
 class ShaderWidget(QWidget, object):
-    def __init__(self, shader_name, parent=None):
+    def __init__(self, shader_name, layout='horizontal', parent=None):
         super(ShaderWidget, self).__init__(parent=parent)
 
         self._name = shader_name
 
-        main_layout = QHBoxLayout()
+        if layout == 'horizontal':
+            main_layout = QHBoxLayout()
+        else:
+            main_layout = QVBoxLayout()
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(5)
         main_layout.setAlignment(Qt.AlignLeft)
@@ -257,61 +282,28 @@ class ShaderWidget(QWidget, object):
             self._shader_swatch = solstice_shader_utils.get_shader_swatch(self._name)
             main_layout.addWidget(self._shader_swatch)
 
-            v_div_w = QWidget()
-            v_div_l = QVBoxLayout()
-            v_div_l.setAlignment(Qt.AlignLeft)
-            v_div_l.setContentsMargins(0, 0, 0, 0)
-            v_div_l.setSpacing(0)
-            v_div_w.setLayout(v_div_l)
-            v_div = QFrame()
-            v_div.setMinimumHeight(30)
-            v_div.setFrameShape(QFrame.VLine)
-            v_div.setFrameShadow(QFrame.Sunken)
-            v_div_l.addWidget(v_div)
-            main_layout.addWidget(v_div_w)
+            if layout == 'horizontal':
+                v_div_w = QWidget()
+                v_div_l = QVBoxLayout()
+                v_div_l.setAlignment(Qt.AlignLeft)
+                v_div_l.setContentsMargins(0, 0, 0, 0)
+                v_div_l.setSpacing(0)
+                v_div_w.setLayout(v_div_l)
+                v_div = QFrame()
+                v_div.setMinimumHeight(30)
+                v_div.setFrameShape(QFrame.VLine)
+                v_div.setFrameShadow(QFrame.Sunken)
+                v_div_l.addWidget(v_div)
+                main_layout.addWidget(v_div_w)
 
         shader_lbl = QLabel(shader_name)
         main_layout.addWidget(shader_lbl)
-
-        v_div_w = QWidget()
-        v_div_l = QVBoxLayout()
-        v_div_l.setAlignment(Qt.AlignLeft)
-        v_div_l.setContentsMargins(0, 0, 0, 0)
-        v_div_l.setSpacing(0)
-        v_div_w.setLayout(v_div_l)
-        v_div = QFrame()
-        v_div.setMinimumHeight(30)
-        v_div.setFrameShape(QFrame.VLine)
-        v_div.setFrameShadow(QFrame.Sunken)
-        v_div_l.addWidget(v_div)
-        main_layout.addWidget(v_div_w)
-
-        custom_icon_widget = QWidget()
-        custom_icon_palette = custom_icon_widget.palette()
-        custom_icon_palette.setColor(QPalette.Background, Qt.red)
-        custom_icon_widget.setAutoFillBackground(True)
-        custom_icon_widget.setPalette(custom_icon_palette)
-        custom_icon_layout = QVBoxLayout()
-        custom_icon_layout.setContentsMargins(0, 0, 0, 0)
-        custom_icon_layout.setSpacing(0)
-        custom_icon_widget.setLayout(custom_icon_layout)
-        main_layout.addWidget(custom_icon_widget)
-
-        self._custom_icon_btn = QPushButton('Custom Icon')
-        self._custom_icon_btn.setMinimumHeight(75)
-        self._custom_icon_btn.setMaximumHeight(75)
-        self._custom_icon_btn.setMinimumWidth(75)
-        self._custom_icon_btn.setMaximumWidth(75)
-        custom_icon_layout.addWidget(self._custom_icon_btn)
-
-        auto_gen_icon = QPushButton('Auto Icon')
-        auto_gen_icon.setMaximumHeight(20)
-        custom_icon_layout.addWidget(auto_gen_icon)
+        if layout == 'vertical':
+            main_layout.setAlignment(Qt.AlignCenter)
+            shader_lbl.setAlignment(Qt.AlignCenter)
+            shader_lbl.setStyleSheet('QLabel {background-color: rgba(50, 50, 50, 200); border-radius:5px;}')
 
     def export(self):
-
-        #TODO: Check if a custom icon is setted up and export the correct pixmap depending on it
-
         shader_library_path = ShaderLibrary.get_shader_library_path()
         if not os.path.exists(shader_library_path):
             sp.logger.debug('Shader Library {0} not found! Aborting shader export! Contact TD!'.format(shader_library_path))
@@ -325,7 +317,6 @@ class ShaderWidget(QWidget, object):
         self._shader_swatch.render(px)
         temp_file = os.path.join(ShaderLibrary.get_shader_library_path(), 'tmp.png')
         px.save(temp_file)
-        exported_shaders = None
         try:
             network = ShadingNetwork.write_network(shaders_path=shader_library_path, shaders=[self._name], icon_path=temp_file)
             exported_shaders = network
@@ -343,8 +334,13 @@ class ShaderWidget(QWidget, object):
 
 
 class ShaderExporter(QDialog, object):
+
+    exportFinished = Signal()
+
     def __init__(self, shaders, parent=None):
         super(ShaderExporter, self).__init__(parent=parent)
+
+        self._shaders = shaders
 
         self.setWindowTitle('Solstice Tools - Shader Exporter')
         self.setMinimumWidth(370)
@@ -360,6 +356,7 @@ class ShaderExporter(QDialog, object):
         export_btn = QPushButton('Export')
         self.main_layout.addWidget(export_btn)
 
+        self.widgets_to_export = list()
         for shader in shaders:
             if shader in IGNORE_SHADERS:
                 continue
@@ -371,17 +368,29 @@ class ShaderExporter(QDialog, object):
             self._shaders_list.addItem(shader_item)
             self._shaders_list.setItemWidget(shader_item, shader_widget)
 
-        export_btn.clicked.connect(self._export_shaders)
+            shader_export_widget = ShaderWidget(shader_name=shader, layout='vertical')
+            shader_export_widget.setMinimumWidth(100)
+            shader_export_widget.setMinimumHeight(100)
+            self.widgets_to_export.append(shader_export_widget)
+
+        export_btn.clicked.connect(self._on_export_shaders)
 
     def _export_shaders(self):
+
         exported_shaders = list()
-        for i in range(self._shaders_list.count()):
-            item = self._shaders_list.item(i)
-            item_widget = self._shaders_list.itemWidget(item)
-            exported_shader = item_widget.export()
-            exported_shaders.extend(exported_shader)
+        if len(self._shaders) <= 0:
+            sp.logger.error('No Shaders To Export. Aborting ....')
+            return exported_shaders
+
+        exporter = solstice_sync_dialog.SolsticeShaderExport(shaders=self.widgets_to_export)
+        exporter.sync()
+        exported_shaders = exporter.exported_shaders
 
         return exported_shaders
+
+    def _on_export_shaders(self):
+        self._export_shaders()
+        self.exportFinished.emit()
 
 
 class ShaderViewerWidget(QWidget, object):
@@ -594,7 +603,7 @@ class ShaderLibrary(solstice_windows.Window, object):
         return asset_shading_file
 
     @staticmethod
-    def export_asset(asset=None, shading_meshes=None):
+    def export_asset(asset=None, shading_meshes=None, comment='New Shaders version'):
         """
         Export all shaders info for the given asset
         Generates 2 files:
@@ -648,26 +657,50 @@ class ShaderLibrary(solstice_windows.Window, object):
         asset_materials = list(set(cmds.ls(cmds.listConnections(all_shading_groups), materials=True)))
 
         # Generate JSON shading file for asset
+        upload_new_version = True
         asset_shading_file = ShaderLibrary.get_asset_shader_file_path(asset=asset)
         if os.path.isfile(asset_shading_file):
+            with open(asset_shading_file, 'r') as f:
+                current_data = json.load(f)
+            if current_data is not None:
+                if current_data != json_data:
+                    solstice_artella_utils.lock_file(file_path=asset_shading_file, force=True)
+                    with open(asset_shading_file, 'w') as fp:
+                        json.dump(json_data, fp)
+                else:
+                    result = solstice_qt_utils.show_question(None, 'New JSON Shader File Version','Shaders JSON File {} already exists with same file size! Do you want to upload it to Artella anyways?'.format(asset_shading_file))
+                    if result == QMessageBox.No:
+                        upload_new_version = False
+        else:
             with open(asset_shading_file, 'w') as fp:
                 json.dump(json_data, fp)
 
-        shader_exporter = ShaderExporter(shaders=asset_materials)
-        shaders = shader_exporter._export_shaders()
+        # Upload new version of JSON shading file if necessary
+        if upload_new_version:
+            valid_version = solstice_artella_utils.upload_new_asset_version(asset_shading_file, comment=comment)
+            if not valid_version:
+                solstice_qt_utils.show_info(None, 'New Shaders JSON file version', 'Error while creating new version of JSON shaders version: {} Create it manaully later through Artella!'.format(asset_shading_file))
+
+        # To export shaders file we need to use ShaderLibrary Tool
+        # shader_exporter = ShaderExporter(shaders=asset_materials)
+        # shaders = shader_exporter._export_shaders()
 
         if os.path.isfile(asset_shading_file):
-            return shaders, asset_shading_file
+            return asset_shading_file
 
-        return shaders, ''
+        return ''
 
     def _export_selected_shaders(self):
         shaders = cmds.ls(sl=True, materials=True)
-        ShaderExporter(shaders=shaders, parent=self).exec_()
+        exporter = ShaderExporter(shaders=shaders, parent=self)
+        exporter.exportFinished.connect(self.update_shader_library)
+        exporter.exec_()
 
     def _export_all_shaders(self):
         shaders = cmds.ls(materials=True)
-        ShaderExporter(shaders=shaders, parent=self).exec_()
+        exporter = ShaderExporter(shaders=shaders, parent=self)
+        exporter.exportFinished.connect(self.update_shader_library)
+        exporter.exec_()
 
     def _open_shaders_path(self):
         solstice_python_utils.open_folder(self.get_shader_library_path())

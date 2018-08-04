@@ -13,6 +13,7 @@ import os
 import sys
 import json
 import urllib2
+import traceback
 try:
     import psutil
 except:
@@ -455,8 +456,14 @@ def get_asset_history(file_path, as_json=False):
     spigot = get_spigot_client()
     rsp = spigot.execute(command_action='do', command_name='history', payload=uri)
 
-    if isinstance(rsp, basestring):
-        rsp = json.loads(rsp)
+    try:
+        if isinstance(rsp, basestring):
+            rsp = json.loads(rsp)
+    except Exception as e:
+        msg = 'Error while getting file history info: {}'.format(rsp)
+        sp.logger.error(msg)
+        sp.logger.error(str(e))
+        return {}
 
     sp.logger.debug(rsp)
 
@@ -598,34 +605,44 @@ def is_published(file_path):
 
 def is_locked(file_path):
     """
-    Returns whether an absolute file path refers to a locked asset in dit mode, and if the file is locked
+    Returns whether an absolute file path refers to a locked asset in edit mode, and if the file is locked
     by the current storage workspace
     :param file_path: str, absolute path to a file
     :return: bool
     """
 
-
-    # TODO: Check if the status is a DirectoryOne or a Header one
-
     rsp = get_status(file_path=file_path)
     if rsp:
-        if rsp.header.status != 'OK':
-            sp.logger.info('Status is not OK: {}'.format(rsp))
-            return False, False
+        if isinstance(rsp, classes.ArtellaDirectoryMetaData):
+            if rsp.header.status != 'OK':
+                sp.logger.info('Status is not OK: {}'.format(rsp))
+                return False, False
 
-    file_path = rsp.header.file_path or ''
-    if not file_path:
-        sp.logger.info('File path not found in response: {}'.format(rsp))
-        return False, False
+            file_path = rsp.header.file_path or ''
+            if not file_path or file_path == '':
+                sp.logger.info('File path not found in response: {}'.format(rsp))
+                return False, False
 
-    for ref, ref_data in rsp.references.items():
-        file_data = ref_data.path
-        if not file_data:
-            sp.logger.info('File data not found in response: {}'.format(rsp.get('data', {}), ))
-            return
-        if ref_data.locked:
-            user_id = get_current_user_id()
-            return True, user_id == ref_data.locked_view
+            for ref, ref_data in rsp.references.items():
+                file_data = ref_data.path
+                if not file_data:
+                    sp.logger.info('File data not found in response: {}'.format(rsp.get('data', {}), ))
+                    return
+                if ref_data.locked:
+                    user_id = get_current_user_id()
+                    return True, user_id == ref_data.locked_view
+        elif isinstance(rsp, classes.ArtellaHeaderMetaData):
+            if rsp.status != 'OK':
+                sp.logger.info('Status is not OK: {}'.format(rsp))
+                return False, False
+
+            file_path_header = rsp.file_path or ''
+            if not file_path_header or file_path_header == '':
+                sp.logger.info('File path not found in response: {}'.format(rsp))
+                return False, False
+
+            # This happens when we are trying to lock a file that has not been uploaded to Artella yet
+            return None, None
 
     return False, False
 
@@ -658,11 +675,15 @@ def lock_file(file_path=None, force=False):
         sp.logger.info(msg)
         sp.message(msg)
 
+    if in_edit_mode is None and is_locked_by_me is None:
+        msg = 'File is not versioned yet! '
+        sp.logger.info(msg)
+        return True
+
     if in_edit_mode and not is_locked_by_me:
-        msg = 'Locked by another user or workspace: {}'.format(os.path.basename(file_path))
+        msg = 'Locked by another user or workspace or file is not uploaded to Artella yet: {}'.format(os.path.basename(file_path))
         sp.logger.info(msg)
         cmds.warning(msg)
-        cmds.confirmDialog(title='Solstice Tools - Failed to checkout (lock) file', message=msg, button=['OK'])
         return False
     elif force or not in_edit_mode:
         result = 'Yes'
@@ -774,11 +795,12 @@ def unlock_file(file_path):
     return True
 
 
-def upload_new_asset_version(file_path=None, comment='Published new version with Solstice Tools'):
+def upload_new_asset_version(file_path=None, comment='Published new version with Solstice Tools', skip_saving=False):
     """
     Adds a new file to the Artella server
     :param file_path:
     :param comment:
+    :param skip_saving: When we publish textures we do not want to save the maya scene
     """
 
     from solstice_pipeline.solstice_utils import solstice_maya_utils
@@ -800,8 +822,9 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
         if not valid_lock:
             return False
 
-        if cmds.file(query=True, modified=True):
-            cmds.file(save=True, f=True)
+        if not skip_saving:
+            if cmds.file(query=True, modified=True):
+                cmds.file(save=True, f=True)
             if solstice_maya_utils.file_has_student_line(filename=file_path):
                 solstice_maya_utils.clean_student_line(filename=file_path)
                 if solstice_maya_utils.file_has_student_line(filename=file_path):

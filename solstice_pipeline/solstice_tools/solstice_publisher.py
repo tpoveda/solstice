@@ -11,7 +11,6 @@
 import os
 import re
 import json
-import time
 import weakref
 import traceback
 from shutil import copyfile
@@ -105,7 +104,7 @@ class PublishTexturesTask(solstice_task.Task, object):
                 valid_new_versions = True
                 for txt in textures:
                     if valid_new_versions:
-                        valid_new_version = artella.upload_new_asset_version(txt, comment=self._comment)
+                        valid_new_version = artella.upload_new_asset_version(txt, comment=self._comment, skip_saving=True)
                         if not valid_new_version:
                             self.write_error('Error while creating new texture version for texture {}. Please contact TD!'.format(txt))
                             self.write('Unlocking texture file: {}'.format(txt))
@@ -145,7 +144,7 @@ class PublishTexturesTask(solstice_task.Task, object):
             # After publishing if we unlock the textures
             self.write('Unlocking texture files ...')
             for txt in textures:
-                valid_unlock = artella.unlock_file(txt, force=True)
+                valid_unlock = artella.unlock_file(txt)
                 if not valid_unlock:
                     self.write_error('Impossible to unlock texture file {}. Maybe it is locked by other user!'.format(txt))
                     return False
@@ -789,8 +788,8 @@ class PublishShadingTask(solstice_task.Task, object):
             self.write_ok('Found {} meshes on shading file!'.format(len(shading_meshes)))
 
             # Export shaders
-            self.write('Exporting Shaders ...')
-            shaders, info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset(), shading_meshes=shading_meshes)
+            self.write('Exporting Shaders JSON info file ...')
+            info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset(), shading_meshes=shading_meshes)
             if info is None or not os.path.exists(info):
                 self.write_error('Model Shader JSON file was not generated successfully. Plase contact TD!')
                 self.write('Unlocking shading file ...')
@@ -798,25 +797,30 @@ class PublishShadingTask(solstice_task.Task, object):
                 return False
             self.write_ok('Asset shaders exported successfully!')
             self.write_ok('Model Shader JSON file: {}'.format(info))
-            self.write_ok('Exported Shaders: {}'.format(shaders))
 
         except Exception as e:
             self.write_error('Error while publishing shading files. Reverting process ...')
+            sp.logger.error(e)
             self.write('Unlocking shading file ...')
             artella.unlock_file(shading_path)
             return False
 
         # Save changes on shading file
         self.write('Saving changes to shading file ...')
-        if cmds.file(query=True, modified=True):
+        try:
             cmds.file(save=True, f=True)
             self.write_ok('Changes to shading file stored successfully!')
-            self.write('Check if we need to clean Student License again ...')
+            self.write('Check if we need to clean Studºent License again ...')
             if solstice_maya_utils.file_has_student_line(filename=shading_path):
                 solstice_maya_utils.clean_student_line(filename=shading_path)
                 if solstice_maya_utils.file_has_student_line(filename=shading_path):
                     self.write_error('After updating shading path the Student License could not be fixed again!')
                     return False
+        except Exception as e:
+            self.write_error('Impossible to save changes done on shading file!')
+            self.write('Unlocking shading file ...')
+            artella.unlock_file(shading_path)
+            return False
 
         result = solstice_qt_utils.show_question(None, 'Publishing file {}'.format(shading_path), 'File validated successfully! Do you want to continue with the publish process?')
         published_done = False
@@ -886,7 +890,7 @@ class PublishGroomTask(solstice_task.Task, object):
 
 class PublishTaskGroup(solstice_taskgroups.TaskGroup, object):
     def __init__(self, asset, categories_to_publish, log=None, auto_run=False, parent=None):
-        super(PublishTaskGroup, self).__init__(name='PublishAsset', log=log, parent=parent)
+        super(PublishTaskGroup, self).__init__(name='PublishAsset', stop_on_error=True, log=log, parent=parent)
 
         # # NOTE: First we need to update textures and if textures are updated we need to update also the shading
         # # file. This is force in UI file (shading checkbox is automatically enabled if textures checkbox is enabled)

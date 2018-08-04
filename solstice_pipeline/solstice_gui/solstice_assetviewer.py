@@ -153,8 +153,8 @@ class AssetViewer(solstice_grid.GridWidget, object):
                         # We connect this signal to allow Pipelinizer Tool update its asset info widget after syncronizing
                         # This is a very bad way but it works for now!
                         try:
-                            new_asset.sync_finished.connect(partial(self.parent().update_asset_info, new_asset, True))
-                            new_asset.sync_finished.connect(partial(sp.register_asset, new_asset.name))
+                            new_asset.syncFinished.connect(partial(self.parent().update_asset_info, new_asset, True, False, True))
+                            new_asset.syncFinished.connect(partial(sp.register_asset, new_asset.name))
                         except Exception:
                             pass
 

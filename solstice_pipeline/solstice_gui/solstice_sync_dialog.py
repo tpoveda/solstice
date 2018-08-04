@@ -15,10 +15,11 @@ import traceback
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 
+import maya.utils as utils
+
 import solstice_pipeline as sp
 from solstice_utils import solstice_maya_utils
 from solstice_utils import solstice_artella_utils as artella
-
 from resources import solstice_resource
 
 
@@ -43,6 +44,9 @@ class SolsticeSync(QDialog, object):
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._update_progress_bar)
 
+    def get_pixmap(self):
+        return solstice_resource.pixmap('solstice_sync_splash')
+
     def custom_ui(self):
 
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
@@ -52,12 +56,17 @@ class SolsticeSync(QDialog, object):
         self.main_layout.setSpacing(5)
         self.setLayout(self.main_layout)
 
-        splash_pixmap = solstice_resource.pixmap('solstice_sync_splash')
+        splash_pixmap = self.get_pixmap()
         splash = SolsticeSyncSplash(splash_pixmap)
         self._splash_layout = QVBoxLayout()
         self._splash_layout.setAlignment(Qt.AlignBottom)
         splash.setLayout(self._splash_layout)
         self.main_layout.addWidget(splash)
+
+        self.extended_layout = QVBoxLayout()
+        self.extended_layout.setContentsMargins(2, 2, 2, 2)
+        self.extended_layout.setSpacing(2)
+        self._splash_layout.addLayout(self.extended_layout)
 
         self._progress_bar = QProgressBar()
         self._progress_bar.setMaximum(50)
@@ -198,3 +207,70 @@ class SolsticeSyncGetDeps(SolsticeSync, object):
 
     def _cancel_sync(self):
         self._canceled = True
+
+
+class SolsticeShaderExport(SolsticeSync, object):
+    def __init__(self, shaders=[]):
+        self._shaders = shaders
+        self.exported_shaders = list()
+        super(SolsticeShaderExport, self).__init__()
+
+    def get_pixmap(self):
+        return solstice_resource.pixmap('solstice_shaders_splash')
+
+    def custom_ui(self):
+        super(SolsticeShaderExport, self).custom_ui()
+
+        self.shaders_layout = QHBoxLayout()
+        self.shaders_layout.setAlignment(Qt.AlignCenter)
+        self.shaders_layout.setContentsMargins(2, 2, 2, 2)
+        self.shaders_layout.setSpacing(2)
+        shaders_frame = QFrame()
+        shaders_frame.setStyleSheet('QFrame{background-color: rgba(25, 25, 25, 100);    ')
+        shaders_frame.setFrameStyle(QFrame.StyledPanel | QFrame.Raised)
+        shaders_frame.setLineWidth(1)
+        shaders_frame.setLayout(self.shaders_layout)
+        self.extended_layout.addWidget(shaders_frame)
+
+        for shader in self._shaders:
+            shader.setFixedSize(QSize(100, 140))
+            self.shaders_layout.addWidget(shader)
+
+        self._progress_text.setText('Exporting and Publishing Shaders ...')
+
+    def _update_progress_bar(self):
+        super(SolsticeShaderExport, self)._update_progress_bar()
+
+        if self._event.is_set():
+            self._timer.stop()
+            self.close()
+
+    def sync(self):
+        if not self._shaders:
+            self.close()
+        super(SolsticeShaderExport, self).sync()
+        self._event = threading.Event()
+        try:
+            threading.Thread(target=self.sync_files, args=(self._event,), name='SolsticeShadersExporter').start()
+        except Exception as e:
+            sp.logger.debug(str(e))
+            sp.logger.debug(traceback.format_exc())
+        self.exec_()
+
+    def sync_files(self, event):
+        try:
+            for shader in self._shaders:
+                self._progress_text.setText('Export shading: {0} ... Please wait!'.format(shader.name))
+                exported_shader = utils.executeInMainThreadWithResult(shader.export)
+                if exported_shader is not None:
+                    if type(exported_shader) == list:
+                        self.exported_shaders.extend(exported_shader)
+                    else:
+                        self.exported_shaders.append(exported_shader)
+                else:
+                    sp.logger.error('Error while export shader ...')
+        except Exception as e:
+            sp.logger.debug(str(e))
+            sp.logger.debug(traceback.format_exc())
+            event.set()
+        event.set()

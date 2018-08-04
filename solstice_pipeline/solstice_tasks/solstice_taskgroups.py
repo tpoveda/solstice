@@ -51,20 +51,18 @@ class TaskGroup(QWidget, object):
 
     def _on_do_task(self):
         for task in self.tasks:
-            valid_task = task.run()
-            if self.valid:
-                if valid_task:
-                    task.valid_task()
-                    self.taskDone.emit(task, True)
-                else:
-                    task.invalid_task()
-                    self.taskDone.emit(task, False)
-                    if self.stop_on_error:
-                        break
-                    self.valid = False
-            else:
+            if self.stop_on_error and not self.valid:
+                self.taskDone.emit(task, False)
+                self.valid = False
                 task.invalid_task()
                 task.task_text.setText('>> ABORTED <<')
+                continue
+            valid_task = task.run()
+            if valid_task:
+                task.valid_task()
+                self.taskDone.emit(task, True)
+            else:
+                task.invalid_task()
                 self.taskDone.emit(task, False)
-
+                self.valid = False
         self.taskFinished.emit(self.valid)

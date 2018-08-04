@@ -453,11 +453,14 @@ class Pipelinizer(solstice_windows.Window, object):
                 check_published_info = False
                 if self.settings.has_option(self.settings.app_name, 'auto_check_published'):
                     check_published_info = strtobool(self.settings.get('auto_check_published'))
+
+            if not check_working_info:
                 if self.settings.has_option(self.settings.app_name, 'auto_check_working'):
                     check_working_info = strtobool(self.settings.get('auto_check_working'))
 
-            if self.settings.has_option(self.settings.app_name, 'auto_check_lock'):
-                check_lock_info = strtobool(self.settings.get('auto_check_lock'))
+            if not check_lock_info:
+                if self.settings.has_option(self.settings.app_name, 'auto_check_lock'):
+                    check_lock_info = strtobool(self.settings.get('auto_check_lock'))
 
             try:
                 info_widget = asset.get_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info, check_lock_info=check_lock_info)
