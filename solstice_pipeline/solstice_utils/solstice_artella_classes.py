@@ -71,7 +71,7 @@ class ArtellaAssetMetaData(object):
 
         self._published_folders = dict()
         self._published_folders_all = dict()
-        self._must_folders = sp.valid_categories
+        self._must_folders = sp.must_categories
 
         for f in self._must_folders:
             self._published_folders[f] = dict()

@@ -272,6 +272,19 @@ class PublishModelTask(solstice_task.Task, object):
                 return False
             self.write_ok('Asset main group is valid: {}'.format(self._asset().name))
 
+            # Check that model file has no shaders stored inside it
+            shaders = cmds.ls(materials=True)
+            invalid_shaders = list()
+            for shader in shaders:
+                if shader not in ['lambert1', 'particleCloud1']:
+                    invalid_shaders.append(shader)
+            if len(invalid_shaders) > 0:
+                self.write_error('Scene file has shaders stored in it: {}. Remove them before publishing the model file ...'.format(invalid_shaders))
+                self.write('Unlocking model file ...')
+                artella.unlock_file(model_path)
+                return False
+            self.write_ok('Model file has no shaders stored in it!')
+
             # Check that model file has a valid proxy and hires group
             self.write('Checking if asset has valid proxy and hires groups')
             if not valid_obj:
@@ -389,7 +402,7 @@ class PublishModelTask(solstice_task.Task, object):
                             break
 
             if not valid_tag_data:
-                self.write_error('Main group has not a valid tag data node connected to. Creating it ...')
+                self.write_warning('Main group has not a valid tag data node connected to. Creating it ...')
                 try:
                     from solstice_pipeline.solstice_tools import solstice_tagger
                     cmds.select(valid_obj)
@@ -787,11 +800,49 @@ class PublishShadingTask(solstice_task.Task, object):
                         shading_meshes.append(obj)
             self.write_ok('Found {} meshes on shading file!'.format(len(shading_meshes)))
 
-            # Export shaders
+            # Check that shading groups nomenclature is valid
+            self.write('Getting asset shaders from shading file ...')
+            shaders = cmds.ls(materials=True)
+            asset_shaders = list()
+            for shader in shaders:
+                if shader not in ['lambert1', 'particleCloud1']:
+                    asset_shaders.append(shader)
+            if len(asset_shaders) > 0:
+                self.write_ok('Valid shaders found on shading file: {}'.format(asset_shaders))
+            else:
+                self.write_error('Shading file has not valid shaders inside it! Aborting publishing ...')
+                self.write('Unlocking shading file ...')
+                artella.unlock_file(shading_path)
+                return False
+
+            self.write('Checking that nomenclature of shading groups are valid')
+            for shader in asset_shaders:
+                shading_groups = cmds.listConnections(shader, type='shadingEngine')
+                if not shading_groups or len(shading_groups) <= 0:
+                    self.write_error('No shading groups found on shader {}. Aborting publishing ...'.format(shader))
+                    self.write('Unlocking shading file ...')
+                    artella.unlock_file(shading_path)
+                    return False
+                if len(shading_groups) > 2:
+                    self.write_error('More than one shading groups found on shader {0} >> {1}. Aborting publishing ...'.format(shader, shading_groups))
+                    self.write('Unlocking shading file ...')
+                    artella.unlock_file(shading_path)
+                    return  False
+                shading_group = shading_groups[0]
+                if shading_group != shader+'SG':
+                    self.write_error('Shading Group {0} does not follows a valid nomenclature. Rename it to {1}'.format(shading_group, shader+'SG'))
+                    self.write('Unlocking shading file ...')
+                    artella.unlock_file(shading_path)
+                    return False
+                else:
+                    self.write_ok('Shader {0} has a valid shading group: {1}'.format(shader, shading_group))
+            self.write('Shading groups checked successfully!')
+
+            # Export shader JSON info
             self.write('Exporting Shaders JSON info file ...')
             info = solstice_shaderlibrary.ShaderLibrary.export_asset(asset=self._asset(), shading_meshes=shading_meshes)
             if info is None or not os.path.exists(info):
-                self.write_error('Model Shader JSON file was not generated successfully. Plase contact TD!')
+                self.write_error('Model Shader JSON file was not generated successfully. Please contact TD!')
                 self.write('Unlocking shading file ...')
                 artella.unlock_file(shading_path)
                 return False
@@ -810,7 +861,6 @@ class PublishShadingTask(solstice_task.Task, object):
         try:
             cmds.file(save=True, f=True)
             self.write_ok('Changes to shading file stored successfully!')
-            self.write('Check if we need to clean Studºent License again ...')
             if solstice_maya_utils.file_has_student_line(filename=shading_path):
                 solstice_maya_utils.clean_student_line(filename=shading_path)
                 if solstice_maya_utils.file_has_student_line(filename=shading_path):
@@ -818,6 +868,7 @@ class PublishShadingTask(solstice_task.Task, object):
                     return False
         except Exception as e:
             self.write_error('Impossible to save changes done on shading file!')
+            self.write_error(str(e))
             self.write('Unlocking shading file ...')
             artella.unlock_file(shading_path)
             return False
@@ -838,12 +889,15 @@ class PublishShadingTask(solstice_task.Task, object):
                 self.write_error('Impossible to sync the new published model. Do it manually later please!')
 
             # Publish new version and sync it
+            shading_folder = os.path.dirname(shading_path)
             self.write('Getting shading file version to publish ...')
             selected_versions = dict()
-            status = artella.get_status(shading_path)
+            status = artella.get_status(shading_folder)
             if status and hasattr(status, 'references'):
                 if status.references:
                     for ref, ref_data in status.references.items():
+                        if ref_data.deleted:
+                            continue
                         selected_versions[ref] = ref_data.maximum_version
             if not selected_versions:
                 self.write_error('No shading file version to publish. Aborting publishing ...')

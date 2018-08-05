@@ -52,7 +52,7 @@ class SolsticeConsole(QTextEdit, object):
         self.insertHtml(msg_html)
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        sp.logger.debug('{}\n'.format(msg))
+        sp.logger.error('{}\n'.format(msg))
 
     def write_ok(self, msg):
         """
@@ -65,6 +65,18 @@ class SolsticeConsole(QTextEdit, object):
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
         sp.logger.debug('{}\n'.format(msg))
+
+    def write_warning(self, msg):
+        """
+        Adds a warning yellow message to the console
+        :param msg: str
+        """
+
+        msg_html = "<font color=\"Yellow\">: " + msg + "\n</font><br>"
+        self.insertHtml(msg_html)
+        self.moveCursor(QTextCursor.End)
+        self._buffer.write(unicode(msg))
+        sp.logger.warning('{}\n'.format(msg))
 
     def __getattr__(self, attr):
         """

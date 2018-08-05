@@ -350,10 +350,6 @@ class Pipelinizer(solstice_windows.Window, object):
                 item = item.containedWidget.name
                 items.append(item)
 
-    def closeEvent(self, event):
-        print('hasdfasdfasfasdfasfasf')
-        super(Pipelinizer, self).closeEvent(event)
-
     def open_settings(self):
         """
         Opens Pipelinizer Settings Dialog

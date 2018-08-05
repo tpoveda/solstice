@@ -8,6 +8,7 @@
 
 import os
 import re
+import ast
 
 import maya.cmds as cmds
 
@@ -257,3 +258,87 @@ class SolsticeAssetNode(SolsticeNode, object):
                 print('ASSET IS VALID')
             else:
                 sp.logger.warning('File "{0}" does not follow a correct nomenclature!'.format(self.filename))
+
+
+class SolsticeTagDataNode(object):
+    def __init__(self, node):
+        super(SolsticeTagDataNode, self).__init__()
+
+        self._node = node
+
+    def get_node(self):
+        return self._node
+
+    def get_asset(self):
+        if not self._node or not cmds.objExists(self._node):
+            return None
+        if not cmds.attributeQuery('node', node=self._node, exists=True):
+            return None
+
+        connections = cmds.listConnections(self._node+'.node')
+        if connections:
+            node = connections[0]
+            if cmds.objExists(node):
+                return node
+
+        return None
+
+    def get_tag_type(self):
+        if not self._node or not cmds.objExists(self._node):
+            return None
+        if not cmds.attributeQuery('tag_type', node=self._node, exists=True):
+            return None
+
+        return cmds.getAttr(self._node + '.tag_type')
+
+    def get_types(self):
+        if not self._node or not cmds.objExists(self._node):
+            return []
+        if not cmds.attributeQuery('types', node=self._node, exists=True):
+            return []
+
+        return cmds.getAttr(self._node + '.types')
+
+    def get_proxy_group(self):
+        if not self._node or not cmds.objExists(self._node):
+            return None
+        if not cmds.attributeQuery('proxy', node=self._node, exists=True):
+            return None
+
+        connections = cmds.listConnections(self._node + '.proxy')
+        if connections:
+            node = connections[0]
+            if cmds.objExists(node):
+                return node
+
+        return None
+
+    def get_hires_group(self):
+        if not self._node or not cmds.objExists(self._node):
+            return None
+        if not cmds.attributeQuery('hires', node=self._node, exists=True):
+            return None
+
+        connections = cmds.listConnections(self._node + '.hires')
+        if connections:
+            node = connections[0]
+            if cmds.objExists(node):
+                return node
+
+        return None
+
+    def get_shaders(self):
+        if not self._node or not cmds.objExists(self._node):
+            return None
+        if not cmds.attributeQuery('shaders', node=self._node, exists=True):
+            return None
+
+        shaders_attr = cmds.getAttr(self._node + '.shaders')
+        shaders_attr_fixed = shaders_attr.replace("'", "\"")
+        shaders_dict = ast.literal_eval(shaders_attr_fixed)
+        if type(shaders_dict) != dict:
+            sp.logger.error('Impossible to get dictionary from shaders attribute. Maybe shaders are not set up properly. Please contact TD!')
+        else:
+            return shaders_dict
+
+        return shaders_attr

@@ -26,7 +26,7 @@ class AssetViewer(solstice_grid.GridWidget, object):
 
     IGNORED_PATHS = ['PIPELINE', 'lighting', 'Light Rigs', 'S_CH_02_summer_scripts']
 
-    def __init__(self, assets_path, item_pressed_callback, simple_assets=False, checkable_assets=False, show_only_published_assets=False, parent=None):
+    def __init__(self, assets_path, item_pressed_callback, simple_assets=False, checkable_assets=False, show_only_published_assets=False, parent=None, column_count=4):
         super(AssetViewer, self).__init__(parent=parent)
 
         self._assets_paths = assets_path
@@ -39,7 +39,7 @@ class AssetViewer(solstice_grid.GridWidget, object):
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.setShowGrid(False)
         self.setFocusPolicy(Qt.NoFocus)
-        self.setColumnCount(4)
+        self.setColumnCount(column_count)
         self.horizontalHeader().hide()
         self.verticalHeader().hide()
         self.resizeRowsToContents()
@@ -96,7 +96,6 @@ class AssetViewer(solstice_grid.GridWidget, object):
     def update_items(self, update=True):
         """
         Updates the list of items in the Asset Viewer
-        :param category: str, category of the items we want to add ('All, 'Props', 'Characters', 'BackgroundElements')
         :param update: bool, If True, we will get the info of the missing widgets from Artella
         :return:
         """
@@ -164,36 +163,15 @@ class AssetViewer(solstice_grid.GridWidget, object):
 
                         if self._show_only_published_assets:
                             if not new_asset.is_published():
-                                new_asset.setVisible(False)
+                                continue
+                            else:
+                                sp.logger.debug('Adding asset: {}'.format(new_asset.name))
+
                         if self._item_pressed_callback:
                             new_asset._asset_btn.clicked.connect(partial(self._item_pressed_callback, new_asset))
                             new_asset.publishFinished.connect(partial(self._item_pressed_callback, new_asset, True, True))
                             new_asset.newVersionFinished.connect(partial(self._item_pressed_callback, new_asset, True, True))
                         self.add_asset(new_asset)
-                        # ===========================================================================================================
-
-
-                        # if category == 'All':
-                        #     asset_data = utils.read_json(asset_data_file)
-                        #     new_asset = solstice_asset.AssetWidget(
-                        #         name=asset_name,
-                        #         path=asset_path,
-                        #         category=asset_category,
-                        #         icon=asset_data['asset']['icon'],
-                        #         icon_format=asset_data['asset']['icon_format'],
-                        #         preview=asset_data['asset']['preview'],
-                        #         preview_format=asset_data['asset']['preview_format'],
-                        #         description=asset_data['asset']['description'],
-                        #         simple_mode=self._simple_assets,
-                        #         checkable=self._checkable_assets
-                        #     )
-                        #     if self._show_only_published_assets:
-                        #         if not new_asset.is_published():
-                        #             new_asset.setVisible(False)
-                        #     if self._item_pressed_callback:
-                        #         new_asset._asset_btn.clicked.connect(partial(self._item_pressed_callback, new_asset))
-                        #     self.add_asset(new_asset)
-                        # else:
 
 
 class CategorizedAssetViewer(QWidget, object):
@@ -238,9 +216,10 @@ class CategorizedAssetViewer(QWidget, object):
             item_pressed_callback=item_pressed_callback,
             simple_assets=simple_assets,
             checkable_assets=checkable_assets,
-            show_only_published_assets=show_only_published_assets)
+            show_only_published_assets=show_only_published_assets,
+            column_count=2
+        )
 
-        self._asset_viewer.setColumnCount(2)
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         asset_viewer_layout.addWidget(self._asset_viewer)
 

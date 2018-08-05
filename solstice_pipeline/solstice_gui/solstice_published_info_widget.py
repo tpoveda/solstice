@@ -9,6 +9,7 @@
 # ==================================================================="""
 
 from functools import partial
+from collections import OrderedDict
 
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
@@ -123,7 +124,7 @@ class PublishedInfoWidget(QWidget, object):
             if status == 'working':
                 self._ui[status]['layout'].addWidget(solstice_splitters.Splitter('WORKING INFO'))
             elif status == 'published':
-                self._ui[status]['layout'].addWidget(solstice_splitters.Splitter('PUBLSIHED INFO'))
+                self._ui[status]['layout'].addWidget(solstice_splitters.Splitter('PUBLISHED INFO'))
 
             self._info_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
             if status == 'working':
@@ -208,6 +209,9 @@ class PublishedInfoWidget(QWidget, object):
                     if f == 'textures':
                         max_version = 0
                         for txt_name, txt_version in version_info.items():
+                            # We do not check for files that have been deleted
+                            if txt_version.size <= 0:
+                                continue
                             if txt_version.version > max_version:
                                 max_version = txt_version.version
                             textures_version_str += txt_name + ' : | ' + status_type.upper() + '| ' + 'v' + str(txt_version.version) + '\n'
@@ -228,8 +232,19 @@ class PublishedInfoWidget(QWidget, object):
                         msg_str = ''
                         valid_check = True
                         if max_local and max_server:
-                            for (local_txt_name, local_txt_version), (server_txt_name, server_txt_version) in zip(max_local.items(), max_server.items()):
-                                if local_txt_name == server_txt_name:
+
+                            # Clean not valid server versions
+                            clean_max_server = OrderedDict()
+                            for txt_name, txt_version in max_server.items():
+                                if txt_version.size > 0:
+                                    clean_max_server[txt_name] = txt_version
+
+                            for local_txt_name, local_txt_version in max_local.items():
+
+                                valid_texture = clean_max_server.get(local_txt_name)
+                                server_txt_name = local_txt_name
+                                if valid_texture is not None:
+                                    server_txt_version = clean_max_server[local_txt_name]
                                     if local_txt_version.version == server_txt_version.version:
                                         msg_str += 'Texture {0} is updated: v{1}\n'.format(server_txt_name, server_txt_version.version)
                                     else:

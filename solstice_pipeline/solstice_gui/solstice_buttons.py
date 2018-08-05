@@ -133,7 +133,6 @@ class CategoryButtonWidget(QWidget, object):
                 self._lock_btn.setStatusTip('This file does not exists on Artella server yet!')
                 self._lock_btn.setToolTip('This file does not exists on Artella server yet!')
 
-
     def open_asset_file(self):
         if self._category_name == 'textures':
             self._asset().open_textures_folder(self._status)

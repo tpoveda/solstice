@@ -85,6 +85,12 @@ class Task(QWidget, object):
         self._log.write_ok(msg)
         self.repaint()
 
+    def write_warning(self, msg):
+        if self._log is None:
+            return
+        self._log.write_warning(msg)
+        self.repaint()
+
     def get_error_message(self):
         return self._error_message
 

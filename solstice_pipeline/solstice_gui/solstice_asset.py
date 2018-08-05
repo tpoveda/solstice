@@ -13,6 +13,7 @@ import time
 import webbrowser
 import collections
 from functools import partial
+from collections import OrderedDict
 
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
@@ -21,7 +22,6 @@ from solstice_qt.QtGui import *
 import solstice_pipeline as sp
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_artella_utils as artella
-from solstice_utils import solstice_artella_classes as classes
 from solstice_utils import solstice_naming_utils as naming
 from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_python_utils
 from solstice_gui import solstice_splitters, solstice_published_info_widget, solstice_sync_dialog, solstice_buttons
@@ -482,11 +482,11 @@ class AssetWidget(QWidget, object):
         else:
             folders = sp.valid_categories
 
-        max_versions = dict()
+        max_versions = OrderedDict()
         server_versions_list = self.get_server_versions(status=status, categories=folders)
         local_versions_list = self.get_local_versions(status=status, categories=folders)
         for t in ['local', 'server']:
-            max_versions[t] = dict()
+            max_versions[t] = OrderedDict()
             for f in folders:
                 max_versions[t][f] = None
 
@@ -501,7 +501,7 @@ class AssetWidget(QWidget, object):
                                 max_versions['local'][local_name] = int(version)
                 else:
                     if local_name == 'textures':
-                        max_versions['local'][local_name] = dict()
+                        max_versions['local'][local_name] = OrderedDict()
                         for txt, txt_data in local_versions.items():
                             for v in txt_data.versions:
                                 if txt not in max_versions['local'][local_name]:
@@ -529,7 +529,7 @@ class AssetWidget(QWidget, object):
                                 max_versions['server'][server_name] = int(version)
                 else:
                     if local_name == 'textures':
-                        max_versions['server'][local_name] = dict()
+                        max_versions['server'][local_name] = OrderedDict()
                         for txt, txt_data in server_versions.items():
                             for v in txt_data.versions:
                                 if txt not in max_versions['server'][local_name]:
@@ -617,12 +617,7 @@ class AssetWidget(QWidget, object):
             published_in_server = asset_data.get_is_published()
             if published_in_server:
                 sp.logger.debug('Asset {0} is published in Artella Server!'.format(self._name))
-
-                # TODO: Update Info and check if our local version is the same as the
-                # version located in Artella server
-
                 return True
-
         sp.logger.debug('Asset {0} is not published in Artella Server!'.format(self._name))
         return False
 

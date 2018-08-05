@@ -805,11 +805,8 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
 
     from solstice_pipeline.solstice_utils import solstice_maya_utils
 
-    maya_file = False
-
     if not file_path:
         file_path = cmds.file(query=True, sceneName=True)
-        maya_file = True
     if not file_path:
         sp.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False

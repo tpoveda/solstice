@@ -15,9 +15,11 @@ from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
 
 import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
 
-from solstice_gui import solstice_windows
+from solstice_pipeline.solstice_gui import solstice_windows
+from solstice_pipeline.solstice_utils import solstice_node
+
+reload(solstice_node)
 
 
 class OutlinerListView(QListView, object):
@@ -144,6 +146,19 @@ class SolsticeOutliner(solstice_windows.Window, object):
         #     self.register_callbacks()
         #     self.outliner.update_model()
 
+    @staticmethod
+    def get_tag_data_nodes():
+        tag_nodes = list()
+        objs = cmds.ls()
+        for obj in objs:
+            valid_tag_data = cmds.attributeQuery('tag_type', node=obj, exists=True)
+            if valid_tag_data:
+                tag_type = cmds.getAttr(obj + '.tag_type')
+                if tag_type and tag_type == 'SOLSTICE_TAG':
+                    tag_node = solstice_node.SolsticeTagDataNode(node=obj)
+                    tag_nodes.append(tag_node)
+
+        return tag_nodes
 
 def run():
     SolsticeOutliner.run()
