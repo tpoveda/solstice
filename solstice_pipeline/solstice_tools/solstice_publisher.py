@@ -815,27 +815,47 @@ class PublishShadingTask(solstice_task.Task, object):
                 artella.unlock_file(shading_path)
                 return False
 
-            self.write('Checking that nomenclature of shading groups are valid')
+            self.write('Checking that nomenclature of shaders and shading groups are valid')
+            shader_types = cmds.listNodeTypes('shader')
             for shader in asset_shaders:
-                shading_groups = cmds.listConnections(shader, type='shadingEngine')
-                if not shading_groups or len(shading_groups) <= 0:
-                    self.write_error('No shading groups found on shader {}. Aborting publishing ...'.format(shader))
+                if shader in ['lambert1', 'particleCloud1']:
+                    continue
+                if 'displacement' in shader or 'Displacement' in shader:
+                    continue
+                if not shader.startswith(self._asset().name):
+                    self.write_error('Shader {} has not a valid nomenclature. Rename it with prefix {}'.format(shader, self._asset().name))
                     self.write('Unlocking shading file ...')
                     artella.unlock_file(shading_path)
                     return False
+                shading_groups = cmds.listConnections(shader, type='shadingEngine')
+                if not shading_groups or len(shading_groups) <= 0:
+                    self.write_warning('Shader {} has not a shading group connected to it!'.format(shader))
                 if len(shading_groups) > 2:
                     self.write_error('More than one shading groups found on shader {0} >> {1}. Aborting publishing ...'.format(shader, shading_groups))
                     self.write('Unlocking shading file ...')
                     artella.unlock_file(shading_path)
-                    return  False
-                shading_group = shading_groups[0]
-                if shading_group != shader+'SG':
-                    self.write_error('Shading Group {0} does not follows a valid nomenclature. Rename it to {1}'.format(shading_group, shader+'SG'))
-                    self.write('Unlocking shading file ...')
-                    artella.unlock_file(shading_path)
                     return False
+                shading_group = shading_groups[0]
+                connections = cmds.listConnections(shading_group, source=True, destination=False)
+                if connections is not None:
+                    connected_shaders = list()
+                    for cnt in connections:
+                        if cmds.objectType(cnt) in shader_types:
+                            connected_shaders.append(cnt)
+                    if len(connected_shaders) > 0:
+                        target_name = cmds.listConnections(shading_group + '.surfaceShader')[0]
+                        if shading_group != '{}SG'.format(target_name, shader):
+                            self.write_error('Shader invalid nomenclature: Target name: {} ---------- {} => {}'.format(target_name, shader, shading_group))
+                            self.write('Unlocking shading file ...')
+                            artella.unlock_file(shading_path)
+                            return False
                 else:
-                    self.write_ok('Shader {0} has a valid shading group: {1}'.format(shader, shading_group))
+                    if shading_group != '{}_{}SG'.format(self._asset().name, shader):
+                        self.write_error('Shading Group {0} does not follows a valid nomenclature. Rename it to {1}_{2}SG'.format(shading_group, self._asset().name, shader))
+                        self.write('Unlocking shading file ...')
+                        artella.unlock_file(shading_path)
+                        return False
+            self.write_ok('Shader {0} has a valid shading group: {1}'.format(shader, shading_group))
             self.write('Shading groups checked successfully!')
 
             # Export shader JSON info

@@ -211,7 +211,7 @@ class BasePickerButton(QPushButton, object):
     def get_control_group(self):
         if self.scene.namespace != '':
             if self._side != '':
-                return self.scene.namespace + ':' + self._side.upper() + self._part + '_ctrlsGrp'
+                return self.scene.namespace + ':' + self._side.upper() + '_' + self._part + '_ctrlsGrp'
             else:
                 return self.scene.namespace + ':' + self._part + '_ctrlsGrp'
         else:
@@ -673,6 +673,9 @@ class ToggleButton(BasePickerButton, object):
 
         self.toggleOn.emit() if self._pressed else self.toggleOff.emit()
 
+    def mouseDoubleClickEvent(self, event):
+        event.accept()
+
     def paintEvent(self, event):
         super(ToggleButton, self).paintEvent(event)
         self._text = self._on_text if self._pressed is True else self._off_text
@@ -967,7 +970,7 @@ class FKIKSwitchButton(ToggleButton, object):
         sel = cmds.ls(sl=True)
         if len(sel) > 0:
             curr_ctrl = sel[0]
-            fk_ik_ctrl = self.part.get_button_by_name(curr_ctrl)
+            fk_ik_ctrl = self.get_part().get_button_by_name(curr_ctrl)
             if len(fk_ik_ctrl) > 0:
                 fk_ik_ctrl = fk_ik_ctrl[0].get_fk_ik_control()
                 if fk_ik_ctrl and cmds.objExists(fk_ik_ctrl):
@@ -1134,13 +1137,19 @@ class ModuleButton(BasePickerButton, object):
         from solstice_pipeline.solstice_pickers.picker import picker_window
 
         module_ctrls = self.scene.get_part_controls(self.get_part(), self.side)
-        module_ctrl = module_ctrls[0]
-        if module_ctrl == '':
-            module_ctrl = module_ctrls[1]
         window_picker = picker_window.window_picker
-        if window_picker and window_picker.namespace and window_picker.namespace.count() > 0:
-            module_ctrl = '{0}:{1}'.format(window_picker.namespace.currentText(), module_ctrl)
-        mel.eval('vlRigIt_selectModuleControls("{}")'.format(module_ctrl))
+        module_ctrl = module_ctrls[0]
+        if module_ctrl == '' or module_ctrl == '{}:'.format(window_picker.namespace.currentText()):
+            module_ctrl = module_ctrls[1]
+        try:
+            mel.eval('vlRigIt_selectModuleControls("{}")'.format(module_ctrl))
+        except Exception:
+            try:
+                if window_picker and window_picker.namespace and window_picker.namespace.count() > 0:
+                    module_ctrl = '{0}:{1}'.format(window_picker.namespace.currentText(), module_ctrl)
+                mel.eval('vlRigIt_selectModuleControls("{}")'.format(module_ctrl))
+            except Exception as e:
+                print('Impossible to select module')
 
 
 class SelectButton(BasePickerButton, object):

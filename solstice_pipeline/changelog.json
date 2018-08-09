@@ -40,7 +40,7 @@
     "Updated UI layout of Solstice Changelog",
     "Added Tray Icon to Solstice Tools",
     "Added new Check and Task System for Solstice Tools",
-    "Solstice Light Rigs Tool can import current light rigs",
+    "Solstice Light Rigs Tool can import and reference Solstice light rigs",
     "Now shaders can be created on the fly from JSON file directly from Solstice Shader Library Viewer",
     "When Shader Library is launched, it checks if the ShadersLibrary folder is sync and if not, it will sync",
     "Added Asset Viewer to Shader Library to be able to export shader info for each asset easily",
@@ -56,5 +56,21 @@
     "Improve the stabilty of Solstice Pipelinizer",
     "Solstice Pipelinizer now launches automatically Artella app (only works in Windows for now)",
     "Added Proxy/Hires tag data info into Solstice Tagger Tool"
+  ],
+  "5.0":
+  [
+    "Nos Solstice Pipelinizer does not uses a JSON file to read user data",
+    "Fixed error with Solstice Picker Script loading",
+    "Added WIP version of Solstice Outliner Tool",
+    "Added link to Solstice Pickers Documentation in Solstice Picker tool",
+    "Added Anim School Picker Tool for Mac and Windows",
+    "Added Studio Library tool direct link to Solstice Picker Tool",
+    "Added Anim School Summer Picker",
+    "Updated documentation for Solstice Picker Tool",
+    "Fixed error when selecting modules on Solstice Picker",
+    "Fixed error when selecting some facial controls on Solstice Picker",
+    "Fixed error when select picker control with namespace on Solstice Picker",
+    "Fixed multiple bugs related wit FK/IK functionality on Solstice Picker",
+    "Fixed multiple bugs related with command for facial pickers on Solstice Picker"
   ]
 }

@@ -163,17 +163,28 @@ class UserWidget(QWidget, object):
 
         try:
             # Make sure that user_login.json file is sync
-            user_login_file = os.path.normpath(os.path.join(sp.get_solstice_project_path(), 'Assets', 'Scripts', 'PIPELINE', '__working__','user_login.json'))
+            user_login_file = os.path.normpath(os.path.join(sp.get_solstice_project_path(), 'Assets', 'Scripts', 'PIPELINE', '__working__', 'user_login.json'))
             if not os.path.isfile(user_login_file):
                 artella.synchronize_file(user_login_file)
             if not user_login_file:
                 sp.logger.debug('Error during logging into Artella, please try it later!')
                 return False
 
+            # We force the unlock of the file
+            try:
+                artella.unlock_file(user_login_file)
+            except Exception as e:
+                pass
+
             user_name = '{0}_{1}'.format(getpass.getuser(), sys.platform)
+            user_pixmap = solstice_resource.pixmap(name='no_user', category='images', extension='png')
             data = python.load_json(user_login_file)
             if user_name not in data['users'.title()]:
-                artella.lock_file(user_login_file)
+                valid_lock = artella.lock_file(user_login_file, force=True)
+                if not valid_lock:
+                    sp.logger.debug('Impossible to get user avatar. Applying default one ...')
+                    self._update_user_info(pixmap=user_pixmap)
+                    return
                 try:
                     file_status = artella.get_status(user_login_file)
                     file_info = file_status.references.values()[0]
@@ -181,7 +192,8 @@ class UserWidget(QWidget, object):
                     sp.logger.debug('ID: {}'.format(user_id))
                     if not user_id:
                         sp.logger.debug('Error during logging into Artella, please try it later!')
-                        return False
+                        self._update_user_info(pixmap=user_pixmap)
+                        return
                     data['users'.title()][user_name] = user_id
                     python.write_json(user_login_file, data)
                     artella.upload_new_asset_version(user_login_file, 'Added user: {}'.format(user_name))
@@ -189,13 +201,13 @@ class UserWidget(QWidget, object):
                 except Exception as e:
                     sp.logger.error(str(e))
                     artella.unlock_file(user_login_file)
-                    return False
+                    self._update_user_info(pixmap=user_pixmap)
+                    return
             else:
                 user_id = data['users'.title()][user_name]
 
             user_image = artella.get_user_avatar(user_id=user_id)
             image = QImage()
-            user_pixmap = None
             try:
                 image.loadFromData(user_image.read())
                 user_pixmap = QPixmap(image)
@@ -206,6 +218,10 @@ class UserWidget(QWidget, object):
             user_pixmap = solstice_resource.pixmap(name='no_user', category='images', extension='png')
 
         self._update_user_info(pixmap=user_pixmap)
+        try:
+            artella.unlock_file(user_login_file)
+        except Exception as e:
+            pass
 
     def _update_user_info(self, pixmap):
         self.user_info.set_pixmap(pixmap)

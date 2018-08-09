@@ -13,7 +13,7 @@ import os
 import sys
 import json
 import urllib2
-import traceback
+import platform
 try:
     import psutil
 except:
@@ -80,8 +80,10 @@ def get_artella_data_folder():
     :return: str
     """
 
-    # TODO: This should not work in MAC, find a cross-platform way of doing this
-    artella_folder = os.path.join(os.getenv('PROGRAMDATA'), 'Artella')
+    if platform.system() == 'Darwin':
+        artella_folder = os.path.join(os.path.expanduser('~/Library/Application Support/'), 'Artella')
+    else:
+        artella_folder = os.path.join(os.getenv('PROGRAMDATA'), 'Artella')
 
     artella_app_version = None
     version_file = os.path.join(artella_folder, 'version_to_run_next')
@@ -100,7 +102,7 @@ def get_artella_data_folder():
 
     sp.logger.debug('ARTELLA FOLDER: {}'.format(artella_folder))
     if not os.path.exists(artella_folder):
-        QMessageBox.information(None, 'Artella App Folder {} does not exists! Solstice Launcher will continue but maybe will not as it should. Please contact Solstice TD to check this problem!')
+        QMessageBox.information(None, 'Artella App Folder {} does not exists! Please contact Solstice TD!')
 
     return artella_folder
 

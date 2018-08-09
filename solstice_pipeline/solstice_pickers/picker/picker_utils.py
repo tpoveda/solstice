@@ -22,6 +22,7 @@ import maya.cmds as cmds
 import maya.mel as mel
 import maya.OpenMayaUI as OpenMayaUI
 
+import solstice_pipeline as sp
 
 # --------------------------------------------------------------------------------------------
 scripts_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'scripts')
@@ -113,11 +114,59 @@ def load_script(name):
 
     script_to_load = os.path.join(scripts_path, name)
     if not os.path.isfile(script_to_load):
-        cmds.error('ERROR: Impossible to load {} script'.format(name))
+        sp.logger.error('ERROR: Impossible to load {} script'.format(name))
         return
     try:
+        sp.logger.debug('Loading MEL script: {}'.format(name))
         mel.eval('source "{}"'.format(script_to_load).replace('\\', '/'))
+        sp.logger.debug('MEL script {} loaded successfully!'.format(name))
     except Exception as e:
         cmds.error('ERROR: Impossible to evaluation {} script'.format(name))
         print '-' * 100
         print str(e)
+
+
+def get_mirror_control(ctrl_name):
+    """
+    Mirror control
+    :param ctrl_name: str
+    """
+
+    old_side = None
+    new_side = None
+    sides_list = ['l', 'r', 'L', 'R']
+    side_formats = []
+    for side in sides_list:
+        side_formats.append('{0}_'.format(side))
+        side_formats.append('_{0}_'.format(side))
+        side_formats.append('_{0}'.format(side))
+
+    # If the control name, we do not take in accout namespace
+    name_parts = ctrl_name.rpartition(':')
+    namespace = None
+    if len(name_parts) > 1:
+        namespace = name_parts[0]
+    ctrl_name = name_parts[2]
+
+    for format in side_formats:
+        if format in ctrl_name:
+            for side in sides_list:
+                if side in format:
+                    old_side = side
+                    break
+
+    if old_side is None:
+        return
+
+    if old_side == 'l' or old_side == 'L':
+        new_side = 'R'
+    elif new_side == 'r' or old_side == 'R':
+        new_side = 'L'
+
+    if new_side is None:
+        return
+
+    if namespace:
+        return namespace + ':' + ctrl_name.replace(old_side, new_side)
+    else:
+        return ctrl_name.replace(old_side, new_side)

@@ -171,6 +171,4 @@ class LightRigManager(solstice_windows.Window, object):
 
 
 def run():
-    reload(solstice_sync_dialog)
-    reload(solstice_qt_utils)
     LightRigManager.run()

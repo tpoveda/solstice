@@ -338,6 +338,16 @@ def get_solstice_production_path():
         return None
 
 
+def get_externals_path():
+    """
+    Returns to Solstice external files
+    :return: str
+    """
+
+    root_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(root_path, 'externals')
+
+
 def get_asset_version(name):
     """
     Returns the version of a specific given asset (model_v001, return [v001, 001, 1])
@@ -420,8 +430,13 @@ def update_tools():
 
 
 def message(msg, title='Solstice Tools'):
-    if tray:
-        tray.show_message(title=title, msg=msg)
+    if sys.platform == 'win32':
+        if tray:
+            tray.show_message(title=title, msg=msg)
+        else:
+            logger.debug(str(msg))
+    else:
+        logger.debug(str(msg))
 
 
 def open_artella_project():

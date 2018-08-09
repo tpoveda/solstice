@@ -18,7 +18,6 @@ from solstice_pipeline.solstice_pickers.picker import picker_view
 from solstice_pipeline.solstice_pickers.picker import picker_commands as commands
 
 
-
 class Picker(QWidget, object):
     def __init__(self, data_path=None, image_path=None, parent=None):
         super(Picker, self).__init__(parent=parent)

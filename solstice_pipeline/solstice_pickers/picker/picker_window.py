@@ -57,14 +57,16 @@ class PickerWindow(QWidget, object):
         self.pickers_layout = None
         self.dock_window = None
 
+        if not self._init_setup():
+            self.close()
+            return
+
         self.custom_ui()
 
         global window_picker
         window_picker = self
 
-        if not self._init_setup():
-            self.close()
-            return
+        self.update_pickers()
 
     def get_full_window(self):
         return self._full_window
@@ -220,6 +222,8 @@ class PickerWindow(QWidget, object):
         if not os.path.exists(utils.scripts_path):
             cmds.error('Solstice Picker Scripts not found!')
 
+        sp.logger.debug('Loading pickers MEL scripts ...')
+
         utils.load_script('vlRigIt_getModuleFromControl.mel')
         utils.load_script('vlRigIt_getControlsFromModuleList.mel')
         utils.load_script('vlRigIt_selectModuleControls.mel')
@@ -241,12 +245,10 @@ class PickerWindow(QWidget, object):
             data_path=self.get_body_picker_data(),
             image_path=os.path.join(self._images_path, '{}_body.svg'.format(self.char_name.lower())))
 
-
     def get_facial_picker(self):
         return picker_widget.Picker(
             data_path=self.get_facial_picker_data(),
             image_path=os.path.join(self._images_path, '{}_facial.svg'.format(self.char_name.lower())))
-
 
     def update_pickers(self):
         """
@@ -255,6 +257,9 @@ class PickerWindow(QWidget, object):
 
         for picker in [self.body_picker, self.facial_picker]:
             picker.namespace = self.namespace.currentText()
+
+            # Called to update the FK/IK state of Picker
+            picker.view.scene().update_state()
 
     def reload_data(self):
         """

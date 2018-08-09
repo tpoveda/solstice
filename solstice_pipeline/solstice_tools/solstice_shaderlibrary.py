@@ -794,14 +794,14 @@ class ShaderLibrary(solstice_windows.Window, object):
 
         return ''
 
-    def export_asset_shaders(self, asset):
+    def export_asset_shaders(self, asset, status='published'):
         if asset is None:
             sp.logger.debug('Given Asset to export is not valid! Aborting operation ...')
             return
 
-        asset.sync(sync_type='shading', status='published')
-        shading_path = asset.get_asset_file(file_type='shading', status='published')
-        if not os.path.isfile(shading_path):
+        asset.sync(sync_type='shading', status=status)
+        shading_path = asset.get_asset_file(file_type='shading', status=status)
+        if shading_path is None or not os.path.isfile(shading_path):
             sp.logger.error('Last published shading file {} is not sync in your computer!'.format(shading_path))
             return
 
@@ -823,6 +823,8 @@ class ShaderLibrary(solstice_windows.Window, object):
         children = cmds.listRelatives(grp, type='transform', allDescendents=True, fullPath=True)
         for child in children:
             child_shapes = cmds.listRelatives(child, shapes=True, fullPath=True)
+            if not child_shapes:
+                continue
             for shape in child_shapes:
                 json_data[grp][shape] = dict()
                 shading_groups = cmds.listConnections(shape, type='shadingEngine')
@@ -978,7 +980,7 @@ class ShaderLibrary(solstice_windows.Window, object):
 
     def _on_asset_click(self, asset):
         sp.logger.debug('Generating Shading info for asset: {}'.format(asset.name))
-        self.export_asset_shaders(asset=asset)
+        self.export_asset_shaders(asset=asset, status='published')
 
 
 def run():

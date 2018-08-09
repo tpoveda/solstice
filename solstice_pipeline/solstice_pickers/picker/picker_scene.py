@@ -115,12 +115,13 @@ class PickerScene(QGraphicsScene, object):
         for btn in self._buttons:
             btn.update_hierarchy()
 
-        for part in self.parts:
-            if part.has_fk_ik():
-                if part.get_fk_ik(as_text=True) == 'FK':
-                    part.set_fk()
-                else:
-                    part.set_ik()
+        # Moved to update_pickers() function in picker_window because at this point namespace is not updated
+        # for part in self.parts:
+        #     if part.has_fk_ik():
+        #         if part.get_fk_ik(as_text=True) == 'FK':
+        #             part.set_fk()
+        #         else:
+        #             part.set_ik()
 
     def reload_data(self):
         """

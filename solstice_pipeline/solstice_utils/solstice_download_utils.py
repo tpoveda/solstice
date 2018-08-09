@@ -10,6 +10,7 @@
 
 import os
 import re
+import sys
 import json
 import time
 import shutil
@@ -108,13 +109,19 @@ def get_version(s):
     return None
 
 
-def update_tools(get_versions=False, console=None):
+def update_tools(get_versions=False):
     temp_path = tempfile.mkdtemp()
-    maya_path = os.path.join(os.path.expanduser('~/'), 'maya')
-    if not os.path.exists(maya_path):
+
+    if sys.platform == 'win32':
         maya_path = os.path.join(os.path.expanduser("~/Documents"), 'maya')
+    elif sys.platform == 'darwin':
+        maya_path = os.path.join(os.path.expanduser('~/Library/Preferences'), 'maya')
+    else:
+        print('Solstice Tools are not compatible with your OS {}'.format(sys.platform))
+        return
+    print('Maya Installation Path found: {}'.format(maya_path))
     if not os.path.exists(maya_path):
-        print('ERROR: Maya Documents path {} does not exists" Check that Maya is installed on your system!'.format(maya_path))
+        print('Maya path {} does not exists" Check that Maya is installed on your system!'.format(maya_path))
         return
     tools_file = 'solstice_pipeline_mac.zip'
     repo_url = 'http://cgart3d.com/solstice_pipeline/'

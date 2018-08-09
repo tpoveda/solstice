@@ -16,6 +16,7 @@ import json
 import stat
 import platform
 import subprocess
+import webbrowser
 from tempfile import mkstemp
 from shutil import move
 
@@ -402,3 +403,12 @@ def add_unique_postfix(fn):
             return uni_fn
 
     return None
+
+
+def open_web(url):
+    """
+    Open given web URL in user web browser
+    :param url: str
+    """
+
+    webbrowser.open(url)

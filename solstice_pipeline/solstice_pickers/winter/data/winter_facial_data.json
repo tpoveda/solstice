@@ -97,7 +97,7 @@
             "gizmo": "rotate",
             "text": "EYESFK",
             "color":[246,227,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('C_eyes1_fk_eye_ctrl')"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('C_eyes1_fk_eye_ctrl')"
           },
           {
             "x": -217,
@@ -110,7 +110,7 @@
             "gizmo": "rotate",
             "text": "EYEBULBS",
             "color":[246,227,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('eyebulbs_set'); cmds._select_control('C_eyes1_fk_eye_ctrl', replace=False);"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('eyebulbs_set'); cmds.select_control('C_eyes1_fk_eye_ctrl', replace=False);"
           },
           {
             "x": "-211",
@@ -121,7 +121,7 @@
             "text":"EYES",
             "color":[246,227,255],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('eyebulbs_set');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('eyebulbs_set');"
           }
         ]
       },
@@ -212,7 +212,7 @@
             "text":"TONGUE",
             "color":[246,227,255],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('tongue_set');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('tongue_set');"
           }
         ]
       },
@@ -739,7 +739,7 @@
             "text": "HIEYEBROWS",
             "color":[246,227,255],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('hiEyebrows_set');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('hiEyebrows_set');"
           },
           {
             "x": "-72",
@@ -750,7 +750,7 @@
             "text": "EYEBROWS",
             "color":[246,227,255],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('eyebrows_set');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('eyebrows_set');"
           },
            {
             "x": "-72",
@@ -761,7 +761,7 @@
             "text": "EYELIDS",
             "color":[246,227,255],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('eyelids_set');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('eyelids_set');"
           },
           {
             "x": "-72",
@@ -772,7 +772,7 @@
             "text": "CHEEKS",
             "color":[100,255,0],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('cheeks_set');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('cheeks_set');"
           },
           {
             "x": "132",
@@ -783,7 +783,7 @@
             "text": "NOSE",
             "color":[246,227,255],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('nose_set');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('nose_set');"
           },
           {
             "x": "-72",
@@ -794,7 +794,7 @@
             "text": "LIPS",
             "color":[85,223,255],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('lips_set');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('lips_set');"
           },
           {
             "x": "-72",
@@ -805,7 +805,7 @@
             "text": "LIPS EXTRA",
             "color":[255,206,0],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('lipsExtra_set');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('lipsExtra_set');"
           },
            {
             "x": "216",
@@ -816,7 +816,7 @@
             "text": "JAW",
             "color":[246,227,255],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('jaw1_set');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('jaw1_set');"
           },
           {
             "x": "-213",
@@ -826,7 +826,7 @@
             "width":"60",
             "color":[225,255,110],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('R_upBackTeeth_ctrl'); cmds._select_control('R_upMidTeeth_ctrl', replace=False); cmds._select_control('C_upTeeth_ctrl', replace=False); cmds._select_control('L_upBackTeeth_ctrl', replace=False); cmds._select_control('L_upMidTeeth_ctrl', replace=False);"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('R_upBackTeeth_ctrl'); cmds.select_control('R_upMidTeeth_ctrl', replace=False); cmds.select_control('C_upTeeth_ctrl', replace=False); cmds.select_control('L_upBackTeeth_ctrl', replace=False); cmds.select_control('L_upMidTeeth_ctrl', replace=False);"
           },
           {
             "x": "-213",
@@ -836,7 +836,7 @@
             "width":"60",
             "color":[225,255,110],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('R_loBackTeeth_ctrl'); cmds._select_control('R_loMidTeeth_ctrl', replace=False); cmds._select_control('C_loTeeth_ctrl', replace=False); cmds._select_control('L_loBackTeeth_ctrl', replace=False); cmds._select_control('L_loMidTeeth_ctrl', replace=False);"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('R_loBackTeeth_ctrl'); cmds.select_control('R_loMidTeeth_ctrl', replace=False); cmds.select_control('C_loTeeth_ctrl', replace=False); cmds.select_control('L_loBackTeeth_ctrl', replace=False); cmds.select_control('L_loMidTeeth_ctrl', replace=False);"
           },
           {
             "x": "27",
@@ -846,7 +846,7 @@
             "width":"92",
             "color":[255,255,110],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('R_hiEyebrow_ctrl');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('R_hiEyebrow_ctrl');"
           },
            {
             "x": "200",
@@ -856,7 +856,7 @@
             "width":"92",
             "color":[255,255,110],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('L_hiEyebrow_ctrl');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('L_hiEyebrow_ctrl');"
           },
            {
             "x": "108",
@@ -866,7 +866,7 @@
             "width":"100",
             "color":[255,255,110],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('jaw1_jaw_ctrl');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('jaw1_jaw_ctrl');"
           },
            {
             "x": "117",
@@ -876,7 +876,7 @@
             "width":"85",
             "color":[255,255,110],
             "glowColor":[255,255,255],
-            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds._select_control('jaw1_chin_ctrl');"
+            "command":"from pickers.picker import solstice_pickerCommands as cmds; cmds.select_control('jaw1_chin_ctrl');"
           },
            {
             "x": "-271",
