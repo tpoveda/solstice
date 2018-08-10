@@ -9,17 +9,20 @@
 # ==================================================================="""
 
 import weakref
+import collections
 
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 from solstice_qt.QtGui import *
 
 import maya.cmds as cmds
+import maya.OpenMaya as OpenMaya
 
-from solstice_pipeline.solstice_gui import solstice_windows
-from solstice_pipeline.solstice_utils import solstice_node
+from solstice_pipeline.solstice_utils import solstice_node, solstice_maya_utils, solstice_qt_utils
+from solstice_pipeline.solstice_gui import solstice_messagehandler
+from solstice_pipeline.resources import solstice_resource
 
-reload(solstice_node)
+global solstice_outliner_window
 
 
 class OutlinerListView(QListView, object):
@@ -110,25 +113,94 @@ class OutlinerListModel(QAbstractListModel):
         return True
 
 
-class SolsticeOutliner(solstice_windows.Window, object):
+class SolsticeOutliner(QWidget, object):
 
-    name = 'Solstice_Outliner'
-    title = 'Solstice Tools - Outliner'
+    name = 'SolsticeOutliner'
+    title = 'Solstice Outliner'
     version = '1.0'
-    docked = True
 
-    def __init__(self, name='OutlinerWindow', parent=None, **kwargs):
-        super(SolsticeOutliner, self).__init__(name=name, parent=parent, **kwargs)
+    instances = list()
+
+    def __init__(self, parent=solstice_maya_utils.get_maya_window()):
+        super(SolsticeOutliner, self).__init__(parent=parent)
+
+        SolsticeOutliner._delete_instances()
+        self.__class__.instances.append(weakref.proxy(self))
+        cmds.select(clear=True)
+
+        self.assets = list()
+
+        self.custom_ui()
+        self.setup_signals()
+
+        global solstice_outliner_window
+        solstice_outliner_window = self
 
     def custom_ui(self):
-        super(SolsticeOutliner, self).custom_ui()
 
-        self.set_logo('solstice_outliner_logo')
+        self.main_layout = QGridLayout()
+        self.main_layout.setContentsMargins(5, 5, 5, 5)
+        self.parent().layout().addLayout(self.main_layout)
+
+        self.refresh_btn = QPushButton()
+        self.refresh_btn.setIcon(solstice_resource.icon('refresh'))
+        self.refresh_btn.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        self.main_layout.addWidget(self.refresh_btn, 0, 0, 1, 1)
+
+        scroll_widget = QWidget()
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setStyleSheet('QScrollArea { background-color: rgb(57,57,57);}')
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scroll_area.setWidget(scroll_widget)
+
+        self.assets_layout = QVBoxLayout()
+        self.assets_layout.setContentsMargins(1, 1, 1, 1)
+        self.assets_layout.setSpacing(0)
+        # self.assets_layout.addStretch()
+        scroll_widget.setLayout(self.assets_layout)
+        self.main_layout.addWidget(scroll_area, 1, 0, 1, 3)
 
         self.outliner = OutlinerListView()
-        self.main_layout.addWidget(self.outliner)
+        self.assets_layout.addWidget(self.outliner)
 
         self.register_callbacks()
+
+    def setup_signals(self):
+        pass
+
+    # ==========================================================================================================
+
+    @staticmethod
+    def _delete_instances():
+        for ins in SolsticeOutliner.instances:
+            try:
+                ins.setParent(None)
+                ins.deleteLater()
+            except Exception:
+                pass
+
+            SolsticeOutliner.instances.remove(ins)
+            del ins
+
+    # ==========================================================================================================
+
+    def append_asset(self, asset):
+        self.assets.append(asset)
+        self.assets_layout.insertWidget(0, asset)
+
+    def remove_asset(self, asset):
+        pass
+
+    def clear_assets(self):
+        del self.assets[:]
+        while self.assets_layout.count():
+            child = self.assets_layout.takeAt(0)
+            if child.widget() is not None:
+                child.widget().deleteLater()
+
+        # self.assets_layout.setSpacing(0)
+        # self.assets_layout.addStretch()
 
     def register_callbacks(self):
         pass
@@ -146,6 +218,39 @@ class SolsticeOutliner(solstice_windows.Window, object):
         #     self.register_callbacks()
         #     self.outliner.update_model()
 
+    # ==========================================================================================================
+
+    def run(self):
+        return self
+
+
+class SolsticeOutlinerManager(object):
+    def __init__(self):
+        self.widget_tree = collections.defaultdict(list)
+
+        self.ui = SolsticeOutliner()
+        self.io = solstice_messagehandler.MessageHandler()
+        self.callbacks = OpenMaya.MCallbackIdArray()
+
+        self.custom_ui()
+        self.setup_signal()
+
+    def custom_ui(self):
+        pass
+
+    def setup_signal(self):
+        pass
+
+    # ==========================================================================================================
+
+    def add_callbacks(self):
+        pass
+
+    def remove_callbacks(self):
+        pass
+
+    # ==========================================================================================================
+
     @staticmethod
     def get_tag_data_nodes():
         tag_nodes = list()
@@ -160,5 +265,21 @@ class SolsticeOutliner(solstice_windows.Window, object):
 
         return tag_nodes
 
+    # ==========================================================================================================
+
+    def _on_selection_changed(self):
+        pass
+
+    def _on_refresh_outliner(self):
+        pass
+
+    # ==========================================================================================================
+
+    def show(self):
+        self.add_callbacks()
+        self._on_refresh_outliner()
+        self.ui.show()
+
+
 def run():
-    SolsticeOutliner.run()
+    solstice_qt_utils.dock_window(SolsticeOutliner)

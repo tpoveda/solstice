@@ -21,12 +21,11 @@ from solstice_qt.QtWidgets import *
 import maya.cmds as cmds
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_user, solstice_grid, solstice_asset, solstice_assetviewer, solstice_assetbrowser, solstice_published_info_widget, solstice_login
-from solstice_utils import solstice_python_utils, solstice_maya_utils, solstice_artella_utils, solstice_image
-from solstice_tools import solstice_sequencer
-from resources import solstice_resource
-from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_browser_utils, solstice_worker
-from solstice_gui import solstice_label, solstice_breadcrumb, solstice_navigationwidget, solstice_filelistwidget, solstice_splitters
+from solstice_pipeline.solstice_gui import solstice_windows, solstice_user, solstice_asset, solstice_assetviewer, solstice_splitters
+from solstice_pipeline.solstice_utils import solstice_python_utils, solstice_artella_utils
+from solstice_pipeline.solstice_tools import solstice_sequencer
+from solstice_pipeline.solstice_utils import solstice_artella_classes, solstice_qt_utils
+from solstice_pipeline.resources import solstice_resource
 
 
 class PipelinizerSettings(QDialog, object):
@@ -108,16 +107,13 @@ class PipelinizerSettings(QDialog, object):
 
 class Pipelinizer(solstice_windows.Window, object):
 
-    name = 'Solstice_Pipelinizer'
+    name = 'SolsticePipelinizer'
     title = 'Solstice Tools - Artella Pipeline'
-    version = '1.0'
-    docked = True
+    version = '1.5'
 
-    def __init__(self, name='PipelinizerWindow', parent=None, **kwargs):
+    def __init__(self):
         self._projects = None
-        super(Pipelinizer, self).__init__(name=name, parent=parent, **kwargs)
-
-        self.setWindowFlags(self.windowFlags() | Qt.WA_DeleteOnClose)
+        super(Pipelinizer, self).__init__()
 
     def _get_separator(self):
         v_div_w = QWidget()
@@ -523,24 +519,6 @@ class Pipelinizer(solstice_windows.Window, object):
 
 # ============================================================================================================
 
-# if not 'pipelinizer_window' in globals():
-pipelinizer_window = None
-
-
-def pipelinizer_window_closed(object=None):
-    global pipelinizer_window
-    if pipelinizer_window is not None:
-        pipelinizer_window.cleanup()
-        pipelinizer_window.parent().setParent(None)
-        pipelinizer_window.parent().deleteLater()
-        pipelinizer_window = None
-
-
-def pipelinizer_window_destroyed(object=None):
-    global pipelinizer_window
-    pipelinizer_window = None
-
-
 def run():
     # reload(solstice_python_utils)
     # reload(solstice_maya_utils)
@@ -580,4 +558,5 @@ def run():
         if result == QMessageBox.Yes:
             cmds.SaveScene()
 
-    Pipelinizer.run()
+    win = Pipelinizer().show()
+

@@ -301,3 +301,21 @@ def get_horizontal_separator():
     v_div.setFrameShadow(QFrame.Sunken)
     v_div_l.addWidget(v_div)
     return v_div_w
+
+
+def dock_window(window_class):
+    try:
+        cmds.deleteUI(window_class.name)
+    except Exception:
+        pass
+
+    main_control = cmds.workspaceControl(window_class.name, ttc=["AttributeEditor", -1], iw=300, mw=True, wp='preferred', label=window_class.title)
+
+    control_widget = OpenMayaUI.MQtUtil.findControl(window_class.name)
+    control_wrap = wrapInstance(long(control_widget), QWidget)
+    control_wrap.setAttribute(Qt.WA_DeleteOnClose)
+    win = window_class(control_wrap)
+
+    cmds.evalDeferred(lambda *args: cmds.workspaceControl(main_control, e=True, rs=True))
+
+    return win.run()

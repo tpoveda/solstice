@@ -23,22 +23,10 @@ import solstice_pipeline as sp
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_artella_utils as artella
 from solstice_utils import solstice_naming_utils as naming
-from solstice_utils import solstice_artella_classes, solstice_qt_utils, solstice_python_utils
+from solstice_utils import solstice_qt_utils, solstice_python_utils
 from solstice_gui import solstice_splitters, solstice_published_info_widget, solstice_sync_dialog, solstice_buttons
 from solstice_tools import solstice_publisher
 from resources import solstice_resource
-
-reload(img)
-reload(artella)
-reload(solstice_artella_classes)
-reload(solstice_qt_utils)
-reload(solstice_python_utils)
-reload(solstice_splitters)
-reload(solstice_published_info_widget)
-reload(solstice_sync_dialog)
-reload(solstice_buttons)
-reload(solstice_resource)
-reload(solstice_publisher)
 
 # ================================================================================================================
 
@@ -371,9 +359,10 @@ class AssetWidget(QWidget, object):
                         elif category == 'shading':
                             ref_path = os.path.join(server_path, ref_data.name)
                             file_name = os.path.basename(ref_path)
-                            if os.path.isfile(ref_path) and file_name == '{}_SHD.ma'.format(self.name):
-                                ref_history = artella.get_asset_history(ref_path)
-                                server_data[category] = ref_history
+                            if os.path.isfile(ref_path):
+                                if file_name == '{}_SHD.ma'.format(self.name) or file_name == '{}_shd.ma'.format(self.name):
+                                    ref_history = artella.get_asset_history(ref_path)
+                                    server_data[category] = ref_history
                         else:
                             # TODO: Create custom sync dialog
                             ref_path = os.path.join(server_path, ref_data.name)

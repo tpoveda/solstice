@@ -15,18 +15,19 @@ from collections import OrderedDict
 from solstice_qt.QtCore import *
 from solstice_qt.QtWidgets import *
 
-from solstice_gui import solstice_dialog, solstice_accordion, solstice_group
+from solstice_gui import solstice_dialog, solstice_accordion, solstice_splitters
 
 
 class SolsticeChangelog(solstice_dialog.Dialog, object):
 
-    name = 'Solstice_Changelog'
+    name = 'SolsticeChangelog'
     title = 'Solstice Tools - Changelog'
     version = '1.0'
-    docked = False
 
-    def __init__(self, name='ChangelogWindow', parent=None):
-        super(SolsticeChangelog, self).__init__(name=name, parent=parent)
+    def __init__(self):
+        super(SolsticeChangelog, self).__init__()
+
+        self.setWindowFlags(self.windowFlags() ^ Qt.FramelessWindowHint)
 
     def custom_ui(self):
         super(SolsticeChangelog, self).custom_ui()
@@ -49,8 +50,11 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll.setWidgetResizable(True)
         scroll.setFocusPolicy(Qt.NoFocus)
+        ok_btn = QPushButton('OK')
+        ok_btn.clicked.connect(self.close)
         self.main_layout.addWidget(scroll)
         self.main_layout.setAlignment(Qt.AlignTop)
+        self.main_layout.addWidget(ok_btn)
         scroll.setWidget(central_widget)
         central_widget.setLayout(scroll_layout)
         self.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))

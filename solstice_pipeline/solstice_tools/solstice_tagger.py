@@ -636,19 +636,18 @@ class ShadersEditor(TaggerEditor, object):
 
 class SolsticeTagger(solstice_windows.Window, object):
 
-    name = 'Solstice_Tagger'
+    name = 'SolsticeTagger'
     title = 'Solstice Tools - Tagger'
     version = '1.0'
-    docked = False
 
     tagDataCreated = Signal()
 
     current_selection = 'scene'
     tag_attributes = ['types', 'selections', 'description']
 
-    def __init__(self, name='TaggerWindow', parent=None, **kwargs):
+    def __init__(self):
 
-        super(SolsticeTagger, self).__init__(name=name, parent=parent, **kwargs)
+        super(SolsticeTagger, self).__init__()
         self.add_callback(OpenMaya.MEventMessage.addEventCallback('SelectionChanged', self._on_selection_changed, self))
 
     def custom_ui(self):
@@ -984,9 +983,6 @@ class SolsticeTagger(solstice_windows.Window, object):
         else:
             cmds.select(curr_selection)
 
+
 def run():
-    reload(utils)
-    reload(solstice_grid)
-    reload(solstice_buttons)
-    reload(solstice_label)
-    SolsticeTagger.run()
+    win = SolsticeTagger.run().show()

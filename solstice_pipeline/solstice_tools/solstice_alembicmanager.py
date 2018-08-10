@@ -85,10 +85,9 @@ class AlembicManager(solstice_windows.Window, object):
     name = 'Solstice_AlembicManager'
     title = 'Solstice Tools - Alembic Manager'
     version = '1.0'
-    docked = True
 
-    def __init__(self, name='AlembicManagerWindow', parent=None):
-        super(AlembicManager, self).__init__(name=name, parent=parent)
+    def __init__(self):
+        super(AlembicManager, self).__init__()
 
     def custom_ui(self):
         super(AlembicManager, self).custom_ui()
@@ -106,4 +105,4 @@ class AlembicManager(solstice_windows.Window, object):
 
 
 def run():
-    AlembicManager.run()
+    win = AlembicManager().show()

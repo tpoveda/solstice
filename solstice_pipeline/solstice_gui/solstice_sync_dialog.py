@@ -133,7 +133,9 @@ class SolsticeSyncFile(SolsticeSync, object):
         for p in self._files:
             file_path = os.path.relpath(p, sp.get_solstice_assets_path())
             self._progress_text.setText('Syncing file: {0} ... Please wait!'.format(file_path))
-            artella.synchronize_file(p)
+            valid_sync = artella.synchronize_file(p)
+            if valid_sync is None or valid_sync == {}:
+                event.set()
             sp.register_asset(p)
         event.set()
 
@@ -166,7 +168,12 @@ class SolsticeSyncPath(SolsticeSync, object):
         for p in self._paths:
             file_path = os.path.relpath(p, sp.get_solstice_assets_path())
             self._progress_text.setText('Syncing files of folder: {0} ... Please wait!'.format(file_path))
-            artella.synchronize_path(p)
+            try:
+                artella.synchronize_path(p)
+            except Exception as e:
+                sp.logger.error('Impossible to sync files ... Maybe Artella is down! Try it later ...')
+                sp.logger.error(str(e))
+                event.set()
             sp.register_asset(p)
         event.set()
 

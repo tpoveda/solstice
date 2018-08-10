@@ -69,10 +69,9 @@ class AnimTools(solstice_windows.Window, object):
     name = 'Solstice_AnimTools'
     title = 'Solstice Tools - Animation Tools'
     version = '1.0'
-    docked = True
 
     def __init__(self, name='AnimToolsWindow', parent=None):
-        super(AnimTools, self).__init__(name=name, parent=parent)
+        super(AnimTools, self).__init__()
 
     def custom_ui(self):
         super(AnimTools, self).custom_ui()
@@ -88,4 +87,4 @@ class AnimTools(solstice_windows.Window, object):
 
 
 def run():
-    AnimTools.run()
+    win = AnimTools.show()

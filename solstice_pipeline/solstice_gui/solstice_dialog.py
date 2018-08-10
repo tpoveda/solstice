@@ -25,7 +25,6 @@ class Dialog(QDialog, object):
     name = 'Solstice Tools'
     title = 'Solstice Tools'
     version = '1.0'
-    dock = False
 
     def __init__(self, **kwargs):
         super(Dialog, self).__init__(parent=solstice_maya_utils.get_maya_window())
@@ -33,7 +32,8 @@ class Dialog(QDialog, object):
         # Window needs to have a unique name to avoid problems with Maya workspaces
         self.callbacks = list()
 
-        self.setWindowTitle(kwargs.get('title', self.title))
+        self.setObjectName(self.name)
+        self.setWindowTitle('{0} - {1}'.format(self.title, self.version))
         self.setWindowFlags(self.windowFlags() | Qt.Window)
         self.setFocusPolicy(Qt.StrongFocus)
         self.main_layout = None

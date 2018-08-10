@@ -1011,17 +1011,17 @@ class PublishTaskGroup(solstice_taskgroups.TaskGroup, object):
 
 class SolsticePublisher(solstice_dialog.Dialog, object):
 
-    name = 'Solstice_Publisher'
+    name = 'SolsticePublisher'
     title = 'Solstice Tools - Publisher'
     version = '1.0'
     docked = False
 
-    def __init__(self, name='SolsticePublisherWindow', asset=None, new_working_version=False, parent=None, **kwargs):
+    def __init__(self, asset=None, new_working_version=False, **kwargs):
         self._asset = asset
         self._new_working_version = new_working_version
         self.result = False
 
-        super(SolsticePublisher, self).__init__(name=name, parent=parent, **kwargs)
+        super(SolsticePublisher, self).__init__(**kwargs)
 
     def custom_ui(self):
         super(SolsticePublisher, self).custom_ui()
@@ -1363,11 +1363,6 @@ class AssetPublisherWidget(QWidget, object):
 
 
 def run(asset=None, new_working_version=False):
-    reload(solstice_validators)
-    from solstice_pipeline.solstice_checks import solstice_assetchecks
-    reload(solstice_assetchecks)
-    reload(solstice_spinner)
-
     publisher_dialog = SolsticePublisher(asset=asset, new_working_version=new_working_version)
     publisher_dialog.exec_()
     return publisher_dialog.result

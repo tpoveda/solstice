@@ -18,13 +18,12 @@ from solstice_pipeline.solstice_gui import solstice_windows
 
 class DependenciesManager(solstice_windows.Window, object):
 
-    name = 'Solstice_Dependencies'
+    name = 'SolsticeDependencies'
     title = 'Solstice Tools - Dependencies Manager'
     version = '1.0'
-    dock = False
 
-    def __init__(self, name='DependenciesWindow', parent=None, **kwargs):
-        super(DependenciesManager, self).__init__(name=name, parent=parent, **kwargs)
+    def __init__(self):
+        super(DependenciesManager, self).__init__()
 
     def custom_ui(self):
         super(DependenciesManager, self).custom_ui()
@@ -32,4 +31,4 @@ class DependenciesManager(solstice_windows.Window, object):
         self.set_logo('solstice_dependenciesmanager_logo')
 
 def run():
-    DependenciesManager.run()
+    win = DependenciesManager.show()

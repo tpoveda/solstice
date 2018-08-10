@@ -29,15 +29,14 @@ class SolsticeScatter(solstice_windows.Window, object):
     name = 'Solstice_Scatter'
     title = 'Solstice Tools - Scatter Tool'
     version = '1.0'
-    docked = True
 
-    def __init__(self, name='ScatterWindow', parent=None, **kwargs):
+    def __init__(self):
 
         self._current_asset = None
         self._context = None
         self._ignore_callbacks = False
 
-        super(SolsticeScatter, self).__init__(name=name, parent=parent, **kwargs)
+        super(SolsticeScatter, self).__init__()
 
         self.add_callback(OpenMaya.MEventMessage.addEventCallback('NewSceneOpened', self._update_ui, self))
         self.add_callback(OpenMaya.MEventMessage.addEventCallback('SceneOpened', self._update_ui, self))
@@ -333,11 +332,6 @@ class SolsticeScatter(solstice_windows.Window, object):
 
 
 def run():
-
-    reload(solstice_asset)
-    reload(solstice_assetviewer)
-    reload(solstice_mash_utils)
-
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()
     if not solstice_artella_utils.check_artella_plugin_loaded():
@@ -347,4 +341,4 @@ def run():
     # Update Solstice Project Environment Variable
     sp.update_solstice_project_path()
 
-    SolsticeScatter.run()
+    win = SolsticeScatter().show()

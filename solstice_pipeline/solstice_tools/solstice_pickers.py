@@ -29,10 +29,9 @@ class SolsticePickers(solstice_windows.Window, object):
     name = 'Solstice_Pickers'
     title = 'Solstice Tools - Picker Tool'
     version = '1.0'
-    docked = False
 
-    def __init__(self, name='PickersWindow', parent=None, **kwargs):
-        super(SolsticePickers, self).__init__(name=name, parent=parent, **kwargs)
+    def __init__(self):
+        super(SolsticePickers, self).__init__()
 
     def custom_ui(self):
         super(SolsticePickers, self).custom_ui()
@@ -246,8 +245,5 @@ class SolsticePickers(solstice_windows.Window, object):
         utils.load_script('vl_resetAttributes.mel')
         utils.load_script('vl_contextualMenuBuilder.mel')
 
-
-
-
 def run():
-    SolsticePickers.run()
+    win = SolsticePickers().show()

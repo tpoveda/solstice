@@ -79,13 +79,12 @@ class LightRig(QWidget, object):
 
 class LightRigManager(solstice_windows.Window, object):
 
-    name = 'Solstice_LightRigs'
+    name = 'SolsticeLightRigManager'
     title = 'Solstice Tools - Light Rigs Manager'
     version = '1.0'
-    docked = False
 
-    def __init__(self, name='LightRigWindow', parent=None, **kwargs):
-        super(LightRigManager, self).__init__(name=name, parent=parent, **kwargs)
+    def __init__(self):
+        super(LightRigManager, self).__init__()
 
     def custom_ui(self):
         super(LightRigManager, self).custom_ui()
@@ -171,4 +170,4 @@ class LightRigManager(solstice_windows.Window, object):
 
 
 def run():
-    LightRigManager.run()
+    win = LightRigManager().show()

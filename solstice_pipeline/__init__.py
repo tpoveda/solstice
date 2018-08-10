@@ -9,22 +9,14 @@
 import os
 import re
 import sys
-import glob
 import urllib2
-import pkgutil
 import datetime
 import platform
-import importlib
 import webbrowser
 from collections import OrderedDict
-if sys.version_info[:2] > (2, 7):
-    from importlib import reload
-else:
-    from imp import reload
 
 import maya.cmds as cmds
 import maya.mel as mel
-import maya.utils
 
 import solstice_pipeline
 
@@ -60,67 +52,6 @@ def update_paths():
     for subdir, dirs, files in os.walk(root_path):
         if subdir not in sys.path:
             sys.path.append(subdir)
-
-
-def get_module_names():
-    """
-    Return the name of all solstice_tools modules
-    :return: list<str>
-    """
-
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    root_name = os.path.basename(root_path)
-    ret = list()
-    for subdir, dirs, files in os.walk(root_path):
-        file_names = glob.glob(os.path.split(subdir)[0] + '/*/__init__.py')
-        for file_path in file_names:
-            directories = file_path.split(os.sep)
-            subdirectory = str.join(os.sep, directories[:directories.index(root_name)])
-            package_path = file_path.split(subdirectory)[1].replace('\\', '.')[1:].replace('.__init__.py', '').replace('.__init__.pyc', '')
-            ret.append(package_path)
-    return ret
-
-
-def import_modules():
-    mod_names = list(set(get_module_names()))
-    for mod_name in mod_names:
-        if 'userSetup' in mod_name:
-            continue
-        try:
-            importlib.import_module(mod_name)
-        except ImportError as e:
-            logger.debug('Impossible to import {} module'.format(mod_name))
-            logger.debug(str(e))
-
-        try:
-            mod = sys.modules[mod_name]
-            imported_mods = list()
-            for importer, mod_name, is_pkg in pkgutil.iter_modules(mod.__path__):
-                if 'userSetup' in mod_name:
-                    continue
-                mod_name = '{0}.{1}'.format(mod.__name__, mod_name)
-                imported_mod = importlib.import_module(mod_name)
-                imported_mods.append(imported_mod)
-                logger.debug('Module {} initialized!'.format(mod_name))
-        except Exception as e:
-            continue
-
-
-def reload_all():
-    """
-    Loops through all solstice_tools modules and reload them ane by one
-    Used to increase iteration times
-    """
-
-    for mod_name in get_module_names():
-        try:
-            if mod_name == 'solstice_pipeline':
-                continue
-            mod = sys.modules[mod_name]
-            reload(mod)
-        except Exception:
-            continue
-
 
 def create_solstice_logger():
     """
@@ -486,10 +417,26 @@ def artella_is_available():
         return False
 
 
+def reload_all():
+    # if os.environ.get('SOLSTICE_DEV_MODE', '0') == '1':
+    import inspect
+    windowed = mel.eval('$temp1=$gMainWindow')
+    if windowed:
+        scripts_dir = os.path.dirname(__file__)
+        for key, module in sys.modules.items():
+            try:
+                module_path = inspect.getfile(module)
+            except TypeError:
+                continue
+            if module_path == __file__:
+                continue
+            if module_path.startswith(scripts_dir):
+                reload(module)
+
+
 def init():
     update_paths()
     create_solstice_logger()
-    import_modules()
     reload_all()
     create_solstice_settings()
     init_solstice_environment_variables()

@@ -558,12 +558,11 @@ class ShaderViewerWidget(QWidget, object):
 
 class ShaderLibrary(solstice_windows.Window, object):
 
-    name = 'Solstice_ShaderLibrary'
+    name = 'SolsticeShaderLibrary'
     title = 'Solstice Tools - Shader Manager'
     version = '1.0'
-    dock = True
 
-    def __init__(self, name='ShaderManagerWindow', parent=None, **kwargs):
+    def __init__(self):
 
         self._valid_state = True
         self._shader_library_path = self.get_shader_library_path()
@@ -578,7 +577,7 @@ class ShaderLibrary(solstice_windows.Window, object):
             else:
                 self._valid_state = False
 
-        super(ShaderLibrary, self).__init__(name=name, parent=parent, **kwargs)
+        super(ShaderLibrary, self).__init__()
 
     def custom_ui(self):
         super(ShaderLibrary, self).custom_ui()
@@ -801,10 +800,18 @@ class ShaderLibrary(solstice_windows.Window, object):
 
         asset.sync(sync_type='shading', status=status)
         shading_path = asset.get_asset_file(file_type='shading', status=status)
-        if shading_path is None or not os.path.isfile(shading_path):
+
+        if shading_path is None:
             sp.logger.error('Last published shading file {} is not sync in your computer!'.format(shading_path))
             return
 
+        if not os.path.isfile(shading_path):
+            shading_path = shading_path.replace('SHD', 'shd')
+            if not os.path.isfile(shading_path):
+                sp.logger.error('Last published shading file {} is not sync in your computer!'.format(shading_path))
+                return
+
+        print(shading_path)
         cmds.file(shading_path, o=True, f=True)
 
         all_shading_groups = list()
@@ -984,11 +991,6 @@ class ShaderLibrary(solstice_windows.Window, object):
 
 
 def run():
-    reload(utils)
-    reload(solstice_shader_utils)
-    reload(solstice_shaderviewer)
-    reload(solstice_assetviewer)
-
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()
     if not solstice_artella_utils.check_artella_plugin_loaded():
@@ -998,4 +1000,4 @@ def run():
     # Update Solstice Project Environment Variable
     sp.update_solstice_project_path()
 
-    ShaderLibrary.run()
+    win = ShaderLibrary().show()

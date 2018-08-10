@@ -18,9 +18,6 @@ import solstice_pipeline as sp
 from solstice_gui import solstice_sequencerwidgets
 from solstice_utils import solstice_artella_utils as artella
 
-reload(solstice_sequencerwidgets)
-reload(artella)
-
 
 class SolsticeSequencer(QWidget, object):
     def __init__(self, parent=None):

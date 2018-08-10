@@ -19,13 +19,12 @@ from solstice_gui import solstice_windows
 
 
 class SnowGenerator(solstice_windows.Window, object):
-    name = 'Solstice_SnowGenerator'
+    name = 'SolsticeSnowGenerator'
     title = 'Solstice Tools - Snow Generator'
     version = '1.0'
-    docked = False
 
-    def __init__(self, name='SnowGeneratorWindow', parent=None):
-        super(SnowGenerator, self).__init__(name=name, parent=parent)
+    def __init__(self):
+        super(SnowGenerator, self).__init__()
 
         self.setMaximumWidth(350)
         self.setMaximumHeight(150)
@@ -130,4 +129,4 @@ class SnowGenerator(solstice_windows.Window, object):
 
 
 def run():
-    SnowGenerator.run()
+    win = SnowGenerator().show()

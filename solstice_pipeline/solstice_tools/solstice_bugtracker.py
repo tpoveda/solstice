@@ -30,13 +30,12 @@ from solstice_pipeline.resources import solstice_resource
 
 class BugTracker(solstice_dialog.Dialog, object):
 
-    name = 'Solstice_BugTracker'
+    name = 'SolsticeBugTracker'
     title = 'Solstice Tools - Bug Tracker'
     version = '1.0'
-    docked = False
 
-    def __init__(self, name='BugTrackerDialog', parent=None, **kwargs):
-        super(BugTracker, self).__init__(name=name, parent=parent, **kwargs)
+    def __init__(self):
+        super(BugTracker, self).__init__()
 
         self.screen_pixmap = None
 

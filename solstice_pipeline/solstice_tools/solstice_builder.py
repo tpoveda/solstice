@@ -24,13 +24,12 @@ from solstice_utils import solstice_image as img
 
 class SolsticeBuilder(solstice_windows.Window, object):
 
-    name = 'Solstice_Builder'
+    name = 'SolsticeAssetBuilder'
     title = 'Solstice Tools - Solstice Builder'
     version = '1.0'
-    docked = False
 
-    def __init__(self, name='AssetBuilderWindow', parent=None, **kwargs):
-        super(SolsticeBuilder, self).__init__(name=name, parent=parent, **kwargs)
+    def __init__(self):
+        super(SolsticeBuilder, self).__init__()
 
         self.set_logo('solstice_assetbuilder_logo')
 
@@ -42,7 +41,7 @@ class SolsticeBuilder(solstice_windows.Window, object):
         self._light_rig_builder = LightRigBuilder()
         tab_widget.addTab(self._asset_builder, 'Asset')
         tab_widget.addTab(self._user_builder, 'User')
-        tab_widget.addTab(self._light_rig_builder, 'Ligth Rig')
+        tab_widget.addTab(self._light_rig_builder, 'Light Rig')
 
 
 class BuilderWidget(QWidget, object):
@@ -53,7 +52,6 @@ class BuilderWidget(QWidget, object):
         base_layout.setContentsMargins(2, 2, 2, 2)
         base_layout.setSpacing(2)
         self.setLayout(base_layout)
-
 
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(2, 2, 2, 2)
@@ -258,8 +256,6 @@ class LightRigBuilder(BuilderWidget, object):
 
 
 def run():
-    reload(solstice_splitters)
-    reload(img)
-    SolsticeBuilder.run()
+    win = SolsticeBuilder().show()
 
 

@@ -1398,14 +1398,13 @@ class SolsticePlayBlast(solstice_windows.Window, object):
     name = 'Solstice_PlayBlast'
     title = 'Solstice Tools - Playblast Tool'
     version = '1.0'
-    docked = True
 
-    def __init__(self, parent=None, **kwargs):
+    def __init__(self):
 
         self.playblast_widgets = list()
         self.config_dialog = None
 
-        super(SolsticePlayBlast, self).__init__(parent=parent, **kwargs)
+        super(SolsticePlayBlast, self).__init__()
 
     def custom_ui(self):
         super(SolsticePlayBlast, self).custom_ui()
@@ -2404,10 +2403,6 @@ def uninitializePlugin(obj):
 
 # ==================================================================================================================
 
+
 def run():
-    reload(solstice_accordion)
-    reload(solstice_label)
-    reload(solstice_buttons)
-    reload(utils)
-    reload(python)
-    SolsticePlayBlast.run()
+    win = SolsticePlayBlast().show()

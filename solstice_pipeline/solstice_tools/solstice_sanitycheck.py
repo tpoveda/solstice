@@ -21,10 +21,9 @@ class SanityCheck(solstice_windows.Window, object):
     name = 'Solstice_SanityCheck'
     title = 'Solstice Tools - Sanity Check'
     version = '1.0'
-    dock = False
 
-    def __init__(self, name='SanityCheckWindow', parent=None, **kwargs):
-        super(SanityCheck, self).__init__(name=name, parent=parent, **kwargs)
+    def __init__(self):
+        super(SanityCheck, self).__init__()
 
     def custom_ui(self):
         super(SanityCheck, self).custom_ui()
@@ -44,5 +43,4 @@ class SanityCheck(solstice_windows.Window, object):
 
 
 def run():
-    reload(solstice_maya_utils)
-    SanityCheck.run()
+    win = SanityCheck().show()

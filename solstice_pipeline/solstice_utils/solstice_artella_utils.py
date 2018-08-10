@@ -435,17 +435,19 @@ def synchronize_file(file_path):
     :return:
     """
 
-    # TODO: We need to check if Artella App is running, if not abort the operation
+    try:
+        uri = get_cms_uri(file_path)
+        spigot = get_spigot_client()
+        rsp = spigot.execute(command_action='do', command_name='update', payload=uri)
 
-    uri = get_cms_uri(file_path)
-    spigot = get_spigot_client()
-    rsp = spigot.execute(command_action='do', command_name='update', payload=uri)
+        if isinstance(rsp, basestring):
+            rsp = json.loads(rsp)
 
-    if isinstance(rsp, basestring):
-        rsp = json.loads(rsp)
-
-    sp.logger.debug(rsp)
-    return rsp
+        sp.logger.debug(rsp)
+        return rsp
+    except Exception as e:
+        sp.logger.error(str(e))
+        return None
 
 
 def get_asset_history(file_path, as_json=False):
