@@ -11,19 +11,13 @@
 from solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_gui import solstice_dialog
 from solstice_pipeline.resources import solstice_resource
 
 
-class SolsticeTrayMessage(solstice_dialog.Dialog, object):
+class SolsticeTrayMessage(QWidget, object):
 
-    name = 'Solstice_Tray'
-    title = 'Solstice Tools - Tray'
-    version = '1.0'
-    docked = False
-
-    def __init__(self, name='SolsticeTray', parent=None, **kwargs):
-        super(SolsticeTrayMessage, self).__init__(name=name, parent=parent, **kwargs)
+    def __init__(self, parent=None):
+        super(SolsticeTrayMessage, self).__init__(parent=parent)
 
         _solstice_icon = solstice_resource.icon('solstice')
         _artella_icon = solstice_resource.icon('artella')

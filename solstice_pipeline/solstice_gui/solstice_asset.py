@@ -11,7 +11,6 @@
 import os
 import time
 import webbrowser
-import collections
 from functools import partial
 from collections import OrderedDict
 
@@ -23,7 +22,7 @@ import solstice_pipeline as sp
 from solstice_utils import solstice_image as img
 from solstice_utils import solstice_artella_utils as artella
 from solstice_utils import solstice_naming_utils as naming
-from solstice_utils import solstice_qt_utils, solstice_python_utils
+from solstice_utils import solstice_qt_utils, solstice_python_utils, solstice_node
 from solstice_gui import solstice_splitters, solstice_published_info_widget, solstice_sync_dialog, solstice_buttons
 from solstice_tools import solstice_publisher
 from resources import solstice_resource
@@ -127,7 +126,7 @@ class AssetInfo(QWidget, object):
             w.update()
 
 
-class AssetWidget(QWidget, object):
+class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
 
     syncFinished = Signal()
     publishFinished = Signal()
@@ -135,12 +134,10 @@ class AssetWidget(QWidget, object):
 
     def __init__(self, **kwargs):
         parent = kwargs['parent'] if 'parent' in kwargs else None
-        super(AssetWidget, self).__init__(parent=parent)
 
-        self._name = kwargs['name'] if 'name' in kwargs else 'New_Asset'
-        self._asset_path = kwargs['path'] if 'path' in kwargs else None
-        self._category = kwargs['category'] if 'category' in kwargs else None
-        self._description = kwargs['description'] if 'description' in kwargs else ''
+        QWidget.__init__(self, parent=parent)
+        solstice_node.SolsticeAssetNode.__init__(self, **kwargs)
+
         self._icon_format = kwargs['icon_format'] if 'icon_format' in kwargs else None
         self._preview_format = kwargs['preview_format'] if 'preview_format' in kwargs else None
         self._simple_mode = kwargs['simple_mode'] if 'simple_mode' in kwargs else False
@@ -185,14 +182,6 @@ class AssetWidget(QWidget, object):
         self._asset_info = None
 
     @property
-    def name(self):
-        return self._name
-
-    @property
-    def asset_path(self):
-        return self._asset_path
-
-    @property
     def icon(self):
         return self._icon
 
@@ -209,26 +198,15 @@ class AssetWidget(QWidget, object):
         return self._preview_format
 
     @property
-    def category(self):
-        return self._category
-
-    @property
-    def description(self):
-        return self._description
-
-    @property
     def simple_mode(self):
         return self._simple_mode
 
-    def print_asset_info(self):
-        print('- {0}'.format(self._name))
-        print('\t          Path: {0}'.format(self._asset_path))
-        print('\t      Category: {0}'.format(self._category))
-        print('\t   Description: {0}'.format(self._category))
-        print('\t   Icon Format: {0}'.format(self._icon_format))
-        print('\tPreview Format: {0}'.format(self._preview_format))
-        print('\t   Simple Mode: {0}'.format(self._simple_mode))
-        print('\t  Is Checkable: {0}'.format(self._checkable))
+    # def print_asset_info(self):
+    #     print('- {0}'.format(self._name))
+    #     print('\t   Icon Format: {0}'.format(self._icon_format))
+    #     print('\tPreview Format: {0}'.format(self._preview_format))
+    #     print('\t   Simple Mode: {0}'.format(self._simple_mode))
+    #     print('\t  Is Checkable: {0}'.format(self._checkable))
 
     def publish(self):
         result = solstice_publisher.run(asset=self)
@@ -246,63 +224,6 @@ class AssetWidget(QWidget, object):
             if not self._menu:
                 return
             self._menu.exec_(event.globalPos())
-
-    def get_local_versions(self, status='published', categories=None):
-
-        if categories:
-            if type(categories) not in [list]:
-                folders = [categories]
-            else:
-                folders = categories
-        else:
-            folders = sp.valid_categories
-
-        local_folders = dict()
-        for f in folders:
-            local_folders[f] = dict()
-
-        for p in os.listdir(self._asset_path):
-            if status == 'working':
-                if p != '__working__':
-                    continue
-
-                for f in os.listdir(os.path.join(self._asset_path, '__working__')):
-                    if f in folders:
-                        if f == 'textures':
-                            # In textures we can have multiple textures files with different versions each one
-                            txt_files = list()
-                            for (dir_path, dir_names, file_names) in os.walk(os.path.join(self._asset_path, '__working__', f)):
-                                txt_files.extend(file_names)
-                                break
-
-                            textures_history = dict()
-                            if len(txt_files) > 0:
-                                for txt in txt_files:
-                                    txt_path = os.path.join(self._asset_path, '__working__', f, txt)
-                                    txt_history = artella.get_asset_history(txt_path)
-                                    textures_history[txt] = txt_history
-                            local_folders[f] = textures_history
-                        else:
-                            asset_name = self._name
-                            if f == 'shading':
-                                asset_name = asset_name + '_SHD'
-                            file_path = os.path.join(self._asset_path, '__working__', f, asset_name+'.ma')
-                            history = artella.get_asset_history(file_path)
-                            local_folders[f] = history
-            else:
-                if p == '__working__':
-                    continue
-
-                for f in folders:
-                    if f in p:
-                        version = sp.get_asset_version(p)[1]
-                        local_folders[f][str(version)] = p
-
-                # Sort all dictionaries by version number when we are getting published version info
-                for f in folders:
-                    local_folders[f] = collections.OrderedDict(sorted(local_folders[f].items()))
-
-        return local_folders
 
     def get_server_versions(self, status='published', all_versions=False, categories=None):
         if status == 'published':
@@ -376,33 +297,6 @@ class AssetWidget(QWidget, object):
                     if not server_data[category]:
                         server_data[category] = {}
             return server_data
-
-    def get_max_local_versions(self, categories=None):
-
-        if categories:
-            if type(categories) not in [list]:
-                folders = [categories]
-            else:
-                folders = categories
-        else:
-            folders = sp.valid_categories
-
-        max_local_versions = dict()
-        for f in folders:
-            max_local_versions[f] = None
-
-        local_versions = self.get_local_versions()
-
-        for f, versions in local_versions.items():
-            if versions:
-                for version, version_folder in versions.items():
-                    if max_local_versions[f] is None:
-                        max_local_versions[f] = [int(version), version_folder]
-                    else:
-                        if int(max_local_versions[f][0]) < int(version):
-                            max_local_versions[f] = [int(version), version_folder]
-
-        return max_local_versions
 
     def get_max_published_versions(self, all_versions=False, categories=None):
         if categories:
@@ -790,36 +684,6 @@ class AssetWidget(QWidget, object):
         elapsed_time = time.time() - start_time
         sp.logger.debug('{0} synchronized in {1} seconds'.format(self._name, elapsed_time))
         self.syncFinished.emit()
-
-    def get_asset_file(self, file_type, status):
-        """
-        Returns file to an asset file
-        :param file_type: str
-        :param status: str
-        :return: str
-        """
-
-        if file_type not in sp.valid_categories:
-            return None
-        if status not in sp.valid_status:
-            return None
-
-        asset_name = self._name
-        if file_type == 'shading':
-            asset_name = self._name + '_SHD'
-        elif file_type == 'groom':
-            asset_name = self._name + '_GROOMING'
-        asset_name = asset_name + '.ma'
-
-        file_path = None
-        if status == 'working':
-            file_path = os.path.join(self._asset_path, '__working__', file_type, asset_name)
-        elif status == 'published':
-            local_max_versions = self.get_max_local_versions()
-            if local_max_versions[file_type]:
-                file_path = os.path.join(self._asset_path, local_max_versions[file_type][1], file_type, asset_name)
-
-        return file_path
 
     def open_asset_file(self, file_type, status):
         file_path = self.get_asset_file(file_type=file_type, status=status)

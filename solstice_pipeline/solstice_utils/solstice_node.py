@@ -9,6 +9,7 @@
 import os
 import re
 import ast
+import collections
 
 import maya.cmds as cmds
 
@@ -23,7 +24,7 @@ FULL_NAME_REGEX = re.compile(r'(?P<env>\A.+)(?P<art>_art/production/)(?P<code>.+
 
 
 class SolsticeNode(object):
-    def __init__(self, node):
+    def __init__(self, node=None):
         super(SolsticeNode, self).__init__()
 
         self._node = node
@@ -94,6 +95,9 @@ class SolsticeNode(object):
         """
         Updates all the info related with the given node
         """
+
+        if self._node is None:
+            return False
 
         self._exists = cmds.objExists(self.node)
         if not self._exists:
@@ -210,11 +214,17 @@ class SolsticeNode(object):
 
 
 class SolsticeAssetNode(SolsticeNode, object):
-    def __init__(self, node):
+    def __init__(self, node=None, **kwargs):
         super(SolsticeAssetNode, self).__init__(node=node)
 
-        self._name = None
-        self._asset_type = None
+        if node is not None:
+            self._name = node
+        else:
+            self._name = kwargs['name'] if 'name' in kwargs else 'New_Asset'
+        self._asset_path = kwargs['path'] if 'path' in kwargs else self._get_asset_path()
+        self._category = kwargs['category'] if 'category' in kwargs else None
+        self._description = kwargs['description'] if 'description' in kwargs else ''
+
         self._current_version = None
         self._latest_version = None
         self._version_folder = dict()
@@ -226,8 +236,17 @@ class SolsticeAssetNode(SolsticeNode, object):
     def get_name(self):
         return self._name
 
-    def get_asset_type(self):
-        return self._asset_type
+    def get_short_name(self):
+        return self._name.split(':')[-1].split('|')[-1]
+
+    def get_asset_path(self):
+        return self._asset_path
+
+    def get_category(self):
+        return self._category
+
+    def get_description(self):
+        return self._description
 
     def get_current_version(self):
         return self._current_version
@@ -242,12 +261,20 @@ class SolsticeAssetNode(SolsticeNode, object):
         return self._version_folder
 
     name = property(get_name)
-    asset_type = property(get_asset_type)
+    asset_path = property(get_asset_path)
+    category = property(get_category)
+    description = property(get_description)
     current_version = property(get_current_version)
     latest_version = property(get_latest_version, set_latest_version)
     version_folder = property(get_version_folder)
 
     # =================================================================================================
+
+    def print_asset_info(self):
+        print('- {0}'.format(self._name))
+        print('\t          Path: {0}'.format(self._asset_path))
+        print('\t      Category: {0}'.format(self._category))
+        print('\t   Description: {0}'.format(self._category))
 
     def update_info(self):
         super(SolsticeAssetNode, self).update_info()
@@ -258,6 +285,153 @@ class SolsticeAssetNode(SolsticeNode, object):
                 print('ASSET IS VALID')
             else:
                 sp.logger.warning('File "{0}" does not follow a correct nomenclature!'.format(self.filename))
+
+    def get_local_versions(self, status='published', categories=None):
+
+        if categories:
+            if type(categories) not in [list]:
+                folders = [categories]
+            else:
+                folders = categories
+        else:
+            folders = sp.valid_categories
+
+        local_folders = dict()
+        for f in folders:
+            local_folders[f] = dict()
+
+        for p in os.listdir(self._asset_path):
+            if status == 'working':
+                if p != '__working__':
+                    continue
+
+                for f in os.listdir(os.path.join(self._asset_path, '__working__')):
+                    if f in folders:
+                        if f == 'textures':
+                            # In textures we can have multiple textures files with different versions each one
+                            txt_files = list()
+                            for (dir_path, dir_names, file_names) in os.walk(os.path.join(self._asset_path, '__working__', f)):
+                                txt_files.extend(file_names)
+                                break
+
+                            textures_history = dict()
+                            if len(txt_files) > 0:
+                                for txt in txt_files:
+                                    txt_path = os.path.join(self._asset_path, '__working__', f, txt)
+                                    txt_history = artella.get_asset_history(txt_path)
+                                    textures_history[txt] = txt_history
+                            local_folders[f] = textures_history
+                        else:
+                            asset_name = self._name
+                            if f == 'shading':
+                                asset_name = asset_name + '_SHD'
+                            file_path = os.path.join(self._asset_path, '__working__', f, asset_name+'.ma')
+                            history = artella.get_asset_history(file_path)
+                            local_folders[f] = history
+            else:
+                if p == '__working__':
+                    continue
+
+                for f in folders:
+                    if f in p:
+                        version = sp.get_asset_version(p)[1]
+                        local_folders[f][str(version)] = p
+
+                # Sort all dictionaries by version number when we are getting published version info
+                for f in folders:
+                    local_folders[f] = collections.OrderedDict(sorted(local_folders[f].items()))
+
+        return local_folders
+
+    def get_max_local_versions(self, categories=None):
+
+        if categories:
+            if type(categories) not in [list]:
+                folders = [categories]
+            else:
+                folders = categories
+        else:
+            folders = sp.valid_categories
+
+        max_local_versions = dict()
+        for f in folders:
+            max_local_versions[f] = None
+
+        local_versions = self.get_local_versions()
+
+        for f, versions in local_versions.items():
+            if versions:
+                for version, version_folder in versions.items():
+                    if max_local_versions[f] is None:
+                        max_local_versions[f] = [int(version), version_folder]
+                    else:
+                        if int(max_local_versions[f][0]) < int(version):
+                            max_local_versions[f] = [int(version), version_folder]
+
+        return max_local_versions
+
+    def get_asset_data_path(self):
+        asset_path = self.asset_path
+        if asset_path is None or not os.path.exists(asset_path):
+            raise RuntimeError('Asset Path {} does not exists!'.format(asset_path))
+
+        asset_data_file = os.path.join(asset_path, '__working__', 'data.json')
+        if not os.path.isfile(asset_data_file):
+            # TODO: Maybe sync automatically if the data file is not already synced
+            sp.logger.warning('Asset Data file {} is not sync yet! Sync it using Solstice Pipelinizer Tool plesae!'.format(asset_data_file))
+
+        return asset_data_file
+
+    def get_asset_file(self, file_type, status):
+        """
+        Returns file to an asset file
+        :param file_type: str
+        :param status: str
+        :return: str
+        """
+
+        if file_type not in sp.valid_categories:
+            return None
+        if status not in sp.valid_status:
+            return None
+
+        asset_name = self.get_short_name()
+        if file_type == 'shading':
+            asset_name = self.get_short_name() + '_SHD'
+        elif file_type == 'groom':
+            asset_name = self.get_short_name() + '_GROOMING'
+        asset_name = asset_name + '.ma'
+
+        file_path = None
+        if status == 'working':
+            file_path = os.path.join(self._asset_path, '__working__', file_type, asset_name)
+        elif status == 'published':
+            local_max_versions = self.get_max_local_versions()
+            if local_max_versions[file_type]:
+                file_path = os.path.join(self._asset_path, local_max_versions[file_type][1], file_type, asset_name)
+
+        return file_path
+
+    def get_asset_files(self, status='published'):
+        asset_files = dict()
+        for cat in sp.valid_categories:
+            asset_file = self.get_asset_file(cat, status)
+            if asset_file is None or not os.path.exists(asset_file):
+                continue
+            asset_files[cat] = asset_file
+
+        return asset_files
+
+    def _get_asset_path(self):
+        assets_path = sp.get_solstice_assets_path()
+        if assets_path is None or not os.path.exists(assets_path):
+            raise RuntimeError('Asset Path is not valid: {}'.format(assets_path))
+
+        for root, dirs, files in os.walk(assets_path):
+            asset_path = root
+            asset_name = os.path.basename(root)
+            if asset_name == self.get_short_name():
+                return os.path.normpath(asset_path)
 
 
 class SolsticeTagDataNode(object):
@@ -278,8 +452,7 @@ class SolsticeTagDataNode(object):
         connections = cmds.listConnections(self._node+'.node')
         if connections:
             node = connections[0]
-            if cmds.objExists(node):
-                return node
+            return SolsticeAssetNode(node=node)
 
         return None
 

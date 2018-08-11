@@ -13,19 +13,10 @@ import urllib2
 import datetime
 import platform
 import webbrowser
-from collections import OrderedDict
 
 import maya.cmds as cmds
-import maya.mel as mel
 
-import solstice_pipeline
-
-loaded_modules = OrderedDict()
-reload_modules = list()
-logger = None
-info_dialog = None
-settings = None
-tray = None
+from solstice_qt.QtCore import *
 
 # =================================================================================
 
@@ -38,124 +29,217 @@ valid_status = ['working', 'published']
 
 # =================================================================================
 
+sys.solstice_dispatcher = None
+logger = None
+tray = None
+settings = None
 
-def update_paths():
-    root_path = os.path.dirname(os.path.abspath(__file__))
-    extra_paths = [os.path.join(root_path, 'externals'), os.path.join(root_path, 'resources', 'icons')]
-    for path in extra_paths:
-        if os.path.exists(path) and path not in sys.path:
-            print('Adding Path {} to SYS_PATH ...'.format(path))
-            sys.path.append(path)
+# =================================================================================
+
+
+class SolsticePipeline(QObject):
+    def __init__(self):
+        super(SolsticePipeline, self).__init__()
+
+        self.logger = self.create_solstice_logger()
+        self.settings = self.create_solstice_settings()
+        self.update_paths()
+        self.set_environment_variables()
+        self.reload_all()
+        self.info_dialog = self.create_solstice_info_window()
+        self.create_solstice_shelf()
+        self.create_solstice_menu()
+        self.tray = self.create_solstice_tray()
+        self.update_solstice_project()
+        self.show_changelog()
+
+    @staticmethod
+    def create_solstice_logger():
+        """
+        Creates and initializes solstice logger
+        """
+
+        from solstice_utils import solstice_logger
+        global logger
+        logger = solstice_logger.Logger(name='solstice', level=solstice_logger.LoggerLevel.DEBUG)
+        logger.debug('Initializing Solstice Tools ...')
+        return logger
+
+    @staticmethod
+    def create_solstice_settings():
+        """
+        Creates a settings file that can be accessed globally by all tools
+        """
+
+        from solstice_pipeline.solstice_utils import solstice_config
+        global settings
+        settings = solstice_config.create_config('solstice_pipeline')
+        return settings
+
+    @staticmethod
+    def create_solstice_info_window():
+        """
+        Creates a global window that is used to show different type of info
+        """
+
+        from solstice_gui import solstice_info_dialog
+        info_dialog = solstice_info_dialog.InfoDialog()
+        return info_dialog
+
+    @staticmethod
+    def reload_all():
+        # if os.environ.get('SOLSTICE_DEV_MODE', '0') == '1':
+        import inspect
+        scripts_dir = os.path.dirname(__file__)
+        for key, module in sys.modules.items():
+            try:
+                module_path = inspect.getfile(module)
+            except TypeError:
+                continue
+            if module_path == __file__:
+                continue
+            if module_path.startswith(scripts_dir):
+                reload(module)
+
+    @staticmethod
+    def show_changelog():
+        if platform.system() == 'Darwin':
+            from solstice_pipeline.solstice_tools import solstice_changelog
+            solstice_changelog.run()
+            cmds.evalDeferred('import solstice_pipeline; solstice_pipeline.update_tools()')
+
+    def update_paths(self):
+        """
+        Updates system path with Solstice Tools Paths
+        :return:
+        """
+        root_path = os.path.dirname(os.path.abspath(__file__))
+        extra_paths = [os.path.join(root_path, 'externals'), os.path.join(root_path, 'resources', 'icons')]
+        for path in extra_paths:
+            if os.path.exists(path) and path not in sys.path:
+                self.logger.debug('Adding Path {} to SYS_PATH ...'.format(path))
+                sys.path.append(path)
+            else:
+                self.logger.debug('Path {} not added to SYS_PATH because it does not exists or is already included in SYS_PATH!'.format(path))
+
+        for subdir, dirs, files in os.walk(root_path):
+            if subdir not in sys.path:
+                sys.path.append(subdir)
+
+    def set_environment_variables(self):
+        """
+        Initializes all necessary environment variables used in Solstice Tools
+        """
+
+        from solstice_pipeline.solstice_utils import solstice_artella_utils
+
+        self.logger.debug('Initializing environment variables for Solstice Tools ...')
+
+        try:
+            solstice_artella_utils.update_local_artella_root()
+            artella_var = os.environ.get('ART_LOCAL_ROOT')
+            self.logger.debug('Artella environment variable is set to: {}'.format(artella_var))
+            if artella_var and os.path.exists(artella_var):
+                os.environ['SOLSTICE_PROJECT'] = '{}/_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'.format(
+                    artella_var)
+            else:
+                self.logger.debug('Impossible to set Artella environment variables! Solstice Tools wont work correctly! Please contact TD!')
+        except Exception:
+            self.logger.debug('Error while setting Solstice Environment Variables. Solstice Tools may not work properly!')
+
+        icons_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'icons')
+        if os.path.exists(icons_path):
+            if platform.system() == 'Darwin':
+                os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ':' + icons_path
+            else:
+                os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ';' + icons_path
+            self.logger.debug('Artella Icons Folder "{}" added to Maya Icons Paths ...'.format(icons_path))
         else:
-            print('Path {} not added to SYS_PATH because it does not exists or is already included in SYS_PATH!'.format(path))
+            self.logger.debug('Solstice Icons not found! Solstice Shelf maybe will not show icons! Please contact TD!')
 
-    for subdir, dirs, files in os.walk(root_path):
-        if subdir not in sys.path:
-            sys.path.append(subdir)
+        self.logger.debug('=' * 100)
+        self.logger.debug("Solstices Tools initialization completed!")
+        self.logger.debug('=' * 100)
+        self.logger.debug('*' * 100)
+        self.logger.debug('-' * 100)
+        self.logger.debug('\n')
 
-def create_solstice_logger():
-    """
-    Creates and initializes solstice logger
-    """
+        if os.environ.get('SOLSTICE_PIPELINE_SHOW'):
+            from solstice_pipeline.solstice_tools import solstice_changelog
+            solstice_changelog.run()
 
-    from solstice_utils import solstice_logger
-    global logger
-    logger = solstice_logger.Logger(name='solstice', level=solstice_logger.LoggerLevel.DEBUG)
-    logger.debug('Initializing Solstice Tools ...')
+    def create_solstice_shelf(self):
+        """
+        Creates Solstice Tools shelf
+        """
 
+        self.logger.debug('Building Solstice Tools Shelf ...')
 
-def create_solstice_settings():
-    """
-    Creates a settings file that can be accessed globally by all tools
-    """
+        from solstice_gui import solstice_shelf
 
-    from solstice_pipeline.solstice_utils import solstice_config
-    global settings
-    settings = solstice_config.create_config('solstice_pipeline')
+        try:
+            s_shelf = solstice_shelf.SolsticeShelf()
+            s_shelf.create(delete_if_exists=True)
+            shelf_file = get_solstice_shelf_file()
+            if shelf_file and os.path.isfile(shelf_file):
+                s_shelf.build(shelf_file=shelf_file)
+                s_shelf.set_as_active()
+        except Exception as e:
+            self.logger.warning('Error during Solstice Shelf Creation: {}'.format(e))
 
+    def create_solstice_menu(self):
+        """
+        Create Solstice Tools menu
+        """
 
-def create_solstice_info_window():
-    """
-    Creates a global window that is used to show different type of info
-    """
+        self.logger.debug('Building Solstice Tools Menu ...')
 
-    from solstice_gui import solstice_info_dialog
-    global info_dialog
-    info_dialog = solstice_info_dialog.InfoDialog()
+        from solstice_gui import solstice_menu
+        from solstice_utils import solstice_maya_utils
 
+        try:
+            solstice_maya_utils.remove_menu('Solstice')
+        except Exception:
+            pass
 
-def create_solstice_shelf():
-    """
-    Creates Solstice Tools shelf
-    """
+        try:
+            s_menu = solstice_menu.SolsticeMenu()
+            menu_file = get_solstice_menu_file()
+            if menu_file and os.path.isfile(menu_file):
+                s_menu.create_menu(file_path=menu_file, parent_menu='Solstice')
+        except Exception as e:
+            self.logger.warning('Error during Solstice Menu Creation: {}'.format(e))
 
-    solstice_pipeline.logger.debug('Building Solstice Tools Shelf ...')
+    def create_solstice_tray(self):
+        """
+        Create Solstice Pipeline tray
+        """
 
-    from solstice_gui import solstice_shelf
+        from solstice_pipeline.solstice_gui import solstice_traymessage
 
-    try:
-        s_shelf = solstice_shelf.SolsticeShelf()
-        s_shelf.create(delete_if_exists=True)
-        shelf_file = get_solstice_shelf_file()
-        if shelf_file and os.path.isfile(shelf_file):
-            s_shelf.build(shelf_file=shelf_file)
-            s_shelf.set_as_active()
-    except Exception as e:
-        solstice_pipeline.logger.warning('Error during Solstice Shelf Creation: {}'.format(e))
+        global tray
+        self.logger.debug('Creating Solstice Tray ...')
+        tray = solstice_traymessage.SolsticeTrayMessage()
+        return tray
 
+    def update_solstice_project(self):
+        """
+        Set the current Maya project to the path where Solstice is located inside Artella folder
+        """
 
-def create_solstice_menu():
-    """
-    Create Solstice Tools menu
-    """
+        try:
+            self.logger.debug('Setting Solstice Project ...')
+            solstice_project_folder = os.environ.get('SOLSTICE_PROJECT', 'folder-not-defined')
+            if solstice_project_folder and os.path.exists(solstice_project_folder):
+                cmds.workspace(solstice_project_folder, openWorkspace=True)
+                self.logger.debug(
+                    'Solstice Project setup successfully! => {}'.format(solstice_project_folder))
+            else:
+                self.logger.debug('Unable to set Solstice Project! => {}'.format(solstice_project_folder))
+        except Exception as e:
+            self.logger.debug(str(e))
 
-    solstice_pipeline.logger.debug('Building Solstice Tools Menu ...')
-
-    from solstice_gui import solstice_menu
-    from solstice_utils import solstice_maya_utils
-
-    try:
-        solstice_maya_utils.remove_menu('Solstice')
-    except Exception:
-        pass
-
-    try:
-        s_menu = solstice_menu.SolsticeMenu()
-        menu_file = get_solstice_menu_file()
-        if menu_file and os.path.isfile(menu_file):
-            s_menu.create_menu(file_path=menu_file, parent_menu='Solstice')
-    except Exception as e:
-        solstice_pipeline.logger.warning('Error during Solstice Menu Creation: {}'.format(e))
-
-
-def create_solstice_tray():
-    """
-    Create Solstice Pipeline tray
-    """
-
-    solstice_pipeline.logger.debug('Creating Solstice Tray ...')
-
-    from solstice_pipeline.solstice_gui import solstice_traymessage
-
-    global tray
-    tray = solstice_traymessage.SolsticeTrayMessage()
-
-
-def update_solstice_project():
-    """
-    Set the current Maya project to the path where Solstice is located inside Artella folder
-    """
-
-    try:
-        solstice_pipeline.logger.debug('Setting Solstice Project ...')
-        solstice_project_folder = os.environ.get('SOLSTICE_PROJECT', 'folder-not-defined')
-        if solstice_project_folder and os.path.exists(solstice_project_folder):
-            cmds.workspace(solstice_project_folder, openWorkspace=True)
-            solstice_pipeline.logger.debug('Solstice Project setup successfully! => {}'.format(solstice_project_folder))
-        else:
-            solstice_pipeline.logger.debug('Unable to set Solstice Project! => {}'.format(solstice_project_folder))
-    except Exception as e:
-        solstice_pipeline.logger.debug(str(e))
+# =================================================================================
 
 
 def update_solstice_project_path():
@@ -207,7 +291,7 @@ def get_solstice_shelf_file():
 
     shelf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'shelf.xml')
     if not os.path.exists(shelf_file):
-        solstice_pipeline.logger.warning('Shelf file: {} does not exists!'.format(shelf_file))
+        logger.warning('Shelf file: {} does not exists!'.format(shelf_file))
         return False
 
     return shelf_file
@@ -221,7 +305,7 @@ def get_solstice_menu_file():
 
     menu_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'menu.json')
     if not os.path.exists(menu_file):
-        solstice_pipeline.logger.warning('Menu file: {} does not exists!'.format(menu_file))
+        logger.warning('Menu file: {} does not exists!'.format(menu_file))
         return False
 
     return menu_file
@@ -313,48 +397,6 @@ def register_asset(asset_name):
     return sync_time
 
 
-def init_solstice_environment_variables():
-    """
-    Initializes all necessary environment variables used in Solstice Tools
-    """
-
-    from solstice_pipeline.solstice_utils import solstice_artella_utils
-
-    solstice_pipeline.logger.debug('Initializing environment variables for Solstice Tools ...')
-
-    try:
-        solstice_artella_utils.update_local_artella_root()
-        artella_var = os.environ.get('ART_LOCAL_ROOT')
-        solstice_pipeline.logger.debug('Artella environment variable is set to: {}'.format(artella_var))
-        if artella_var and os.path.exists(artella_var):
-            os.environ['SOLSTICE_PROJECT'] = '{}/_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'.format(artella_var)
-        else:
-            solstice_pipeline.logger.debug('Impossible to set Artella environment variables! Solstice Tools wont work correctly! Please contact TD!')
-    except Exception:
-        solstice_pipeline.logger.debug('Error while setting Solstice Environment Variables. Solstice Tools may not work properly!')
-
-    icons_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'icons')
-    if os.path.exists(icons_path):
-        if platform.system() == 'Darwin':
-            os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ':' + icons_path
-        else:
-            os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ';' + icons_path
-        solstice_pipeline.logger.debug('Artella Icons Folder "{}" added to Maya Icons Paths ...'.format(icons_path))
-    else:
-        solstice_pipeline.logger.debug('Solstice Icons not found! Solstice Shelf maybe will not show icons! Please contact TD!')
-
-    solstice_pipeline.logger.debug('=' * 100)
-    solstice_pipeline.logger.debug("Solstices Tools initialization completed!")
-    solstice_pipeline.logger.debug('=' * 100)
-    solstice_pipeline.logger.debug('*' * 100)
-    solstice_pipeline.logger.debug('-' * 100)
-    solstice_pipeline.logger.debug('\n')
-
-    if os.environ.get('SOLSTICE_PIPELINE_SHOW'):
-        from solstice_pipeline.solstice_tools import solstice_changelog
-        solstice_changelog.run()
-
-
 def update_tools():
     from solstice_pipeline.solstice_utils import solstice_download_utils
     solstice_download_utils.update_tools()
@@ -413,42 +455,9 @@ def send_email(tool_info='Solstice Tools'):
 def artella_is_available():
     try:
         return urllib2.urlopen('https://www.artella.com').getcode() == 200
-    except:
+    except Exception:
         return False
 
 
-def reload_all():
-    # if os.environ.get('SOLSTICE_DEV_MODE', '0') == '1':
-    import inspect
-    windowed = mel.eval('$temp1=$gMainWindow')
-    if windowed:
-        scripts_dir = os.path.dirname(__file__)
-        for key, module in sys.modules.items():
-            try:
-                module_path = inspect.getfile(module)
-            except TypeError:
-                continue
-            if module_path == __file__:
-                continue
-            if module_path.startswith(scripts_dir):
-                reload(module)
-
-
 def init():
-    update_paths()
-    create_solstice_logger()
-    reload_all()
-    create_solstice_settings()
-    init_solstice_environment_variables()
-    create_solstice_info_window()
-    create_solstice_shelf()
-    create_solstice_menu()
-    create_solstice_tray()
-    update_solstice_project()
-
-    if platform.system() == 'Darwin':
-        from solstice_pipeline.solstice_tools import solstice_changelog
-        solstice_changelog.run()
-        cmds.evalDeferred('import solstice_pipeline; solstice_pipeline.update_tools()')
-
-
+    sys.dispatcher = SolsticePipeline()

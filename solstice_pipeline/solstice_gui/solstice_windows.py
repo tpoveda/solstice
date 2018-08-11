@@ -16,6 +16,7 @@ try:
 except ImportError:
     from shiboken2 import wrapInstance
 
+import solstice_pipeline as sp
 from solstice_utils import solstice_maya_utils, solstice_config
 from resources import solstice_resource
 
@@ -57,8 +58,9 @@ class Window(QMainWindow, object):
                 self.callbacks.remove(c)
                 del c
             except Exception as e:
-                pass
-        self.callbacks = []
+                sp.logger.error('Impossible to clean callback {}'.format(c))
+                sp.logger.error(str(e))
+        self.callbacks = list()
 
     def custom_ui(self):
         self.main_widget = QWidget()
@@ -104,12 +106,11 @@ class Window(QMainWindow, object):
     def closeEvent(self, event):
         self.cleanup()
         event.accept()
-    #
-    # def __del__(self):
-    #     try:
-    #         self.cleanup()
-    #     except Exception:
-    #         pass
+
+    def deleteLater(self):
+        self.cleanup()
+        super(Window, self).deleteLater()
+
 
 class DockWindow(QMainWindow, object):
     def __init__(self, name='SolsticeWindow', title='SolsticeWindow', parent=None, use_scroll=False):

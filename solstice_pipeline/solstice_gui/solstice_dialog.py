@@ -96,5 +96,9 @@ class Dialog(QDialog, object):
         self.cleanup()
         event.accept()
 
-    def __del__(self):
+    def deleteLater(self):
         self.cleanup()
+        super(Dialog, self).deleteLater()
+
+    # def __del__(self):
+    #     self.cleanup()
