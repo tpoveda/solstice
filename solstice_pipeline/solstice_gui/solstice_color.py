@@ -8,7 +8,7 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from solstice_qt.QtGui import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 
 class Color(QColor, object):

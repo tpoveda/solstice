@@ -16,7 +16,7 @@ import functools
 import contextlib
 from collections import OrderedDict
 
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 try:
     from shiboken2 import wrapInstance
 except ImportError:

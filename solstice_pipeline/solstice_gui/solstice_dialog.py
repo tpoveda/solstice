@@ -10,8 +10,8 @@
 
 import uuid
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 from solstice_utils import solstice_maya_utils
 from resources import solstice_resource

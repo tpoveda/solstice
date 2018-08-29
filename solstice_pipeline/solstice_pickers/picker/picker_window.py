@@ -10,8 +10,8 @@ import os
 import weakref
 from functools import partial
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 
@@ -184,20 +184,20 @@ class PickerWindow(QWidget, object):
             reload(solstice_studiolibrary.librarywidget)
             self.pose_widget = solstice_studiolibrary.librarywidget.LibraryWidget.instance()
 
-        solstice_project_folder = os.environ.get('SOLSTICE_PROJECT')
-        if not os.path.exists(solstice_project_folder):
-            sp.update_solstice_project()
-            solstice_project_folder = os.environ.get('SOLSTICE_PROJECT')
-        if solstice_project_folder and os.path.exists(solstice_project_folder):
-            solstice_assets = os.path.join(solstice_project_folder, 'Asset')
-            if os.path.exists(solstice_assets):
-                anims = os.path.join(solstice_assets, 'AnimationLibrary')
-                if os.path.exists(anims):
-                    self.pose_widget.setPath(anims)
-                else:
-                    self.pose_widget.setPath(solstice_assets)
-            else:
-                self.pose_widget.setPath(solstice_project_folder)
+        # solstice_project_folder = os.environ.get('SOLSTICE_PROJECT')
+        # if not os.path.exists(solstice_project_folder):
+        #     sp.update_solstice_project()
+        #     solstice_project_folder = os.environ.get('SOLSTICE_PROJECT')
+        # if solstice_project_folder and os.path.exists(solstice_project_folder):
+        #     solstice_assets = os.path.join(solstice_project_folder, 'Asset')
+        #     if os.path.exists(solstice_assets):
+        #         anims = os.path.join(solstice_assets, 'AnimationLibrary')
+        #         if os.path.exists(anims):
+        #             self.pose_widget.setPath(anims)
+        #         else:
+        #             self.pose_widget.setPath(solstice_assets)
+        #     else:
+        #         self.pose_widget.setPath(solstice_project_folder)
 
         if full_window:
 

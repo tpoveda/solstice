@@ -11,9 +11,9 @@
 import os
 from functools import partial
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
-from solstice_qt.QtGui import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
 import solstice_grid
@@ -51,6 +51,9 @@ class AssetViewer(solstice_grid.GridWidget, object):
 
     @Slot()
     def add_asset(self, asset_widget):
+        if asset_widget is None:
+            return
+
         row, col = self.first_empty_cell()
         self.addWidget(row, col, asset_widget)
         self.resizeRowsToContents()

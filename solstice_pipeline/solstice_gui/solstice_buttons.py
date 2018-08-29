@@ -10,9 +10,9 @@
 
 import weakref
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
-from solstice_qt.QtGui import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import maya.cmds as cmds
 

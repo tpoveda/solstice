@@ -8,7 +8,7 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
 from solstice_pipeline.resources import solstice_resource

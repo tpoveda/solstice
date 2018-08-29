@@ -8,8 +8,8 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 
 def property_animation(start=[0, 0], end=[30, 0], duration=300, object=None, property='iconSize', on_finished=None):

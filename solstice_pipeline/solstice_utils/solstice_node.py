@@ -12,6 +12,7 @@ import ast
 import collections
 
 import maya.cmds as cmds
+import maya.OpenMaya as OpenMaya
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
@@ -211,6 +212,14 @@ class SolsticeNode(object):
         self.update_info()
 
         return result
+
+    def get_mobject(self):
+        sel = OpenMaya.MSelectionList()
+        sel.add(self.node)
+        obj = OpenMaya.MObject()
+        sel.getDependNode(0, obj)
+
+        return obj
 
 
 class SolsticeAssetNode(SolsticeNode, object):
@@ -421,6 +430,15 @@ class SolsticeAssetNode(SolsticeNode, object):
             asset_files[cat] = asset_file
 
         return asset_files
+
+    def get_main_control(self):
+        if not cmds.objExists(self.node):
+            sp.logger.warning('Impossible to get main control because node {} does not exists!'.format(self.node))
+            return None
+
+        for obj in cmds.listRelatives(self.node, allDescendents=True, fullPath=True):
+            if obj.endswith('root_ctrl'):
+                return obj
 
     def _get_asset_path(self):
         assets_path = sp.get_solstice_assets_path()

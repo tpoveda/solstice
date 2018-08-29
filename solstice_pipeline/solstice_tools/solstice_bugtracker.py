@@ -18,8 +18,8 @@ import datetime
 import  urllib2
 import webbrowser
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_dialog, solstice_splitters, solstice_sync_dialog

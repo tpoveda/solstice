@@ -16,9 +16,9 @@ from functools import partial
 
 import maya.cmds as cmds
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
-from solstice_qt.QtGui import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
 from solstice_gui import solstice_windows, solstice_shaderviewer, solstice_sync_dialog, solstice_assetviewer
@@ -866,28 +866,28 @@ class ShaderLibrary(solstice_windows.Window, object):
         for tag in tag_nodes:
             shaders = tag.get_shaders()
             if not shaders:
-                sp.logger.error('No shaders found for asset: {}'.format(tag.get_asset()))
+                sp.logger.error('No shaders found for asset: {}'.format(tag.get_asset().node))
                 continue
 
             hires_group = tag.get_hires_group()
             if not hires_group or not cmds.objExists(hires_group):
-                sp.logger.error('No Hires group found for asset: {}'.format(tag.get_asset()))
+                sp.logger.error('No Hires group found for asset: {}'.format(tag.get_asset().node))
                 continue
 
             hires_meshes = [obj for obj in cmds.listRelatives(hires_group, children=True, type='transform', shapes=False, noIntermediate=True, fullPath=True) if cmds.objExists(obj) and cmds.listRelatives(obj, shapes=True)]
             if not hires_meshes or len(hires_meshes) <= 0:
-                sp.logger.error('No Hires meshes found for asset: {}'.format(tag.get_asset()))
+                sp.logger.error('No Hires meshes found for asset: {}'.format(tag.get_asset().node))
                 continue
 
-            node = tag.get_asset()
-            is_referenced = cmds.referenceQuery(node, isNodeReferenced=True)
+            asset = tag.get_asset()
+            is_referenced = cmds.referenceQuery(asset.node, isNodeReferenced=True)
             if not is_referenced:
-                sp.logger.error('Node {} is not referenced! All scene assets should be referenced (not imported). Please contact TD!'.format(node))
+                sp.logger.error('Node {} is not referenced! All scene assets should be referenced (not imported). Please contact TD!'.format(asset))
                 continue
 
-            namespace = cmds.referenceQuery(node, namespace=True)
+            namespace = cmds.referenceQuery(asset.node, namespace=True)
             if not namespace or not namespace.startswith(':'):
-                sp.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(node))
+                sp.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(asset.node))
                 continue
             else:
                 namespace = namespace[1:] + ':'

@@ -10,7 +10,7 @@
 
 import maya.OpenMaya as OpenMaya
 
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 from solstice_pipeline.solstice_utils import solstice_maya_utils
 

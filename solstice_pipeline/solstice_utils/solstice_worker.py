@@ -11,7 +11,7 @@
 import uuid
 from threading import Lock, Condition
 
-from solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
 
 
 class Worker(QThread, object):

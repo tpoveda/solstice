@@ -6,7 +6,7 @@
 #  Custom colors used in pickers and buttons
 # ==================================================================="""
 
-from solstice_qt.QtGui import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 black = QColor(50, 50, 50, 255)
 white = QColor(255, 255, 255, 200)

@@ -17,9 +17,9 @@ from shutil import copyfile
 
 import maya.cmds as cmds
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
-from solstice_qt.QtGui import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_dialog, solstice_splitters, solstice_spinner, solstice_console, solstice_sync_dialog
@@ -279,7 +279,7 @@ class PublishModelTask(solstice_task.Task, object):
                 if shader not in ['lambert1', 'particleCloud1']:
                     invalid_shaders.append(shader)
             if len(invalid_shaders) > 0:
-                self.write_error('Scene file has shaders stored in it: {}. Remove them before publishing the model file ...'.format(invalid_shaders))
+                self.write_error('Model file has shaders stored in it: {}. Remove them before publishing the model file ...'.format(invalid_shaders))
                 self.write('Unlocking model file ...')
                 artella.unlock_file(model_path)
                 return False
@@ -830,6 +830,7 @@ class PublishShadingTask(solstice_task.Task, object):
                 shading_groups = cmds.listConnections(shader, type='shadingEngine')
                 if not shading_groups or len(shading_groups) <= 0:
                     self.write_warning('Shader {} has not a shading group connected to it!'.format(shader))
+                    continue
                 if len(shading_groups) > 2:
                     self.write_error('More than one shading groups found on shader {0} >> {1}. Aborting publishing ...'.format(shader, shading_groups))
                     self.write('Unlocking shading file ...')

@@ -16,7 +16,7 @@ import webbrowser
 
 import maya.cmds as cmds
 
-from solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
 
 # =================================================================================
 
@@ -33,6 +33,7 @@ sys.solstice_dispatcher = None
 logger = None
 tray = None
 settings = None
+info_dialog = None
 
 # =================================================================================
 
@@ -83,6 +84,7 @@ class SolsticePipeline(QObject):
         """
 
         from solstice_gui import solstice_info_dialog
+        global info_dialog
         info_dialog = solstice_info_dialog.InfoDialog()
         return info_dialog
 
@@ -114,7 +116,7 @@ class SolsticePipeline(QObject):
         :return:
         """
         root_path = os.path.dirname(os.path.abspath(__file__))
-        extra_paths = [os.path.join(root_path, 'externals'), os.path.join(root_path, 'resources', 'icons')]
+        extra_paths = [os.path.join(root_path, 'resources', 'icons')]
         for path in extra_paths:
             if os.path.exists(path) and path not in sys.path:
                 self.logger.debug('Adding Path {} to SYS_PATH ...'.format(path))
@@ -289,7 +291,7 @@ def get_solstice_shelf_file():
     :return: str
     """
 
-    shelf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'shelf.xml')
+    shelf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'shelf.json')
     if not os.path.exists(shelf_file):
         logger.warning('Shelf file: {} does not exists!'.format(shelf_file))
         return False

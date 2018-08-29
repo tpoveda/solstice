@@ -19,7 +19,7 @@ try:
 except:
     pass
 
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 
@@ -756,6 +756,11 @@ def can_unlock(file_path):
     asset_status = get_status(file_path=file_path)
     if not asset_status:
         return
+
+    if type(asset_status) == classes.ArtellaHeaderMetaData:
+        sp.logger.debug('File {} is not uploaded on Artella yet, so you cannot unlock it!')
+        return False
+
     asset_info = asset_status.references.values()[0]
     locker_name = asset_info.locked_view
     user_id = get_current_user_id()

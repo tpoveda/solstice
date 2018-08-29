@@ -1,0 +1,98 @@
+{
+    "solstice_shelf":
+    {
+        "main":
+        [
+            {
+                "icon": "setproject.png",
+                "command": "import solstice_pipeline; solstice_pipeline.update_solstice_project();",
+                "annotation": "Auto Setup Solstice Project",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
+                "icon": "pipeline.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_pipelinizer; solstice_pipelinizer.run();",
+                "annotation": "Solstice Pipelinizer Tool",
+                "label": ""
+            },
+            {
+                "icon": "pipeline.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_outliner; solstice_outliner.run();",
+                "annotation": "Solstice Outliner Tool",
+                "label": ""
+            }
+        ],
+        "anim":
+        [
+            {
+                "icon": "picker.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_pickers; solstice_pickers.run();",
+                "annotation": "Solstice Pickers",
+                "label": ""
+            },
+            {
+                "icon": "solsticeplayblast.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_playblast; solstice_playblast.run();",
+                "annotation": "Solstice Playblast",
+                "label": ""
+            }
+        ],
+        "light":
+        [
+            {
+                "icon": "lightrigs.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_lightrigs; reload(solstice_lightrigs); solstice_lightrigs.run();",
+                "annotation": "Solstice Light Rigs Tool",
+                "label": ""
+            }
+        ],
+        "utils":
+        [
+            {
+                "icon": "scatter.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_scatter; reload(solstice_scatter); solstice_scatter.run();",
+                "annotation": "Solstice Scatter Tool",
+                "label": ""
+            },
+            {
+                "icon": "solsticesnow.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_snowgenerator; reload(solstice_snowgenerator); solstice_snowgenerator.run();",
+                "annotation": "Solstice Snow Creator Tool",
+                "label": ""
+            }
+        ],
+        "td":
+        [
+            {
+                "icon": "tagger.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_pipelinizer; solstice_pipelinizer.run();",
+                "annotation": "Solstice Pipelinizer Tool",
+                "label": ""
+            },
+            {
+                "icon": "sanitycheck.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_sanitycheck; reload(solstice_sanitycheck); solstice_sanitycheck.run();",
+                "annotation": "Solstice Sanity Check Tool",
+                "label": ""
+            },
+            {
+                "icon": "shaders.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_shaderlibrary; reload(solstice_shaderlibrary); solstice_shaderlibrary.run();",
+                "annotation": "Solstice Shader Library Tool",
+                "label": ""
+            },
+            {
+                "icon": "txtrelinker.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_texturesrelinker; reload(solstice_texturesrelinker); solstice_texturesrelinker.run();",
+                "annotation": "Solstice Textures Relinker Tool",
+                "label": ""
+            }
+        ]
+    }
+}

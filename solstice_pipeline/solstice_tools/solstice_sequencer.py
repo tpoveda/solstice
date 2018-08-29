@@ -11,8 +11,8 @@
 import os
 from collections import OrderedDict
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
 from solstice_gui import solstice_sequencerwidgets

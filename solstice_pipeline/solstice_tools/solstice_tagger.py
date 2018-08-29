@@ -11,8 +11,8 @@
 import os
 from functools import partial
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
@@ -935,7 +935,7 @@ class SolsticeTagger(solstice_windows.Window, object):
     @classmethod
     def create_new_tag_data_node_for_current_selection(cls, asset_type=None):
 
-        if not cls.current_selection or cls.current_selection == 'scene':
+        if not cls.current_selection or cls.current_selection == 'scene' or not cmds.objExists(cls.current_selection):
             cls.current_selection = cmds.ls(sl=True)
             if cls.current_selection:
                 cls.current_selection = cls.current_selection[0]

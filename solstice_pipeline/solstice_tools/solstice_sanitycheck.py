@@ -8,7 +8,7 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 from solstice_pipeline.solstice_utils import solstice_maya_utils
 from solstice_pipeline.solstice_gui import solstice_windows

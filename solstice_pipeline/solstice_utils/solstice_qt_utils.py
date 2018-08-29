@@ -14,11 +14,12 @@ import subprocess
 
 import maya.cmds as cmds
 import maya.OpenMayaUI as OpenMayaUI
+import shiboken2 as shiboken
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
-from solstice_qt.QtGui import *
-from solstice_qt import QtCompat
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
+from solstice_pipeline.externals.solstice_qt import QtCompat
 try:
     from shiboken import wrapInstance
 except ImportError:
@@ -26,6 +27,13 @@ except ImportError:
 
 import solstice_pipeline as sp
 from solstice_utils import solstice_maya_utils, solstice_python_utils, solstice_browser_utils
+
+
+def wrapinstance(ptr, base=None):
+    if ptr is None:
+        return None
+
+    return shiboken.wrapInstance(long(ptr), base)
 
 
 def dock_solstice_widget(widget_class):

@@ -79,6 +79,14 @@
     "Added first working version of Solstice Outliner Tool",
     "Small improvement on Solstice Publisher related with better validations and checks",
     "Simplified Solstice Tools initialization",
-    "Fixed Tray window error on MAC system"
+    "Fixed Tray window error on MAC system",
+    "Removed Studio Library from pickers and added as an external tool"
+  ],
+  "7.0":
+  [
+    "Fixed Shaders when publishing new Shader Files through Solstice Publisher",
+    "Change externals library import to avoid conflicts between already installed Maya libraries",
+    "Added new window style for titles",
+    "Added new shelf organized by department"
   ]
 }

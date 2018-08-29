@@ -12,9 +12,9 @@ import os
 import sys
 import getpass
 
-from solstice_qt.QtCore import *
-from solstice_qt.QtWidgets import *
-from solstice_qt.QtGui import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_utils import solstice_worker

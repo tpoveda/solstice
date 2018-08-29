@@ -8,12 +8,21 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-import xml.dom.minidom as minidom
+import json
+from collections import OrderedDict
+from functools import partial
+
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
 
 import maya.cmds as cmds
 import maya.mel as mel
+import maya.OpenMayaUI as OpenMayaUI
 
+import solstice_pipeline as sp
 from solstice_utils import solstice_maya_utils as utils
+from solstice_utils import solstice_qt_utils as qt
+from resources import solstice_resource
 
 
 class SolsticeShelf(object):
@@ -23,6 +32,10 @@ class SolsticeShelf(object):
         self.name = name
         self.label_background = label_background
         self.label_color = label_color
+
+        self.category_btn = None
+        self.category_menu = None
+
 
     @staticmethod
     def add_menu_item(parent, label, command='', icon=''):
@@ -49,8 +62,6 @@ class SolsticeShelf(object):
 
         return cmds.menuItem(parent=parent, label=label, icon=icon or '', subMenu=True)
 
-    # endregion
-
     def create(self, delete_if_exists=True):
         """
         Creates a new shelf
@@ -63,6 +74,26 @@ class SolsticeShelf(object):
             assert not utils.shelf_exists(self.name), 'Shelf with name {} already exists!'.format(self.name)
 
         self.name = utils.create_shelf(name=self.name)
+
+        # ========================================================================================================
+
+        self.category_btn = QPushButton('')
+        self.category_btn.setIcon(solstice_resource.icon('solstice_s'))
+        self.category_btn.setIconSize(QSize(18, 18))
+        self.category_menu = QMenu(self.category_btn)
+        self.category_btn.setStyleSheet('QPushButton::menu-indicator {image: url(myindicator.png);subcontrol-position: right center;subcontrol-origin: padding;left: -2px;}')
+        self.category_btn.setMenu(self.category_menu)
+        self.category_lbl = QLabel('MAIN')
+        self.category_lbl.setAlignment(Qt.AlignCenter)
+        font = self.category_lbl.font()
+        font.setPointSize(6)
+        self.category_lbl.setFont(font)
+        menu_ptr = OpenMayaUI.MQtUtil.findControl(self.name)
+        menu_widget = qt.wrapinstance(menu_ptr, QWidget)
+        menu_widget.layout().addWidget(self.category_btn)
+        menu_widget.layout().addWidget(self.category_lbl)
+
+        self.add_separator()
 
     def set_as_active(self):
         """
@@ -101,18 +132,97 @@ class SolsticeShelf(object):
 
         cmds.separator(parent=self.name, manage=True, visible=True, horizontal=False, style='shelf', enableBackground=False, preventOverride=False)
 
+    def build_category(self, shelf_file, category_name):
+
+        self.category_lbl.setText(category_name.upper())
+
+        self.load_category(shelf_file, 'general', clear=True)
+        if category_name != 'general':
+            self.add_separator()
+            self.load_category(shelf_file, category_name, clear=False)
+
+    def build_categories(self, shelf_file, categories):
+        """
+        Builds all categories given
+        :param categories: list<str>, list of categories to build
+        """
+
+        self.category_lbl.setText('ALL')
+
+        self.load_category(shelf_file, 'general', clear=True)
+        for cat in categories:
+            if cat == 'general':
+                continue
+            self.add_separator()
+            self.load_category(shelf_file, cat, clear=False)
+
+    def load_category(self, shelf_file, category_name, clear=True):
+        """
+        Loads into a shelf all the items of given category name, if exists
+        :param category_name: str, name of the category
+        """
+
+        if clear:
+            self.clear_list()
+            # self.add_separator()
+
+        with open(shelf_file) as f:
+            shelf_data = json.load(f, object_pairs_hook=OrderedDict)
+            if not 'solstice_shelf' in shelf_data:
+                sp.logger.warning('Impossible to create Solstice Shelf! Please contact TD!')
+                return
+
+            for item, item_data in shelf_data['solstice_shelf'].items():
+                if item != category_name:
+                    continue
+
+                for i in item_data:
+                    icon = i.get('icon')
+                    command = i.get('command')
+                    annotation = i.get('annotation')
+                    label = i.get('label')
+
+                    if annotation == 'separator':
+                        self.add_separator()
+                    else:
+                        self.add_button(label=label, command=command, icon=icon, tooltip=annotation)
+                return
+
     def build(self, shelf_file):
         """
-        Builds shelf
+        Builds shelf from JSON file
         :param shelf_file: str
         """
-        xml_menu_doc = minidom.parse(shelf_file)
-        for shelf_item in xml_menu_doc.getElementsByTagName('shelfItem'):
-            btn_icon = shelf_item.attributes['icon'].value
-            btn_annotation = shelf_item.attributes['ann'].value
-            btn_command = shelf_item.attributes['cmds'].value
-            btn_lbl = shelf_item.attributes['label'].value or ''
-            if btn_annotation == 'Separator':
-                self.add_separator()
-            else:
-                self.add_button(label=btn_lbl, command=btn_command, icon=btn_icon, tooltip=btn_annotation)
+
+        first_item = None
+
+        all_categories = list()
+
+        with open(shelf_file) as f:
+            shelf_data = json.load(f, object_pairs_hook=OrderedDict)
+            if not 'solstice_shelf' in shelf_data:
+                sp.logger.warning('Impossible to create Solstice Shelf! Please contact TD!')
+                return
+
+            for i, item in enumerate(shelf_data['solstice_shelf'].keys()):
+                if i == 0:
+                    first_item = item
+
+                category_action = self.category_menu.addAction(item.title())
+                category_action.triggered.connect(partial(self.build_category, shelf_file, item))
+                all_categories.append(item)
+
+            category_action = self.category_menu.addAction('All')
+            category_action.triggered.connect(partial(self.build_categories, shelf_file, all_categories))
+
+        if first_item:
+            self.load_category(shelf_file, first_item, clear=False)
+
+    def clear_list(self):
+        if utils.shelf_exists(shelf_name=self.name):
+            menu_items = cmds.shelfLayout(self.name, query=True, childArray=True)
+            for item in menu_items:
+                try:
+                    cmds.deleteUI(item)
+                except Exception:
+                    pass

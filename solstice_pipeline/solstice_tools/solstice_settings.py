@@ -12,8 +12,8 @@ import logging
 
 import maya.app.general.mayaMixin as mayaMixin
 
-from solstice_qt.QtWidgets import *
-from solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtCore import *
 
 import solstice_pipeline as sp
 
