@@ -116,7 +116,7 @@ class SolsticePipeline(QObject):
         :return:
         """
         root_path = os.path.dirname(os.path.abspath(__file__))
-        extra_paths = [os.path.join(root_path, 'resources', 'icons')]
+        extra_paths = [os.path.join(root_path, 'resources', 'icons'), os.path.join(root_path, 'externals', 'animBot')]
         for path in extra_paths:
             if os.path.exists(path) and path not in sys.path:
                 self.logger.debug('Adding Path {} to SYS_PATH ...'.format(path))

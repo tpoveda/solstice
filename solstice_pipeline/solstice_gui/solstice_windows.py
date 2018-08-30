@@ -40,6 +40,7 @@ class WindowDragger(QFrame, object):
         palette.setColor(self.backgroundRole(), QColor(35, 35, 35))
         self.setPalette(palette)
         self.setMinimumHeight(40)
+        self.setMaximumHeight(40)
         self.setAutoFillBackground(True)
 
         main_layout = QHBoxLayout()
@@ -164,6 +165,8 @@ class Window(QMainWindow, object):
         self.setWindowFlags(self.windowFlags() ^ Qt.FramelessWindowHint)
         self.setWindowTitle('{} - {}'.format(self.title, self.version))
         self.main_layout = None
+
+        self.statusBar().setSizeGripEnabled(True)
 
         self.custom_ui()
 

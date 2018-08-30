@@ -87,6 +87,8 @@
     "Fixed Shaders when publishing new Shader Files through Solstice Publisher",
     "Change externals library import to avoid conflicts between already installed Maya libraries",
     "Added new window style for titles",
-    "Added new shelf organized by department"
+    "Added new shelf organized by department",
+    "Added ml_tools to Animation Tools",
+    "Added aTools to Animation Tools"
   ]
 }

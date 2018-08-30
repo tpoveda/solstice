@@ -22,7 +22,7 @@
                 "label": ""
             },
             {
-                "icon": "pipeline.png",
+                "icon": "outline.png",
                 "command": "from solstice_pipeline.solstice_tools import solstice_outliner; solstice_outliner.run();",
                 "annotation": "Solstice Outliner Tool",
                 "label": ""
@@ -30,6 +30,30 @@
         ],
         "anim":
         [
+            {
+                "icon": "aTools.png",
+                "command": "from solstice_pipeline.externals.aTools.animTools.animBar import animBarUI; reload(animBarUI); animBarUI.show('refresh');",
+                "annotation": "aTools",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
+                "icon": "ml_convertRotationOrder.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_animrotconverter; reload(solstice_animrotconverter); solstice_animrotconverter.run()",
+                "annotation": "ml_tools - Convert Rotation Order",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
             {
                 "icon": "picker.png",
                 "command": "from solstice_pipeline.solstice_tools import solstice_pickers; solstice_pickers.run();",
