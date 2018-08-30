@@ -404,6 +404,121 @@
           }
         ]
       },
+      "spine1":
+      {
+        "FKButton":
+        [
+          {
+            "x": "12",
+            "y": "-75",
+            "radius": "24",
+            "name": "spine2",
+            "type":"fk",
+            "parent": "spine1_fk_spine1_ctrl",
+            "gizmo": "rotate",
+            "color":[255,255,0]
+          },
+
+          {
+            "x": "12",
+            "y": "-50",
+            "radius": "24",
+            "name": "spine1",
+            "type":"fk",
+            "parent": "spine1_fk_spine0_ctrl",
+            "gizmo": "rotate",
+            "color":[255,255,0]
+          },
+          {
+            "x": "12",
+            "y": "-25",
+            "radius": "24",
+            "name": "spine0",
+            "type":"fk",
+            "parent": "spine1_fk_pelvis_ctrl",
+            "gizmo": "rotate",
+            "color":[255,255,0]
+          },
+          {
+            "x": "12",
+            "y": "0",
+            "radius": "24",
+            "name": "upperBody",
+            "type":"fk",
+            "gizmo": "rotate",
+            "color":[255,255,0]
+          },
+          {
+            "x": "-12",
+            "y": "-12",
+            "radius": "24",
+            "name": "pelvis",
+            "type":"fk",
+            "gizmo": "move",
+            "color":[0,0,255]
+          }
+        ],
+        "IKButton":
+        [
+          {
+            "x": "-12",
+            "y": "-62",
+            "radius": "24",
+            "name": "spine2",
+            "type":"ik",
+            "gizmo": "rotate",
+            "color":[0,0,255]
+          },
+          {
+            "x": "-12",
+            "y": "-37",
+            "radius": "24",
+            "name": "spine1",
+            "type":"ik",
+            "gizmo": "move",
+            "color":[0,0,255]
+          }
+        ],
+        "ExtraButton":
+        [
+          {
+            "x": "45",
+            "y": "-55",
+            "radius": "5",
+            "height":"20",
+            "width":"20",
+            "color":[255,255,0],
+            "name": "chestGeo",
+            "gizmo": "move",
+            "side": "L",
+            "mirror": "True",
+            "offset": [-5,0]
+          },
+          {
+            "x": "0",
+            "y": "20",
+            "radius": "5",
+            "height":"20",
+            "width":"20",
+            "color":[255,255,0],
+            "name": "C_bellyGeo",
+            "gizmo": "move"
+          }
+        ],
+        "ModuleButton":
+        [
+          {
+            "x": "-25",
+            "y": "40",
+            "radius": "2",
+            "height":"22",
+            "width":"78",
+            "text":"SPINE",
+            "color":[100,100,100],
+            "glowColor":[255,255,255]
+          }
+        ]
+      },
       "finger1":
       {
         "FKButton":
@@ -698,7 +813,7 @@
             "x": "34",
             "y": "215",
             "radius": "27",
-            "name": "leg",
+            "name": "foot",
             "type":"ik",
             "gizmo": "move",
             "side":"L",

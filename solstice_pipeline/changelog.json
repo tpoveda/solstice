@@ -89,6 +89,8 @@
     "Added new window style for titles",
     "Added new shelf organized by department",
     "Added ml_tools to Animation Tools",
-    "Added aTools to Animation Tools"
+    "Added aTools to Animation Tools",
+    "Fixed Picker IK Selection on Summer/Winter Legs",
+    "Added Spine Controls to Summer/Pickers"
   ]
 }
