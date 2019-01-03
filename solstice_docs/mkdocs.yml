@@ -1,0 +1,18 @@
+site_name: Solstice - Pipeline Docs
+site_dir: solsticedocs
+nav:
+    - Home: index.md
+    - First Steps:
+        - 'NDA': 'nda.md'
+        - 'Shading Test': 'shadingtest.md'
+    - About: about.md
+theme:
+  name: 'material'
+  logo: 'img/solstice_tools.png'
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.emoji
+extra_css:
+  - 'stylesheets/solstice.css'

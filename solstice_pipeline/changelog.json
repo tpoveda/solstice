@@ -91,6 +91,10 @@
     "Added ml_tools to Animation Tools",
     "Added aTools to Animation Tools",
     "Fixed Picker IK Selection on Summer/Winter Legs",
-    "Added Spine Controls to Summer/Pickers"
+    "Added Spine Controls to Summer Picker"
+  ],
+  "8.0":
+  [
+    "Main shelf is added now on all shelf categories"
   ]
 }

@@ -1,0 +1,9 @@
+.md-header
+{
+    background-image:  linear-gradient(to right, rgb(245, 180, 148) , rgb(75, 70, 170));
+}
+
+img[src$="centerme"] {
+  display:block;
+  margin: 0 auto;
+}
