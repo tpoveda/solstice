@@ -27,8 +27,7 @@ except ImportError as err:
         # but if we get here it means this this was a wheel (or exe).
         msg = "this Windows version is too old (< Windows Vista); "
         msg += "psutil 3.4.2 is the latest version which supports Windows "
-        msg += "2000, XP and 2003 server; it may be possible that psutil "
-        msg += "will work if compiled from sources though"
+        msg += "2000, XP and 2003 server"
         raise RuntimeError(msg)
     else:
         raise
@@ -83,6 +82,7 @@ ACCESS_DENIED_ERRSET = frozenset([errno.EPERM, errno.EACCES,
                                   cext.ERROR_ACCESS_DENIED])
 NO_SUCH_SERVICE_ERRSET = frozenset([cext.ERROR_INVALID_NAME,
                                     cext.ERROR_SERVICE_DOES_NOT_EXIST])
+HAS_PROC_IO_PRIORITY = hasattr(cext, "proc_io_priority_get")
 
 
 if enum is None:
@@ -645,7 +645,7 @@ def wrap_exceptions(fun):
 class Process(object):
     """Wrapper class around underlying C implementation."""
 
-    __slots__ = ["pid", "_name", "_ppid"]
+    __slots__ = ["pid", "_name", "_ppid", "_cache"]
 
     def __init__(self, pid):
         self.pid = pid
@@ -655,10 +655,10 @@ class Process(object):
     # --- oneshot() stuff
 
     def oneshot_enter(self):
-        self.oneshot_info.cache_activate()
+        self.oneshot_info.cache_activate(self)
 
     def oneshot_exit(self):
-        self.oneshot_info.cache_deactivate()
+        self.oneshot_info.cache_deactivate(self)
 
     @memoize_when_activated
     def oneshot_info(self):
@@ -928,7 +928,7 @@ class Process(object):
         return cext.proc_priority_set(self.pid, value)
 
     # available on Windows >= Vista
-    if hasattr(cext, "proc_io_priority_get"):
+    if HAS_PROC_IO_PRIORITY:
         @wrap_exceptions
         def ionice_get(self):
             return cext.proc_io_priority_get(self.pid)

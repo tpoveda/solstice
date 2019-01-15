@@ -10,12 +10,10 @@
 
 import os
 import sys
-import subprocess
 import logging
 import psutil
 
 from PySide.QtGui import *
-from PySide.QtCore import *
 
 
 artella_maya_plugin_name = 'Artella.py'

@@ -1,0 +1,28 @@
+site_name: Solstice - Pipeline Docs
+dev_addr: '127.0.0.1:9000'
+sticky_navigation: False
+nav:
+    - Home: index.md
+    - First Steps:
+        - 'NDA': 'nda.md'
+        - 'Shading Test': 'shadingtest.md'
+    - Solstice Pipeline:
+      - Software: solsticepipeline/software.md
+      - Software Installation:
+        - Installing Maya: solsticepipeline/installingmaya.md
+        - Installing Arnold: solsticepipeline/installingarnold.md
+        - Installing Yeti: solsticepipeline/installingyeti.md
+    - Slack: 'slack.md'
+    - About: 'about.md'
+theme:
+  name: 'material'
+  logo: 'img/solstice_avatar.png'
+  feature:
+    tabs: true
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.emoji
+extra_css:
+  - 'stylesheets/solstice.css'

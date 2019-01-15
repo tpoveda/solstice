@@ -36,7 +36,7 @@ from socket import SOCK_DGRAM
 from socket import SOCK_STREAM
 
 import psutil
-from psutil import OSX
+from psutil import MACOS
 from psutil import POSIX
 from psutil import SUNOS
 from psutil import WINDOWS
@@ -117,6 +117,7 @@ TRAVIS = bool(os.environ.get('TRAVIS'))
 # whether we're running this test suite on Appveyor for Windows
 # (http://www.appveyor.com/)
 APPVEYOR = bool(os.environ.get('APPVEYOR'))
+PYPY = '__pypy__' in sys.builtin_module_names
 
 # --- configurable defaults
 
@@ -125,7 +126,7 @@ NO_RETRIES = 10
 # bytes tolerance for system-wide memory related tests
 MEMORY_TOLERANCE = 500 * 1024  # 500KB
 # the timeout used in functions which have to wait
-GLOBAL_TIMEOUT = 3
+GLOBAL_TIMEOUT = 3 if TRAVIS or APPVEYOR else 0.5
 # test output verbosity
 VERBOSITY = 1 if os.getenv('SILENT') or TOX else 2
 # be more tolerant if we're on travis / appveyor in order to avoid
@@ -137,7 +138,16 @@ if TRAVIS or APPVEYOR:
 # --- files
 
 TESTFILE_PREFIX = '$testfn'
+if os.name == 'java':
+    # Jython disallows @ in module names
+    TESTFILE_PREFIX = '$psutil-test-'
+else:
+    TESTFILE_PREFIX = '@psutil-test-'
 TESTFN = os.path.join(os.path.realpath(os.getcwd()), TESTFILE_PREFIX)
+# Disambiguate TESTFN for parallel testing, while letting it remain a valid
+# module name.
+TESTFN = TESTFN + str(os.getpid())
+
 _TESTFN = TESTFN + '-internal'
 TESTFN_UNICODE = TESTFN + u("-ƒőő")
 ASCII_FS = sys.getfilesystemencoding().lower() in ('ascii', 'us-ascii')
@@ -179,7 +189,7 @@ def _get_py_exe():
         else:
             return exe
 
-    if OSX:
+    if MACOS:
         exe = \
             attempt(sys.executable) or \
             attempt(os.path.realpath(sys.executable)) or \
@@ -207,7 +217,7 @@ _testfiles_created = set()
 
 
 @atexit.register
-def _cleanup_files():
+def cleanup_test_files():
     DEVNULL.close()
     for name in os.listdir(u('.')):
         if isinstance(name, unicode):
@@ -228,7 +238,7 @@ def _cleanup_files():
 
 # this is executed first
 @atexit.register
-def _cleanup_procs():
+def cleanup_test_procs():
     reap_children(recursive=True)
 
 
@@ -367,7 +377,7 @@ def create_proc_children_pair():
 def create_zombie_proc():
     """Create a zombie process and return its PID."""
     assert psutil.POSIX
-    unix_file = tempfile.mktemp(prefix=TESTFILE_PREFIX) if OSX else TESTFN
+    unix_file = tempfile.mktemp(prefix=TESTFILE_PREFIX) if MACOS else TESTFN
     src = textwrap.dedent("""\
         import os, sys, time, socket, contextlib
         child_pid = os.fork()
@@ -592,7 +602,7 @@ class retry(object):
                  timeout=None,
                  retries=None,
                  interval=0.001,
-                 logfun=lambda s: print(s, file=sys.stderr),
+                 logfun=print,
                  ):
         if timeout and retries:
             raise ValueError("timeout and retries args are mutually exclusive")
@@ -625,7 +635,7 @@ class retry(object):
             for _ in self:
                 try:
                     return fun(*args, **kwargs)
-                except self.exception as _:
+                except self.exception as _:  # NOQA
                     exc = _
                     if self.logfun is not None:
                         self.logfun(exc)
@@ -1175,11 +1185,12 @@ if POSIX:
         by this process, copies it in another location and loads it
         in memory via ctypes. Return the new absolutized path.
         """
+        exe = 'pypy' if PYPY else 'python'
         ext = ".so"
         dst = tempfile.mktemp(prefix=dst_prefix, suffix=ext)
         libs = [x.path for x in psutil.Process().memory_maps() if
                 os.path.splitext(x.path)[1] == ext and
-                'python' in x.path.lower()]
+                exe in x.path.lower()]
         src = random.choice(libs)
         shutil.copyfile(src, dst)
         try:

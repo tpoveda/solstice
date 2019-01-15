@@ -20,7 +20,7 @@ from PySide.QtCore import *
 import solstice_updater as updater
 
 
-DEF_MAYA_PATH_INSTALLATIONS = ['C://Program Files//Autodesk//Maya2017']
+DEF_MAYA_PATH_INSTALLATIONS = ['C:/Program Files/Autodesk/Maya2017']
 DEF_MAYA_EXECUTABLE = 'maya.exe'
 
 
@@ -62,6 +62,7 @@ def get_maya_executables_from_installation_path(installation_path):
 
     if os.path.exists(installation_path):
         bin_path = os.path.join(installation_path, 'bin')
+
         if not os.path.exists(bin_path):
             return None
         maya_files = os.listdir(bin_path)
@@ -91,15 +92,19 @@ def get_maya_2017_installation():
         return None
 
     maya_executable = get_maya_executables_from_installation_path(maya_location)
-    if not os.path.isfile(maya_executable):
-        maya_executable = str(QFileDialog.getExistingDirectory(None, 'Select Maya 2017 installation'))
+
+    if maya_executable is None or not os.path.isfile(maya_executable):
+        maya_executable = str(QFileDialog.getOpenFileName(None, 'Select Maya 2017 installation')[0])
+        print(maya_executable)
         if not os.path.isfile(maya_executable):
-            QMessageBox.information(None, 'Maya location not found! Solstice Launcher will not launch Maya!')
+            QMessageBox.information(None, 'Maya Location not found!' 'Maya location not found! Solstice Launcher will not launch Maya!')
             return None
     versions['2017'] = maya_executable
 
     # We are not interested in supporting multiple Maya versions
     # return versions
+
+    print('HOALALALA')
 
     return maya_executable
 

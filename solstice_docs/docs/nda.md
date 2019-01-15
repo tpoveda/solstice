@@ -1,5 +1,7 @@
 ![Solstice Documentation](img/info_nda.png?style=centerme)
 
+***
+
 If you are new in the project, please follow the next steps:
 
 1. Copy this text and fill it:
