@@ -1,7 +1,7 @@
 
 ### **Instructions**
 
-To join the shading team in Solstice Short Film you need to pass a shading text. Follow the next steps to complete the test:
+To join the shading team in Solstice Short Film you need to pass a shading test. Follow the next steps to complete the test:
 
 * Download the asset you have to do shading for: [Lamp](/files/test_shading.zip)
 * You have some references that we already made for Solstice Short film
