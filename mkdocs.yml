@@ -1,5 +1,5 @@
 site_name: Solstice - Pipeline Docs
-site_dir: solsticedocs
+dev_addr: '127.0.0.1:9000'
 nav:
     - Home: index.md
     - First Steps:
