@@ -1,9 +1,11 @@
 language: python
+os: windows
 install:
 - pip install mkdocs
 - pip install mkdocs-material
 script:
-- mkdocs build --config-file=solstice_docs/mkdocs.yml --verbose --clean --strict
+- mkdocs build --config-file=solstice_docs/mkdocs.yml --verbose --clean
+- move solstice_docs/site .
 deploy:
   provider: pages
   skip_cleanup: true
