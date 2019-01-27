@@ -29,16 +29,17 @@ class SolsticeTools():
     setup_file = '{}{}'.format(repo_url, setup_json)
 
     @staticmethod
-    def set_installation_path():
+    def set_installation_path(console):
         """
         Set Solstice Tools installation path
         :return: str
         """
 
-        selected_dir = QFileDialog.getExistingDirectory()
+        selected_dir = QFileDialog.getExistingDirectory(None, "Select folder where you want to install Solstice Tools")
         if not os.path.exists(selected_dir):
             new_dir = SolsticeTools.get_installation_path()
-            print('Selected Installation Folder: {0} does not exists! Installing in default path: {1}'.format(selected_dir, new_dir))
+            if console:
+                console.write('Selected Installation Folder: {0} does not exists! Installing in default path: {1}'.format(selected_dir, new_dir))
             selected_dir = new_dir
 
         return os.path.abspath(selected_dir)

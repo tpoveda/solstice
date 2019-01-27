@@ -12,10 +12,10 @@ import os
 import platform
 import subprocess
 
-from PySide.QtGui import *
 from PySide.QtCore import *
 
 import solstice_launcher_utils as utils
+
 
 class SolsticeConfig(QSettings, object):
     """
@@ -56,8 +56,8 @@ def create_config(console, window, config_file=None):
     config = SolsticeConfig(filename=config_file, window=window, console=console)
 
     application_versions = utils.get_maya_2017_installation()
-
     if not application_versions:
+        console.write('Maya Location not found: Solstice Launcher will not launch Maya!')
         return None
 
     # for item in application_versions.items():

@@ -23,6 +23,7 @@ import solstice_maya_utils
 from PySide.QtGui import *
 from PySide.QtCore import *
 
+
 class SolsticeLauncher(QObject, object):
 
     def __init__(self):
@@ -118,7 +119,7 @@ class SolsticeLauncher(QObject, object):
             install_path = os.path.join(install_path, 'solstice_pipeline')
         if install_path is None or not os.path.exists(install_path):
             console.write('Current installation path does not exists: {}. Reinstalling Solstice Tools ...'.format(install_path))
-            config.setValue('solstice_pipeline_install', os.path.abspath(solstice_updater.SolsticeTools.set_installation_path()))
+            config.setValue('solstice_pipeline_install', os.path.abspath(solstice_updater.SolsticeTools.set_installation_path(console=console)))
 
         # Setup Solstice Environment variables
         console.write('Setting Maya Environment Variables ...')

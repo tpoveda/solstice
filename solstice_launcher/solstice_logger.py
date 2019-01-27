@@ -11,6 +11,7 @@
 import os
 import logging
 import json
+import traceback
 
 # ==================================================================================
 LOGGERS = dict()
@@ -53,27 +54,13 @@ class Logger(object):
 
         try:
             logging_settings_file = self.get_log_file(path=path)
-            logging_file_name = os.path.basename(logging_settings_file)
-            for root, dirs, files in os.walk(path):
-                for f in files:
-                    if f == logging_file_name:
-                        logging_settings_file = os.path.join(root, f)
-                        break
-
-            if logging_settings_file and os.path.isfile(logging_settings_file):
-                with open(os.path.join(os.path.dirname(__file__), logging_settings_file), str("rt")) as f:
-                    config = json.load(f)
-                logging.config.dictConfig(config)
-            else:
-                pass
-                # logging.basicConfig(format=format_, filename=logging_settings_file) if format_ else logging.basicConfig()
-                # logging.basicConfig(format=format_, filename=logging_settings_file)
             self._logger = logging.getLogger(self._name)
             self._logger.setLevel(self._level)
             fh = logging.FileHandler(logging_settings_file)
             fh.setLevel(self._level)
             self._logger.addHandler(fh)
-        except Exception:
+        except Exception as e:
+            print('Impossible to create logger ... {}'.format(traceback.format_exc()))
             logging.basicConfig(format=format_) if format_ else logging.basicConfig()
             self._logger = logging.getLogger(self._name)
             self._logger.setLevel(self._level)

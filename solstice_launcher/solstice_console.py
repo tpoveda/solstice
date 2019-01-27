@@ -13,7 +13,6 @@ from io import StringIO
 import logging
 
 from PySide.QtGui import *
-from PySide.QtCore import *
 
 import solstice_logger
 import solstice_launcher_utils as utils
