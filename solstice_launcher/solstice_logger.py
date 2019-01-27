@@ -11,6 +11,7 @@
 import os
 import logging
 import traceback
+import logging.handlers
 
 # ==================================================================================
 LOGGERS = dict()
@@ -58,6 +59,11 @@ class Logger(object):
             fh = logging.FileHandler(logging_settings_file)
             fh.setLevel(self._level)
             self._logger.addHandler(fh)
+            rh = logging.handlers.RotatingFileHandler(logging_settings_file, 'w', backupCount=1)
+            rh.setLevel(self._level)
+            rh.setFormatter(format_)
+            rh.doRollover()
+            self._logger.addHandler(rh)
         except Exception as e:
             print('Impossible to create logger ... {}'.format(traceback.format_exc()))
             logging.basicConfig(format=format_) if format_ else logging.basicConfig()

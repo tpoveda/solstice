@@ -95,6 +95,8 @@
   ],
   "8.0":
   [
-    "Main shelf is added now on all shelf categories"
+    "Main shelf is added now on all shelf categories",
+    "New Solstice Launcer Version (with proper lug and fixing small bugs)",
+    "Moved Solstice Pipeline Tools & Pipeline Documentation to its final URL: https://tpoveda.github.io/solstice/"
   ]
 }
