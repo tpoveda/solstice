@@ -15,7 +15,7 @@
     3. **yeti_setup.bat** file
     
     > Folders inside yeti_solstice.zip fil
-    ![Yeti Install 0](../img/yeti_install_win_0.png?style=centerme)
+    ![Yeti Install 0](../../img/yeti_install_win_0.png?style=centerme)
     
     ***
     
@@ -24,7 +24,7 @@
     Extract **all files** on your **C:\\** drive
     
     > Extracted Yeti files on C:
-    ![Yeti Install 1](../img/yeti_install_win_1.png?style=centerme)
+    ![Yeti Install 1](../../img/yeti_install_win_1.png?style=centerme)
 
     ***
     
@@ -37,7 +37,7 @@
         Maybe you will need to execute **yeti_setup.bat** with adminstrator privileges
         
     > yeti_setup.bat creates some environment variables in your computer
-    ![Yeti Install 2](../img/yeti_install_win_2.png?style=centerme)
+    ![Yeti Install 2](../../img/yeti_install_win_2.png?style=centerme)
     
     ***
     
@@ -46,7 +46,7 @@
     After setting up Yeti, you need to launch Maya and open **Maya Plug-in Manager**
     
     > Opening Maya Plug-in Manager Window
-    ![Yeti Install 3](../img/yeti_install_win_3.png?style=centerme)
+    ![Yeti Install 3](../../img/yeti_install_win_3.png?style=centerme)
     
     ***
     
@@ -54,12 +54,12 @@
     Auto load cheboxes to load Yeti plugin.
     
     > Maya Plug-in Window with Yeti plugin loaded successfully
-    ![Yeti Install 4](../img/yeti_install_win_4.png?style=centerme)
+    ![Yeti Install 4](../../img/yeti_install_win_4.png?style=centerme)
     
     ***
     
     > After Yeti plugin is loaded, Yeti shelf will be created automatically
-    ![Yeti Install 5](../img/yeti_install_win_5.png?style=centerme)
+    ![Yeti Install 5](../../img/yeti_install_win_5.png?style=centerme)
     
     ***
     
@@ -70,7 +70,7 @@
         following folder: **C:/yeti_solstice/bin**
         
     > Setting up procedural search pats for Arnold
-    ![Yeti Install 6](../img/yeti_install_win_6.png?style=centerme)
+    ![Yeti Install 6](../../img/yeti_install_win_6.png?style=centerme)
     
     ***
     
@@ -83,7 +83,7 @@
         Make sure you are using **Arnold renderer 2.0.2.1** when rendering the scene test
 
     > If you render the test scene, you should see this amazing render!
-    ![Yeti Install 7](../img/yeti_install_win_7.png?style=centerme)
+    ![Yeti Install 7](../../img/yeti_install_win_7.png?style=centerme)
 
 ??? example "MacOS"
     ** Work in Progress**

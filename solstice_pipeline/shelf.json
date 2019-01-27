@@ -55,6 +55,12 @@
                 "label": ""
             },
             {
+                "icon": "",
+                "command": "from solstice_pipeline.solstice_pickers.picker import picker_utils; picker_utils.load_vl_scripts();",
+                "annotation": "Load Picker Scripts",
+                "label": ""
+            },
+            {
                 "icon": "picker.png",
                 "command": "from solstice_pipeline.solstice_tools import solstice_pickers; solstice_pickers.run();",
                 "annotation": "Solstice Pickers",

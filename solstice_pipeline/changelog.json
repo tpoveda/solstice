@@ -97,6 +97,7 @@
   [
     "Main shelf is added now on all shelf categories",
     "New Solstice Launcer Version (with proper lug and fixing small bugs)",
-    "Moved Solstice Pipeline Tools & Pipeline Documentation to its final URL: https://tpoveda.github.io/solstice/"
+    "Moved Solstice Pipeline Tools & Pipeline Documentation to its final URL: https://tpoveda.github.io/solstice/",
+    "Picker Scripts can now be reloaded manually on Animation Shelf"
   ]
 }

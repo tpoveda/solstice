@@ -126,6 +126,25 @@ def load_script(name):
         print str(e)
 
 
+def load_vl_scripts():
+    """
+    Loads all vl picker scripts
+    """
+
+    if not os.path.exists(scripts_path):
+        cmds.error('Solstice Picker Scripts not found!')
+
+    sp.logger.debug('Loading pickers MEL scripts ...')
+
+    load_script('vlRigIt_getModuleFromControl.mel')
+    load_script('vlRigIt_getControlsFromModuleList.mel')
+    load_script('vlRigIt_selectModuleControls.mel')
+    load_script('vlRigIt_snap_ikFk.mel')
+    load_script('vl_resetTransformations.mel')
+    load_script('vl_resetAttributes.mel')
+    load_script('vl_contextualMenuBuilder.mel')
+
+
 def get_mirror_control(ctrl_name):
     """
     Mirror control
