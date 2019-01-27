@@ -76,15 +76,22 @@ def get_maya_2017_installation():
     versions = dict()
 
     if platform.system().lower() == 'windows':
-        maya_location = os.getenv('MAYA_LOCATION')
-        if not maya_location:
-            for path in DEF_MAYA_PATH_INSTALLATIONS:
-                if os.path.exists(path):
-                    maya_location = path
-                    break
+        try:
+            from _winreg import *
+            a_reg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
+            a_key = OpenKey(a_reg, r"SOFTWARE\Autodesk\Maya\2017\Setup\InstallPath")
+            value = QueryValueEx(a_key, 'MAYA_INSTALL_LOCATION')
+            maya_location = value[0]
+        except Exception:
+            maya_location = os.getenv('MAYA_LOCATION')
+            if not maya_location:
+                for path in DEF_MAYA_PATH_INSTALLATIONS:
+                    if os.path.exists(path):
+                        maya_location = path
+                        break
 
     if not os.path.exists(maya_location):
-        QMessageBox.information(None, 'Maya location not found! Solstice Launcher will not launch Maya!')
+        QMessageBox.information(None, 'Maya location not found', 'Solstice Launcher will not launch Maya!')
         return None
 
     maya_executable = get_maya_executables_from_installation_path(maya_location)
