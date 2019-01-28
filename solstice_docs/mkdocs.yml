@@ -6,8 +6,13 @@ nav:
     - First Steps:
         - 'NDA': 'nda.md'
         - 'Shading Test': 'shadingtest.md'
+    - Artella App:
+        - What's Artella App?: solsticepipeline/artella/artellaapp.md
+        - Installing Artella App: solsticepipeline/artella/installingartellaapp.md
+        - Managing the Artella App: solsticepipeline/artella/managingartellaapp.md
     - Solstice Launcher:
-      - What's Solstice Launcher?: ''
+      - What's Solstice Launcher?: solsticepipeline/solsticelauncher/solsticelauncherapp.md
+      - Installing Solstice Launcher: solsticepipeline/solsticelauncher/installingsolsticelauncher.md
     - Solstice Pipeline:
       - Software:
         - Software Versions: solsticepipeline/software/softwareversions.md
@@ -15,12 +20,11 @@ nav:
           - Installing Maya: solsticepipeline/software/installingmaya.md
           - Installing Arnold: solsticepipeline/software/installingarnold.md
           - Installing Yeti: solsticepipeline/software/installingyeti.md
-      - Artella App:
-        - What's Artella App?: solsticepipeline/artella/artellaapp.md
-        - Installing Artella App: solsticepipeline/artella/installingartellaapp.md
-        - Managing the Artella App: solsticepipeline/artella/managingartellaapp.md
       - Artella Pipeline:
         - Artella Nomenclature: solsticepipeline/artella/artellanomenclature.md
+      - Solstice Tools:
+        - Solstice Changelog: solsticepipeline/solsticetools/solsticechangelog.md
+        - Solstice Pipelinizer: solsticepipeline/solsticetools/solsticepipelinizer.md
     - Slack: 'slack.md'
     - About: 'about.md'
 theme:

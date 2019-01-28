@@ -4,6 +4,18 @@
         "main":
         [
             {
+                "icon": "changelog.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_changelog; solstice_changelog.run();",
+                "annotation": "Solstice Changelog",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
                 "icon": "setproject.png",
                 "command": "import solstice_pipeline; solstice_pipeline.update_solstice_project();",
                 "annotation": "Auto Setup Solstice Project",
@@ -55,7 +67,7 @@
                 "label": ""
             },
             {
-                "icon": "",
+                "icon": "refresh.png",
                 "command": "from solstice_pipeline.solstice_pickers.picker import picker_utils; picker_utils.load_vl_scripts();",
                 "annotation": "Load Picker Scripts",
                 "label": ""
