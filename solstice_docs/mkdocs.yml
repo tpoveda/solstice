@@ -4,18 +4,19 @@ sticky_navigation: False
 nav:
     - Home: index.md
     - First Steps:
-        - 'NDA': 'nda.md'
-        - 'Shading Test': 'shadingtest.md'
+      - 'NDA': 'nda.md'
+      - 'Shading Test': 'shadingtest.md'
     - Artella App:
-        - What's Artella App?: solsticepipeline/artella/artellaapp.md
-        - Installing Artella App: solsticepipeline/artella/installingartellaapp.md
-        - Managing the Artella App: solsticepipeline/artella/managingartellaapp.md
+      - What's Artella App?: solsticepipeline/artella/app.md
+      - Installing Artella App: solsticepipeline/artella/installing.md
+      - Managing the Artella App: solsticepipeline/artella/managing.md
     - Solstice Launcher:
-      - What's Solstice Launcher?: solsticepipeline/solsticelauncher/solsticelauncherapp.md
-      - Installing Solstice Launcher: solsticepipeline/solsticelauncher/installingsolsticelauncher.md
+      - What's Solstice Launcher?: solsticepipeline/solsticelauncher/app.md
+      - Installing Solstice Launcher: solsticepipeline/solsticelauncher/installation.md
+      - Using Solstice Launcher: solsticepipeline/solsticelauncher/usage.md
     - Solstice Pipeline:
       - Software:
-        - Software Versions: solsticepipeline/software/softwareversions.md
+        - Software Versions: solsticepipeline/software/versions.md
         - Software Installation:
           - Installing Maya: solsticepipeline/software/installingmaya.md
           - Installing Arnold: solsticepipeline/software/installingarnold.md
