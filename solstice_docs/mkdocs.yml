@@ -25,7 +25,10 @@ nav:
         - Artella Nomenclature: solsticepipeline/artella/artellanomenclature.md
       - Solstice Tools:
         - Solstice Changelog: solsticepipeline/solsticetools/solsticechangelog.md
-        - Solstice Pipelinizer: solsticepipeline/solsticetools/solsticepipelinizer.md
+        - Solstice Pipelinizer:
+          - Launch: solsticepipeline/solsticetools/pipelinizer/launch.md
+          - Main UI: solsticepipeline/solsticetools/pipelinizer/mainui.md
+          - Assets: solsticepipeline/solsticetools/pipelinizer/assets.md
     - Slack: 'slack.md'
     - About: 'about.md'
 theme:

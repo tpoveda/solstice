@@ -1,5 +1,5 @@
 ???+ example "Windows"
-    !!! failure
+    !!! warning
         First of all, make sure that you have installed **Maya 2017 Update 5** in your computer and **Arnold 2.0.2.1**. 
         It's very important that you have installed these exact versions of Maya and Arnold installed, otherwise 
         Yeti plugin won't load properly.
