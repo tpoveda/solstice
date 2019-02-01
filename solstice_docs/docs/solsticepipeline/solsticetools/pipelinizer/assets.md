@@ -19,10 +19,26 @@ A Pipelinizer Asset shows:
 
 ***
 
-#### Asset Contextual Menu
+#### Asset Properties
+
+> Summer Asset Properties
+![Summer Asset Properties](../../../img/asset_properties.png?style=centerme)
 
 ***
 
-#### Asset Properties
+#### Asset Contextual Menu
 
+> Character Asset Contextual Menu
+![Summer Asset Contextual Menu](../../../img/asset_contextual_menu.png?style=centerme)
 
+* **Open Asset in Light Rig**: 
+
+* **Get Info(DEV)**:
+
+* **Synchronize**:
+
+* **Check for New Versions**:
+
+* **Import to current scene ...**:
+
+* **Reference in current scene ...**:
