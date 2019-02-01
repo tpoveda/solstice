@@ -22,8 +22,11 @@ nav:
           - Installing Arnold: solsticepipeline/software/installingarnold.md
           - Installing Yeti: solsticepipeline/software/installingyeti.md
       - Artella Pipeline:
-        - Artella Nomenclature: solsticepipeline/artella/artellanomenclature.md
+        - Artella Nomenclature: solsticepipeline/artella/nomenclature.md
       - Solstice Tools:
+        - Solstice Tray: solsticepipeline/solsticetools/solsticetray.md
+        - Solstice Shelf: solsticepipeline/solsticetools/solsticeshelf.md
+        - Solstice Toolbar: solsticepipeline/solsticetools/solsticetoolbar.md
         - Solstice Changelog: solsticepipeline/solsticetools/solsticechangelog.md
         - Solstice Pipelinizer:
           - Launch: solsticepipeline/solsticetools/pipelinizer/launch.md
