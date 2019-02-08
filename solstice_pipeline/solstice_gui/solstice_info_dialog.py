@@ -10,6 +10,7 @@
 
 import threading
 
+import solstice_pipeline as sp
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
@@ -84,12 +85,13 @@ class InfoDialog(QDialog, object):
 
         self._timer = None
 
-    def do(self, text, name, fn, args=None):
+    def do(self, text, name, fn, args=None, show=True):
 
         if not fn:
             return
 
-        self.show()
+        if show:
+            self.show()
 
         self._progress_text.setText(text)
 
@@ -110,6 +112,9 @@ class InfoDialog(QDialog, object):
 
         return thread, self._event
 
+    def set_text(self, text):
+        self._progress_text.setText(text)
+
     def show(self):
         super(InfoDialog, self).show()
         solstice_animations.fade_window(start=0, end=1, duration=2000, object=self)
@@ -125,6 +130,13 @@ class InfoDialog(QDialog, object):
         self._stop_timer()
         event.accept()
         # return super(InfoDialog, self).closeEvent(event)
+
+    def keyPressEvent(self, event):
+        if event.type() == QEvent.KeyPress:
+            if event.key() == Qt.Key_Escape:
+                sp.logger.debug('Process stopped by user!')
+                self._event.set()
+                self._update_progress_bar()
 
     def _update_progress_bar(self):
         if self._progress_bar.value() >= self._progress_bar.maximum():

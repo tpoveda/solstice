@@ -99,6 +99,15 @@
     "Added button to Main Shelf to show Solstice Tools Changelog",
     "New Solstice Launcer Version (with proper lug and fixing small bugs)",
     "Moved Solstice Pipeline Tools & Pipeline Documentation to its final URL: https://tpoveda.github.io/solstice/",
-    "Picker Scripts can now be reloaded manually on Animation Shelf"
+    "Picker Scripts can now be reloaded manually on Animation Shelf",
+    "Solstice Builder now supports the creation of JSON data for Shot/Sequences",
+    "Solstice Builder added to TD shelf",
+    "Added option to synchronize Sequences using Solstice Pipelinizer",
+    "Synchronization processes can now be closed manually by pressing Esc key",
+    "UI Animations are now smoother (more user friendly interaction)"
+  ],
+  "9.0":
+  [
+    "Solstice Sequencer is now loaded in background when Solstice Pipelinizer is opened"
   ]
 }

@@ -1,27 +1,42 @@
-### **Main UI**
+# **Solstice Pipelinizer**
 
-> Solstice Pipelinizer UI
-![Solstice Pipelinizer UI](../../../img/pipelinizer_0.png?style=centerme)
+!!! tip
+    In Windows, remember to launch Maya using Solstice Launcher
+    
+## **Launch**
+
+To launch Solstice Pipelinizer Tool, open Maya and click on Solstice Pipelinizer Tool icon located in **MAIN** Solstice Shelf
+
+> Solstice Pipelinizer Icon
+![Solstice Pipelinizer Icon](../../../img/solstice_pipelinizer_icon.png?style=centerme)
 
 ***
+
+> Solstice Pipelinizer
+![Solstice Pipelinizer](../../../img/solstice_pipelinizer.png?style=centerme)
+
+***
+
+## **Main UI**
+
+> Solstice Pipelinizer UI
+![Solstice Pipelinizer UI](../../../../img/pipelinizer_0.png?style=centerme)
 
 <center>
 
 |    |      Description      | 
 | -------- |:------------:|
-| ![Solstice Pipelinizer Purple](../../../img/color_purple.png?style=centerme) | User Information (shows the name of the user, OS platform and Artella availability |
-| ![Solstice Pipelinizer Blue](../../../img/color_blue.png?style=centerme) | Solstice Pipelinizer Toolbar |
-| ![Solstice Pipelinizer Yellow](../../../img/color_yellow.png?style=centerme) | Solstice Assets Filter & Viewer |
+| ![Solstice Pipelinizer Purple](../../../../img/color_purple.png?style=centerme) | User Information (shows the name of the user, OS platform and Artella availability |
+| ![Solstice Pipelinizer Blue](../../../../img/color_blue.png?style=centerme) | Solstice Pipelinizer Toolbar |
+| ![Solstice Pipelinizer Yellow](../../../../img/color_yellow.png?style=centerme) | Assets Manager & Sequences Manager |
 
 
 </center>
 
-***
-
 ### **User Information**
 
 > Solstice Pipelinizer User Info
-![Solstice Pipelinizer User Info](../../../img/pipelinizer_info.png?style=centerme)
+![Solstice Pipelinizer User Info](../../../../img/pipelinizer_info.png?style=centerme)
 
 !!! tip
     User Image is downloaded in an asynchronous way so can take some seconds until the image appears. During this time,
@@ -37,7 +52,7 @@ This is the image of the user that is setted up in Artella Settings
 
 
 > Solstice Pipelinizer User Image
-![Solstice Pipelinizer User Info](../../../img/pipelinizer_user_image.png?style=centerme)
+![Solstice Pipelinizer User Info](../../../../img/pipelinizer_user_image.png?style=centerme)
 
 ***
 
@@ -53,8 +68,8 @@ This is the OS used by the user
 
 |    |      Description      | 
 | -------- |:------------:|
-| ![OS Apple](../../../img/os_windows.png?style=centerme) | This icon appears if the user is using Windows OS |
-| ![OS Windows](../../../img/os_apple.png?style=centerme) | This icon appearas if the user is using MacOS |
+| ![OS Apple](../../../../img/os_windows.png?style=centerme) | This icon appears if the user is using Windows OS |
+| ![OS Windows](../../../../img/os_apple.png?style=centerme) | This icon appearas if the user is using MacOS |
 
 </center>
 
@@ -67,8 +82,8 @@ This indicator shows is Artella server is available (green) or not (red)
 
 |    |      Description      | 
 | -------- |:------------:|
-| ![Artella On](../../../img/artella_on.png?style=centerme) | Artella server is available |
-| ![Artella Off](../../../img/artella_off.png?style=centerme) | Artella server is **not** available |
+| ![Artella On](../../../../img/artella_on.png?style=centerme) | Artella server is available |
+| ![Artella Off](../../../../img/artella_off.png?style=centerme) | Artella server is **not** available |
 
 
 </center>
@@ -78,14 +93,14 @@ This indicator shows is Artella server is available (green) or not (red)
 ### **ToolBar**
 
 > Solstice Pipelinizer ToolBar
-![Solstice Pipelinizer User Info](../../../img/pipelinizer_toolbar.png?style=centerme)
+![Solstice Pipelinizer User Info](../../../../img/pipelinizer_toolbar.png?style=centerme)
 
 ***
 
 #### **Artella Project**
 This button opens Solstice Artella Project in your web browser
 
-![Artella Project](../../../img/artella_logo.jpg?style=centerme)
+![Artella Project](../../../../img/artella_logo.jpg?style=centerme)
 
 !!! info
     The link that is opened is the next one: <a href="https://www.artella.com/project/2252d6c8-407d-4419-a186-cf90760c9967/files" target="_blank" rel="noopener">Solstice Artella Project</a>
@@ -95,10 +110,10 @@ This button opens Solstice Artella Project in your web browser
 #### **Local Project**
 This button opens your local Solstice Artella Project in your computer
 
-![Local Project](../../../img/folder.png?style=centerme)
+![Local Project](../../../../img/folder.png?style=centerme)
 
 > Artella Local Folder in my computer
-![Local Project Browser](../../../img/artella_local.jpg?style=centerme)
+![Local Project Browser](../../../../img/artella_local.jpg?style=centerme)
 
 !!! note
     Your local Artella folder can be different because this path is configured by each user during
@@ -109,12 +124,12 @@ This button opens your local Solstice Artella Project in your computer
 #### **Assets Batch Synchronization**
 This button allows you to sync different assets types in batch (sync all characters, all props, etc)
 
-![Sync Batch](../../../img/sync.png?style=centerme)
+![Sync Batch](../../../../img/sync.png?style=centerme)
 
 When you click on top of the Sync button a drop down appears:
 
 > Sync Batch Dropdown Menu
-![Sync Batch Menu](../../../img/sync_menu.png?style=centerme)
+![Sync Batch Menu](../../../../img/sync_menu.png?style=centerme)
 
 ***
 
@@ -129,7 +144,7 @@ You can batch 3 types of assets:
 1. **Characters**
 
     > Sync Characters
-    ![Sync Batch Characters](../../../img/sync_menu_characters.png?style=centerme)
+    ![Sync Batch Characters](../../../../img/sync_menu_characters.png?style=centerme)
     
     * **All**: All characters assets files are synchronized in your computer from Artella
     * **Model**: Only character models files are synchronized in your computer from Artella
@@ -140,7 +155,7 @@ You can batch 3 types of assets:
 2. **Props**
 
     > Sync Props
-    ![Sync Batch Props](../../../img/sync_menu_props.png?style=centerme)
+    ![Sync Batch Props](../../../../img/sync_menu_props.png?style=centerme)
     
     * **All**: All props assets files are synchronized in your computer from Artella
     * **Model**: Only props models files are synchronized in your computer from Artella
@@ -150,7 +165,7 @@ You can batch 3 types of assets:
 3. **Background Elements**
 
     > Sync Background Elements
-    ![Sync Batch Background Elements](../../../img/sync_menu_bg.png?style=centerme)
+    ![Sync Batch Background Elements](../../../../img/sync_menu_bg.png?style=centerme)
     
     * **All**: All background assets files are synchronized in your computer from Artella
     * **Model**: Only background models files are synchronized in your computer from Artella
@@ -160,7 +175,7 @@ You can batch 3 types of assets:
 4. **All**
 
     > Sync All Assets
-    ![Sync Batch All](../../../img/sync_menu_all.jpg?style=centerme)
+    ![Sync Batch All](../../../../img/sync_menu_all.jpg?style=centerme)
     
     All Solstice Short Film assets will be synchronized
     
@@ -173,10 +188,10 @@ You can batch 3 types of assets:
 #### ** Solstice Pipelinizer Settings**
 This button opens Solstice Pipelinizer settings dialog
 
-![Solstice Pipelinizer Settings](../../../img/settings.png?style=centerme)
+![Solstice Pipelinizer Settings](../../../../img/settings.png?style=centerme)
 
 > Solstice Pipelinizer Settings Dialog
-![Pipelinizer Settings Dialog](../../../img/pipelinizer_settings_dialog.png?style=centerme)
+![Pipelinizer Settings Dialog](../../../../img/pipelinizer_settings_dialog.png?style=centerme)
 
 * **Auto Check Published Versions?**: If is **checked**, any time you select an Asset in Asset Viewer, Solstice Pipelinizer
 will retrieve latest **published** versions of the asset files
@@ -190,27 +205,3 @@ will check if some **working** files (model, textures, etc) of the asset are bei
 !!! warning
     Enabling these settings will means that any time you select an Asset in the Assets Viewer, Pipelinizer Tool will need
     to connect to Artella Server to retrieve some information, this will take some time, so be patient.
-
-***
-
-### **Assets Viewer**
-This is the main work area of the tool, here you can select Assets and filter them by its type. At this moment all 
-short film assets are organized in 4 groups:
-
-* **Background Elements**
-* **Characters**
-* **Props**
-* **Sets** (not being used at this moment)
-
-> Solstice Pipelinizer Assets Viewer
-![Pipelinizer Assets Viewer](../../../img/pipelinizer_assets_viewer.png?style=centerme)
-
-!!! warning
-    Assets Viewer only will show already synced assets, so if you cannot see any assets make sure that you have
-    sync your assets using Sync Batch functionality explained above
-
-!!! tip
-    Using left buttons you can filter assets by type
-    
-> Assets Viewer filtering characters
-![Pipelinizer Assets Viewer](../../../img/pipelinizer_char_filter.png?style=centerme)

@@ -231,7 +231,7 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
             thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo', self.get_artella_asset_data, [asset_data])
             while not event.is_set():
                 QCoreApplication.processEvents()
-                event.wait(0.25)
+                event.wait(0.05)
             if asset_data and len(asset_data) > 0:
                 asset_data = asset_data[0]
                 if not asset_data:
@@ -265,7 +265,7 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
                 thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo', self.get_artella_asset_data_path, [server_path, asset_data])
                 while not event.is_set():
                     QCoreApplication.processEvents()
-                    event.wait(0.25)
+                    event.wait(0.05)
                 if asset_data and len(asset_data) > 0:
                     asset_data = asset_data[0]
                     if not asset_data:
@@ -492,7 +492,7 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
         thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticeAssetInfo', self.get_artella_asset_data, [asset_data])
         while not event.is_set():
             QCoreApplication.processEvents()
-            event.wait(0.25)
+            event.wait(0.05)
         if asset_data and len(asset_data) > 0:
             asset_data = asset_data[0]
             if not asset_data:

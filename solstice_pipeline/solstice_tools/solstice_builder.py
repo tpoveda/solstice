@@ -38,7 +38,9 @@ class SolsticeBuilder(solstice_windows.Window, object):
         self._asset_builder = AssetBuilder()
         self._user_builder = UserBuilder()
         self._light_rig_builder = LightRigBuilder()
+        self._sequence_builder = ShotSequenceBuilder()
         tab_widget.addTab(self._asset_builder, 'Asset')
+        tab_widget.addTab(self._sequence_builder, 'Shot/Sequence')
         tab_widget.addTab(self._user_builder, 'User')
         tab_widget.addTab(self._light_rig_builder, 'Light Rig')
 
@@ -254,7 +256,46 @@ class LightRigBuilder(BuilderWidget, object):
             self._current_icon_path = icon_file_path[0]
 
 
+class ShotSequenceBuilder(BuilderWidget, object):
+    def __init__(self, parent=None):
+        super(ShotSequenceBuilder, self).__init__(name='Shot/Sequence', parent=parent)
+
+        self._current_icon_path = None
+
+        self._icon_btn = QPushButton('Icon')
+        self._icon_btn.setMinimumSize(QSize(150, 150))
+        self._icon_btn.setMaximumSize(QSize(150, 150))
+        self._icon_btn.setIconSize(QSize(150, 150))
+        self._icon_btn.setIconSize(QSize(150, 150))
+        self._description_text = QTextEdit()
+        self._description_text.setPlaceholderText('Description')
+
+        icon_layout = QHBoxLayout()
+        icon_layout.setContentsMargins(5, 10, 5, 5)
+        self.main_layout.addLayout(icon_layout)
+        icon_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        icon_layout.addWidget(self._icon_btn, Qt.AlignCenter)
+        icon_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Expanding, QSizePolicy.Fixed))
+
+        self.main_layout.addWidget(self._description_text)
+
+        self.main_layout.addItem(QSpacerItem(0, 5))
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        # ============================================================================
+
+        self._icon_btn.clicked.connect(self._set_icon)
+
+    def _set_icon(self):
+        file_dialog = QFileDialog(self)
+        icon_file_path = file_dialog.getOpenFileName(self, 'Select Preview File', sp.get_solstice_assets_path(), 'PNG Files (*.png);; JPG Files (*.jpg)')
+        if icon_file_path and os.path.isfile(icon_file_path[0]):
+            self._icon_btn.setIcon(QIcon(QPixmap(icon_file_path[0])))
+            self._icon_btn.setText('')
+            self._current_icon_path = icon_file_path[0]
+
+
 def run():
-    win = SolsticeBuilder().show()
+    SolsticeBuilder().show()
 
 

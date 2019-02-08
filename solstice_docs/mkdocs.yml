@@ -29,9 +29,9 @@ nav:
         - Solstice Toolbar: solsticepipeline/solsticetools/solsticetoolbar.md
         - Solstice Changelog: solsticepipeline/solsticetools/solsticechangelog.md
         - Solstice Pipelinizer:
-          - Launch: solsticepipeline/solsticetools/pipelinizer/launch.md
-          - Main UI: solsticepipeline/solsticetools/pipelinizer/mainui.md
-          - Assets: solsticepipeline/solsticetools/pipelinizer/assets.md
+          - Main UI: solsticepipeline/solsticetools/pipelinizer/tool.md
+          - Assets Manager: solsticepipeline/solsticetools/pipelinizer/assetmanager.md
+          - Sequences Manager: solsticepipeline/solsticetools/pipelinizer/sequencesmanager.md
     - Slack: 'slack.md'
     - About: 'about.md'
 theme:

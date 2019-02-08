@@ -4,18 +4,6 @@
         "main":
         [
             {
-                "icon": "changelog.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_changelog; solstice_changelog.run();",
-                "annotation": "Solstice Changelog",
-                "label": ""
-            },
-            {
-                "icon": "",
-                "command": "",
-                "annotation": "separator",
-                "label": ""
-            },
-            {
                 "icon": "setproject.png",
                 "command": "import solstice_pipeline; solstice_pipeline.update_solstice_project();",
                 "annotation": "Auto Setup Solstice Project",
@@ -37,6 +25,18 @@
                 "icon": "outline.png",
                 "command": "from solstice_pipeline.solstice_tools import solstice_outliner; solstice_outliner.run();",
                 "annotation": "Solstice Outliner Tool",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+           {
+                "icon": "changelog.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_changelog; solstice_changelog.run();",
+                "annotation": "Solstice Changelog",
                 "label": ""
             }
         ],
@@ -133,6 +133,36 @@
                 "icon": "txtrelinker.png",
                 "command": "from solstice_pipeline.solstice_tools import solstice_texturesrelinker; reload(solstice_texturesrelinker); solstice_texturesrelinker.run();",
                 "annotation": "Solstice Textures Relinker Tool",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
+                "icon": "solstice_builder",
+                "command": "from solstice_pipeline.solstice_tools import solstice_builder; reload(solstice_builder); solstice_builder.run();",
+                "annotation": "Solstice Builder Tool",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
+                "icon": "clean",
+                "command": "from solstice_pipeline.solstice_utils import solstice_maya_utils; reload(solstice_maya_utils); solstice_maya_utils.clean_scene();",
+                "annotation": "Clean Scene",
+                "label": ""
+            },
+            {
+                "icon": "student",
+                "command": "from solstice_pipeline.solstice_utils import solstice_maya_utils; reload(solstice_maya_utils); solstice_maya_utils.clean_student_line();",
+                "annotation": "Clean Student License",
                 "label": ""
             }
         ]

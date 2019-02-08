@@ -29,6 +29,7 @@ import maya.OpenMayaUI as OpenMayaUI
 import maya.OpenMaya as OpenMaya
 
 import solstice_pipeline as sp
+from solstice_utils import solstice_python_utils as python
 
 _DPI_SCALE = 1.0 if not hasattr(cmds, "mayaDpiSetting") else cmds.mayaDpiSetting(query=True, realScaleValue=True)
 
@@ -530,13 +531,16 @@ def file_has_student_line(filename):
     return False
 
 
-def clean_student_line(filename):
+def clean_student_line(filename=None):
     """
     Clean the student line from the given Maya file name
     :param filename: str
     """
 
     changed = False
+
+    if filename is None:
+        filename = cmds.file(q=True, sn=True)
 
     if not os.path.exists(filename):
         sp.logger.error('File "{}" does not exists!'.format(filename))
@@ -666,3 +670,103 @@ def isolated_nodes(nodes, panel):
         for obj in nodes:
             cmds.isolateSelect(panel, addDagObject=obj)
     yield
+
+
+def delete_nodes_of_type(node_type):
+    """
+    Delete all nodes of the given type
+    :param node_type: varaiant, list<str> || str, name of node type (eg: hyperView, etc) or list of names
+    """
+
+    node_type = python.force_list(node_type)
+    deleted_nodes = list()
+
+    for node_type_name in node_type:
+        nodes_to_delete = cmds.ls(type=node_type_name)
+        for n in nodes_to_delete:
+            if n == 'hyperGraphLayout':
+                continue
+            if not cmds.objExists(n):
+                continue
+
+            cmds.lockNode(n, lock=False)
+            cmds.delete(n)
+            deleted_nodes.append(n)
+
+    return deleted_nodes
+
+
+def delete_unknown_nodes():
+    """
+    Find all unknown nodes and delete them
+    """
+
+    unknown = cmds.ls(type='unknown')
+    deleted = list()
+    for n in unknown:
+        if cmds.objExists(n):
+            cmds.lockNode(n, lock=False)
+            cmds.delete(n)
+            deleted.append(n)
+
+    print('Deleted uknowns: {}'.format(deleted))
+
+
+def delete_turtle_nodes():
+    """
+    Find all turtle nodes in a scene and delete them
+    """
+
+    plugin_list = cmds.pluginInfo(query=True, pluginsInUse=True)
+    turtle_nodes = list()
+    if plugin_list:
+        for plugin in plugin_list:
+            if plugin[0] == 'Turtle':
+                turtle_types = ['ilrBakeLayer',
+                                'ilrBakeLayerManager',
+                                'ilrOptionsNode',
+                                'ilrUIOptionsNode']
+                turtle_nodes = delete_nodes_of_type(turtle_types)
+                break
+
+    print('Removed Turtle nodes: {}'.format(turtle_nodes))
+
+
+def delete_unused_plugins():
+    """
+    Removes all nodes in the scene that belongs to unused plugins (plugins that are not loaded)
+    """
+
+    # This functionality is not available in old Maya versions
+    list_cmds = dir(cmds)
+    if not 'unknownPlugin' in list_cmds:
+        return
+
+    unknown_nodes = cmds.ls(type='unknown')
+    if unknown_nodes:
+        return
+
+    unused = list()
+    unknown_plugins = cmds.unknownPlugin(query=True, list=True)
+    if unknown_plugins:
+        for p in unknown_plugins:
+            try:
+                cmds.unknownPlugin(p, remove=True)
+            except Exception:
+                continue
+            unused.append(p)
+
+    print('Removed unused plugins: {}'.format(unused))
+
+
+def clean_scene():
+    """
+    Function that cleans current open scene
+    - Clean Unknown nodes
+    - Clean Turtle nodes
+    - Clean Unused Plugins nodes
+    """
+
+    delete_unknown_nodes()
+    delete_turtle_nodes()
+    delete_unused_plugins()

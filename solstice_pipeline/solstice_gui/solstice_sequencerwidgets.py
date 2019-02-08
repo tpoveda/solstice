@@ -10,11 +10,12 @@
 
 import os
 
+import solstice_pipeline as sp
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 from solstice_utils import solstice_maya_utils as utils
-from solstice_gui import solstice_splitters
+from solstice_gui import solstice_splitters, solstice_sync_dialog
 from solstice_utils import solstice_artella_utils as artella
 
 reload(utils)
@@ -23,12 +24,15 @@ reload(solstice_splitters)
 
 
 class SequenceWidget(QWidget, object):
-    def __init__(self, sequence_data, sequence_files, parent=None):
+    def __init__(self, sequence_data, sequence_files=None, parent=None):
         super(SequenceWidget, self).__init__(parent=parent)
 
         self._sequence_data = sequence_data
 
         self._master_layout = None
+
+        if sequence_files is None:
+            sequence_files = list()
         if 'layout' in sequence_files:
             self._master_layout = sequence_files['layout']
 
@@ -97,6 +101,9 @@ class SequenceWidget(QWidget, object):
 
     def open_master_layout(self):
         artella.open_file_in_maya(file_path=self._master_layout)
+
+    def sync(self):
+        solstice_sync_dialog.SolsticeSyncPath(paths=[self.path]).sync()
 
     def mousePressEvent(self, event):
         super(SequenceWidget, self).mousePressEvent(event)

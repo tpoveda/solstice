@@ -181,6 +181,9 @@ class Pipelinizer(solstice_windows.Window, object):
         sync_all_action = QAction('All', self)
         for action in [sync_characters_action, sync_props_action, sync_background_elements_action, sync_all_action]:
             synchronize_menu.addAction(action)
+        synchronize_menu.addSeparator()
+        sync_sequences_action = QAction('Sequences', self)
+        synchronize_menu.addAction(sync_sequences_action)
         synchronize_btn.setMenu(synchronize_menu)
 
         sync_characters_menu = QMenu(self)
@@ -222,7 +225,6 @@ class Pipelinizer(solstice_windows.Window, object):
         self._tab_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self._tab_widget.setMinimumHeight(330)
         self.main_layout.addWidget(self._tab_widget)
-        self._tab_widget.currentChanged.connect(self._on_tab_changed)
 
         categories_widget = QWidget()
         categories_layout = QVBoxLayout()
@@ -238,7 +240,8 @@ class Pipelinizer(solstice_windows.Window, object):
         sequences_widget.setLayout(sequences_layout)
 
         self._tab_widget.addTab(categories_widget, 'Assets Manager')
-        self._tab_widget.addTab(sequences_widget, 'Sequence Manager')
+        self._tab_widget.addTab(sequences_widget, 'Loading | Sequence Manager')
+        self._tab_widget.setTabEnabled(1, False)
 
         # ================== Asset Manager Widget
         main_categories_menu_layout = QHBoxLayout()
@@ -289,12 +292,15 @@ class Pipelinizer(solstice_windows.Window, object):
         categories_buttons['All'].setChecked(True)
 
         # Sequence Manager Widget
-        self._sequencer = solstice_sequencer.SolsticeSequencer()
-        sequences_layout.addWidget(self._sequencer)
+        self.sequencer = solstice_sequencer.SolsticeSequencer()
+        sequences_layout.addWidget(self.sequencer)
 
         # =================================================================================================
+
+        self.sequencer.sequencerInitialized.connect(self._sequencer_loaded)
         artella_project_btn.clicked.connect(self.open_project_in_artella)
         project_folder_btn.clicked.connect(self.open_project_folder)
+        sync_all_action.triggered.connect(partial(self.sync_all_assets, True, True))
         sync_characters_all_action.triggered.connect(partial(self.sync_category, 'Characters', 'all', True, True))
         sync_character_model_action.triggered.connect(partial(self.sync_category, 'Characters', 'model', True, False))
         sync_character_shading_action.triggered.connect(partial(self.sync_category, 'Characters', 'shading', True, False))
@@ -308,6 +314,7 @@ class Pipelinizer(solstice_windows.Window, object):
         sync_props_model_action.triggered.connect(partial(self.sync_category, 'Props', 'model', True, False))
         sync_props_shading_action.triggered.connect(partial(self.sync_category, 'Props', 'shading', True, False))
         sync_props_textures_action.triggered.connect(partial(self.sync_category, 'Props', 'textures', True, False))
+        sync_sequences_action.triggered.connect(partial(self.sync_sequences, True, True))
         settings_btn.clicked.connect(self.open_settings)
         self.user_icon.user_info.updatedAvailability.connect(self.update_ui)
 
@@ -329,6 +336,10 @@ class Pipelinizer(solstice_windows.Window, object):
     @staticmethod
     def open_project_folder():
         solstice_python_utils.open_folder(sp.get_solstice_project_path())
+
+    def _sequencer_loaded(self):
+        self._tab_widget.setTabText(1, 'Sequence Manager')
+        self._tab_widget.setTabEnabled(1, True)
 
     def _change_category(self, category, flag):
         self._asset_viewer.change_category(category=category)
@@ -379,7 +390,7 @@ class Pipelinizer(solstice_windows.Window, object):
 
             while not event.is_set():
                 QCoreApplication.processEvents()
-                event.wait(0.25)
+                event.wait(0.05)
 
             elements_to_sync = list()
             if elements:
@@ -419,6 +430,22 @@ class Pipelinizer(solstice_windows.Window, object):
         elapsed_time = time.time() - start_time
         sp.logger.debug('{0} synchronized in {1} seconds'.format(category_name, elapsed_time))
         cmds.waitCursor(state=False)
+
+    def sync_sequences(self, full_sync=False, ask=False):
+        """
+        Synchronizes all the sequences of Solstice Short Film
+        :param full_sync: bool, If True, all the assets will be sync with the content on Artella Server,
+               if False, only will synchronize the assets that are missing (no warranty that you have latest versions
+               on other assets)
+       :param ask: bool, True if you want to show a message box to the user to decide if the want or not download
+               missing files in his local machine
+        :return:
+        """
+
+        if ask:
+            result = solstice_qt_utils.show_question(None, 'Full synchronization', 'Do you want to synchronize all assets? NOTE: This can take quite a lot of time!')
+            if result == QMessageBox.Yes:
+                self.sequencer.sync_sequences()
 
     def sync_all_assets(self, full_sync=False, ask=False):
         """
@@ -512,35 +539,20 @@ class Pipelinizer(solstice_windows.Window, object):
 
         return tree
 
-    def _on_tab_changed(self, index):
-        if self._tab_widget.currentWidget().objectName() == 'SequencerWidget':
-            self._sequencer.init_sequencer()
-
-
 # ============================================================================================================
 
 def run():
-    # reload(solstice_python_utils)
-    # reload(solstice_maya_utils)
-    # reload(solstice_artella_classes)
-    # reload(solstice_artella_utils)
-    # reload(solstice_browser_utils)
-    # reload(solstice_image)
-    # reload(solstice_qt_utils)
-    # reload(solstice_resource)
-    # reload(solstice_user)
-    # reload(solstice_grid)
-    # reload(solstice_asset)
-    # reload(solstice_assetviewer)
-    # reload(solstice_assetbrowser)
-    # reload(solstice_label)
-    # reload(solstice_breadcrumb)
-    # reload(solstice_navigationwidget)
-    # reload(solstice_filelistwidget)
-    # reload(solstice_splitters)
-    # reload(solstice_published_info_widget)
-    # reload(solstice_sequencer)
-    # reload(solstice_login)
+    reload(solstice_python_utils)
+    reload(solstice_artella_classes)
+    reload(solstice_artella_utils)
+    reload(solstice_qt_utils)
+    reload(solstice_resource)
+    reload(solstice_user)
+    reload(solstice_asset)
+    reload(solstice_assetviewer)
+    reload(solstice_splitters)
+    reload(solstice_sequencer)
+    reload(solstice_sequencer)
 
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()
@@ -558,5 +570,9 @@ def run():
         if result == QMessageBox.Yes:
             cmds.SaveScene()
 
-    win = Pipelinizer().show()
+    win = Pipelinizer()
+    win.show()
+
+    win.sequencer.init_sequencer()
+
 

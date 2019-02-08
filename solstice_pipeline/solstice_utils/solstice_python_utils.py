@@ -412,3 +412,22 @@ def open_web(url):
     """
 
     webbrowser.open(url)
+
+
+def force_list(var):
+    """
+    Returns the given variable as list
+    :param var: variant
+    :return: list
+    """
+
+    if var is None:
+        return []
+
+    if type(var) is not list:
+        if type(var) in [tuple]:
+            var = list(var)
+        else:
+            var = [var]
+
+    return var

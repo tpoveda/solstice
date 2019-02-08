@@ -119,13 +119,22 @@ def deploy_solstice_pipeline():
 
     shutil.rmtree(temp_path)
     shutil.rmtree(version_folder_path)
+    
+    # Create folder that will be uploaded to server
+    version_folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), new_version)
+    if not os.path.exists(version_folder_path):
+        os.makedirs(version_folder_path)
+    shutil.move(mac_zip_file, version_folder_path)
+    shutil.move(win_zip_file, version_folder_path)
+
+
 
     print 'Solstice Pipeline deployed successfully with version {}'.format(new_version)
 
-    # try:
-    #     subprocess.check_call(['explorer', os.path.dirname(zip_file)])
-    # except Exception:
-    #     pass
+    try:
+        subprocess.check_call(['explorer', os.path.dirname(zip_file)])
+    except Exception:
+        pass
 
 
 def get_solstice_pipeline_folder():

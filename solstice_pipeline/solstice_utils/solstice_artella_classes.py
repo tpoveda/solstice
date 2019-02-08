@@ -225,6 +225,26 @@ class ArtellaReferencesMetaData(object):
     def locked_by_display(self):
         return self._locked_by_display
 
+    def print_info(self):
+        """
+        Prints in logger the info of the current Artella object
+        """
+
+        sp.logger.debug('Name: {}'.format(self.name))
+        sp.logger.debug('Path: {}'.format(self.path))
+        sp.logger.debug('Maximum Version Deleted: {}'.format(self.maximum_version_deleted))
+        sp.logger.debug('Is Directory: {}'.format(self.is_directory))
+        sp.logger.debug('Is Deleted: {}'.format(self.deleted))
+        sp.logger.debug('Local Version: {}'.format(self.local_version))
+        sp.logger.debug('View Version: {}'.format(self.view_version))
+        sp.logger.debug('Relative Path: {}'.format(self.relative_path))
+        sp.logger.debug('Maximum Version: {}'.format(self.maximum_version))
+        sp.logger.debug('View Version Digest: {}'.format(self.view_version_digest))
+        sp.logger.debug('Locked: {}'.format(self.locked))
+        sp.logger.debug('Locked By: {}'.format(self.locked_by))
+        sp.logger.debug('Locked View: {}'.format(self.locked_view))
+        sp.logger.debug('Locked By Display: {}'.format(self.locked_by_display))
+
 
 class ArtellaDirectoryMetaData(object):
     def __init__(self, metadata_path, status_dict):
@@ -250,6 +270,15 @@ class ArtellaDirectoryMetaData(object):
     @property
     def references(self):
         return self._references
+
+    def print_info(self):
+        """
+        Prints in logger the info of the current Artella object
+        """
+
+        sp.logger.debug('Path: {}'.format(self.path))
+        sp.logger.debug('Header: {}'.format(self.header))
+        sp.logger.debug('References: {}'.format(self.references))
 
 
 class ArtellaAppMetaData(object):
