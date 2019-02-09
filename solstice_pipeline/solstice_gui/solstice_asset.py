@@ -606,10 +606,8 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
         :return: QMenu
         """
         self._menu = QMenu(self)
-        self._menu.addAction('Open Asset in Light Rig')
-
-        get_info_action = QAction('Get Info (DEV)', self._menu)
-        self._menu.addAction(get_info_action)
+        # get_info_action = QAction('Get Info (DEV)', self._menu)
+        # self._menu.addAction(get_info_action)
         sync_action = QAction('Synchronize', self._menu)
         sync_menu = QMenu(self)
         sync_action.setMenu(sync_menu)
@@ -623,14 +621,14 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
         sync_shading_action = QAction('Shading', self._menu)
         sync_menu.addAction(sync_shading_action)
         self._menu.addAction(sync_action)
-        check_versions_action = QAction('Check for New Versions', self._menu)
-        self._menu.addAction(check_versions_action)
+        # check_versions_action = QAction('Check for New Versions', self._menu)
+        # self._menu.addAction(check_versions_action)
         import_asset_action = QAction('Import to current scene ...', self._menu)
         self._menu.addAction(import_asset_action)
         reference_asset_action = QAction('Reference in current scene ...', self._menu)
         self._menu.addAction(reference_asset_action)
 
-        get_info_action.triggered.connect(self.get_asset_info)
+        # get_info_action.triggered.connect(self.get_asset_info)
         sync_all_action.triggered.connect(partial(self.sync, 'all', 'all', False))
         sync_model_action.triggered.connect(partial(self.sync, 'model', 'all', False))
         sync_textures_action.triggered.connect(partial(self.sync, 'textures', 'all', False))

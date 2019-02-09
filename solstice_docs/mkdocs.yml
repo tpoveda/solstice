@@ -32,6 +32,8 @@ nav:
           - Main UI: solsticepipeline/solsticetools/pipelinizer/tool.md
           - Assets Manager: solsticepipeline/solsticetools/pipelinizer/assetmanager.md
           - Sequences Manager: solsticepipeline/solsticetools/pipelinizer/sequencesmanager.md
+      - FAQ:
+          - Hello world: ""
     - Slack: 'slack.md'
     - About: 'about.md'
 theme:
