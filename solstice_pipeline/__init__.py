@@ -355,6 +355,15 @@ def get_solstice_production_path():
         return None
 
 
+def get_solstice_shot_name_regex():
+    """
+    Returns Regex used to identify solstice shorts
+    :return: str
+    """
+
+    return re.compile(r"(\A[^_]+_\d{2,2}_\d{2,3})(.+)\Z")
+
+
 def get_externals_path():
     """
     Returns to Solstice external files

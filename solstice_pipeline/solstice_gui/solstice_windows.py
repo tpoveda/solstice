@@ -2,7 +2,7 @@
 # # -*- coding: utf-8 -*-
 #
 # """ ==================================================================
-# Script Name: solstice_pipelinizer.py
+# Script Name: solstice_windows.py
 # by Tomas Poveda
 # Base wrapper classes for Solstice windows
 # ______________________________________________________________________

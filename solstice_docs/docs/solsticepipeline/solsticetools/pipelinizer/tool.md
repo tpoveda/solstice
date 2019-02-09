@@ -12,6 +12,21 @@ To launch Solstice Pipelinizer Tool, open Maya and click on Solstice Pipelinizer
 
 ***
 
+!!! info "Save Scene"
+    If you have an scene opened when launching Solstice Pipelinizer, a dialog will appear telling you if you want 
+    to save your current scene before opening Solstice Pipelinizer. 
+    
+    ![Solstice Pipelinizer Save](../../../img/solstice_pipelinizer_save.png?style=centerme)
+    
+    If you press **Yes**, the scene will be saved before opening Solstice Pipelinizer tool, otherwise (**No**) Solstice 
+    Pipelinizer will be opened without saving the scene.
+    
+    I **recommend** saving the scene to avoid the lose of data if Solstice Pipelinizer crashes at some point (that 
+    can happen)
+
+    
+
+
 > Solstice Pipelinizer
 ![Solstice Pipelinizer](../../../img/solstice_pipelinizer.png?style=centerme)
 

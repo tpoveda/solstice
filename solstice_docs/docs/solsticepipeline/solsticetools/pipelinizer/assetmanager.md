@@ -181,6 +181,9 @@ your hard drive). This can be caused by:
     > Lock/Unlock buttons will appear under the file buttons
     ![Asset File Lock 1](../../../../img/asset_lock_1.png?style=centerme)
     
+    > Lock Asset File in Artella
+    ![Artella Lock Asset File](../../../../img/lock_asset_file.png?style=centerme)
+    
     ***
     
     ##### Lock/Unlock States
@@ -195,7 +198,7 @@ your hard drive). This can be caused by:
     | ![Not available](../../../../img/file_not_found_button.png?style=centerme) | Asset file does not exists in Artella server yet |
     
     </center>
-    
+        
 ***
 
 #### **Asset Files Versions Info**
@@ -270,7 +273,10 @@ This button will popup a new window that shows more info about the asset file
 
 Those buttons are used to create new **working** versions and to **publish** assets
 
-For more info about how to create new version and publish assets please go to the following link: **ADD LINK**
+For more info about how to create new version and publish assets please go to the following links:
+
+* [How to upload new working versions of an asset?](https://tpoveda.github.io/solstice/solsticepipeline/faq/workingversion/)
+* [How to publish an asset?](https://tpoveda.github.io/solstice/solsticepipeline/faq/publishversion/)
 
 
     

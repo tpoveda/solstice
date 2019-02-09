@@ -32,8 +32,17 @@ nav:
           - Main UI: solsticepipeline/solsticetools/pipelinizer/tool.md
           - Assets Manager: solsticepipeline/solsticetools/pipelinizer/assetmanager.md
           - Sequences Manager: solsticepipeline/solsticetools/pipelinizer/sequencesmanager.md
+        - Solstice Publisher: solsticepipeline/solsticetools/solsticepublisher.md
+      - Departments:
+        - Layout:
+          - Rough Layout: solsticepipeline/departments/layout/rough.md
+          - Final Layout: solsticepipeline/departments/layout/final.md
+        - Animation: solsticepipeline/departments/animation.md
       - FAQ:
-          - Hello world: ""
+          - How to upload new working versions of an asset?: solsticepipeline/faq/workingversion.md
+          - How to publish an asset?:
+            - Publish asset model: solsticepipeline/faq/publish/model.md
+            - Publish asset shading & textures: solsticepipeline/faq/publish/shading.md
     - Slack: 'slack.md'
     - About: 'about.md'
 theme:

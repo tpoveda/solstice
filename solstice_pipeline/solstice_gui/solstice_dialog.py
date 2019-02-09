@@ -2,13 +2,11 @@
 # # -*- coding: utf-8 -*-
 #
 # """ ==================================================================
-# Script Name: solstice_pipelinizer.py
+# Script Name: solstice_dialog.py
 # by Tomas Poveda
-# Base wrapper classes for Solstice windows
+# Base wrapper classes for Solstice dialogs
 # ______________________________________________________________________
 # ==================================================================="""
-
-import uuid
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *

@@ -985,4 +985,4 @@ class SolsticeTagger(solstice_windows.Window, object):
 
 
 def run():
-    win = SolsticeTagger.run().show()
+    win = SolsticeTagger().show()

@@ -40,6 +40,15 @@
                 "label": ""
             }
         ],
+        "layout":
+        [
+            {
+                "icon": "alembic.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
+                "annotation": "Solstice Alembic Manager",
+                "label": ""
+            }
+        ],
         "anim":
         [
             {
@@ -113,8 +122,8 @@
         [
             {
                 "icon": "tagger.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_pipelinizer; solstice_pipelinizer.run();",
-                "annotation": "Solstice Pipelinizer Tool",
+                "command": "from solstice_pipeline.solstice_tools import solstice_tagger; reload(solstice_tagger); solstice_tagger.run();",
+                "annotation": "Solstice Tagger Tool",
                 "label": ""
             },
             {

@@ -108,6 +108,7 @@
   ],
   "9.0":
   [
-    "Solstice Sequencer is now loaded in background when Solstice Pipelinizer is opened"
+    "Solstice Sequencer is now loaded in background when Solstice Pipelinizer is opened",
+    "Added Layout category to Solstice Shelf"
   ]
 }
