@@ -15,10 +15,12 @@ import maya.cmds as cmds
 
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters
 from solstice_pipeline.resources import solstice_resource
+from solstice_pipeline.solstice_tools import solstice_tagger
 
 ALEMBIC_GROUP_SUFFIX = '_ABCGroup'
 
@@ -133,6 +135,235 @@ class AlembicImporter(QWidget, object):
 
 # ===================================================================================================================
 
+class AlembicExporterNode(object):
+    def __init__(self, name, parent=None):
+
+        super(AlembicExporterNode, self).__init__()
+
+        self._name = name
+        self._children = []
+        self._parent = parent
+        self.model = None
+
+        if parent is not None:
+            parent.addChild(self)
+
+    def attrs(self):
+
+        classes = self.__class__.__mro__
+
+        kv = {}
+
+        for cls in classes:
+            for k, v in cls.__dict__.iteritems():
+                if isinstance(v, property):
+                    print "Property:", k.rstrip("_"), "\n\tValue:", v.fget(self)
+                    kv[k] = v.fget(self)
+
+        return kv
+
+    def typeInfo(self):
+        return "NODE"
+
+    def addChild(self, child):
+        self.model.layoutAboutToBeChanged.emit()
+        self._children.append(child)
+        child._parent = self
+        child.model = self.model
+        self.model.layoutChanged.emit()
+
+    def insertChild(self, position, child):
+
+        if position < 0 or position > len(self._children):
+            return False
+
+        self.model.layoutAboutToBeChanged.emit()
+        self._children.insert(position, child)
+        child._parent = self
+        child.model = self.model
+        self.model.layoutChanged.emit()
+
+        return True
+
+    def removeChild(self, position):
+
+        if position < 0 or position > len(self._children):
+            return False
+
+        self.model.layoutAboutToBeChanged.emit()
+        child = self._children.pop(position)
+        child._parent = None
+        child.model = None
+        self.model.layoutChanged.emit()
+
+        return True
+
+    def name():
+        def fget(self): return self._name
+
+        def fset(self, value): self._name = value
+
+        return locals()
+
+    name = property(**name())
+
+    def child(self, row):
+        return self._children[row]
+
+    def childCount(self):
+        return len(self._children)
+
+    def parent(self):
+        return self._parent
+
+    def row(self):
+        if self._parent is not None:
+            return self._parent._children.index(self)
+
+    def log(self, tabLevel=-1):
+
+        output = ""
+        tabLevel += 1
+
+        for i in range(tabLevel):
+            output += "\t"
+
+        output += "|------" + self._name + "\n"
+
+        for child in self._children:
+            output += child.log(tabLevel)
+
+        tabLevel -= 1
+        output += "\n"
+
+        return output
+
+    def __repr__(self):
+        return self.log()
+
+    def data(self, column):
+
+        if column is 0:
+            return self.name
+        elif column is 1:
+            return self.typeInfo()
+
+    def setData(self, column, value):
+        if column is 0:
+            self.name = value.toPyObject()
+        elif column is 1:
+            pass
+
+    def resource(self):
+        return None
+
+
+class AlembicExporterGroupNode(AlembicExporterNode, object):
+    def __init__(self, name, parent=None):
+        super(AlembicExporterGroupNode, self).__init__(name=name, parent=parent)
+
+
+class AlembicExporterGroupsModel(QAbstractItemModel, object):
+
+    sortRole = Qt.UserRole
+    filterRole = Qt.UserRole + 1
+
+    def __init__(self, parent=None):
+        super(AlembicExporterGroupsModel, self).__init__(parent)
+        self._root_node = AlembicExporterNode('Root')
+        self._root_node.model = self
+
+    def rowCount(self, parent):
+        if not parent.isValid():
+            parent_node = self._root_node
+        else:
+            parent_node = parent.internalPointer()
+
+        return parent_node.childCount()
+
+    def columnCount(self, parent):
+        return 1
+
+    def data(self, index, role):
+        if not index.isValid():
+            return None
+
+        node = index.internalPointer()
+
+        if role == Qt.DisplayRole or role == Qt.EditRole:
+            return node.data(index.column())
+        elif role == Qt.DecorationRole:
+            resource = node.resource()
+            return QIcon(QPixmap(resource))
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if index.isValid():
+            node = index.internalPointer()
+            if role == Qt.EditRole:
+                node.setData(index.column(), value)
+                self.dataChanged.emit(index, index)
+                return True
+
+        return False
+
+    def headerData(self, section, orientation, role):
+        if role == Qt.DisplayRole:
+            if section == 0:
+                return 'Node'
+            else:
+                return 'Type'
+
+    def flags(self, index):
+        return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
+
+    def parent(self, index):
+        node = self.get_node(index)
+        parent_node = node.parent()
+        if parent_node == self._root_node:
+            return QModelIndex()
+
+        return self.createIndex(parent_node.row(), 0, parent_node)
+
+    def index(self, row, column, parent):
+        parent_node = self.get_node(parent)
+
+        child_item = parent_node.child(row)
+        if child_item:
+            return self.createIndex(row, column, child_item)
+        else:
+            return QModelIndex()
+
+    def insertRows(self, pos, rows, parent=QModelIndex()):
+        parent_node = self.get_node(parent)
+        self.beginInsertRows(parent, pos, pos + rows - 1)
+        for row in range(rows):
+            child_count = parent_node.childCount()
+            child_node = AlembicExporterNode('Untitled'+str(child_count))
+            success = parent_node.insertChild(pos, child_node)
+        self.endInsertRows()
+
+        return success
+
+    def removeRows(self, pos, rows, parent=QModelIndex()):
+        parent_node = self.get_node(parent)
+        self.beginRemoveRows(parent, pos, pos + rows - 1)
+        for row in range(rows):
+            success = parent_node.removeChild(pos)
+        self.endRemoveRows()
+
+        return success
+
+    def get_node(self, index):
+        if index.isValid():
+            node = index.internalPointer()
+            if node:
+                return node
+
+        return self._root_node
+
+    def clean(self):
+        for child_index in range(self._root_node.childCount()):
+            self._root_node.removeChild(child_index)
 
 
 class AlembicExporter(QWidget, object):
@@ -208,6 +439,15 @@ class AlembicExporter(QWidget, object):
         self.export_path_btn.clicked.connect(self._on_set_export_path)
         export_btn.clicked.connect(self._on_export)
 
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        self._tree_model = AlembicExporterGroupsModel(self)
+        self._abc_tree = QTreeView()
+        self._abc_tree.setModel(self._tree_model)
+        self.main_layout.addWidget(self._abc_tree)
+
+        self.alembic_groups_combo.currentIndexChanged.connect(self._on_update_tree)
+
     def refresh(self):
         """
         Function that update necessary info of the tool
@@ -217,6 +457,49 @@ class AlembicExporter(QWidget, object):
         self._refresh_alembic_groups()
         self._refresh_frame_ranges()
         self._refresh_shot_name()
+
+    def get_selected_alembic_group(self):
+        """
+        Returns the name of the currently selected set
+        :return: str
+        """
+
+        alembic_group_name = self.alembic_groups_combo.currentText()
+        if not cmds.objExists(alembic_group_name):
+            raise Exception('ERROR: Invalid Alembic Group: {}'.format(alembic_group_name))
+
+        return alembic_group_name
+
+    def get_alembic_group_nodes(self, abc_grp_name=None):
+        """
+        Returns a list of the nodes that are in the given alembic group name
+        If no name given the name will be retrieved by the Alembic Group ComboBox
+        :return:
+        """
+
+        if abc_grp_name:
+            if not cmds.objExists(abc_grp_name):
+                raise Exception('ERROR: Invalid Alembic Group: {}'.format(abc_grp_name))
+        else:
+            abc_grp_name = self.get_selected_alembic_group()
+
+        if not abc_grp_name:
+            cmds.confirmDialog(
+                t='Error during Alembic Exportation',
+                m='No Alembic Group selected. Please select an Alembic Group from the list'
+            )
+            return None
+
+        set_nodes = cmds.sets(abc_grp_name, q=True, no=True)
+        if not set_nodes:
+            cmds.confirmDialog(
+                t='Error during Alembic Exportation',
+                m='No members inside selected Alembic Group\n Alembic Group: {}'.format(abc_grp_name)
+            )
+
+        set_nodes = sorted(set_nodes)
+
+        return set_nodes
 
     def _refresh_alembic_groups(self):
         """
@@ -273,23 +556,39 @@ class AlembicExporter(QWidget, object):
         export_folder = res[0]
         self.export_path_line.setText(export_folder)
 
+    def _on_update_tree(self, index):
+        set_text = self.get_selected_alembic_group()
+
+        self._tree_model.clean()
+
+        # Add selected Alembic Group to the tree root node
+        abc_group_node = AlembicExporterGroupNode(name=set_text)
+        self._tree_model._root_node.addChild(abc_group_node)
+
+        models_list = list()
+        anims_list = list()
+
+        abc_group_objs = self.get_alembic_group_nodes(set_text)
+        if not abc_group_objs:
+            sp.logger.warning('Selected Alembic Group is empty: {}'.format(set_text))
+            return
+        for obj in abc_group_objs:
+            tag_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(obj)
+            if tag_node is None:
+                sp.logger.warning('Object {} is not properly tagged and cannot be exported!'.format(obj))
+                continue
+
+
+
+        self._abc_tree.expandAll()
+
+
+
+
     def _on_export(self):
-        sel_set = self.alembic_groups_combo.currentText()
-        if not sel_set:
-            cmds.confirmDialog(
-                t='Error during Alembic Exportation',
-                m='No Alembic Group selected. Please select an Alembic Group from the list'
-            )
-            return None
 
-        set_nodes = cmds.sets(sel_set, q=True, no=True)
-        if not set_nodes:
-            cmds.confirmDialog(
-                t='Error during Alembic Exportation',
-                m='No members inside selected Alembic Group\n Alembic Group: {}'.format(sel_set)
-            )
-
-        set_nodes = sorted(set_nodes)
+        sel_set = self.get_selected_alembic_group()
+        set_nodes = self.get_alembic_group_nodes(sel_set)
 
         shot_name = self.shot_line.text()
         if not shot_name:

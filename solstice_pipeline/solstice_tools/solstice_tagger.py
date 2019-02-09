@@ -62,7 +62,7 @@ class TaggerEditor(QWidget, object):
     def initialize(self):
         pass
 
-    def update_tag_buttons_state(self):
+    def update_tag_buttons_state(self, sel=None):
         pass
 
     def update_data(self, data, *args, **kwargs):
@@ -85,13 +85,13 @@ class NameEditor(TaggerEditor, object):
 
         self._name_line.textChanged.connect(partial(self.update_data, None))
 
-    def update_tag_buttons_state(self):
+    def update_tag_buttons_state(self, sel):
         """
         Updates the selection tag attribute of the tag data node
         :param name: str, name of the selection tag to add/remove
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None:
             return
 
@@ -107,7 +107,9 @@ class NameEditor(TaggerEditor, object):
         :param data: variant
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        sel = kwargs.pop('sel', None)
+
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None:
             return
 
@@ -154,13 +156,13 @@ class TypeEditor(TaggerEditor, object):
             tag_widget.btn.toggled.connect(partial(self.update_data, tag_widget.get_name()))
             self._type_grid.add_widget_first_empty_cell(tag_widget)
 
-    def update_tag_buttons_state(self):
+    def update_tag_buttons_state(self, sel=None):
         """
         Updates the type tag attribute of the tag data node
         :param name: str, name of the type tag to add/remove
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None:
             return
 
@@ -179,7 +181,9 @@ class TypeEditor(TaggerEditor, object):
                                 tag_w = container_w.containedWidget
                                 tag_name = tag_w.get_name()
                                 if tag_name == t:
+                                    tag_w.btn.blockSignals(True)
                                     tag_w.btn.setChecked(True)
+                                    tag_w.btn.blockSignals(False)
 
     def update_data(self, data, *args, **kwargs):
         """
@@ -187,7 +191,9 @@ class TypeEditor(TaggerEditor, object):
         :param data: variant
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        sel = kwargs.pop('sel', None)
+
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None:
             return
 
@@ -235,7 +241,9 @@ class TypeEditor(TaggerEditor, object):
                 container_w = self._type_grid.cellWidget(j, i)
                 if container_w is not None:
                     tag_w = container_w.containedWidget
+                    tag_w.btn.blockSignals(True)
                     tag_w.btn.setChecked(state)
+                    tag_w.btn.blockSignals(False)
 
 
 class SelectionEditor(TaggerEditor, object):
@@ -271,13 +279,13 @@ class SelectionEditor(TaggerEditor, object):
             tag_widget.btn.toggled.connect(partial(self.update_data, tag_widget.get_name()))
             self._selection_grid.add_widget_first_empty_cell(tag_widget)
 
-    def update_tag_buttons_state(self):
+    def update_tag_buttons_state(self, sel=None):
         """
         Updates the selection tag attribute of the tag data node
         :param name: str, name of the selection tag to add/remove
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None:
             return
 
@@ -296,7 +304,9 @@ class SelectionEditor(TaggerEditor, object):
                                 tag_w = container_w.containedWidget
                                 tag_name = tag_w.get_name()
                                 if tag_name == s:
+                                    tag_w.btn.blockSignals(True)
                                     tag_w.btn.setChecked(True)
+                                    tag_w.btn.blockSignals(False)
 
     def update_data(self, data, *args, **kwargs):
         """
@@ -304,7 +314,9 @@ class SelectionEditor(TaggerEditor, object):
         :param data: variant
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        sel = kwargs.pop('sel', None)
+
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None:
             return
 
@@ -352,7 +364,9 @@ class SelectionEditor(TaggerEditor, object):
                 container_w = self._selection_grid.cellWidget(j, i)
                 if container_w is not None:
                     tag_w = container_w.containedWidget
+                    tag_w.btn.blockSignals(True)
                     tag_w.btn.setChecked(state)
+                    tag_w.btn.blockSignals(False)
 
 
 class HighProxyEditor(TaggerEditor, object):
@@ -387,8 +401,8 @@ class HighProxyEditor(TaggerEditor, object):
         # self.low_line.textChanged.connect(partial(self.update_data, None))
         # self.high_line.textChanged.connect(partial(self.update_data, None))
 
-    def update_tag_buttons_state(self):
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+    def update_tag_buttons_state(self, sel=None):
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None  or not cmds.objExists(tag_data_node):
             return
 
@@ -409,9 +423,12 @@ class HighProxyEditor(TaggerEditor, object):
                 self.high_line.setText(hires_group)
 
     def update_data(self, data, *args, **kwargs):
+
+        sel = kwargs.pop('sel', None)
+
         self.update_proxy_group()
         self.update_hires_group()
-        self.update_tag_buttons_state()
+        self.update_tag_buttons_state(sel)
 
     @staticmethod
     def update_proxy_group(tag_data=None):
@@ -527,13 +544,13 @@ class DescriptionEditor(TaggerEditor, object):
 
         self._description_text.textChanged.connect(partial(self.update_data, None))
 
-    def update_tag_buttons_state(self):
+    def update_tag_buttons_state(self, sel=None):
         """
         Updates the selection tag attribute of the tag data node
         :param name: str, name of the selection tag to add/remove
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None:
             return
 
@@ -549,7 +566,9 @@ class DescriptionEditor(TaggerEditor, object):
         :param data: variant
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        sel = kwargs.pop('sel', None)
+
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None:
             return
 
@@ -577,13 +596,13 @@ class ShadersEditor(TaggerEditor, object):
 
         self._update_shaders_btn.clicked.connect(partial(self.update_data, None))
 
-    def update_tag_buttons_state(self):
+    def update_tag_buttons_state(self, sel=None):
         """
         Updates the selection tag attribute of the tag data node
         :param name: str, name of the selection tag to add/remove
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None:
             return
 
@@ -600,7 +619,9 @@ class ShadersEditor(TaggerEditor, object):
         :param data: variant
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel()
+        sel = kwargs.pop('sel', None)
+
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
         if tag_data_node is None:
             return
 
@@ -886,15 +907,18 @@ class SolsticeTagger(solstice_windows.Window, object):
         """
 
         sel = cmds.ls(sl=True)
+
         if len(sel) <= 0:
             SolsticeTagger.current_selection = 'scene'
+            sel = None
         else:
             SolsticeTagger.current_selection = sel[0]
+            sel = sel[0]
 
         self._update_current_info()
         self._update_ui()
         for i in range(self._tagger_tabs.count()):
-            self._tagger_tabs.widget(i).update_tag_buttons_state()
+            self._tagger_tabs.widget(i).update_tag_buttons_state(sel)
 
     def _update_ui(self):
         """

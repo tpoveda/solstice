@@ -30,6 +30,11 @@
   "selections":
   [
     {
+      "name":"Model",
+      "image": "",
+      "type": "model"
+    },
+    {
       "name":"Animation",
       "image":"",
       "type":"animation"
