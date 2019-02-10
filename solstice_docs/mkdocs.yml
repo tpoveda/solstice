@@ -33,6 +33,7 @@ nav:
           - Assets Manager: solsticepipeline/solsticetools/pipelinizer/assetmanager.md
           - Sequences Manager: solsticepipeline/solsticetools/pipelinizer/sequencesmanager.md
         - Solstice Publisher: solsticepipeline/solsticetools/solsticepublisher.md
+        - Solstice Pickers: solsticepipeline/solsticetools/solsticepickers.md
       - Departments:
         - Layout:
           - Rough Layout: solsticepipeline/departments/layout/rough.md
