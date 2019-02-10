@@ -284,6 +284,13 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
                                 if file_name == '{}_SHD.ma'.format(self.name) or file_name == '{}_shd.ma'.format(self.name):
                                     ref_history = artella.get_asset_history(ref_path)
                                     server_data[category] = ref_history
+                        elif category == 'groom':
+                            ref_path = os.path.join(server_path, ref_data.name)
+                            file_name = os.path.basename(ref_path)
+                            if os.path.isfile(ref_path):
+                                if file_name == '{}_GROOMING.ma'.format(self.name) or file_name == '{}_grooming.ma'.format(self.name):
+                                    ref_history = artella.get_asset_history(ref_path)
+                                    server_data[category] = ref_history
                         else:
                             # TODO: Create custom sync dialog
                             ref_path = os.path.join(server_path, ref_data.name)
@@ -799,7 +806,12 @@ class CharacterAsset(AssetWidget, object):
             return
 
         self._working_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom', status='working', asset=self, check_lock_info=self._asset_info._check_lock_info)
+        self._working_groom_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self._asset_info._working_asset_layout.addWidget(self._working_groom_btn)
+
         self._published_groom_btn = solstice_buttons.CategoryButtonWidget(category_name='Groom', status='published', asset=self, check_lock_info=self._asset_info._check_lock_info)
+        self._published_groom_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self._asset_info._published_asset_layout.addWidget(self._published_groom_btn)
 
     def has_groom(self):
         return True

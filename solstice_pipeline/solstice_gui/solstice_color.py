@@ -8,6 +8,8 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 
@@ -62,3 +64,43 @@ class Color(QColor, object):
         """
 
         return self.red() < 125 and self.green() < 125 and self.blue() < 125
+
+
+class ColorPicker(QPushButton, object):
+    """
+    Custom color picker button to store and retrieve color values
+    """
+
+    valueChanged = Signal()
+
+    def __init__(self, parent=None):
+        super(ColorPicker, self).__init__(parent)
+
+        self._color = None
+        self.color = [1, 1, 1]
+
+        self.clicked.connect(self._on_show_color_dialog)
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, values):
+        self._color = values
+        self.valueChanged.emit()
+
+        values = [int(x*255) for x in values]
+        self.setStyleSheet('background: rgb({},{},{})'.format(*values))
+
+    def _on_show_color_dialog(self):
+        """
+        Internal function used to display a color picker to change color
+        """
+
+        current = QColor()
+        current.setRgbF(*self._color)
+        colors = QColorDialog.getColor(current)
+        if not colors:
+            return
+        self.color = [colors.redF(), colors.greenF(), colors.blueF()]

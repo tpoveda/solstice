@@ -109,6 +109,10 @@
   "9.0":
   [
     "Solstice Sequencer is now loaded in background when Solstice Pipelinizer is opened",
-    "Added Layout category to Solstice Shelf"
+    "Added Layout category to Solstice Shelf",
+    "Added Groom file access button for characters",
+    "Fixed Errors in Solstice Tagger when dealing with multiple tag nodes in a same scene",
+    "Added Alembic Manager Tool to import/export alembic file from asset files",
+    "Fixed Camera Playblast widget, now when refreshing cameras list everything updates properly"
   ]
 }

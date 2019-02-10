@@ -18,8 +18,10 @@ from collections import OrderedDict
 
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 try:
+    import shiboken2 as shiboken
     from shiboken2 import wrapInstance
 except ImportError:
+    import shiboken as shiboken
     from shiboken import wrapInstance
 
 import maya.cmds as cmds
@@ -32,6 +34,12 @@ import solstice_pipeline as sp
 from solstice_utils import solstice_python_utils as python
 
 _DPI_SCALE = 1.0 if not hasattr(cmds, "mayaDpiSetting") else cmds.mayaDpiSetting(query=True, realScaleValue=True)
+
+
+class MessageType(object):
+    OK = 0
+    WARNING = 1
+    ERROR = 2
 
 
 class MCallbackIdWrapper(object):
@@ -110,6 +118,100 @@ def get_maya_window():
     return None
 
 
+def get_maya_commands():
+    """
+    Returns a list with all commands available in Maya
+    :return: list<str>
+    """
+
+    def search_menu(menu):
+        filter_list = [
+            'Attributes',
+             'Hotbox',
+             "What's New",
+             'Help',
+             'Tutorials',
+             'Maya Scripting Reference',
+             'Recent Commands',
+             'Recent Projects',
+             'Recent Files',
+             'Saved Layouts',
+             'Maya Communities',
+             'Maya Services and Support',
+             'Maya Resources and Tools',
+             'Speak Back',
+             'Try Other Autodesk Products'
+        ]
+
+        for item in menu.children():
+            try:
+                parent = item.parentWidget()
+                value = True
+                for content in filter_list:
+                    if content in parent.title():
+                        value = False
+            except Exception:
+                pass
+
+            if value:
+                if type(item) == QMenu:
+                    parent = item.parentWidget()
+                    if type(parent) == QMenuBar:
+                        parent = 'TOPMENU'
+                    else:
+                        parent = parent.title()
+                    item.aboutToShow.emit()
+                    search_menu(item)
+                elif type(item) == QWidgetAction:
+                    name = item.text()
+                    if name and not item.isSeparator() and not item.menu():
+                        try:
+                            parent = item.parentWidget()
+                            item_name = item.text()
+                            if any([x in item_name for x in ('Option Box', 'Options', 'DialogItem', 'Dialog', 'ItemDialog', 'Item')]):
+                                commands_list[-1]['altCommand'] = item
+                            else:
+                                item_info = item.toolTip()
+                                category = parent.title()
+                                menu_item = OpenMayaUI.MQtUtil.fullName(long(shiboken.getCppPointer(item)[0]))
+                                item_cmd = item
+                                item_icon_path = ':' + cmds.menuItem(menu_item, query=True, i=True).split('.')[0]
+                                tags = category.lower() + ',MAYA'
+                                if item_icon_path == ':':
+                                    item_icon_path = 'mayaDefault@2x'
+                                exists = False
+                                for cmd in commands_list:
+                                    if cmd['name'] == item_name:
+                                        if cmd['info'] == item_info:
+                                            exists = True
+
+                                if not exists:
+                                    if item_cmd != 'None':
+                                        cmd = {'name': item_name,
+                                               'command': item_cmd,
+                                               'tags': tags,
+                                               'icon': item_icon_path,
+                                               'category': 'Maya/' + category}
+                                        commands_list.append(cmd)
+                        except Exception:
+                            pass
+
+            return commands_list
+
+    commands_list = list()
+    maya_window = get_maya_window()
+    main_menu_bar = None
+    for obj in maya_window.children():
+        if type(obj) == QMenuBar:
+            main_menu_bar = obj
+
+    if main_menu_bar is not None:
+        commands_list = search_menu(main_menu_bar)
+        return commands_list
+    else:
+        return
+
+
 def get_main_shelf():
     """
     Returns the Maya main shelf
@@ -126,13 +228,26 @@ def get_main_window():
     return mel.eval("$tempVar = $gMainWindow")
 
 
-def viewport_message(text):
+def viewport_message(text, header='SOLSTICE', mode=MessageType.OK):
     """
     Shows a message in the Maya viewport
     :param text: str, text to show in Maya viewport
     """
 
-    cmds.inViewMessage(amg='<hl>{}</hl>'.format(text), pos='midCenter', fade=True)
+    fade_time = len(text) * 110
+    if fade_time > 10000:
+        fade_time = 10000
+    elif fade_time < 2000:
+        fade_time = 4000
+
+    if mode == MessageType.OK:
+        cmds.inViewMessage(amg=u'<span style="color:#21C4F5;">{}:</span> {}'.format(header, text), pos='topRight', fade=True, fadeStayTime=fade_time)
+    elif mode == MessageType.WARNING:
+        cmds.inViewMessage(amg=u'<span style="color:#FFB600;">{}:</span> {}'.format(header, text), pos='topRight', fade=True, fadeStayTime=fade_time)
+    elif mode == MessageType.ERROR:
+        cmds.inViewMessage(amg=u'<span style="color:#21C4F5;">{}:</span> {}'.format(header, text), pos='topRight', fade=True, fadeStayTime=fade_time)
+    else:
+        cmds.inViewMessage(amg=u'<h1>{}:</h1> {}'.format(header, text), pos='topRight', fade=True, fadeStayTime=fade_time)
 
 
 def force_stack_trace_on():

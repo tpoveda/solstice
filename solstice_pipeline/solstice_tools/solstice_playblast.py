@@ -9,6 +9,7 @@
 import os
 import re
 import sys
+import math
 import glob
 import json
 import tempfile
@@ -27,7 +28,9 @@ import maya.api.OpenMayaRender as OpenMayaRender
 import maya.api.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_gui import solstice_windows, solstice_label, solstice_buttons, solstice_accordion, solstice_sync_dialog, solstice_splitters
+from solstice_pipeline.solstice_gui import solstice_windows, solstice_dialog, solstice_label, solstice_buttons
+from solstice_pipeline.solstice_gui import  solstice_accordion, solstice_sync_dialog, solstice_splitters
+from solstice_pipeline.solstice_gui import solstice_color
 from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
 from solstice_pipeline.solstice_utils import solstice_python_utils as python
 from solstice_pipeline.solstice_utils import solstice_qt_utils
@@ -486,10 +489,15 @@ class SolsticeCameras(SolsticePlayblastWidget, object):
 
         self.get_active = QPushButton('Get Active')
         self.get_active.setToolTip('Set camera from currently active view')
-        self.refresh = QPushButton('Refresh')
+        refresh_icon = solstice_resource.icon('refresh')
+        self.refresh = QPushButton()
+        self.refresh.setMaximumWidth(25)
+        self.refresh.setIcon(refresh_icon)
         self.refresh.setToolTip('Refresh the list of cameras')
+        self.refresh.setStatusTip('Refresh the list of cameras')
 
-        for widget in [self.cameras, self.get_active, self.refresh]:
+
+        for widget in [self.refresh, self.cameras, self.get_active]:
             self.main_layout.addWidget(widget)
 
     def setup_signals(self):
@@ -555,7 +563,7 @@ class SolsticeCameras(SolsticePlayblastWidget, object):
         if camera is None:
             index = self.cameras.currentIndex()
             if index != -1:
-                camera = self.cameras.currentIndex()
+                camera = self.cameras.currentText()
 
         self.cameras.blockSignals(True)
         try:
@@ -572,6 +580,7 @@ class SolsticeCameras(SolsticePlayblastWidget, object):
         if cam != self.get_outputs()['camera']:
             camera_index = self.cameras.currentIndex()
             self.cameras.currentIndexChanged.emit(camera_index)
+            # self.cameras.setCurrentIndex(camera_index)
 
 
 class SolsticeResolution(SolsticePlayblastWidget, object):
@@ -645,6 +654,97 @@ class SolsticeResolution(SolsticePlayblastWidget, object):
         self.main_layout.addLayout(self.percent_layout)
         self.main_layout.addWidget(self.scale_result)
 
+        self._on_mode_changed()
+        self._on_resolution_changed()
+
+        self.mode.currentIndexChanged.connect(self._on_mode_changed)
+        self.mode.currentIndexChanged.connect(self._on_resolution_changed)
+        self.percent.valueChanged.connect(self._on_resolution_changed)
+        self.width.valueChanged.connect(self._on_resolution_changed)
+        self.height.valueChanged.connect(self._on_resolution_changed)
+
+        self.mode.currentIndexChanged.connect(self.optionsChanged)
+        self.percent.valueChanged.connect(self.optionsChanged)
+        self.width.valueChanged.connect(self.optionsChanged)
+        self.height.valueChanged.connect(self.optionsChanged)
+
+    def get_outputs(self):
+        """
+        Returns width x height defined by the combination of settings
+        :return: dict, width and height key values
+        """
+
+        mode = self.mode.currentText()
+        pnl = utils.get_active_editor()
+
+        if mode == ScaleSettings.SCALE_CUSTOM:
+            width = self.width.value()
+            height = self.height.value()
+        elif mode == ScaleSettings.SCALE_RENDER_SETTINGS:
+            width = cmds.getAttr('defaultResolution.width')
+            height = cmds.getAttr('defaultResolution.height')
+        elif mode == ScaleSettings.SCALE_WINDOW:
+            if not pnl:
+                width = 0
+                height = 0
+            else:
+                width = cmds.control(pnl, query=True, width=True)
+                height = cmds.control(pnl, query=True, height=True)
+        else:
+            raise NotImplementedError('Unsupported scale mode: {}'.format(mode))
+
+        scale = [width, height]
+        percentage = self.percent.value()
+        scale = [math.floor(x * percentage) for x in scale]
+
+        return {'width': scale[0], 'height': scale[1]}
+
+    def get_inputs(self, as_preset=False):
+        return {'mode': self.mode.currentText(),
+                'width': self.width.value(),
+                'height': self.height.value(),
+                'percent': self.percent.value()}
+
+    def apply_inputs(self, attrs_dict):
+        mode = attrs_dict.get('mode', ScaleSettings.SCALE_RENDER_SETTINGS)
+        width = int(attrs_dict.get('width', 1920))
+        height = int(attrs_dict.get('height', 1080))
+        percent = float(attrs_dict.get('percent', 1.0))
+
+        self.mode.setCurrentIndex(self.mode.findText(mode))
+        self.width.setValue(width)
+        self.height.setValue(height)
+        self.percent.setValue(percent)
+
+    def _get_output_resolution(self):
+        options = self.get_outputs()
+        return int(options['width']), int(options['height'])
+
+    def _on_mode_changed(self):
+        """
+        Updates the width/height enabled state when mode changes
+        """
+
+        if self.mode.currentText() != ScaleSettings.SCALE_CUSTOM:
+            self.width.setEnabled(False)
+            self.height.setEnabled(False)
+            self.resolution.hide()
+        else:
+            self.width.setEnabled(True)
+            self.height.setEnabled(True)
+            self.resolution.show()
+
+    def _on_resolution_changed(self):
+        """
+        Updates the reoslution label
+        """
+
+        width, height = self._get_output_resolution()
+        lbl = 'Resolution: {}x{}'.format(width, height)
+        self.scale_result.setText(lbl)
+        self.label = 'Resolution ({}x{})'.format(width, height)
+        self.labelChanged.emit(self.label)
+
 
 class SolsticeCodec(SolsticePlayblastWidget, object):
 
@@ -717,6 +817,170 @@ class SolsticeCodec(SolsticePlayblastWidget, object):
         format = self.format.currentText()
         self.compression.clear()
         self.compression.addItems(utils.get_playblast_compressions(format=format))
+
+
+class SolsticeRenderer(SolsticePlayblastWidget, object):
+    """
+    Allows user to select Maya renderer to use to render playblast
+    """
+
+    id = 'Renderer'
+
+    def __init__(self, parent=None):
+
+        self._renderers = self.get_renderers()
+
+        super(SolsticeRenderer, self).__init__(parent=parent)
+
+    def get_main_layout(self):
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        return layout
+
+    def custom_ui(self):
+        super(SolsticeRenderer, self).custom_ui()
+
+        self.renderers = QComboBox()
+        self.renderers.addItems(self._renderers.keys())
+        self.main_layout.addWidget(self.renderers)
+        self.apply_inputs(self.get_defaults())
+
+        self.renderers.currentIndexChanged.connect(self.optionsChanged)
+
+    def get_inputs(self, as_preset=False):
+        return {'rendererName': self.get_current_renderer()}
+
+    def get_outputs(self):
+        return {'viewport_options': {
+            'rendererName': self.get_current_renderer()
+        }}
+
+    def apply_inputs(self, attrs_dict):
+        reverse_lookup = {value: key for key, value in self._renderers.items()}
+        renderer = attrs_dict.get('rendererName', 'vp2Renderer')
+        renderer_ui = reverse_lookup.get(renderer)
+
+        if renderer_ui:
+            index = self.renderers.findText(renderer_ui)
+            self.renderers.setCurrentIndex(index)
+        else:
+            self.renderers.setCurrentIndex(1)
+
+    def get_defaults(self):
+        return {'rendererName': 'vp2Renderer'}
+
+    def get_renderers(self):
+        """
+        Returns a list with all available renderes for playblast
+        :return: list<str>
+        """
+
+        active_editor = utils.get_active_editor()
+        renderers_ui = cmds.modelEditor(active_editor, query=True, rendererListUI=True)
+        renderers_id = cmds.modelEditor(active_editor, query=True, rendererList=True)
+
+        renderers = dict(zip(renderers_ui, renderers_id))
+        renderers.pop('Stub Renderer')
+
+        return renderers
+
+    def get_current_renderer(self):
+        """
+        Get current renderer by internal name (non-UI)
+        :return: str, name of the renderer
+        """
+
+        renderer_ui = self.renderers.currentText()
+        renderer = self._renderers.get(renderer_ui, None)
+        if renderer is None:
+            raise RuntimeError('No valid renderer: {}'.format(renderer_ui))
+
+        return renderer
+
+
+class SolsticeDisplayOptions(SolsticePlayblastWidget, object):
+    """
+    Allows user to set playblast display settings
+    """
+
+    id = 'Display Options'
+
+    BACKGROUND_DEFAULT = [0.6309999823570251, 0.6309999823570251, 0.6309999823570251]
+    TOP_DEFAULT = [0.5350000262260437, 0.6169999837875366, 0.7020000219345093]
+    BOTTOM_DEFAULT = [0.052000001072883606, 0.052000001072883606, 0.052000001072883606]
+    COLORS = {"background": BACKGROUND_DEFAULT,
+              "backgroundTop": TOP_DEFAULT,
+              "backgroundBottom": BOTTOM_DEFAULT}
+    LABELS = {"background": "Background",
+              "backgroundTop": "Top",
+              "backgroundBottom": "Bottom"}
+
+    def __init__(self, parent=None):
+
+        self._colors = dict()
+
+        super(SolsticeDisplayOptions, self).__init__(parent=parent)
+
+    def get_main_layout(self):
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        return layout
+
+    def custom_ui(self):
+        super(SolsticeDisplayOptions, self).custom_ui()
+
+        self.override = QCheckBox('Override Display Options')
+
+        self.display_type = QComboBox()
+        self.display_type.addItems(['Solid', 'Gradient'])
+
+        self._color_layout = QHBoxLayout()
+        for lbl, default in self.COLORS.items():
+            self._add_color_picker(self._color_layout, lbl, default)
+
+        self.main_layout.addWidget(self.override)
+        self.main_layout.addWidget(self.display_type)
+        self.main_layout.addLayout(self._color_layout)
+
+        self._on_toggle_override()
+
+        self.override.toggled.connect(self._on_toggle_override)
+        self.override.toggled.connect(self.optionsChanged)
+        self.display_type.currentIndexChanged.connect(self.optionsChanged)
+
+    def _add_color_picker(self, layout, label, default):
+        """
+        Internal function that creates a picker with a label and a button to select a color
+        :param layout: QLayout, layout to add color picker to
+        :param label: str, systen name for the color type (egp: backgorundTop)
+        :param default: list, default color to start with
+        :return: solstice_color.ColorPicker
+        """
+
+        l = QVBoxLayout()
+        lbl = QLabel(self.LABELS[label])
+        color_picker = solstice_color.ColorPicker()
+        color_picker.color = default
+        l.addWidget(lbl)
+        l.addWidget(color_picker)
+        l.setAlignment(lbl, Qt.AlignCenter)
+        layout.addLayout(l)
+        color_picker.valueChanged.connect(self.optionsChanged)
+        self._colors[label] = color_picker
+
+        return color_picker
+
+    def _on_toggle_override(self):
+        """
+        Internal function that is called when override is toggled
+        Enable or disabled the color pickers and background type widgets bases on the current state of the override
+        checkbox
+        """
+
+        state = self.override.isChecked()
+        self.display_type.setEnabled(state)
+        for w in self._colors.values():
+            w.setEnabled(state)
 
 
 class SolsticeMaskObject(object):
@@ -1388,6 +1652,47 @@ class PlayblastPreset(QWidget, object):
         self.save_preset(inputs)
 
 
+class SolsticeTemplateConfiguration(solstice_dialog.Dialog, object):
+
+    name = 'SolsticeTemplateConfiguration'
+    title = 'Solstice Playblast - Template Configuration'
+    version = '1.0'
+    docked = False
+
+    def __init__(self, **kwargs):
+
+        self.playblast_config_widgets = list()
+
+        super(SolsticeTemplateConfiguration, self).__init__(**kwargs)
+
+    def custom_ui(self):
+        super(SolsticeTemplateConfiguration, self).custom_ui()
+
+        self.set_logo('solstice_playblast_logo')
+
+        self.setMinimumHeight(800)
+        self.setMaximumWidth(400)
+
+        self.main_widget = solstice_accordion.AccordionWidget(parent=self)
+        self.main_widget.rollout_style = solstice_accordion.AccordionStyle.MAYA
+        self.main_layout.addWidget(self.main_widget)
+
+        self.codec = SolsticeCodec()
+        self.renderer = SolsticeRenderer()
+        self.display = SolsticeDisplayOptions()
+        self.options = BasePlayblastOptions()
+        self.mask = SolsticeMaskWidget()
+
+        for widget in [self.codec, self.renderer, self.display, self.options, self.mask]:
+            widget.initialize()
+            # widget.optionsChanged.connect(self._on_update_settings)
+            # self.playblastFinished.connect(widget.on_playblast_finished)
+            item = self.main_widget.add_item(widget.id, widget)
+            self.playblast_config_widgets.append(widget)
+            if item is not None:
+                widget.labelChanged.connect(item.setTitle)
+
+
 class SolsticePlayBlast(solstice_windows.Window, object):
 
     optionsChanged = Signal(dict)
@@ -1406,11 +1711,13 @@ class SolsticePlayBlast(solstice_windows.Window, object):
 
         super(SolsticePlayBlast, self).__init__()
 
+
     def custom_ui(self):
         super(SolsticePlayBlast, self).custom_ui()
 
         self.set_logo('solstice_playblast_logo')
 
+        self.setMinimumHeight(545)
         self.setMinimumWidth(380)
 
         # ========================================================================================================
@@ -1442,18 +1749,19 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         self.time_range = SolsticeTimeRange()
         self.cameras = SolsticeCameras()
         self.resolution = SolsticeResolution()
-        self.codec = SolsticeCodec()
-        self.options = BasePlayblastOptions()
-        self.mask = SolsticeMaskWidget()
 
-        for widget in [self.time_range, self.cameras, self.resolution, self.codec, self.options, self.mask]:
+        for widget in [self.cameras, self.resolution, self.time_range]:
             widget.initialize()
             widget.optionsChanged.connect(self._on_update_settings)
             self.playblastFinished.connect(widget.on_playblast_finished)
-            item = self.main_widget.add_item(widget.id, widget)
+            item = self.main_widget.add_item(widget.id, widget, collapsed=True)
             self.playblast_widgets.append(widget)
             if item is not None:
                 widget.labelChanged.connect(item.setTitle)
+
+        # We force the reload of the camera plugin title
+        self.cameras._on_update_label()
+        self.resolution._on_resolution_changed()
 
         # ========================================================================================================
 
@@ -1570,9 +1878,7 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         Build configuration dialog to store configuration widgets in
         """
 
-        self.config_dialog = QDialog(self)
-        self.config_dialog.setWindowTitle('Solstice Playblast - Advanced Configuration')
-        QVBoxLayout(self.config_dialog)
+        self.config_dialog = SolsticeTemplateConfiguration()
 
     def _on_update_settings(self):
         self.optionsChanged.emit(self.get_outputs)

@@ -42,12 +42,24 @@
         ],
         "layout":
         [
-            {
-                "icon": "alembic.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
-                "annotation": "Solstice Alembic Manager",
+          {
+              "icon": "alembic.png",
+              "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
+              "annotation": "Solstice Alembic Manager",
+              "label": ""
+          },
+          {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
                 "label": ""
-            }
+          },
+          {
+              "icon": "solsticeplayblast.png",
+              "command": "from solstice_pipeline.solstice_tools import solstice_playblast; solstice_playblast.run();",
+              "annotation": "Solstice Playblast",
+              "label": ""
+          }
         ],
         "anim":
         [
@@ -55,12 +67,6 @@
                 "icon": "aTools.png",
                 "command": "from solstice_pipeline.externals.aTools.animTools.animBar import animBarUI; reload(animBarUI); animBarUI.show('refresh');",
                 "annotation": "aTools",
-                "label": ""
-            },
-            {
-                "icon": "",
-                "command": "",
-                "annotation": "separator",
                 "label": ""
             },
             {
@@ -85,6 +91,24 @@
                 "icon": "picker.png",
                 "command": "from solstice_pipeline.solstice_tools import solstice_pickers; solstice_pickers.run();",
                 "annotation": "Solstice Pickers",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
+              "icon": "alembic.png",
+              "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
+              "annotation": "Solstice Alembic Manager",
+              "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
                 "label": ""
             },
             {

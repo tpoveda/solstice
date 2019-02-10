@@ -458,7 +458,11 @@ class HighProxyEditor(TaggerEditor, object):
         if cmds.objExists(sel_name):
             name = sel_name.split('|')[-1]
             proxy_name = '{}_proxy_grp'.format(name)
-            for obj in cmds.listRelatives(sel_name, allDescendents=True, type='transform', fullPath=True):
+            children = cmds.listRelatives(sel_name, allDescendents=True, type='transform', fullPath=True)
+            if not children:
+                sp.logger.error('Proxy Group not found!')
+                return False
+            for obj in children:
                 base_name = obj.split('|')[-1]
                 if base_name == proxy_name:
                     if proxy_path is None:
@@ -506,7 +510,11 @@ class HighProxyEditor(TaggerEditor, object):
         if cmds.objExists(sel_name):
             name = sel_name.split('|')[-1]
             hires_name = '{}_hires_grp'.format(name)
-            for obj in cmds.listRelatives(sel_name, allDescendents=True, type='transform', fullPath=True):
+            children = cmds.listRelatives(sel_name, allDescendents=True, type='transform', fullPath=True)
+            if not children:
+                sp.logger.error('Hires Group not found!')
+                return False
+            for obj in children:
                 base_name = obj.split('|')[-1]
                 if base_name == hires_name:
                     if hires_path is None:

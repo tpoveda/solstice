@@ -18,6 +18,8 @@ import maya.cmds as cmds
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 
+from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
+
 # =================================================================================
 
 solstice_project_id = '2/2252d6c8-407d-4419-a186-cf90760c9967/'
@@ -53,6 +55,9 @@ class SolsticePipeline(QObject):
         self.tray = self.create_solstice_tray()
         self.update_solstice_project()
         self.show_changelog()
+        self.init_searcher()
+
+        utils.viewport_message('Solstice Pipeline Tools loaded successfully!')
 
     @staticmethod
     def create_solstice_logger():
@@ -109,6 +114,11 @@ class SolsticePipeline(QObject):
             from solstice_pipeline.solstice_tools import solstice_changelog
             solstice_changelog.run()
             cmds.evalDeferred('import solstice_pipeline; solstice_pipeline.update_tools()')
+
+    @staticmethod
+    def init_searcher():
+        from solstice_pipeline.solstice_tools import solstice_searcher
+        solstice_searcher.SolsticeSearcher.install_hotkeys()
 
     def update_paths(self):
         """
@@ -361,7 +371,7 @@ def get_solstice_shot_name_regex():
     :return: str
     """
 
-    return re.compile(r"(\A[^_]+_\d{2,2}_\d{2,3})(.+)\Z")
+    return re.compile(r"(\A[^_]+_\d{2,2}_\d{2,3})")
 
 
 def get_externals_path():
