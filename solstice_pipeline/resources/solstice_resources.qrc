@@ -87,6 +87,7 @@
 		<file alias="settings">icons/settings.png</file>
 		<file alias="shader">icons/shader.png</file>
 		<file alias="shaders">icons/shaders.png</file>
+		<file alias="size_grip">icons/size_grip.png</file>
 		<file alias="solstice">icons/solstice.png</file>
 		<file alias="solsticeplayblast">icons/solsticeplayblast.png</file>
 		<file alias="solsticesnow">icons/solsticesnow.png</file>

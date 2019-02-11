@@ -18,7 +18,7 @@ except ImportError:
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_utils import solstice_maya_utils, solstice_config
-from solstice_pipeline.solstice_gui import solstice_dragger
+from solstice_pipeline.solstice_gui import solstice_dragger, solstice_animations
 from resources import solstice_resource
 
 
@@ -47,9 +47,18 @@ class Window(QMainWindow, object):
 
         self.statusBar().setSizeGripEnabled(True)
         self.statusBar().setStyleSheet("""
-        background-color: rgb(35, 35, 35);
-        border-bottom-left-radius: 10px;
-        border-bottom-right-radius: 10px;
+        QStatusBar
+        {
+            border-bottom-left-radius: 5;
+            border-bottom-right-radius: 5;
+            background-color: rgb(50,50,50);
+        }
+        QSizeGrip
+        {
+            image:url(:/icons/size_grip);
+            width:16px;
+            height:16px;
+        }
         """)
 
         self.custom_ui()
@@ -130,6 +139,9 @@ class Window(QMainWindow, object):
         # TODO: Take the width from the QGraphicsView not hardcoded :)
         self.logo_view.centerOn(1000, 0)
         return super(Window, self).resizeEvent(event)
+
+    def fade_close(self):
+        solstice_animations.fade_window(start=1, end=0, duration=400, object=self, on_finished=self.close)
 
     def cleanup(self):
         self.remove_callbacks()

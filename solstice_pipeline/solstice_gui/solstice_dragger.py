@@ -144,7 +144,7 @@ class WindowDragger(QFrame, object):
         self._parent.setWindowState(Qt.WindowNoState)
 
     def _on_close_window(self):
-        self._parent.close()
+        self._parent.fade_close()
 
 
 class DialogDragger(WindowDragger, object):
@@ -157,6 +157,3 @@ class DialogDragger(WindowDragger, object):
 
     def mouseDoubleClickEvent(self, event):
         return
-
-    def _on_close_window(self):
-        self._parent.fade_close()

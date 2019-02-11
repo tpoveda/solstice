@@ -36,6 +36,8 @@ from solstice_pipeline.solstice_utils import solstice_python_utils as python
 from solstice_pipeline.solstice_utils import solstice_qt_utils
 from solstice_pipeline.resources import solstice_resource
 
+reload(solstice_windows)
+
 # ========================================================================================================
 
 CameraOptions = {
@@ -948,6 +950,46 @@ class SolsticeDisplayOptions(SolsticePlayblastWidget, object):
         self.override.toggled.connect(self.optionsChanged)
         self.display_type.currentIndexChanged.connect(self.optionsChanged)
 
+    def apply_inputs(self, attrs_dict):
+        for lbl, w in self._colors.items():
+            default = self.COLORS.get(lbl, [0, 0, 0])
+            value = attrs_dict.get(lbl, default)
+            w.color = value
+
+        override = attrs_dict.get('override_display', False)
+        self.override.setChecked(override)
+
+    def get_inputs(self, as_preset=False):
+        inputs = {'override_display': self.override.isChecked()}
+        for lbl, w in self._colors.items():
+            inputs[lbl] = w.color
+
+        return inputs
+
+    def get_outputs(self):
+        outputs = dict()
+        if self.override.isChecked():
+            outputs['displayGradient'] = self.display_gradient()
+            for lbl, w in self._colors.items():
+                outputs[lbl] = w.color
+        else:
+            outputs['displayGradient'] = cmds.displayPref(query=True, displayGradient=True)
+            for key in self.COLORS.keys():
+                color = cmds.displayRGBColor(key, query=True)
+                outputs[key] = color
+
+        return {'display_options': outputs}
+
+    def display_gradient(self):
+        """
+        Returns whether the background should be displayed as gradient
+        If True, the colors will use the top and bottom colors to define
+        the gradient otherwise the background color will be used as solid color
+        :return: bool, True if background is gradient, False otherwise
+        """
+
+        return self.display_type.currentText() == 'Gradient'
+
     def _add_color_picker(self, layout, label, default):
         """
         Internal function that creates a picker with a label and a button to select a color
@@ -981,6 +1023,25 @@ class SolsticeDisplayOptions(SolsticePlayblastWidget, object):
         self.display_type.setEnabled(state)
         for w in self._colors.values():
             w.setEnabled(state)
+
+
+class SolsticeViewportOptions(SolsticePlayblastWidget, object):
+    """
+    Allows user to set playblast display settings
+    """
+
+    id = 'Viewport Options'
+
+    def __init__(self, parent=None):
+        super(SolsticeViewportOptions, self).__init__(parent=parent)
+
+    def get_main_layout(self):
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        return layout
+
+    def custom_ui(self):
+        super(SolsticeViewportOptions, self).custom_ui()
 
 
 class SolsticeMaskObject(object):
@@ -1680,10 +1741,11 @@ class SolsticeTemplateConfiguration(solstice_dialog.Dialog, object):
         self.codec = SolsticeCodec()
         self.renderer = SolsticeRenderer()
         self.display = SolsticeDisplayOptions()
+        self.viewport = SolsticeViewportOptions()
         self.options = BasePlayblastOptions()
         self.mask = SolsticeMaskWidget()
 
-        for widget in [self.codec, self.renderer, self.display, self.options, self.mask]:
+        for widget in [self.codec, self.renderer, self.display, self.viewport, self.options, self.mask]:
             widget.initialize()
             # widget.optionsChanged.connect(self._on_update_settings)
             # self.playblastFinished.connect(widget.on_playblast_finished)
