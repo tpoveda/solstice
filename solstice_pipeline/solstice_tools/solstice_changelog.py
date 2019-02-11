@@ -17,8 +17,6 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 from solstice_gui import solstice_dialog, solstice_accordion
 
-reload(solstice_dialog)
-
 
 class SolsticeChangelog(solstice_dialog.Dialog, object):
 
@@ -34,14 +32,14 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
         self.set_logo('solstice_changelog_logo')
 
         self.main_layout.setAlignment(Qt.AlignTop)
-        self.main_layout.setContentsMargins(0,0,0,0)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
 
-        self.setFixedWidth(600)
-        self.setMaximumHeight(800)
+        self.resize(550, 600)
 
         scroll_layout = QVBoxLayout()
-        scroll_layout.setContentsMargins(2, 2, 2, 2)
-        scroll_layout.setSpacing(2)
+        scroll_layout.setContentsMargins(0, 0, 0, 0)
+        scroll_layout.setSpacing(0)
         scroll_layout.setAlignment(Qt.AlignTop)
         central_widget = QWidget()
         central_widget.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
@@ -51,6 +49,12 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
         scroll.setWidgetResizable(True)
         scroll.setFocusPolicy(Qt.NoFocus)
         ok_btn = QPushButton('OK')
+        ok_btn.setMinimumHeight(30)
+        ok_btn.setStyleSheet("""
+        border-bottom-left-radius: 5;
+        border-bottom-right-radius: 5;
+        background-color: rgb(50, 50, 50);
+        """)
         ok_btn.clicked.connect(self.fade_close)
         self.main_layout.addWidget(scroll)
         self.main_layout.setAlignment(Qt.AlignTop)
@@ -106,6 +110,5 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
 
 
 def run():
-    reload(solstice_accordion)
     solstice_changelog = SolsticeChangelog()
     solstice_changelog.exec_()

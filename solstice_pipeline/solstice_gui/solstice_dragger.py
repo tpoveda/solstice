@@ -29,11 +29,15 @@ class WindowDragger(QFrame, object):
         self._dragging_threshold = 5
         self._on_close = on_close
 
+        self.setObjectName('titleFrame')
         self.setStyleSheet("""
+        QFrame#titleFrame
+        {
             background-color: rgb(35, 35, 35);
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
-            """)
+        }
+        """)
 
         palette = self.palette()
         palette.setColor(self.backgroundRole(), QColor(35, 35, 35))

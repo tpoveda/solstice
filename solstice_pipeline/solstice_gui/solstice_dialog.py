@@ -79,11 +79,11 @@ class Dialog(QDialog, object):
             self.main_widget.setFrameShape(QFrame.NoFrame)
             self.main_widget.setFrameShadow(QFrame.Plain)
             self.main_widget.setStyleSheet("""
-                    QFrame#mainFrame
-                    {
-                    background-color: rgb(27, 55, 69);
-                    border-radius: 5px;
-                    }""")
+            QFrame#mainFrame
+            {
+            background-color: rgb(35, 35, 35);
+            border-radius: 5px;
+            }""")
             self.main_layout = QVBoxLayout()
             self.main_layout.setContentsMargins(0, 0, 0, 0)
             self.main_layout.setSpacing(0)

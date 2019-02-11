@@ -46,6 +46,11 @@ class Window(QMainWindow, object):
         self.main_layout = None
 
         self.statusBar().setSizeGripEnabled(True)
+        self.statusBar().setStyleSheet("""
+        background-color: rgb(35, 35, 35);
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        """)
 
         self.custom_ui()
 
@@ -77,13 +82,8 @@ class Window(QMainWindow, object):
         base_widget.setLayout(base_layout)
         self.setCentralWidget(base_widget)
 
-        main_title = solstice_dragger.WindowDragger(parent=self)
-        main_title.setStyleSheet("""
-        background-color: rgb(37, 75, 89);
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
-        """)
-        base_layout.addWidget(main_title)
+        self.main_title = solstice_dragger.WindowDragger(parent=self)
+        base_layout.addWidget(self.main_title)
 
         self.main_widget = QFrame()
         self.main_widget.setObjectName('mainFrame')
@@ -92,10 +92,9 @@ class Window(QMainWindow, object):
         self.main_widget.setStyleSheet("""
         QFrame#mainFrame
         {
-        background-color: rgb(27, 55, 69);
+        background-color: rgb(35, 35, 35);
         border-radius: 5px;
         }""")
-
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
