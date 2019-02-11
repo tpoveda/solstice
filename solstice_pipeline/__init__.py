@@ -18,6 +18,7 @@ import maya.cmds as cmds
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 
+from solstice_pipeline.resources import solstice_resources
 from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
 
 # =================================================================================
@@ -177,8 +178,8 @@ class SolsticePipeline(QObject):
         self.logger.debug('\n')
 
         if os.environ.get('SOLSTICE_PIPELINE_SHOW'):
-            from solstice_pipeline.solstice_tools import solstice_changelog
-            solstice_changelog.run()
+            from solstice_pipeline.solstice_tools import solstice_hello
+            solstice_hello.run()
 
     def create_solstice_shelf(self):
         """

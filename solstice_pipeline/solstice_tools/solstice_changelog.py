@@ -15,7 +15,9 @@ from collections import OrderedDict
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
-from solstice_gui import solstice_dialog, solstice_accordion, solstice_splitters
+from solstice_gui import solstice_dialog, solstice_accordion
+
+reload(solstice_dialog)
 
 
 class SolsticeChangelog(solstice_dialog.Dialog, object):
@@ -26,8 +28,6 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
 
     def __init__(self):
         super(SolsticeChangelog, self).__init__()
-
-        self.setWindowFlags(self.windowFlags() ^ Qt.FramelessWindowHint)
 
     def custom_ui(self):
         super(SolsticeChangelog, self).custom_ui()
@@ -51,7 +51,7 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
         scroll.setWidgetResizable(True)
         scroll.setFocusPolicy(Qt.NoFocus)
         ok_btn = QPushButton('OK')
-        ok_btn.clicked.connect(self.close)
+        ok_btn.clicked.connect(self.fade_close)
         self.main_layout.addWidget(scroll)
         self.main_layout.setAlignment(Qt.AlignTop)
         self.main_layout.addWidget(ok_btn)

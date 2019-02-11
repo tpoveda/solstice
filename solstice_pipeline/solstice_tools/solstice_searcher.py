@@ -55,6 +55,15 @@ class SolsticeSearcher():
 
         return hotkey
 
+    @staticmethod
+    def get_content():
+        searcher_command_list = list()
+        searcher_icons_list = list()
+        searcher_categories = list()
+        searcher_actions_list = list()
+
+        action_count = 0
+
 
 def run():
     print('Come on!')

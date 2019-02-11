@@ -10,7 +10,6 @@
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
-from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 try:
     from shiboken import wrapInstance
@@ -18,130 +17,9 @@ except ImportError:
     from shiboken2 import wrapInstance
 
 import solstice_pipeline as sp
-from solstice_utils import solstice_maya_utils, solstice_config
+from solstice_pipeline.solstice_utils import solstice_maya_utils, solstice_config
+from solstice_pipeline.solstice_gui import solstice_dragger
 from resources import solstice_resource
-
-
-class WindowDragger(QFrame, object):
-    """
-    Class to create custom window dragger for Solstice Tools
-    """
-
-    def __init__(self, parent=None, on_close=None):
-        super(WindowDragger, self).__init__()
-
-        self._parent = parent
-        self._mouse_press_pos = None
-        self._mouse_move_pos = None
-        self._dragging_threshold = 5
-        self._on_close = on_close
-
-        palette = self.palette()
-        palette.setColor(self.backgroundRole(), QColor(35, 35, 35))
-        self.setPalette(palette)
-        self.setMinimumHeight(40)
-        self.setMaximumHeight(40)
-        self.setAutoFillBackground(True)
-
-        main_layout = QHBoxLayout()
-        main_layout.setContentsMargins(15, 0, 15, 0)
-        main_layout.setSpacing(5)
-        self.setLayout(main_layout)
-
-        lbl_icon = QLabel()
-        lbl_icon.setPixmap(solstice_resource.pixmap('solstice_tools', category='icons').scaled(20, 20, Qt.KeepAspectRatio))
-        title_text = QLabel(parent.windowTitle())
-
-        main_layout.addWidget(lbl_icon)
-        main_layout.addWidget(title_text)
-        main_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Fixed))
-
-        buttons_widget = QWidget()
-        buttons_layout = QHBoxLayout()
-        buttons_layout.setContentsMargins(0, 0, 0, 0)
-        buttons_layout.setSpacing(0)
-        main_layout.addWidget(buttons_widget)
-
-        buttons_widget.setLayout(buttons_layout)
-        button_minimized = QPushButton()
-        button_minimized.setIconSize(QSize(25, 25))
-        button_minimized.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
-        button_minimized.setIcon(solstice_resource.icon('minimize'))
-        button_minimized.setStyleSheet('QWidget {background-color: rgba(255, 255, 255, 0); border:0px;}')
-        self._button_maximized = QPushButton()
-        self._button_maximized.setIcon(solstice_resource.icon('maximize'))
-        self._button_maximized.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
-        self._button_maximized.setStyleSheet('QWidget {background-color: rgba(255, 255, 255, 0); border:0px;}')
-        self._button_maximized.setIconSize(QSize(25, 25))
-        self._button_restored = QPushButton()
-        self._button_restored.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
-        self._button_restored.setVisible(False)
-        self._button_restored.setIcon(solstice_resource.icon('restore'))
-        self._button_restored.setStyleSheet('QWidget {background-color: rgba(255, 255, 255, 0); border:0px;}')
-        self._button_restored.setIconSize(QSize(25, 25))
-        button_closed = QPushButton()
-        button_closed.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
-        button_closed.setIcon(solstice_resource.icon('close'))
-        button_closed.setStyleSheet('QWidget {background-color: rgba(255, 255, 255, 0); border:0px;}')
-        button_closed.setIconSize(QSize(25, 25))
-
-        buttons_layout.addWidget(button_minimized)
-        buttons_layout.addWidget(self._button_maximized)
-        buttons_layout.addWidget(self._button_restored)
-        buttons_layout.addWidget(button_closed)
-
-        self._button_maximized.clicked.connect(self._on_maximize_window)
-        button_minimized.clicked.connect(self._on_minimize_window)
-        self._button_restored.clicked.connect(self._on_restore_window)
-        button_closed.clicked.connect(self._on_close_window)
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self._mouse_press_pos = event.globalPos()
-            self._mouse_move_pos = event.globalPos() - self._parent.pos()
-        super(WindowDragger, self).mousePressEvent(event)
-
-    def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton:
-            global_pos = event.globalPos()
-            if self._mouse_press_pos:
-                moved = global_pos - self._mouse_press_pos
-                if moved.manhattanLength() > self._dragging_threshold:
-                    diff = global_pos - self._mouse_move_pos
-                    self._parent.move(diff)
-                    self._mouse_move_pos = global_pos - self._parent.pos()
-        super(WindowDragger, self).mouseMoveEvent(event)
-
-    def mouseDoubleClickEvent(self, event):
-        if self._button_maximized.isVisible():
-            self._on_maximize_window()
-        else:
-            self._on_restore_window()
-
-    def mouseReleaseEvent(self, event):
-        if self._mouse_press_pos is not None:
-            if event.button() == Qt.LeftButton:
-                moved = event.globalPos() - self._mouse_press_pos
-                if moved.manhattanLength() > self._dragging_threshold:
-                    event.ignore()
-                self._mouse_press_pos = None
-        super(WindowDragger, self).mouseReleaseEvent(event)
-
-    def _on_maximize_window(self):
-        self._button_restored.setVisible(True)
-        self._button_maximized.setVisible(False)
-        self._parent.setWindowState(Qt.WindowMaximized)
-
-    def _on_minimize_window(self):
-        self._parent.setWindowState(Qt.WindowMinimized)
-
-    def _on_restore_window(self):
-        self._button_restored.setVisible(False)
-        self._button_maximized.setVisible(True)
-        self._parent.setWindowState(Qt.WindowNoState)
-
-    def _on_close_window(self):
-        self._parent.close()
 
 
 class Window(QMainWindow, object):
@@ -162,6 +40,7 @@ class Window(QMainWindow, object):
         self.settings = solstice_config.create_config(self.__class__.name)
 
         self.setObjectName(self.name)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(self.windowFlags() ^ Qt.FramelessWindowHint)
         self.setWindowTitle('{} - {}'.format(self.title, self.version))
         self.main_layout = None
@@ -190,18 +69,33 @@ class Window(QMainWindow, object):
 
     def custom_ui(self):
 
-        base_widget = QFrame()
-        base_widget.setFrameShape(QFrame.StyledPanel)
+        base_widget = QWidget()
+        base_widget.setAutoFillBackground(False)
         base_layout = QVBoxLayout()
         base_layout.setContentsMargins(0, 0, 0, 0)
         base_layout.setSpacing(0)
         base_widget.setLayout(base_layout)
         self.setCentralWidget(base_widget)
 
-        main_title = WindowDragger(parent=self)
+        main_title = solstice_dragger.WindowDragger(parent=self)
+        main_title.setStyleSheet("""
+        background-color: rgb(37, 75, 89);
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        """)
         base_layout.addWidget(main_title)
 
-        self.main_widget = QWidget()
+        self.main_widget = QFrame()
+        self.main_widget.setObjectName('mainFrame')
+        self.main_widget.setFrameShape(QFrame.NoFrame)
+        self.main_widget.setFrameShadow(QFrame.Plain)
+        self.main_widget.setStyleSheet("""
+        QFrame#mainFrame
+        {
+        background-color: rgb(27, 55, 69);
+        border-radius: 5px;
+        }""")
+
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)

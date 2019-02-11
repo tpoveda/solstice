@@ -29,6 +29,16 @@ import solstice_pipeline as sp
 from solstice_utils import solstice_maya_utils, solstice_python_utils, solstice_browser_utils
 
 
+def ui_loader(ui_file, widget=None):
+    ui = QtCompat.loadUi(ui_file)
+    if widget:
+        for member in dir(ui):
+            if not member.startswith('__') and member is not 'staticMetaObject':
+                setattr(widget, member, getattr(ui, member))
+
+    return ui
+
+
 def wrapinstance(ptr, base=None):
     if ptr is None:
         return None
@@ -327,3 +337,16 @@ def dock_window(window_class):
     cmds.evalDeferred(lambda *args: cmds.workspaceControl(main_control, e=True, rs=True))
 
     return win.run()
+
+
+def center_widget_on_screen(widget):
+    """
+    Center a given QWidget on the active screen
+    :param widget: QWidget
+    """
+
+    frame_geo = widget.frameGeometry()
+    screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+    center_point = QApplication.desktop().screenGeometry(screen).center()
+    frame_geo.moveCenter(center_point)
+    widget.move(frame_geo.topLeft())

@@ -11,8 +11,9 @@
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
-from solstice_utils import solstice_maya_utils
-from resources import solstice_resource
+from solstice_pipeline.solstice_utils import solstice_qt_utils, solstice_maya_utils
+from solstice_pipeline.solstice_gui import solstice_dragger, solstice_animations
+from solstice_pipeline.resources import solstice_resource
 
 
 class Dialog(QDialog, object):
@@ -32,11 +33,15 @@ class Dialog(QDialog, object):
 
         self.setObjectName(self.name)
         self.setWindowTitle('{0} - {1}'.format(self.title, self.version))
-        self.setWindowFlags(self.windowFlags() | Qt.Window)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)
+
         self.setFocusPolicy(Qt.StrongFocus)
         self.main_layout = None
 
         self.custom_ui()
+
+        solstice_qt_utils.center_widget_on_screen(self)
 
     def add_callback(self, callback_id):
         self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(callback_id=callback_id))
@@ -52,10 +57,38 @@ class Dialog(QDialog, object):
 
     def custom_ui(self):
         if self.main_layout is None:
+
+            dialog_layout = QVBoxLayout()
+            dialog_layout.setContentsMargins(0, 0, 0, 0)
+            dialog_layout.setSpacing(0)
+            self.setLayout(dialog_layout)
+
+            base_widget = QWidget()
+            base_widget.setAutoFillBackground(False)
+            base_layout = QVBoxLayout()
+            base_layout.setContentsMargins(0, 0, 0, 0)
+            base_layout.setSpacing(0)
+            base_widget.setLayout(base_layout)
+            dialog_layout.addWidget(base_widget)
+
+            self.main_title = solstice_dragger.DialogDragger(parent=self)
+            base_layout.addWidget(self.main_title)
+
+            self.main_widget = QFrame()
+            self.main_widget.setObjectName('mainFrame')
+            self.main_widget.setFrameShape(QFrame.NoFrame)
+            self.main_widget.setFrameShadow(QFrame.Plain)
+            self.main_widget.setStyleSheet("""
+                    QFrame#mainFrame
+                    {
+                    background-color: rgb(27, 55, 69);
+                    border-radius: 5px;
+                    }""")
             self.main_layout = QVBoxLayout()
             self.main_layout.setContentsMargins(0, 0, 0, 0)
             self.main_layout.setSpacing(0)
-            self.setLayout(self.main_layout)
+            self.main_widget.setLayout(self.main_layout)
+            base_layout.addWidget(self.main_widget)
 
             title_layout = QHBoxLayout()
             title_layout.setContentsMargins(0, 0, 0, 0)
@@ -86,6 +119,9 @@ class Dialog(QDialog, object):
         # TODO: Take the width from the QGraphicsView not hardcoded :)
         self.logo_view.centerOn(1000, 0)
         return super(Dialog, self).resizeEvent(event)
+
+    def fade_close(self):
+        solstice_animations.fade_window(start=1, end=0, duration=400, object=self, on_finished=self.close)
 
     def cleanup(self):
         self.remove_callbacks()
