@@ -74,11 +74,11 @@ class Dialog(QDialog, object):
             self.main_title = solstice_dragger.DialogDragger(parent=self)
             base_layout.addWidget(self.main_title)
 
-            self.main_widget = QFrame()
-            self.main_widget.setObjectName('mainFrame')
-            self.main_widget.setFrameShape(QFrame.NoFrame)
-            self.main_widget.setFrameShadow(QFrame.Plain)
-            self.main_widget.setStyleSheet("""
+            self.options_widget = QFrame()
+            self.options_widget.setObjectName('mainFrame')
+            self.options_widget.setFrameShape(QFrame.NoFrame)
+            self.options_widget.setFrameShadow(QFrame.Plain)
+            self.options_widget.setStyleSheet("""
             QFrame#mainFrame
             {
             background-color: rgb(35, 35, 35);
@@ -87,8 +87,8 @@ class Dialog(QDialog, object):
             self.main_layout = QVBoxLayout()
             self.main_layout.setContentsMargins(0, 0, 0, 0)
             self.main_layout.setSpacing(0)
-            self.main_widget.setLayout(self.main_layout)
-            base_layout.addWidget(self.main_widget)
+            self.options_widget.setLayout(self.main_layout)
+            base_layout.addWidget(self.options_widget)
 
             title_layout = QHBoxLayout()
             title_layout.setContentsMargins(0, 0, 0, 0)

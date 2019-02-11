@@ -15,6 +15,7 @@ import json
 import tempfile
 import contextlib
 from functools import partial
+from collections import OrderedDict
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
@@ -156,6 +157,44 @@ if mel.eval('getApplicationVersionAsFloat') > 2015:
         "hwFogColorB": 0.5,
         "hwFogStart": 0.0,
     })
+
+
+OBJECT_TYPES = OrderedDict()
+OBJECT_TYPES['NURBS Curves'] = 'nurbsCurves'
+OBJECT_TYPES['NURBS Surfaces'] = 'nurbsSurfaces'
+OBJECT_TYPES['NURBS CVs'] = 'controlVertices'
+OBJECT_TYPES['NURBS Hulls'] = 'hulls'
+OBJECT_TYPES['Polygons'] = 'polymeshes'
+OBJECT_TYPES['Subdiv Surfaces'] = 'subdivSurfaces'
+OBJECT_TYPES['Planes'] = 'planes'
+OBJECT_TYPES['Lights'] = 'lights'
+OBJECT_TYPES['Cameras'] = 'cameras'
+OBJECT_TYPES['Image Planes'] = 'imagePlane'
+OBJECT_TYPES['Joints'] = 'joints'
+OBJECT_TYPES['IK Handles'] = 'ikHandles'
+OBJECT_TYPES['Deformers'] = 'deformers'
+OBJECT_TYPES['Dynamics'] = 'dynamics'
+OBJECT_TYPES['Particle Instancers'] = 'particleInstancers'
+OBJECT_TYPES['Fluids'] = 'fluids'
+OBJECT_TYPES['Hair Systems'] = 'hairSystems'
+OBJECT_TYPES['Follicles'] = 'follicles'
+OBJECT_TYPES['nCloths'] = 'nCloths'
+OBJECT_TYPES['nParticles'] = 'nParticles'
+OBJECT_TYPES['nRigids'] = 'nRigids'
+OBJECT_TYPES['Dynamic Constraints'] = 'dynamicConstraints'
+OBJECT_TYPES['Locators'] = 'locators'
+OBJECT_TYPES['Dimensions'] = 'dimensions'
+OBJECT_TYPES['Pivots'] = 'pivots'
+OBJECT_TYPES['Handles'] = 'handles'
+OBJECT_TYPES['Textures Placements'] = 'textures'
+OBJECT_TYPES['Strokes'] = 'strokes'
+OBJECT_TYPES['Motion Trails'] = 'motionTrails'
+OBJECT_TYPES['Plugin Shapes'] = 'pluginShapes'
+OBJECT_TYPES['Clip Ghosts'] = 'clipGhosts'
+OBJECT_TYPES['Grease Pencil'] = 'greasePencils'
+OBJECT_TYPES['Manipulators'] = 'manipulators'
+OBJECT_TYPES['Grid'] = 'grid'
+OBJECT_TYPES['HUD'] = 'hud'
 
 # ========================================================================================================
 
@@ -1033,7 +1072,14 @@ class SolsticeViewportOptions(SolsticePlayblastWidget, object):
     id = 'Viewport Options'
 
     def __init__(self, parent=None):
+
+        self.show_type_actions = list()
+        self.show_types = self.get_show_object_tyes()
+
         super(SolsticeViewportOptions, self).__init__(parent=parent)
+
+        self.setObjectName(self.label)
+
 
     def get_main_layout(self):
         layout = QVBoxLayout()
@@ -1042,6 +1088,269 @@ class SolsticeViewportOptions(SolsticePlayblastWidget, object):
 
     def custom_ui(self):
         super(SolsticeViewportOptions, self).custom_ui()
+
+        menus_layout = QHBoxLayout()
+
+        self.display_light_menu = self._build_light_menu()
+        self.display_light_menu.setFixedHeight(20)
+
+        self.show_types_btn = QPushButton('Show')
+        self.show_types_btn.setFixedHeight(20)
+        self.show_types_menu = self._build_show_menu()
+        self.show_types_btn.setMenu(self.show_types_menu)
+
+        menus_layout.addWidget(self.display_light_menu)
+        menus_layout.addWidget(self.show_types_btn)
+
+        cbx_layout = QGridLayout()
+        self.high_quality = QCheckBox()
+        self.high_quality.setText('Force Viewport 2.09 + AA')
+        self.override_viewport = QCheckBox('Override Viewport Settings')
+        self.override_viewport.setChecked(True)
+        self.two_sided_lighting = QCheckBox('Two Sided Lighting')
+        self.two_sided_lighting.setChecked(False)
+        self.shadows = QCheckBox('Shadow')
+        self.shadows.setChecked(False)
+
+        cbx_layout.addWidget(self.override_viewport, 0, 0)
+        cbx_layout.addWidget(self.high_quality, 0, 1)
+        cbx_layout.addWidget(self.two_sided_lighting, 1, 0)
+        cbx_layout.addWidget(self.shadows, 1, 1)
+
+        self.main_layout.addLayout(cbx_layout)
+        self.main_layout.addLayout(menus_layout)
+
+        self.high_quality.stateChanged.connect(self.optionsChanged)
+        self.override_viewport.stateChanged.connect(self.optionsChanged)
+        self.override_viewport.stateChanged.connect(self._on_toggle_override)
+        self.two_sided_lighting.stateChanged.connect(self.optionsChanged)
+        self.shadows.stateChanged.connect(self.optionsChanged)
+        self.display_light_menu.currentIndexChanged.connect(self.optionsChanged)
+
+    def get_inputs(self, as_preset=False):
+        inputs = {
+            'high_quality': self.high_quality.isChecked(),
+            'override_viewport_options': self.override_viewport.isChecked(),
+            'display_lights': self.display_light_menu.currentIndex(),
+            'shadows': self.shadows.isChecked(),
+            'two_sided_lighting': self.two_sided_lighting.isChecked()
+        }
+
+        inputs.update(self.get_show_inputs())
+
+        return inputs
+
+    def apply_inputs(self, attrs_dict):
+        override_viewport = attrs_dict.get('override_viewport_options', True)
+        high_quality = attrs_dict.get('high_quality', True)
+        display_light = attrs_dict.get('display_lights', 0)
+        two_sided_lighting = attrs_dict.get('two_sided_lighting', False)
+        shadows = attrs_dict.get('shadows', False)
+
+        self.high_quality.setChecked(high_quality)
+        self.override_viewport.setChecked(override_viewport)
+        self.show_types_btn.setEnabled(override_viewport)
+        self.display_light_menu.setCurrentIndex(display_light)
+        self.shadows.setChecked(shadows)
+        self.two_sided_lighting.setChecked(two_sided_lighting)
+
+        for action in self.show_Type_actions:
+            system_name = self.show_types[action.text()]
+            state = attrs_dict.get(system_name, True)
+            action.setChecked(state)
+
+    def get_outputs(self):
+        outputs = dict()
+        high_quality = self.high_quality.isChecked()
+        override_viewport_options = self.override_viewport.isChecked()
+
+        if override_viewport_options:
+            outputs['viewport2_options'] = dict()
+            outputs['viewport_options'] = dict()
+
+            if high_quality:
+                outputs['viewport_options']['rendererName'] = 'vp2Renderer'
+                outputs['viewport2_options']['multiSampleEnable'] = True
+                outputs['viewport2_options']['multiSampleCount'] = 8
+
+            show_per_type = self.get_show_inputs()
+            display_lights = self.get_display_lights()
+            outputs['viewport_options'].update(show_per_type)
+            outputs['viewport_options'].update(display_lights)
+        else:
+            outputs = parse_active_view()
+            outputs.pop('display_options', None)
+            outputs.pop('camera', None)
+            outputs['viewport_options'].pop('rendererName', None)
+            outputs['camera_options'] = {'depthOfField': outputs['camera_options']['depthOfField']}
+
+        return outputs
+
+    def get_show_object_tyes(self):
+        results = OrderedDict()
+        plugin_shapes = utils.get_plugin_shapes()
+        results.update(plugin_shapes)
+
+        results.update(OBJECT_TYPES)
+
+        return results
+
+    def get_show_inputs(self):
+        """
+        Returns checked state of show menu items
+        :return: dict, checked show states in the widget
+        """
+
+        show_inputs = dict()
+        for action in self.show_type_actions:
+            lbl = action.text()
+            name = self.show_types.get(lbl, None)
+            if name is None:
+                continue
+            show_inputs[name] = action.isChecked()
+
+        return show_inputs
+
+    def get_display_lights(self):
+        """
+        Returns and parse the currently selected display lights options
+        :return: dict, the display light options
+        """
+
+        index = self.display_light_menu.currentIndex()
+        return {
+            'display_lights': self.display_light_menu.itemData(index),
+            'shadows': self.shadows.isChecked(),
+            'two_sided_lighting': self.two_sided_lighting.isChecked()
+        }
+
+    def _build_light_menu(self):
+        """
+        Internal function used to build different types of lighting for the viewport
+        :return: QComboBox
+        """
+
+        menu = QComboBox(self)
+
+        display_lights = (
+            ("Use Default Lighting", "default"),
+            ("Use All Lights", "all"),
+            ("Use Selected Lights", "active"),
+            ("Use Flat Lighting", "flat"),
+            ("Use No Lights", "none")
+        )
+
+        for lbl, name in display_lights:
+            menu.addItem(lbl, userData=name)
+
+        return menu
+
+    def _build_show_menu(self):
+        """
+        Internal function used to build the menu to select which objects types are
+        shown in the output
+        :return: QMenu
+        """
+
+        menu = QMenu(self)
+        menu.setObjectName('ShowShapesMenu')
+        menu.setWindowTitle('Show')
+        menu.setFixedWidth(180)
+        menu.setTearOffEnabled(False)
+
+        toggle_all = QAction(menu, text='All')
+        toggle_none = QAction(menu, text='None')
+        menu.addAction(toggle_all)
+        menu.addAction(toggle_none)
+        menu.addSeparator()
+
+        for shp in self.show_types:
+            action = QAction(menu, text=shp)
+            action.setCheckable(True)
+            action.toggled.connect(self.optionsChanged)
+            menu.addAction(action)
+            self.show_type_actions.append(action)
+
+        toggle_all.triggered.connect(self._on_toggle_all_visible)
+        toggle_none.triggered.connect(self._on_toggle_all_hide)
+
+        return menu
+
+    def _on_toggle_all_visible(self):
+        """
+        Internal callback function that set all object types off or on depending
+        on the state
+        """
+
+        for action in self.show_type_actions:
+            action.setChecked(True)
+
+    def _on_toggle_all_hide(self):
+        """
+        Internal callback function that set all object types off or on depending
+        on the state
+        """
+
+        for action in self.show_type_actions:
+            action.setChecked(False)
+
+    def _on_toggle_override(self):
+        """
+        Internal callback function that enables or disables show menu when override
+        is checked
+        """
+
+        state = self.override_viewport.isChecked()
+        self.show_types_btn.setEnabled(state)
+        self.high_quality.setEnabled(state)
+        self.display_light_menu.setEnabled(state)
+        self.shadows.setEnabled(state)
+        self.two_sided_lighting.setEnabled(state)
+
+
+class SolsticePanZoom(SolsticePlayblastWidget, object):
+    """
+    Allows user to set playblast display settings
+    """
+
+    id = 'Pan/Zoom'
+
+    def __init__(self, parent=None):
+        super(SolsticePanZoom, self).__init__(parent=parent)
+
+    def get_main_layout(self):
+        layout = QHBoxLayout()
+        layout.setContentsMargins(5, 0, 5, 0)
+        return layout
+
+    def custom_ui(self):
+        super(SolsticePanZoom, self).custom_ui()
+
+        self.pan_zoom = QCheckBox('Use pan/zoom from camera')
+        self.pan_zoom.setChecked(True)
+
+        self.main_layout.addWidget(self.pan_zoom)
+
+        self.pan_zoom.stateChanged.connect(self.optionsChanged)
+
+    def get_outputs(self):
+        if not self.pan_zoom.isChecked():
+            return {
+                'camera_options': {
+                    'panZoomEnabled': 1,
+                    'horizontalPan': 0.0,
+                    'verticalPan': 0.0,
+                    'zoom': 1.0
+                }
+            }
+        else:
+            return {}
+
+    def apply_inputs(self, attrs_dict):
+        self.pan_zoom.setChecked(attrs_dict.get('pan_zoom', True))
+
+    def get_inputs(self, as_preset=False):
+        return {'pan_zoom': self.pan_zoom.isChecked()}
 
 
 class SolsticeMaskObject(object):
@@ -1317,6 +1626,8 @@ class BasePlayblastOptions(SolsticePlayblastWidget, object):
             'isolate_view': self.isolate_view
         }
 
+        self.apply_inputs(self.get_defaults())
+
     def setup_signals(self):
         self.isolate_view.stateChanged.connect(self.optionsChanged)
         self.off_screen.stateChanged.connect(self.optionsChanged)
@@ -1334,6 +1645,27 @@ class BasePlayblastOptions(SolsticePlayblastWidget, object):
             inputs[key] = state
 
         return inputs
+
+    def apply_inputs(self, attrs_dict):
+        for key, w in self.widgets.items():
+            state = attrs_dict.get(key, None)
+            if state is not None:
+                w.setChecked(state)
+
+        return attrs_dict
+
+    def get_outputs(self):
+        inputs = self.get_inputs(as_preset=False)
+        outputs = dict()
+        outputs['off_screen'] = inputs['off_screen']
+
+        if inputs['isolate_view']:
+            panel = utils.get_active_editor()
+            filter_set = cmds.modelEditor(panel, query=True, viewObjects=True)
+            isolate = cmds.sets(filter_set, query=True) if filter_set else None
+            outputs['isolate'] = isolate
+
+        return outputs
 
 
 class PlayblastPreview(QWidget, object):
@@ -1731,28 +2063,44 @@ class SolsticeTemplateConfiguration(solstice_dialog.Dialog, object):
 
         self.set_logo('solstice_playblast_logo')
 
-        self.setMinimumHeight(800)
+        self.resize(400, 810)
+
+        self.setMinimumHeight(810)
         self.setMaximumWidth(400)
 
-        self.main_widget = solstice_accordion.AccordionWidget(parent=self)
-        self.main_widget.rollout_style = solstice_accordion.AccordionStyle.MAYA
-        self.main_layout.addWidget(self.main_widget)
+        self.tab = QTabWidget()
+        self.main_layout.addWidget(self.tab)
+
+        self.options_widget = solstice_accordion.AccordionWidget(parent=self)
+        self.options_widget.rollout_style = solstice_accordion.AccordionStyle.MAYA
+        self.tab.addTab(self.options_widget, 'Options')
+
+        self.mask_widget = solstice_accordion.AccordionWidget(parent=self)
+        self.mask_widget.rollout_style = solstice_accordion.AccordionStyle.MAYA
+        self.tab.addTab(self.mask_widget, 'Mask')
 
         self.codec = SolsticeCodec()
         self.renderer = SolsticeRenderer()
         self.display = SolsticeDisplayOptions()
         self.viewport = SolsticeViewportOptions()
         self.options = BasePlayblastOptions()
-        self.mask = SolsticeMaskWidget()
+        self.panzoom = SolsticePanZoom()
 
-        for widget in [self.codec, self.renderer, self.display, self.viewport, self.options, self.mask]:
+        for widget in [self.codec, self.renderer, self.display, self.viewport, self.options, self.panzoom]:
             widget.initialize()
             # widget.optionsChanged.connect(self._on_update_settings)
             # self.playblastFinished.connect(widget.on_playblast_finished)
-            item = self.main_widget.add_item(widget.id, widget)
+            item = self.options_widget.add_item(widget.id, widget)
             self.playblast_config_widgets.append(widget)
             if item is not None:
                 widget.labelChanged.connect(item.setTitle)
+
+        self.mask = SolsticeMaskWidget()
+        self.mask.initialize()
+        item = self.mask_widget.add_item(self.mask.id, self.mask)
+        self.playblast_config_widgets.append(self.mask)
+        if item is not None:
+            self.mask.labelChanged.connect(item.setTitle)
 
 
 class SolsticePlayBlast(solstice_windows.Window, object):
