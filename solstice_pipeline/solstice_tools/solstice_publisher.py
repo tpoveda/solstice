@@ -1026,6 +1026,9 @@ class SolsticePublisher(solstice_dialog.Dialog, object):
 
     def custom_ui(self):
         super(SolsticePublisher, self).custom_ui()
+
+        self.resize(500, 750)
+
         self.set_logo('solstice_publisher_logo')
         if self._asset:
             asset_publisher = AssetPublisherWidget(asset=self._asset, new_working_version=self._new_working_version)

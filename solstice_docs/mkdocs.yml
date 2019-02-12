@@ -21,8 +21,11 @@ nav:
           - Installing Maya: solsticepipeline/software/installingmaya.md
           - Installing Arnold: solsticepipeline/software/installingarnold.md
           - Installing Yeti: solsticepipeline/software/installingyeti.md
-      - Artella Pipeline:
-        - Artella Nomenclature: solsticepipeline/artella/nomenclature.md
+      - Solstice Pipeline:
+        - Versions: solsticepipeline/versions.md
+        - Asset: solsticepipeline/asset.md
+        - Sequence: solsticepipeline/sequence.md
+        - Shot: solsticepipeline/shot.md
       - Solstice Tools:
         - Solstice Tray: solsticepipeline/solsticetools/solsticetray.md
         - Solstice Shelf: solsticepipeline/solsticetools/solsticeshelf.md
@@ -40,7 +43,7 @@ nav:
           - Final Layout: solsticepipeline/departments/layout/final.md
         - Animation: solsticepipeline/departments/animation.md
       - FAQ:
-          - How to upload new working versions of an asset?: solsticepipeline/faq/workingversion.md
+          - How to create new working versions of an asset?: solsticepipeline/faq/workingversion.md
           - How to publish an asset?:
             - Publish asset model: solsticepipeline/faq/publish/model.md
             - Publish asset shading & textures: solsticepipeline/faq/publish/shading.md
