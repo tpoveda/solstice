@@ -18,6 +18,8 @@ from resources import solstice_resource
 class SpinnerType(object):
     Thumb = 'thumb'
     Circle = 'circle'
+    Loading = 'loading'
+
 
 class WaitSpinner(QWidget, object):
     def __init__(self, spinner_type=SpinnerType.Thumb, parent=None):
@@ -28,6 +30,9 @@ class WaitSpinner(QWidget, object):
         self._spin_icons = list()
 
         if spinner_type == SpinnerType.Thumb:
+            for i in range(7):
+                self._spin_icons.append(solstice_resource.pixmap('thumb_working_{}'.format(i+1), category='icons'))
+        elif spinner_type == SpinnerType.Loading:
             for i in range(7):
                 self._spin_icons.append(solstice_resource.pixmap('thumb_loading_{}'.format(i+1), category='icons'))
         else:

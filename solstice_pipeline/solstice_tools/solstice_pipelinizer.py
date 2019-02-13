@@ -21,7 +21,7 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 import maya.cmds as cmds
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_gui import solstice_windows, solstice_user, solstice_asset, solstice_assetviewer, solstice_splitters
+from solstice_pipeline.solstice_gui import solstice_windows, solstice_user, solstice_asset, solstice_stack, solstice_assetviewer, solstice_splitters, solstice_spinner
 from solstice_pipeline.solstice_utils import solstice_python_utils, solstice_artella_utils
 from solstice_pipeline.solstice_tools import solstice_sequencer
 from solstice_pipeline.solstice_utils import solstice_artella_classes, solstice_qt_utils
@@ -105,6 +105,28 @@ class PipelinizerSettings(QDialog, object):
         sp.logger.debug('{0}: Settings Updated successfully!'.format(self._settings.app_name))
 
 
+class PipelinizerWaiting(QFrame, object):
+    def __init__(self, parent=None):
+        super(PipelinizerWaiting, self).__init__(parent)
+
+        self.setStyleSheet("#background {border-radius: 3px;border-style: solid;border-width: 1px;border-color: rgb(32,32,32);}")
+        self.setFrameShape(QFrame.StyledPanel)
+        self.setFrameShadow(QFrame.Raised)
+
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        self.setLayout(main_layout)
+
+        self.wait_spinner = solstice_spinner.WaitSpinner(spinner_type=solstice_spinner.SpinnerType.Loading)
+        self.wait_spinner.bg.setFrameShape(QFrame.NoFrame)
+        self.wait_spinner.bg.setFrameShadow(QFrame.Plain)
+
+        main_layout.addItem(QSpacerItem(0, 20, QSizePolicy.Fixed, QSizePolicy.Expanding))
+        main_layout.addWidget(self.wait_spinner)
+        main_layout.addItem(QSpacerItem(0, 20, QSizePolicy.Fixed, QSizePolicy.Expanding))
+
+
 class Pipelinizer(solstice_windows.Window, object):
 
     name = 'SolsticePipelinizer'
@@ -134,6 +156,8 @@ class Pipelinizer(solstice_windows.Window, object):
 
         # Set Tool Logo
         self.set_logo('solstice_pipeline_logo')
+
+        self.resize(1100, 900)
 
         # Create Settings File
         if os.path.isfile(self.settings.config_file):
@@ -220,11 +244,17 @@ class Pipelinizer(solstice_windows.Window, object):
         for action in [sync_props_model_action, sync_props_textures_action, sync_props_shading_action]:
             sync_props_menu.addAction(action)
 
+        self.stack = solstice_stack.SlidingStackedWidget(parent=self)
+        self.main_layout.addWidget(self.stack)
+
+        wait_widget = PipelinizerWaiting()
+        self.stack.addWidget(wait_widget)
+
         # Pipelinizer Widgets
         self._tab_widget = QTabWidget()
         self._tab_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self._tab_widget.setMinimumHeight(330)
-        self.main_layout.addWidget(self._tab_widget)
+        self.stack.addWidget(self._tab_widget)
 
         categories_widget = QWidget()
         categories_layout = QVBoxLayout()
@@ -340,6 +370,8 @@ class Pipelinizer(solstice_windows.Window, object):
     def _sequencer_loaded(self):
         self._tab_widget.setTabText(1, 'Sequence Manager')
         self._tab_widget.setTabEnabled(1, True)
+        self.stack.slide_in_next()
+
 
     def _change_category(self, category, flag):
         self._asset_viewer.change_category(category=category)
@@ -488,6 +520,7 @@ class Pipelinizer(solstice_windows.Window, object):
                 cmds.warning(msg)
                 sp.logger.debug(msg)
                 sp.logger.error(str(e))
+                return
             if not info_widget:
                 return
 
@@ -542,18 +575,6 @@ class Pipelinizer(solstice_windows.Window, object):
 # ============================================================================================================
 
 def run():
-    reload(solstice_python_utils)
-    reload(solstice_artella_classes)
-    reload(solstice_artella_utils)
-    reload(solstice_qt_utils)
-    reload(solstice_resource)
-    reload(solstice_user)
-    reload(solstice_asset)
-    reload(solstice_assetviewer)
-    reload(solstice_splitters)
-    reload(solstice_sequencer)
-    reload(solstice_sequencer)
-
     # Check that Artella plugin is loaded and, if not, we loaded it
     solstice_artella_utils.update_artella_paths()
     if not solstice_artella_utils.check_artella_plugin_loaded():

@@ -8,6 +8,8 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
+import sys
+
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp

@@ -37,7 +37,6 @@ from solstice_pipeline.solstice_utils import solstice_python_utils as python
 from solstice_pipeline.solstice_utils import solstice_qt_utils
 from solstice_pipeline.resources import solstice_resource
 
-reload(solstice_windows)
 
 # ========================================================================================================
 

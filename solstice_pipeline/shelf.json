@@ -142,6 +142,15 @@
                 "label": ""
             }
         ],
+        "rig":
+        [
+            {
+                "icon": "tool.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_rigtoolbox; reload(solstice_rigtoolbox); solstice_rigtoolbox.run();",
+                "annotation": "Solstice Rig Toolbox",
+                "label": ""
+            }
+        ],
         "td":
         [
             {

@@ -114,8 +114,10 @@
     "Fixed Errors in Solstice Tagger when dealing with multiple tag nodes in a same scene",
     "Added Alembic Manager Tool to import/export alembic file from asset files",
     "Fixed Camera Playblast widget, now when refreshing cameras list everything updates properly",
-    "Rework all draggers for dialogs and windows",
+    "Rework all UIs for dialogs and windows",
     "Now Solstice Changelog is replaced by a Hello widget after installing new version",
-    "Started the transition to implement all possible tools using QtDesigner UIs"
+    "Started the transition to implement all possible tools using QtDesigner UIs",
+    "Improve stability for Solstice Pipelinizer",
+    "Added RigToolBox tool and rig utils functions"
   ]
 }

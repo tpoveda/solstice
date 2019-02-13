@@ -43,10 +43,14 @@ nav:
           - Final Layout: solsticepipeline/departments/layout/final.md
         - Animation: solsticepipeline/departments/animation.md
       - FAQ:
-          - How to create new working versions of an asset?: solsticepipeline/faq/workingversion.md
-          - How to publish an asset?:
-            - Publish asset model: solsticepipeline/faq/publish/model.md
-            - Publish asset shading & textures: solsticepipeline/faq/publish/shading.md
+          - How to create new working versions of an asset file?:
+            - Shading Files: solsticepipeline/faq/workingversion/shading.md
+            - Textures Files: solsticepipeline/faq/workingversion/textures.md
+            - Model/Rig Files: solsticepipeline/faq/workingversion/model.md
+          - How to publish an asset file?:
+            - Shading Files: solsticepipeline/faq/publish/shading.md
+            - Textures Files: solsticepipeline/faq/publish/textures.md
+            - Model/Rig Files: solsticepipeline/faq/publish/model.md
     - Slack: 'slack.md'
     - About: 'about.md'
 theme:
@@ -59,5 +63,6 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.emoji
+  - pymdownx.tasklist
 extra_css:
   - 'stylesheets/solstice.css'

@@ -229,6 +229,7 @@ class SolsticePipeline(QObject):
         """
 
         from solstice_pipeline.solstice_gui import solstice_traymessage
+        reload(solstice_traymessage)
 
         global tray
         self.logger.debug('Creating Solstice Tray ...')

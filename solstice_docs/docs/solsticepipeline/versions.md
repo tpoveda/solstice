@@ -9,7 +9,7 @@ is not visible by the user. The good thing, is that we can do a roll-back (recov
 !!! info "What is a version roll-back?"
     When we do a version roll-back we are basically telling to Artella:
     
-    *Hi Artella, I want to recover and old version, and make that version the latest available version for the team*
+    *Hi Artella, I want to recover an old version, and make that version the latest available version for the team*
     
     This implies that when we do a roll-back we basically retrieve a specific old version and a new version is created
     with that file

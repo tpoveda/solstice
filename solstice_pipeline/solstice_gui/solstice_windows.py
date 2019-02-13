@@ -41,7 +41,7 @@ class Window(QMainWindow, object):
 
         self.setObjectName(self.name)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setWindowFlags(self.windowFlags() ^ Qt.FramelessWindowHint)
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setWindowTitle('{} - {}'.format(self.title, self.version))
         self.main_layout = None
 
