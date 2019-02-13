@@ -14,6 +14,7 @@ nav:
       - What's Solstice Launcher?: solsticepipeline/solsticelauncher/app.md
       - Installing Solstice Launcher: solsticepipeline/solsticelauncher/installation.md
       - Using Solstice Launcher: solsticepipeline/solsticelauncher/usage.md
+      - Uninstalling Solstice Launcher: solsticepipeline/solsticelauncher/uninstall.md
     - Solstice Pipeline:
       - Software:
         - Software Versions: solsticepipeline/software/versions.md

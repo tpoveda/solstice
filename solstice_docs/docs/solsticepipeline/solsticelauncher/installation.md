@@ -1,6 +1,10 @@
 ### **Instructions**
 
 ???+ example "Windows"
+
+    !!! error
+        If you experience problems during Solstice Pipeline installation please uninstall them manually first
+
     1. **Download the Solstice Launcher Executable**
         * Visit <a href="https://www.artella.com/" target="_blank" rel="noopener">www.artella.com</a>
         * Create a new Account **(Sign up button)** if you do not have one
