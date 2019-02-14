@@ -458,7 +458,7 @@ def open_artella_documentation():
     Opens Artella Documentation web page
     """
 
-    documentation_url = 'https://solstice-short-film.gitbook.io/solstice/'
+    documentation_url = 'https://tpoveda.github.io/solstice/'
     webbrowser.open(documentation_url)
 
 
