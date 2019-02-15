@@ -635,14 +635,14 @@ class PublishShadingTask(solstice_task.Task, object):
             self.write_error('Asset shading file does not exists!')
             return False
 
-        # Check shading file can be unlocked
+        # Check if shading file can be unlocked
         self.write('Check if shading file is already locked by other user or workspace ...')
         can_unlock = artella.can_unlock(shading_path)
         if not can_unlock:
             self.write_error('Asset shading file is locked by another Solstice team member or wokspace. Aborting publishing ...')
             return False
 
-        # Check model file can be unlocked
+        # Check if model file can be unlocked
         self.write('Check if model file is already locked by other user or workspace ...')
         can_unlock = artella.can_unlock(model_path)
         if not can_unlock:

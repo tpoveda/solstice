@@ -632,6 +632,7 @@ class ShaderLibrary(solstice_windows.Window, object):
             item_pressed_callback=self._on_asset_click
             # show_only_published_assets=True
         )
+        self._asset_viewer.setMinimumWidth(420)
 
         shader_splitter.addWidget(self._asset_viewer)
         shader_splitter.addWidget(shader_widget)
