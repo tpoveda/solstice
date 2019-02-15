@@ -5,7 +5,7 @@ To join the shading team in Solstice Short Film you need to pass a shading test.
 
 * Download the asset you have to do shading for: [Lamp](/files/test_shading.zip)
 * You have some references that we already made for Solstice Short film
-* After doing the test, send it to <emilioenigma@gmail.com> and <didacmartin@movistar.es>
+* After doing the test, send it to <emilioenigma@gmail.com> and <didacruiz.j@gmail.com>
 ___
 
 ### **References**

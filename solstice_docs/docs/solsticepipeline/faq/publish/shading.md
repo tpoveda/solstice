@@ -37,7 +37,7 @@
     
     ***
     
-5. Make sure that model and shading files has same names on asset meshes
+5. Make sure that model and shading files has same names on model meshes
     
     !!! error "VERY IMPORTANT"
         Due to pipeline restrictions we need to make sure that asset **meshes located in model file and shading file

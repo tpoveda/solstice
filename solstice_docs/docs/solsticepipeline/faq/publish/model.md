@@ -41,7 +41,7 @@
     
     ***
     
-6. Make sure that model and shading files has same names on asset meshes
+6. Make sure that model and shading files has same names on model meshes
     
     !!! error "VERY IMPORTANT"
         Due to pipeline restrictions we need to make sure that asset **meshes located in model file and shading file
@@ -193,12 +193,7 @@ that version in your computer locally. Wait until the following sync screen is g
 the file.
 
     ![Solstice Working Button](../../../img/model_working_10.png?style=centerme)
-    
-    ***
-    
-    > The new version created in Artella :smile:
-    ![Solstice Working Button](../../../img/model_working_11.png?style=centerme)
-    
+            
 ***
 
 !!! warning
