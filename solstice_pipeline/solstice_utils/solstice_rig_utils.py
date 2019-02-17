@@ -174,3 +174,53 @@ def create_basic_asset_rig(main_grp=None, reduction=60):
     cmds.parent(combine_mesh, proyx_asset_grp)
 
     sp.message('Basic asset rig created for {} successfully!'.format(main_grp))
+
+
+@solstice_maya_utils.maya_undo
+def update_model_meshes(orig_group=None, new_group=None):
+    if orig_group is None or new_group is None or not cmds.objExists(orig_group) or not cmds.objExists(new_group):
+        sel = cmds.ls(sl=True)
+        if len(sel) <= 0 or len(sel) > 2:
+            cmds.warning('Select original group and new group')
+            return
+        orig_group = sel[0]
+        new_group = sel[1]
+
+    orig_meshes = [obj for obj in cmds.listRelatives(orig_group, type='transform', fullPath=True) if
+                   cmds.listRelatives(obj, shapes=True)]
+    new_meshes = [obj for obj in cmds.listRelatives(new_group, type='transform', fullPath=True) if
+                  cmds.listRelatives(obj, shapes=True)]
+
+    if len(orig_meshes) != len(new_meshes):
+        cmds.warning('Meshes are not the same in the selected groups')
+        return
+
+    # Position new meshes properly
+    processed_meshes = list()
+    for orig_mesh in orig_meshes:
+        orig_name = orig_mesh.split('|')[-1]
+        for new_mesh in new_meshes:
+            new_name = new_mesh.split('|')[-1]
+            if orig_name == new_name:
+                cmds.delete(cmds.parentConstraint(orig_mesh, new_mesh, mo=False)[0])
+                processed_meshes.append(orig_name)
+
+    if len(processed_meshes) != len(new_meshes):
+        cmds.warning('Some meshes are not on both groups')
+        return
+
+    # Delete original meshes
+    cmds.delete(orig_meshes)
+
+    # Parent new meshes into original meshes group, assing basic lambert shader and lock transform attributes
+    for mesh in new_meshes:
+        cmds.makeIdentity(mesh, apply=True, t=True, r=True, s=True, n=False, pn=True)
+        cmds.sets(mesh, edit=True, forceElement='initialShadingGroup')
+        for axis in ['x', 'y', 'z']:
+            for xform in ['t', 'r', 's']:
+                cmds.setAttr('{0}.{1}{2}'.format(mesh, xform, axis), lock=True)
+        cmds.setAttr(mesh + '.v', lock=True)
+        cmds.parent(mesh, orig_group)
+
+    # Delete new group
+    cmds.delete(new_group)

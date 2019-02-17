@@ -171,21 +171,22 @@ class SequenceWidget(QWidget, object):
 
         widget_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
 
-        self.versions_tab = QTabWidget()
+        # Master Layout
+        master_layout = self._sequence_files.get('master_layout', None)
+        if not master_layout:
+            return
 
-        working_widget = QWidget()
-        working_layout = QVBoxLayout()
-        working_widget.setLayout(working_layout)
-        publish_widget = QWidget()
-        publish_layout = QVBoxLayout()
-        publish_widget.setLayout(publish_layout)
-        self.versions_tab.addTab(working_widget, 'Working')
-        self.versions_tab.addTab(publish_widget, 'Published')
-        widget_layout.addWidget(self.versions_tab)
+        master_layout_file = SequenceFile(
+            status='working',
+            root_path=master_layout.get('path', None),
+            base_path=master_layout['working'].get('path', None),
+            file_path=master_layout['working'].get('file', None)
+        )
 
-        widget_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        widget_layout.addWidget(master_layout_file)
+        widget_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
 
-        open_btn = QToolButton()
+        open_btn = QPushButton()
         # open_btn.setText('Shots')
         open_btn.setMaximumWidth(40)
         open_btn.setIcon(solstice_resource.icon('shots'))
@@ -194,26 +195,6 @@ class SequenceWidget(QWidget, object):
         # open_btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         open_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         widget_layout.addWidget(open_btn)
-
-        # Master Layout
-        master_layout = self._sequence_files.get('master_layout', None)
-        if not master_layout:
-            return
-
-        working_master_layout = SequenceFile(
-            status='working',
-            root_path=master_layout.get('path', None),
-            base_path=master_layout['working'].get('path', None),
-            file_path=master_layout['working'].get('file', None)
-        )
-        # published_master_layout = SequenceFile(
-        #     status='published',
-        #     base_path=master_layout.get('path', None),
-        #     file_path=master_layout['working'].get('file', None)
-        # )
-
-        working_layout.addWidget(working_master_layout)
-        # publish_layout.addWidget(published_master_layout)
 
         # open_master_layout_btn.clicked.connect(self.open_master_layout)
 

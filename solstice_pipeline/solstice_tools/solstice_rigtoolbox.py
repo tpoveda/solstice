@@ -79,7 +79,19 @@ class PropsRigToolbox(BaseRigToolBoxWidget, object):
         reduction_layout.addWidget(proxy_reduction)
         base_prop_asset_rig_lyt.addLayout(reduction_layout)
 
+        # =========================================================================================================
+
+        update_meshes_widget = QWidget()
+        update_meshes_layout = QHBoxLayout()
+        update_meshes_widget.setLayout(update_meshes_layout)
+
+        update_meshes_btn = QPushButton('Update Model Meshes')
+        update_meshes_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        update_meshes_layout.addWidget(update_meshes_btn)
+        self.accordion.add_item('Update Meshes', update_meshes_widget)
+
         basic_group_btn.clicked.connect(lambda: solstice_rig_utils.create_basic_asset_rig(reduction=proxy_reduction.value()))
+        update_meshes_btn.clicked.connect(lambda: solstice_rig_utils.update_model_meshes())
 
 
 class RigToolBoxMenu(QFrame, object):
