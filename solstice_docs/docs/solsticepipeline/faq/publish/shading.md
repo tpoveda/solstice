@@ -133,9 +133,9 @@ Press **Publish** button.
         You will notice that when you check **SHADING** checkbox, **MODEL** checkbox is automatically selected. This
         is complete normal. This means that each time you publish a shading file a new model file will be published.
         
-        This is happening because when a shader file is generated some data related with shaders is stored in the model
-        file (in the form of MetaData). This data is very important because thanks to this data later we can **reconstruct
-        all the asset shaders on the fly!**
+        This is happening because when a shader file is published, Solstice Publisher generates some data related with 
+        shaders is stored in the model file (in the form of MetaData). This data is very important because thanks to 
+        this data later we can **reconstruct all the asset shaders on the fly!**
         
     ![Solstice Working Button](../../../img/shading_publish_8.png?style=centerme)
     

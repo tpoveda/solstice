@@ -2111,7 +2111,7 @@ class SolsticePlayBlast(solstice_windows.Window, object):
 
     name = 'Solstice_PlayBlast'
     title = 'Solstice Tools - Playblast Tool'
-    version = '1.0'
+    version = '1.2'
 
     def __init__(self):
 

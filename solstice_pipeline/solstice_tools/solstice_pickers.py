@@ -28,7 +28,7 @@ class SolsticePickers(solstice_windows.Window, object):
 
     name = 'Solstice_Pickers'
     title = 'Solstice Tools - Picker Tool'
-    version = '1.0'
+    version = '1.1'
 
     def __init__(self):
         super(SolsticePickers, self).__init__()

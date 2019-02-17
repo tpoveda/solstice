@@ -857,7 +857,7 @@ class AlembicExporter(QWidget, object):
 class AlembicManager(solstice_windows.Window, object):
     name = 'Solstice_AlembicManager'
     title = 'Solstice Tools - Alembic Manager'
-    version = '1.0'
+    version = '1.1'
 
     def __init__(self):
         super(AlembicManager, self).__init__()
@@ -892,4 +892,4 @@ class AlembicManager(solstice_windows.Window, object):
             self.alembic_exporter._refresh_alembic_groups()
 
 def run():
-    win = AlembicManager().show()
+    AlembicManager().show()

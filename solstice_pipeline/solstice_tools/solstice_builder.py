@@ -25,7 +25,7 @@ class SolsticeBuilder(solstice_windows.Window, object):
 
     name = 'SolsticeAssetBuilder'
     title = 'Solstice Tools - Solstice Builder'
-    version = '1.0'
+    version = '1.1'
 
     def __init__(self):
         super(SolsticeBuilder, self).__init__()

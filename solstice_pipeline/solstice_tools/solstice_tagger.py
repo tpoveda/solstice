@@ -91,7 +91,9 @@ class NameEditor(TaggerEditor, object):
         :param name: str, name of the selection tag to add/remove
         """
 
-        º
+        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
+        if tag_data_node is None:
+            return
 
         attr_exists = cmds.attributeQuery('name', node=tag_data_node, exists=True)
         if attr_exists:
@@ -665,7 +667,7 @@ class SolsticeTagger(solstice_windows.Window, object):
 
     name = 'SolsticeTagger'
     title = 'Solstice Tools - Tagger'
-    version = '1.0'
+    version = '1.2'
 
     tagDataCreated = Signal()
 

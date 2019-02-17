@@ -5,7 +5,7 @@
         [
             {
                 "icon": "setproject.png",
-                "command": "import solstice_pipeline; solstice_pipeline.update_solstice_project();",
+                "command": "import solstice_pipeline; import sys; sys.dispatcher.update_solstice_project();",
                 "annotation": "Auto Setup Solstice Project",
                 "label": ""
             },

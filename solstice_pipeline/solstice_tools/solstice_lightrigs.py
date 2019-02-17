@@ -17,6 +17,7 @@ import maya.cmds as cmds
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_sync_dialog, solstice_splitters
+from solstice_pipeline.solstice_utils import solstice_python_utils, solstice_qt_utils
 from solstice_pipeline.resources import solstice_resource
 
 # ===============================================================================================
@@ -43,8 +44,10 @@ class LightRig(QWidget, object):
         self.setMaximumSize(QSize(120, 140))
         self.setMinimumSize(QSize(120, 140))
 
-        self.light_btn = QPushButton()
+        self.light_btn = QToolButton()
         self.light_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.light_btn.setIcon(solstice_resource.icon(name.lower()))
+        self.light_btn.setIconSize(QSize(120, 140))
         self.title_lbl = QLabel(self.name)
         self.title_lbl.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.light_btn)
@@ -80,7 +83,7 @@ class LightRigManager(solstice_windows.Window, object):
 
     name = 'SolsticeLightRigManager'
     title = 'Solstice Tools - Light Rigs Manager'
-    version = '1.0'
+    version = '1.1'
 
     def __init__(self):
         super(LightRigManager, self).__init__()
@@ -117,6 +120,9 @@ class LightRigManager(solstice_windows.Window, object):
 
         self._update_ui()
 
+        open_btn.clicked.connect(self._on_open_light_rigs_folder)
+        sync_btn.clicked.connect(self._on_sync_light_rigs)
+
     @staticmethod
     def get_solstice_light_rigs_path(sync=False):
         """
@@ -142,6 +148,7 @@ class LightRigManager(solstice_windows.Window, object):
         if not os.path.exists(working_path):
             return
 
+        solstice_qt_utils.clear_layout_widgets(self.light_rigs_layout)
         for f in os.listdir(working_path):
             light_rig = LightRig(name=f)
             self.light_rigs_layout.addWidget(light_rig)
@@ -186,6 +193,15 @@ class LightRigManager(solstice_windows.Window, object):
 
         cmds.file(light_rig, reference=True, f=True)
 
+    def _on_open_light_rigs_folder(self):
+        light_rigs_path = os.path.join(self.get_solstice_light_rigs_path(sync=False), '__working__')
+        if os.path.exists(light_rigs_path):
+            solstice_python_utils.open_folder(light_rigs_path)
+
+    def _on_sync_light_rigs(self):
+        self.get_solstice_light_rigs_path(sync=True)
+        self._update_ui()
+
 
 def run():
-    win = LightRigManager().show()
+    LightRigManager().show()

@@ -1014,7 +1014,7 @@ class SolsticePublisher(solstice_dialog.Dialog, object):
 
     name = 'SolsticePublisher'
     title = 'Solstice Tools - Publisher'
-    version = '1.0'
+    version = '1.1'
     docked = False
 
     def __init__(self, asset=None, new_working_version=False, **kwargs):

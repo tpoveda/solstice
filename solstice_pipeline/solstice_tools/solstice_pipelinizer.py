@@ -132,7 +132,7 @@ class Pipelinizer(solstice_windows.Window, object):
 
     name = 'SolsticePipelinizer'
     title = 'Solstice Tools - Artella Pipeline'
-    version = '1.5'
+    version = '1.8'
 
     def __init__(self):
         self._projects = None

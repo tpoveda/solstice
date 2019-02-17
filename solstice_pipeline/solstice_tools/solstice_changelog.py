@@ -22,7 +22,7 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
 
     name = 'SolsticeChangelog'
     title = 'Solstice Tools - Changelog'
-    version = '1.0'
+    version = '1.1'
 
     def __init__(self):
         super(SolsticeChangelog, self).__init__()
