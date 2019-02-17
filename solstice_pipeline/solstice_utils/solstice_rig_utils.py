@@ -175,6 +175,7 @@ def create_basic_asset_rig(main_grp=None, reduction=60):
 
     sp.message('Basic asset rig created for {} successfully!'.format(main_grp))
 
+# =============================================================================
 
 @solstice_maya_utils.maya_undo
 def update_model_meshes(orig_group=None, new_group=None):
@@ -224,3 +225,88 @@ def update_model_meshes(orig_group=None, new_group=None):
 
     # Delete new group
     cmds.delete(new_group)
+
+# =============================================================================
+
+
+def check_shaders_nomenclature(name=None):
+    """
+    Function that checks that shaders nomenclature is valid
+    :param name: str, name of the object to select. If None, first selected object will be checked
+    """
+
+    if name is None or not cmds.objExists(name):
+        sel = cmds.ls(sl=True)
+        if not sel:
+            sp.logger.warning('No shaders to check. Please select an object!')
+            return
+        name = sel[0]
+
+    shader_types = cmds.listNodeTypes('shader')
+    shaders = cmds.ls(materials=True)
+    for shader in shaders:
+        if shader in ['lambert1', 'particleCloud1']:
+            continue
+        if 'displacement' in shader or 'Displacement' in shader:
+            continue
+        if not shader.startswith(name):
+            cmds.warning('{} should start with {}'.format(shader, name))
+        shading_groups = cmds.listConnections(shader, type='shadingEngine')
+        if shading_groups:
+            shading_grp = shading_groups[0]
+            connections = cmds.listConnections(shading_grp, source=True, destination=False)
+            if connections is not None:
+                connected_shaders = list()
+                for cnt in connections:
+                    if cmds.objectType(cnt) in shader_types:
+                        connected_shaders.append(cnt)
+                    if len(connected_shaders) > 0:
+                        target_name = cmds.listConnections(shading_grp + '.surfaceShader')[0]
+                    if shading_grp != '{}SG'.format(target_name, shader):
+                        cmds.warning('{} ---------- {} => {}'.format(target_name, shader, shading_grp))
+            else:
+                if shading_grp != '{}_{}SG'.format(name, shader):
+                    cmds.warning('{} => {}'.format(shader, shading_grp))
+
+
+@solstice_maya_utils.maya_undo
+def rename_shaders(name=None):
+    """
+    Rename all the shaders of the given object. If None, first selected element shaders will be renamed
+    :param name: str
+    """
+
+    if name is None or not cmds.objExists(name):
+        sel = cmds.ls(sl=True)
+        if not sel:
+            sp.logger.warning('No shaders to rename. Please select an object!')
+            return
+        name = sel[0]
+
+    shader_types = cmds.listNodeTypes('shader')
+    shaders = cmds.ls(materials=True)
+    for shader in shaders:
+        try:
+            if shader in ['lambert1', 'particleCloud1']:
+                continue
+            shading_groups = cmds.listConnections(shader, type='shadingEngine')
+            if shading_groups:
+                for shading_grp in shading_groups:
+                    connections = cmds.listConnections(shading_grp, source=True, destination=False)
+                    if connections is not None:
+                        connected_shaders = list()
+                        for cnt in connections:
+                            if cmds.objectType(cnt) in shader_types:
+                                connected_shaders.append(cnt)
+                            if len(connected_shaders) > 0:
+                                target_name = cmds.listConnections(shading_grp + '.surfaceShader')[0]
+                                if shading_grp != '{}SG'.format(target_name, shader):
+                                    cmds.rename(shading_grp, '{}SG'.format(target_name, shader))
+                    else:
+                        if shading_grp != '{}_{}SG'.format(name, shader):
+                            cmds.rename(shading_grp, '{}_{}SG'.format(name, shader))
+            if not shader.startswith(name):
+                cmds.rename(shader, '{}_{}'.format(name, shader))
+        except Exception as e:
+            cmds.warning('Skipping shader {}'.format(shader))
+            sp.logger.error(str(e))

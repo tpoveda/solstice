@@ -41,7 +41,7 @@
     
     ***
     
-6. Make sure that model and shading files has same names on model meshes
+5. Make sure that model and shading files has same names on model meshes
     
     !!! error "VERY IMPORTANT"
         Due to pipeline restrictions we need to make sure that asset **meshes located in model file and shading file
@@ -49,7 +49,65 @@
         will **stop** the publish process during validation.
         
         ![Solstice Working Button](../../../img/shading_publish_4.png?style=centerme)
+    
+    ***
 
+6. If Shading team has updated UVs you will need to also update model with the **last geos of the shading files** 
+(those meshes are the ones that have the most udpated UVs)
+
+    > Import Shading file of the asset
+    ![Solstice Working Button](../../../img/model_publish_16.png?style=centerme)
+    
+    ***    
+    
+    > Remove namespaces of the imported shading file
+    ![Solstice Working Button](../../../img/model_publish_17.png?style=centerme)
+    
+    ***
+    
+    ![Solstice Working Button](../../../img/model_publish_18.png?style=centerme)
+     
+    ***
+    
+    !!! error "IMPORTANT"
+        If the geometry of the shading file has some kind of connections (such as animation keys) you need to delete
+        them before continue
+            
+        ![Solstice Working Button](../../../img/model_publish_19.png?style=centerme)
+        
+    ***
+    
+    Launch **Solstice Rig ToolBox** tool located in **Solstice Rig Shelf**
+    ![Solstice Working Button](../../../img/model_publish_4.png?style=centerme)
+    
+    ***
+    
+    Select first the original group (the main group that contains the meshes of the mesh file) and then select thne 
+    new group (the group that contains the meshes imported from the shading file)
+    ![Solstice Working Button](../../../img/model_publish_20.png?style=centerme)
+    
+    ***
+    
+    Go to the **Props** category using arrow buttons located in bottom bar of **Solstice Rig Toolbox**
+    ![Solstice Working Button](../../../img/model_publish_21.png?style=centerme)
+    
+    ***
+    
+    The script does the following steps:
+    
+    - Checks that both selected groups have the same number of meshes
+    - Checks that for each shading mesh exists a model mesh with the same name
+    - Position the shading meshes into the position of the original model meshes
+    - Reset meshes with standard Maya material
+    - Removes shading group
+    
+    ***
+
+    > Model Meshes have been update with the meshes of the shading file
+    ![Solstice Working Button](../../../img/model_publish_22.png?style=centerme)
+    
+    ***
+                
 7. **Remove** all custom shaders from model file
 
     Model file only can have standard Maya shaders stored in it. Remove all nodes to make sure that the model.
@@ -63,68 +121,8 @@
     ![Solstice Working Button](../../../img/model_publish_9.png?style=centerme)
     
     ***
-
-    !!! warning "IMPORTANT"
     
-        If Shading team has updated UVs you will need to also update model with the **last geos of the shading files** 
-        (those meshes are the ones that have the most udpated UVs)
-        
-        > Import Shading file of the asset
-        ![Solstice Working Button](../../../img/model_publish_16.png?style=centerme)
-       
-        ***    
-       
-        > Remove namespaces of the imported shading file
-        ![Solstice Working Button](../../../img/model_publish_17.png?style=centerme)
-       
-        ***
-       
-        ![Solstice Working Button](../../../img/model_publish_18.png?style=centerme)
-         
-        ***
-       
-        !!! error "IMPORTANT"
-            If the geometry of the shading file has some kind of connections (such as animation keys) you need to delete
-            them before continue
-                
-            ![Solstice Working Button](../../../img/model_publish_19.png?style=centerme)
-            
-        ***
-       
-        Launch **Solstice Rig ToolBox** tool located in **Solstice Rig Shelf**
-        ![Solstice Working Button](../../../img/model_publish_4.png?style=centerme)
-        
-        ***
-        
-        Select first the original group (the main group that contains the meshes of the mesh file) and then select thne 
-        new group (the group that contains the meshes imported from the shading file)
-        ![Solstice Working Button](../../../img/model_publish_20.png?style=centerme)
-        
-        ***
-        
-        Go to the **Props** category using arrow buttons located in bottom bar of **Solstice Rig Toolbox**
-        ![Solstice Working Button](../../../img/model_publish_21.png?style=centerme)
-        
-        ***
-        
-        The script does the following steps:
-        
-        - Checks that both selected groups have the same number of meshes
-        - Checks that for each shading mesh exists a model mesh with the same name
-        - Position the shading meshes into the position of the original model meshes
-        - Reset meshes with standard Maya material
-        - Removes shading group
-        
-        ***
-        
-        > Model Meshes have been update with the meshes of the shading file
-        ![Solstice Working Button](../../../img/model_publish_22.png?style=centerme)
-        
-    ***
-            
-    
-    
-7. If the file has **no rig** yet, you need to create a **temporal one** :smile: (no joking) Fortunately, **Solstice Shelf** 
+8. If the file has **no rig** yet, you need to create a **temporal one** :smile: (no joking) Fortunately, **Solstice Shelf** 
 has available a collection of scripts to make your life easier. This rig will give layout/animation team the ability 
 to translate/rotate/scale assets in Solstice world!
 
@@ -158,6 +156,12 @@ to translate/rotate/scale assets in Solstice world!
     ***
     
     ![Solstice Working Button](../../../img/model_publish_7.png?style=centerme)
+    
+    ***
+    
+    !!! tip
+        If the base controls are too small for the asset you can scale the manually
+        ![Solstice Working Button](../../../img/model_publish_23.png?style=centerme)
     
     ***
 

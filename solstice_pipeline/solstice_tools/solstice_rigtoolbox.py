@@ -90,8 +90,28 @@ class PropsRigToolbox(BaseRigToolBoxWidget, object):
         update_meshes_layout.addWidget(update_meshes_btn)
         self.accordion.add_item('Update Meshes', update_meshes_widget)
 
+        # =========================================================================================================
+
+        check_shaders_widget = QWidget()
+        check_shaders_layout = QHBoxLayout()
+        check_shaders_widget.setLayout(check_shaders_layout)
+
+        check_shaders_name_btn = QPushButton('Check Shader Names')
+        check_shaders_name_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        check_shaders_layout.addWidget(check_shaders_name_btn)
+        check_shaders_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        update_shaders_name_btn = QPushButton('Update Shader Names')
+        update_shaders_name_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        check_shaders_layout.addWidget(update_shaders_name_btn)
+
+        self.accordion.add_item('Check Shaders', check_shaders_widget)
+
+        # =========================================================================================================
+
         basic_group_btn.clicked.connect(lambda: solstice_rig_utils.create_basic_asset_rig(reduction=proxy_reduction.value()))
         update_meshes_btn.clicked.connect(lambda: solstice_rig_utils.update_model_meshes())
+        check_shaders_name_btn.clicked.connect(lambda: solstice_rig_utils.check_shaders_nomenclature())
+        update_shaders_name_btn.clicked.connect(lambda: solstice_rig_utils.rename_shaders())
 
 
 class RigToolBoxMenu(QFrame, object):
