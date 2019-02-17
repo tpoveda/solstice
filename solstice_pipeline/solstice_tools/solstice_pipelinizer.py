@@ -27,6 +27,7 @@ from solstice_pipeline.solstice_tools import solstice_sequencer
 from solstice_pipeline.solstice_utils import solstice_artella_classes, solstice_qt_utils
 from solstice_pipeline.resources import solstice_resource
 
+reload(solstice_sequencer)
 
 class PipelinizerSettings(QDialog, object):
     def __init__(self, parent):
@@ -355,9 +356,10 @@ class Pipelinizer(solstice_windows.Window, object):
 
         return
 
-    def cleanup(self):
+    def closeEvent(self, event):
+        self.cleanup()
         self.user_icon.destroy()                # We use it to clean timers stuff manually
-        super(Pipelinizer, self).cleanup()
+        event.accept()
 
     @staticmethod
     def open_project_in_artella():
@@ -371,7 +373,6 @@ class Pipelinizer(solstice_windows.Window, object):
         self._tab_widget.setTabText(1, 'Sequence Manager')
         self._tab_widget.setTabEnabled(1, True)
         self.stack.slide_in_next()
-
 
     def _change_category(self, category, flag):
         self._asset_viewer.change_category(category=category)

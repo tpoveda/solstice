@@ -164,11 +164,11 @@ class AssetViewer(solstice_grid.GridWidget, object):
                             sp.logger.debug('Asset Widget for "{0}" was not generated!'.format(asset_name))
                             continue
 
-                        if self._show_only_published_assets:
-                            if not new_asset.is_published():
-                                continue
-                            else:
-                                sp.logger.debug('Adding asset: {}'.format(new_asset.name))
+                        # if self._show_only_published_assets:
+                        #     if not new_asset.is_published():
+                        #         continue
+                        #     else:
+                        #         sp.logger.debug('Adding asset: {}'.format(new_asset.name))
 
                         if self._item_pressed_callback:
                             new_asset._asset_btn.clicked.connect(partial(self._item_pressed_callback, new_asset))

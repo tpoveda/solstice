@@ -2,7 +2,7 @@
 # # -*- coding: utf-8 -*-
 #
 # """ ==================================================================
-# Script Name: solstice_assetbuilder.py
+# Script Name: solstice_builder.py
 # by Tomas Poveda
 # Custom QWidget that shows Solstice Assets in the Solstice Asset Viewer
 # ______________________________________________________________________
@@ -32,15 +32,19 @@ class SolsticeBuilder(solstice_windows.Window, object):
 
         self.set_logo('solstice_assetbuilder_logo')
 
+        self.resize(300, 500)
+
         tab_widget = QTabWidget()
         self.main_layout.addWidget(tab_widget)
 
         self._asset_builder = AssetBuilder()
         self._user_builder = UserBuilder()
         self._light_rig_builder = LightRigBuilder()
-        self._sequence_builder = ShotSequenceBuilder()
+        self._sequence_builder = SequenceBuilder()
+        self._shot_builder = ShotBuilder()
         tab_widget.addTab(self._asset_builder, 'Asset')
-        tab_widget.addTab(self._sequence_builder, 'Shot/Sequence')
+        tab_widget.addTab(self._sequence_builder, 'Sequence')
+        tab_widget.addTab(self._shot_builder, 'Shot')
         tab_widget.addTab(self._user_builder, 'User')
         tab_widget.addTab(self._light_rig_builder, 'Light Rig')
 
@@ -256,9 +260,9 @@ class LightRigBuilder(BuilderWidget, object):
             self._current_icon_path = icon_file_path[0]
 
 
-class ShotSequenceBuilder(BuilderWidget, object):
+class SequenceBuilder(BuilderWidget, object):
     def __init__(self, parent=None):
-        super(ShotSequenceBuilder, self).__init__(name='Shot/Sequence', parent=parent)
+        super(SequenceBuilder, self).__init__(name='Sequence', parent=parent)
 
         self._current_icon_path = None
 
@@ -285,6 +289,133 @@ class ShotSequenceBuilder(BuilderWidget, object):
         # ============================================================================
 
         self._icon_btn.clicked.connect(self._set_icon)
+
+    def save(self):
+        out_dict = dict()
+        out_dict['sequence'] = dict()
+        if self._current_icon_path and os.path.isfile(self._current_icon_path):
+            image_format = os.path.splitext(self._current_icon_path)[1][1:].upper()
+            icon_out = img.image_to_base64(image_path=self._current_icon_path, image_format=image_format)
+            out_dict['sequence']['icon'] = icon_out
+            out_dict['sequence']['icon_format'] = image_format
+        out_dict['sequence']['description'] = self._description_text.toPlainText()
+
+        save_file = QFileDialog.getSaveFileName(self, 'Set folder to store shot/sequence data', sp.get_solstice_assets_path(), 'JSON Files (*.json)')[0]
+        if os.path.exists(os.path.dirname(save_file)):
+            with open(save_file, 'w') as f:
+                json.dump(out_dict, f)
+
+            # try:
+            #     import subprocess
+            #     subprocess.Popen(r'explorer /select,"{0}"'.format(save_file))
+            # except Exception:
+            #     pass
+
+    def load(self):
+        print('loading')
+        # load_file = QFileDialog.getOpenFileName(self, 'Select asset data file to open', sp.get_solstice_assets_path(), 'JSON Files (*.json)')[0]
+        # if os.path.isfile(load_file):
+        #     data = None
+        #     with open(load_file, 'r') as f:
+        #         data = json.load(f)
+        #     if data:
+        #         asset_icon = data['asset']['icon']
+        #         icon_format = data['asset']['icon_format']
+        #         asset_preview = data['asset']['preview']
+        #         preview_format = data['asset']['preview_format']
+        #
+        #         if asset_icon is not None and asset_icon != '':
+        #             asset_icon = asset_icon.encode('utf-8')
+        #             self._icon_btn.setIcon(QPixmap.fromImage(img.base64_to_image(asset_icon)))
+        #             self._icon_btn.setText('')
+        #         if asset_preview is not None and asset_preview != '':
+        #             asset_preview = asset_preview.encode('utf-8')
+        #             self._preview_btn.setIcon(img.base64_to_icon(asset_preview, icon_format='PNG'))
+        #             self._preview_btn.setText('')
+        #         self._description_text.setText(data['asset']['description'])
+
+    def _set_icon(self):
+        file_dialog = QFileDialog(self)
+        icon_file_path = file_dialog.getOpenFileName(self, 'Select Preview File', sp.get_solstice_assets_path(), 'PNG Files (*.png);; JPG Files (*.jpg)')
+        if icon_file_path and os.path.isfile(icon_file_path[0]):
+            self._icon_btn.setIcon(QIcon(QPixmap(icon_file_path[0])))
+            self._icon_btn.setText('')
+            self._current_icon_path = icon_file_path[0]
+
+
+class ShotBuilder(BuilderWidget, object):
+    def __init__(self, parent=None):
+        super(ShotBuilder, self).__init__(name='Shot', parent=parent)
+
+        self._current_icon_path = None
+
+        self._icon_btn = QPushButton('Icon')
+        self._icon_btn.setMinimumSize(QSize(150, 150))
+        self._icon_btn.setMaximumSize(QSize(150, 150))
+        self._icon_btn.setIconSize(QSize(150, 150))
+        self._icon_btn.setIconSize(QSize(150, 150))
+        self._description_text = QTextEdit()
+        self._description_text.setPlaceholderText('Description')
+
+        icon_layout = QHBoxLayout()
+        icon_layout.setContentsMargins(5, 10, 5, 5)
+        self.main_layout.addLayout(icon_layout)
+        icon_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        icon_layout.addWidget(self._icon_btn, Qt.AlignCenter)
+        icon_layout.addItem(QSpacerItem(0, 10, QSizePolicy.Expanding, QSizePolicy.Fixed))
+
+        self.main_layout.addWidget(self._description_text)
+
+        self.main_layout.addItem(QSpacerItem(0, 5))
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        # ============================================================================
+
+        self._icon_btn.clicked.connect(self._set_icon)
+
+    def save(self):
+        out_dict = dict()
+        out_dict['shot'] = dict()
+        if self._current_icon_path and os.path.isfile(self._current_icon_path):
+            image_format = os.path.splitext(self._current_icon_path)[1][1:].upper()
+            icon_out = img.image_to_base64(image_path=self._current_icon_path, image_format=image_format)
+            out_dict['shot']['icon'] = icon_out
+            out_dict['shot']['icon_format'] = image_format
+        out_dict['shot']['description'] = self._description_text.toPlainText()
+
+        save_file = QFileDialog.getSaveFileName(self, 'Set folder to store shot/sequence data', sp.get_solstice_assets_path(), 'JSON Files (*.json)')[0]
+        if os.path.exists(os.path.dirname(save_file)):
+            with open(save_file, 'w') as f:
+                json.dump(out_dict, f)
+
+            # try:
+            #     import subprocess
+            #     subprocess.Popen(r'explorer /select,"{0}"'.format(save_file))
+            # except Exception:
+            #     pass
+
+    def load(self):
+        print('loading')
+        # load_file = QFileDialog.getOpenFileName(self, 'Select asset data file to open', sp.get_solstice_assets_path(), 'JSON Files (*.json)')[0]
+        # if os.path.isfile(load_file):
+        #     data = None
+        #     with open(load_file, 'r') as f:
+        #         data = json.load(f)
+        #     if data:
+        #         asset_icon = data['asset']['icon']
+        #         icon_format = data['asset']['icon_format']
+        #         asset_preview = data['asset']['preview']
+        #         preview_format = data['asset']['preview_format']
+        #
+        #         if asset_icon is not None and asset_icon != '':
+        #             asset_icon = asset_icon.encode('utf-8')
+        #             self._icon_btn.setIcon(QPixmap.fromImage(img.base64_to_image(asset_icon)))
+        #             self._icon_btn.setText('')
+        #         if asset_preview is not None and asset_preview != '':
+        #             asset_preview = asset_preview.encode('utf-8')
+        #             self._preview_btn.setIcon(img.base64_to_icon(asset_preview, icon_format='PNG'))
+        #             self._preview_btn.setText('')
+        #         self._description_text.setText(data['asset']['description'])
 
     def _set_icon(self):
         file_dialog = QFileDialog(self)

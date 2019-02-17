@@ -9,6 +9,7 @@
 import os
 import re
 import sys
+import json
 import urllib2
 import datetime
 import platform
@@ -18,10 +19,11 @@ import maya.cmds as cmds
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 
-from solstice_pipeline.resources import solstice_resources
 from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
 
 # =================================================================================
+
+numbers = re.compile('\d+')
 
 solstice_project_id = '2/2252d6c8-407d-4419-a186-cf90760c9967/'
 solstice_project_id_raw = '2252d6c8-407d-4419-a186-cf90760c9967'
@@ -476,10 +478,37 @@ def send_email(tool_info='Solstice Tools'):
 
 
 def artella_is_available():
+    """
+    Returns whether Artelal is available or not
+    :return: bool
+    """
+
     try:
         return urllib2.urlopen('https://www.artella.com').getcode() == 200
     except Exception:
         return False
+
+
+def get_version():
+    """
+    Returns Solstice Tools version
+    :return: int
+    """
+
+    version_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings.json')
+    if os.path.isfile(version_file):
+        with open(version_file, 'r') as f:
+            version_data = json.loads(f.read())
+        current_version = version_data.get('version')
+        if not current_version:
+            raise Exception('Impossible to retrieve Solstice Tools version!')
+
+        if numbers.findall(current_version):
+            lastoccr_sre = list(numbers.finditer(current_version))[-1]
+            lastoccr = lastoccr_sre.group()
+            return lastoccr
+
+    return 0
 
 
 def init():

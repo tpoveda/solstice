@@ -118,6 +118,8 @@
     "Now Solstice Changelog is replaced by a Hello widget after installing new version",
     "Started the transition to implement all possible tools using QtDesigner UIs",
     "Improve stability for Solstice Pipelinizer",
-    "Added RigToolBox tool and rig utils functions"
+    "Added RigToolBox tool and rig utils functions",
+    "Added Solstice AnimShifter Tool to easily shift (move) anim keys",
+    "Added Solstice Asset Viewer Tool"
   ]
 }

@@ -23,8 +23,6 @@ from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
 from solstice_pipeline.solstice_gui import solstice_spinner
 from resources import solstice_resource
 
-reload(solstice_spinner)
-
 
 class UserInfoWidget(QWidget, object):
 

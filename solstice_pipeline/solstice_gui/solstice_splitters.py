@@ -98,7 +98,7 @@ def get_horizontal_separator_widget(max_height=30):
 
     v_div_w = QWidget()
     v_div_l = QVBoxLayout()
-    v_div_l.setAlignment(Qt.AlignLeft)
+    v_div_l.setAlignment(Qt.AlignHCenter)
     v_div_l.setContentsMargins(5, 5, 5, 5)
     v_div_l.setSpacing(0)
     v_div_w.setLayout(v_div_l)

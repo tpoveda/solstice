@@ -3,6 +3,7 @@ import os
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_utils import solstice_qt_utils
 
+
 def get_ui_solstice_path():
     """
     Returns path where Solstice Tools UIs are located

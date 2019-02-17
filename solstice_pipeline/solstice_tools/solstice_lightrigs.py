@@ -16,8 +16,7 @@ from solstice_pipeline.externals.solstice_qt.QtCore import *
 import maya.cmds as cmds
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_gui import solstice_windows, solstice_sync_dialog
-from solstice_pipeline.solstice_utils import solstice_qt_utils
+from solstice_pipeline.solstice_gui import solstice_windows, solstice_sync_dialog, solstice_splitters
 from solstice_pipeline.resources import solstice_resource
 
 # ===============================================================================================
@@ -91,6 +90,25 @@ class LightRigManager(solstice_windows.Window, object):
 
         self.set_logo('solstice_lightrigs_logo')
 
+        self.resize(100, 150)
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(0)
+        self.main_layout.addLayout(buttons_layout)
+
+        open_btn = QToolButton()
+        open_btn.setIcon(solstice_resource.icon('open'))
+        sync_btn = QToolButton()
+        sync_btn.setIcon(solstice_resource.icon('sync'))
+        buttons_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        buttons_layout.addWidget(open_btn)
+        buttons_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        buttons_layout.addWidget(sync_btn)
+        buttons_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
         self.light_rigs_layout = QHBoxLayout()
         self.light_rigs_layout.setContentsMargins(5, 5, 5, 5)
         self.light_rigs_layout.setSpacing(5)
@@ -100,7 +118,7 @@ class LightRigManager(solstice_windows.Window, object):
         self._update_ui()
 
     @staticmethod
-    def get_solstice_light_rigs_path(sync=True):
+    def get_solstice_light_rigs_path(sync=False):
         """
         Returns Solstice Light Rigs path
         :return: str

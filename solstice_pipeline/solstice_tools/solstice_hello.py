@@ -8,10 +8,13 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
+import sys
+
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 
+import solstice_pipeline as sp
 from solstice_pipeline import solstice_tools
 from solstice_pipeline.solstice_gui import solstice_dialog, solstice_animations
 from solstice_pipeline.solstice_utils import solstice_python_utils
@@ -59,7 +62,7 @@ class SolsticeHelloDialog(solstice_dialog.Dialog, object):
         self.tab_opacity_effect.setOpacity(0)
         self.ui.pages_stack.setGraphicsEffect(self.tab_opacity_effect)
 
-        self.ui.close_btn.clicked.connect(self.fade_close_window)
+        self.ui.close_btn.clicked.connect(self.fade_close)
         self.ui.right_btn.clicked.connect(lambda: self._on_button_press(+1))
         self.ui.left_btn.clicked.connect(lambda: self._on_button_press(-1))
         self.ui.page_btn_0.clicked.connect(lambda: self.set_index(0))
@@ -70,6 +73,16 @@ class SolsticeHelloDialog(solstice_dialog.Dialog, object):
         self.ui.changelog_btn.clicked.connect(self.open_chagelog)
 
         self.set_index(0)
+
+        current_version = sp.get_version()
+        self.ui.version_lbl.setText('v{}'.format(current_version))
+
+        system = sys.platform
+        print(system)
+        if system == 'darwin':
+            self.ui.hotkey.setText('SHIFT + TAB')
+        else:
+            self.ui.hotkey.setText('CTRL + TAB')
 
     def mousePressEvent(self, event):
         self._offset = event.pos()
@@ -122,7 +135,7 @@ class SolsticeHelloDialog(solstice_dialog.Dialog, object):
         self.set_index(current + input)
 
     def launch_solstice_tools(self):
-        self.fade_close_window()
+        self.fade_close()
 
     def open_chagelog(self):
         from solstice_pipeline.solstice_tools import solstice_changelog

@@ -22,11 +22,12 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters
 from solstice_pipeline.resources import solstice_resource
 from solstice_pipeline.solstice_tools import solstice_tagger
-from solstice_pipeline.solstice_utils import solstice_browser_utils, solstice_alembic
+from solstice_pipeline.solstice_utils import solstice_browser_utils, solstice_alembic, solstice_maya_utils
 
 ALEMBIC_GROUP_SUFFIX = '_ABCGroup'
 
 reload(solstice_alembic)
+
 
 class AlembicGroup(QWidget, object):
     def __init__(self, parent=None):
@@ -61,6 +62,7 @@ class AlembicGroup(QWidget, object):
         self.main_layout.addWidget(clean_alembic_groups_btn)
 
         create_btn.clicked.connect(self.create_alembic_group)
+        clean_alembic_groups_btn.clicked.connect(self.clean_alembic_groups)
 
     def get_alembic_group_name_from_node_name(self, node_name):
         """
@@ -134,6 +136,24 @@ class AlembicGroup(QWidget, object):
                                m='No objects found with filter type: {}!'.format(filter_type))
 
         return cmds.sets(sel, n=name)
+
+    @solstice_maya_utils.maya_undo
+    def clean_alembic_groups(self):
+        """
+        Removes all alembic groups in current scene
+        """
+
+        all_sets = cmds.listSets(allSets=True)
+        abc_sets = [s for s in all_sets if s.endswith(ALEMBIC_GROUP_SUFFIX)]
+
+        res = cmds.confirmDialog(title='Removing Alembic Groups!',
+                                 message='Do you want to remove following Alembic Groups?\n' + '\n'.join(abc_sets),
+                                 button=['Yes', 'No'],
+                                 defaultButton='Yes',
+                                 cancelButton='No',
+                                 dismissString='No')
+        if res and res == 'Yes':
+            cmds.delete(abc_sets)
 
 
 # ===================================================================================================================
@@ -259,7 +279,11 @@ class AlembicExporterNode(object):
     def data(self, column):
 
         if column is 0:
-            return self.name
+            long_name = self.name
+            try:
+                return long_name.split(':')[-1].split('|')[-1]
+            except Exception:
+                return long_name
         elif column is 1:
             return self.typeInfo()
 
@@ -270,36 +294,25 @@ class AlembicExporterNode(object):
             pass
 
     def resource(self):
-        return None
-
+        pass
 
 class AlembicExporterGroupNode(AlembicExporterNode, object):
     def __init__(self, name, parent=None):
         super(AlembicExporterGroupNode, self).__init__(name=name, parent=parent)
 
 
-class AlembicExporterModel(AlembicExporterNode, object):
+class AlembicNode(AlembicExporterNode, object):
     def __init__(self, name, parent=None):
-        super(AlembicExporterModel, self).__init__(name=name, parent=parent)
-
-    def typeInfo(self):
-        return 'model'
+        super(AlembicNode, self).__init__(name=name, parent=parent)
 
     def resource(self):
-        path = solstice_resource.get('icons', 'cube.png')
+        path = solstice_resource.get('icons', 'alembic_white_icon.png')
         return path
 
 
-class AlembicExporterAnimation(AlembicExporterNode, object):
+class AlembicExporterModelHires(AlembicExporterNode, object):
     def __init__(self, name, parent=None):
-        super(AlembicExporterAnimation, self).__init__(name=name, parent=parent)
-
-    def typeInfo(self):
-        return 'anim'
-
-    def resource(self):
-        path = solstice_resource.get('icons', 'vector.png')
-        return path
+        super(AlembicExporterModelHires, self).__init__(name=name, parent=parent)
 
 
 class AlembicExporterGroupsModel(QAbstractItemModel, object):
@@ -610,41 +623,41 @@ class AlembicExporter(QWidget, object):
         abc_group_node = AlembicExporterGroupNode(name=set_text)
         self._tree_model._root_node.addChild(abc_group_node)
 
-        models_list = list()
-        anims_list = list()
-
         abc_group_objs = self.get_alembic_group_nodes(set_text, show_error)
         if not abc_group_objs:
             if set_text != '':
                 sp.logger.warning('Selected Alembic Group is empty: {}'.format(set_text))
             return
+
+        exports_dict = dict()
+
         for obj in abc_group_objs:
             tag_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(obj)
-            if tag_node is None:
-                sp.logger.warning('Object {} is not properly tagged and cannot be exported!'.format(obj))
-                continue
-
-            attr_exists = cmds.attributeQuery('selections', node=tag_node, exists=True)
-            if not attr_exists:
-                selections = ['model']
+            if tag_node:
+                attr_exists = cmds.attributeQuery('hires', node=tag_node, exists=True)
+                if not attr_exists:
+                    obj_meshes = [obj]
+                else:
+                    hires_grp = cmds.listConnections(tag_node+'.hires')
+                    hires_objs = cmds.listRelatives(hires_grp, ad=True, f=True, type='mesh')
+                    if not hires_objs:
+                        obj_meshes = [obj]
+                    else:
+                        obj_meshes = hires_objs
             else:
-                selections = cmds.getAttr(tag_node + '.selections')
-                selections = selections.split()
+                obj_meshes = [obj]
 
-            if 'model' in selections:
-                if obj not in models_list:
-                    models_list.append(obj)
-            if 'animation' in selections:
-                if obj not in anims_list:
-                    anims_list.append(obj)
+            exports_dict[obj] = list()
+            for o in obj_meshes:
+                if o not in exports_dict:
+                    exports_dict[obj].append(o)
 
-        if not models_list and not anims_list:
+        if not exports_dict:
             sp.logger.warning('No objects in Alembic Groups to export')
             return
 
         shot_name = self.shot_line.text()
         shot_regex = sp.get_solstice_shot_name_regex()
-        print(shot_name)
         m = shot_regex.match(shot_name)
         if m:
             shot_name = m.group(1)
@@ -664,61 +677,72 @@ class AlembicExporter(QWidget, object):
             )
             return
 
-        if models_list:
-            model_path = '{}_{}'.format(shot_name, set_text.replace(ALEMBIC_GROUP_SUFFIX, '.abc'))
-            filename = os.path.normpath(os.path.join(out_folder, shot_name, 'model', model_path))
-            model_node = AlembicExporterModel(solstice_browser_utils.get_relative_path(filename, sp.get_solstice_project_path())[1:])
-            abc_group_node.addChild(model_node)
-            for model in models_list:
-                obj_node = AlembicExporterNode(model)
-                model_node.addChild(obj_node)
+        is_referenced = cmds.referenceQuery(set_text, isNodeReferenced=True)
+        if is_referenced:
+            set_namespace = cmds.referenceQuery(set_text, namespace=True)
+            if not set_namespace or not set_namespace.startswith(':'):
+                export_name = set_text
+            else:
+                set_namespace = set_namespace[1:] + ':'
+                export_name = set_text.replace(set_namespace, '')
+        else:
+            export_name = set_text
 
-        if anims_list:
-            for anim in anims_list:
-                anim_path = '{}_{}'.format(shot_name, obj+'.abc')
-                filename = os.path.normpath(os.path.join(out_folder, shot_name, 'anim', anim_path))
-                anim_node = AlembicExporterAnimation(solstice_browser_utils.get_relative_path(filename, sp.get_solstice_project_path())[1:])
-                abc_group_node.addChild(anim_node)
-                obj_node = AlembicExporterNode(anim)
-                anim_node.addChild(obj_node)
+        export_name = export_name.replace(ALEMBIC_GROUP_SUFFIX, '')
+
+        anim_path = '{}_{}'.format(shot_name, export_name+'.abc')
+        filename = os.path.normpath(os.path.join(out_folder, shot_name, anim_path))
+        anim_node = AlembicNode(solstice_browser_utils.get_relative_path(filename, sp.get_solstice_project_path())[1:])
+        abc_group_node.addChild(anim_node)
+        for obj, geo_list in exports_dict.items():
+            root_grp = AlembicExporterNode(obj)
+            anim_node.addChild(root_grp)
+            hires_grp = None
+            tag_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(obj)
+            if tag_node:
+                hires_grp = cmds.listConnections(tag_node + '.hires')
+            if tag_node and hires_grp:
+                hires_node = AlembicExporterModelHires(hires_grp)
+                root_grp.addChild(hires_node)
+                for model in geo_list:
+                    obj_node = AlembicExporterNode(model)
+                    hires_node.addChild(obj_node)
+            else:
+                for geo in geo_list:
+                    geo_node = AlembicExporterNode(geo)
+                    root_grp.addChild(geo_node)
 
         self.export_btn.setEnabled(True)
 
         self._abc_tree.expandAll()
 
-    def _export_models(self, models):
-        """
-        Exports models files as alembic
-        :param models: dict
-        :return:
-        """
+    def _add_tag_attributes(self, attr_node, tag_node):
+        # We add attributes to the first node in the list
+        attrs = cmds.listAttr(tag_node, ud=True)
+        tag_info = dict()
+        for attr in attrs:
+            try:
+                tag_info[attr] = str(cmds.getAttr('{}.{}'.format(tag_node, attr)))
+            except Exception:
+                pass
+        if not tag_info:
+            sp.logger.warning('Node has not valid tag data: {}'.format(attr_node))
+            return
 
-        current_frame = float(cmds.currentTime(q=True))
-        for model_path, model_nodes in models.items():
-            # Copy attrs from tag to node as str
-            for n in model_nodes:
-                tag_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(n)
-                if tag_node is None:
-                    raise Exception('No tag node found for node: {}'.format(n))
-                attrs = cmds.listAttr(tag_node, ud=True)
-                tag_info = dict()
-                for attr in attrs:
-                    try:
-                        tag_info[attr] = str(cmds.getAttr('{}.{}'.format(tag_node, attr)))
-                    except Exception:
-                        pass
-                if not tag_info:
-                    sp.logger.warning('Node has not valid tag data: {}'.format(n))
-                    continue
+        if not cmds.attributeQuery('tag_info', n=attr_node, exists=True):
+            cmds.addAttr(attr_node, ln='tag_info', dt='string', k=True)
+        cmds.setAttr('{}.tag_info'.format(attr_node), str(tag_info), type='string')
 
-                if not cmds.attributeQuery('tag_info', n=n, exists=True):
-                    cmds.addAttr(n, ln='tag_info', dt='string', k=True)
-                cmds.setAttr('{}.tag_info'.format(n), str(tag_info), type='string')
+    def _export_alembics(self, alembic_nodes):
 
-            if os.path.isfile(model_path):
+        for n in alembic_nodes:
+            export_path = n.get('path')
+            abc_node = n.get('node')
+
+            if os.path.isfile(export_path):
                 res = cmds.confirmDialog(
                     t='Alembic File already exits!',
-                    m='Are you sure you want to overwrite exising Alembic file?\n\n{}'.format(model_path),
+                    m='Are you sure you want to overwrite exising Alembic file?\n\n{}'.format(export_path),
                     button=['Yes', 'No'],
                     defaultButton='Yes',
                     cancelButton='No',
@@ -728,63 +752,47 @@ class AlembicExporter(QWidget, object):
                     sp.logger.debug('Aborting Alembic Export operation ...')
                     return
 
-            solstice_alembic.export(
-                root=model_nodes,
-                alembicFile=model_path,
-                frameRange=[[current_frame, current_frame]],
-                userAttr=['tag_info']
-            )
+            export_list = list()
 
-            for n in model_nodes:
-                if cmds.attributeQuery('tag_info', n=n, exists=True):
-                    try:
-                        cmds.deleteAttr(n=n, at='tag_info')
-                    except Exception:
-                        pass
+            for i in range(abc_node.childCount()):
+                root_node = abc_node.child(i)
+                root_node_name = root_node.name
+                tag_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(root_node_name)
 
-    def _export_anims(self, anims):
-        for anim_path, anim_nodes in anims.items():
-            # Copy attrs from tag to node as str
-            for n in anim_nodes:
-                tag_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(n)
-                if tag_node is None:
-                    raise Exception('No tag node found for node: {}'.format(n))
-                attrs = cmds.listAttr(tag_node, ud=True)
-                tag_info = dict()
-                for attr in attrs:
-                    try:
-                        tag_info[attr] = str(cmds.getAttr('{}.{}'.format(tag_node, attr)))
-                    except Exception:
-                        pass
-                if not tag_info:
-                    sp.logger.warning('Node has not valid tag data: {}'.format(n))
-                    continue
+                root_node_child_count = root_node.childCount()
+                if root_node_child_count > 0:
+                    for j in range(root_node.childCount()):
+                        c = root_node.child(j)
+                        c_name = c.name
+                        if type(c_name) in [list, tuple]:
+                            c_name = c_name[0]
+                        if isinstance(c, AlembicExporterModelHires):
+                            if tag_node:
+                                self._add_tag_attributes(c_name, tag_node)
+                            export_list.append(c_name)
+                        else:
+                            if 'transform' != cmds.nodeType(c_name):
+                                parent_xform = cmds.listRelatives(c_name, fullPath=True, parent=True)
+                                export_list.append(parent_xform[0])
+                            else:
+                                export_list.append(c_name)
+                            if tag_node:
+                                self._add_tag_attributes(c_name, tag_node)
+                else:
+                    export_list.append(root_node_name)
 
-                if not cmds.attributeQuery('tag_info', n=n, exists=True):
-                    cmds.addAttr(n, ln='tag_info', dt='string', k=True)
-                cmds.setAttr('{}.tag_info'.format(n), str(tag_info), type='string')
-
-            if os.path.isfile(anim_path):
-                res = cmds.confirmDialog(
-                    t='Alembic File already exits!',
-                    m='Are you sure you want to overwrite exising Alembic file?\n\n{}'.format(anim_path),
-                    button=['Yes', 'No'],
-                    defaultButton='Yes',
-                    cancelButton='No',
-                    dismissString='No'
-                )
-                if res != 'Yes':
-                    sp.logger.debug('Aborting Alembic Export operation ...')
-                    return
+            if not export_list:
+                sp.logger.debug('No geometry to export! Aborting Alembic Export operation ...')
+                return
 
             solstice_alembic.export(
-                root=anim_nodes,
-                alembicFile=anim_path,
+                root=export_list,
+                alembicFile=export_path,
                 frameRange=[[float(self.start.value()), float(self.end.value())]],
                 userAttr=['tag_info']
             )
 
-            for n in anim_nodes:
+            for n in export_list:
                 if cmds.attributeQuery('tag_info', n=n, exists=True):
                     try:
                         cmds.deleteAttr(n=n, at='tag_info')
@@ -818,21 +826,17 @@ class AlembicExporter(QWidget, object):
 
         file_paths = list()
 
-        export_info = dict()
+        export_info = list()
         for i in range(abc_group_node.childCount()):
             child = abc_group_node.child(i)
-
-            # Add export type into the dict if it does not exists yet
-            export_type = child.typeInfo()
-            if export_type not in export_info.keys():
-                export_info[export_type] = dict()
-
             export_path = os.path.normpath(out_folder + child.name)
             file_paths.append(export_path)
-            export_info[export_type][export_path] = list()
-            for j in range(child.childCount()):
-                c = child.child(j)
-                export_info[export_type][export_path].append(c.name)
+            export_info.append({'path': export_path, 'node': child})
+
+            # for j in range(root_tag_grp.childCount()):
+            #     c = child.child(j)
+            #     export_info[export_type]['path'] = export_path
+        #
 
         res = cmds.confirmDialog(
             t='Exporting Alembic File',
@@ -847,12 +851,7 @@ class AlembicExporter(QWidget, object):
             sp.logger.debug('Aborting Alembic Export operation ...')
             return
 
-        model_files = export_info.get('model', None)
-        anim_files = export_info.get('anim', None)
-        if model_files:
-            self._export_models(model_files)
-        if anim_files:
-            self._export_anims(anim_files)
+        self._export_alembics(export_info)
 
 
 class AlembicManager(solstice_windows.Window, object):
@@ -868,6 +867,8 @@ class AlembicManager(solstice_windows.Window, object):
         super(AlembicManager, self).custom_ui()
 
         self.set_logo('solstice_alembicmanager_logo')
+
+        self.resize(400, 600)
 
         self.main_tabs = QTabWidget()
         self.main_layout.addWidget(self.main_tabs)

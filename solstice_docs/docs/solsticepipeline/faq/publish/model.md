@@ -101,7 +101,58 @@ to translate/rotate/scale assets in Solstice world!
     
     ***
 
-9. **Save** your changes
+9. Open **Solstice Tagger** tool
+    Now we need to add custom tags to the **main group** of the asset.
+    
+    !!! error "IMPORTANT"
+        This step is **REALLY** important. Those tags are used by different Solstice Tools and during all Solstice 
+        Pipeline for different tasks
+    
+    > Solstice Tagger button is located in TD shelf
+    ![Solstice Working Button](../../../img/model_publish_11.png?style=centerme)
+    
+    ***
+    
+10. Select asset **main group** and create **Solstice Tag Node**
+    
+    > Press Create Tag Data node button after selecting asset main group
+    ![Solstice Working Button](../../../img/model_publish_12.png?style=centerme)
+    
+    ***
+    
+11. Fill **Name** filed in Name Category
+    You need to write the same name of the main asset group
+    
+    > Fill name with the same name of the main asset group
+    ![Solstice Working Button](../../../img/model_publish_13.png?style=centerme)
+
+12. Check the **types** of the asset in the **Type** category
+    
+    !!! info
+        Depending of the asset you are working on you will have to select different types. You can select multiple
+        types if necessary
+        
+    ![Solstice Working Button](../../../img/model_publish_14.png?style=centerme)
+    
+13. Check the **selections** of the asset in the **Selections** category
+    
+    In our example (leaf) we enable the **Model** and **Animation** selection types because leaf will be animated in
+    some shots.
+    
+    ![Solstice Working Button](../../../img/model_publish_15.png?style=centerme)
+    
+    !!! info
+        Depending of the asset you are working on you will have to select different types. The unique selection type 
+        that all assets need to have enabled is **Model**
+        
+        * **Model**: All assets need the selection type enabled
+        * **Animation**: All assets that will be animated need to have this selection type enabled
+        * **Cloth**: **NO USE**, will be removed in future versions of the tool
+        * **Groom**: Used only by character assets
+    
+    ***
+    
+14. **Save** your changes
 
     !!! info
         If you do not have lock the file Maya will pop up a message telling you if you want to **lock** the 
@@ -110,7 +161,7 @@ to translate/rotate/scale assets in Solstice world!
     
     ***
  
-10. Open **Solstice Publisher** by pressing **>PUBLISH NEW VERSION<** button located in the bottom right corner of  **Solstice Pipelinizer**
+15. Open **Solstice Publisher** by pressing **>PUBLISH NEW VERSION<** button located in the bottom right corner of  **Solstice Pipelinizer**
     
     ![Solstice Working Button](../../../img/shading_publish_7.png?style=centerme)
     
@@ -122,7 +173,7 @@ to translate/rotate/scale assets in Solstice world!
     
     ***
     
-11. Uncheck **TEXTURES** & **SHADING** checkboxes in Solstice Publisher. Make sure you only have checked **MODEL**.
+16. Uncheck **TEXTURES** & **SHADING** checkboxes in Solstice Publisher. Make sure you only have checked **MODEL**.
 Also you need to write a **descriptive comment** of the changes you have done in the version you are creating.
 
     Then press **Publish** button.
@@ -135,7 +186,7 @@ Also you need to write a **descriptive comment** of the changes you have done in
     
     ***
  
-12. Solstice Publisher **Validation Tool** window will appear. Wait while the process finishes.
+17. Solstice Publisher **Validation Tool** window will appear. Wait while the process finishes.
 
     This tool basically validates the status of your current model by doing the following checks:
                 
@@ -177,19 +228,19 @@ Also you need to write a **descriptive comment** of the changes you have done in
 
     ***
     
-13. Once the validation is completed, a popup window will appear telling you that the validation was correct. Press
+18. Once the validation is completed, a popup window will appear telling you that the validation was correct. Press
 **Yes** button to continue with the creating of a new version process or **No** to cancel the operation.
 
     ![Solstice Working Button](../../../img/model_working_8.png?style=centerme)
     
-14. Wait until the new version is created. Once the version is finished, Solstice Publisher will automatically sync
+19. Wait until the new version is created. Once the version is finished, Solstice Publisher will automatically sync
 that version in your computer locally. Wait until the following sync screen is gone:
     
     ![Solstice Working Button](../../../img/model_working_9.png?style=centerme)
     
     ***
 
-15. If everything is fine you will a lot of green color in your screen :smile: and you have published a new version of
+20. If everything is fine you will a lot of green color in your screen :smile: and you have published a new version of
 the file.
 
     ![Solstice Working Button](../../../img/model_working_10.png?style=centerme)

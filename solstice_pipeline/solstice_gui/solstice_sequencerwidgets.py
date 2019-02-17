@@ -13,28 +13,124 @@ import os
 import solstice_pipeline as sp
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
 
-from solstice_utils import solstice_maya_utils as utils
-from solstice_gui import solstice_splitters, solstice_sync_dialog
-from solstice_utils import solstice_artella_utils as artella
+from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
+from solstice_pipeline.solstice_gui import solstice_splitters, solstice_sync_dialog
+from solstice_utils import solstice_image as img
+from solstice_pipeline.solstice_utils import solstice_artella_utils as artella, solstice_python_utils as py_utils
+from solstice_pipeline.resources import solstice_resource
 
-reload(utils)
-reload(artella)
 reload(solstice_splitters)
 
 
+class SequenceFile(QFrame, object):
+    def __init__(self, status, root_path, base_path, file_path, parent=None):
+        super(SequenceFile, self).__init__(parent)
+
+        self._status = status
+        self._root = root_path
+        self._path = base_path
+        self._file = file_path
+
+        self.setMaximumWidth(150)
+
+        self.setStyleSheet("#background {border-radius: 3px;border-style: solid;border-width: 1px;border-color: rgb(32,32,32);}")
+        self.setFrameShape(QFrame.StyledPanel)
+        self.setFrameShadow(QFrame.Raised)
+
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        self.setLayout(main_layout)
+
+        self.lbl = QLabel('MASTER LAYOUT')
+        self.lbl.setStyleSheet('background-color: rgb(32, 32, 32);')
+        self.lbl.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(self.lbl)
+        main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        main_layout.addItem(QSpacerItem(0, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
+
+        buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(0)
+        main_layout.addLayout(buttons_layout)
+        sync_btn = QToolButton()
+        sync_btn.setStatusTip('Sync File')
+        sync_btn.setToolTip('Sync File')
+        sync_btn.setIcon(solstice_resource.icon('sync'))
+        open_btn = QToolButton()
+        open_btn.setStatusTip('Open File')
+        open_btn.setToolTip('Open File')
+        open_btn.setIcon(solstice_resource.icon('open'))
+        import_btn = QToolButton()
+        import_btn.setStatusTip('Import File')
+        import_btn.setToolTip('Import File')
+        import_btn.setIcon(solstice_resource.icon('import'))
+        reference_btn = QToolButton()
+        reference_btn.setStatusTip('Reference File')
+        reference_btn.setToolTip('Reference File')
+        reference_btn.setIcon(solstice_resource.icon('reference'))
+        new_version_btn = QToolButton()
+        new_version_btn.setStatusTip('New Version')
+        new_version_btn.setToolTip('New Version')
+        new_version_btn.setIcon(solstice_resource.icon('upload'))
+
+        buttons_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        buttons_layout.addWidget(sync_btn)
+        buttons_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        buttons_layout.addWidget(open_btn)
+        buttons_layout.addWidget(import_btn)
+        buttons_layout.addWidget(reference_btn)
+        buttons_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        buttons_layout.addWidget(new_version_btn)
+        buttons_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+
+        main_layout.addItem(QSpacerItem(0, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
+
+        sync_btn.clicked.connect(self.sync)
+        open_btn.clicked.connect(self.open)
+
+    def sync(self):
+        solstice_sync_dialog.SolsticeSyncPath(paths=[self._root]).sync()
+
+    def open(self):
+        if not self._file or not os.path.isfile(self._file):
+            return
+
+        artella.open_file_in_maya(file_path=self._file)
+
+    def import_file(self):
+        if not self._file or not os.path.isfile(self._file):
+            return
+
+        artella.import_file_in_maya(file_path=self._file)
+
+    def reference_file(self):
+        if not self._file or not os.path.isfile(self._file):
+            return
+
+        artella.reference_file_in_maya(file_path=self._file)
+
+    def new_version(self):
+        if not self._file or not os.path.isfile(self._file):
+            return
+
+
 class SequenceWidget(QWidget, object):
+
+    syncShots = Signal(object)
+
     def __init__(self, sequence_data, sequence_files=None, parent=None):
         super(SequenceWidget, self).__init__(parent=parent)
 
         self._sequence_data = sequence_data
 
-        self._master_layout = None
-
         if sequence_files is None:
-            sequence_files = list()
-        if 'layout' in sequence_files:
-            self._master_layout = sequence_files['layout']
+            sequence_files = dict()
+
+        self._sequence_files = sequence_files
 
         self.custom_ui()
 
@@ -75,38 +171,87 @@ class SequenceWidget(QWidget, object):
 
         widget_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
 
-        # Description Layout
-        description_layout = QVBoxLayout()
-        description_layout.setContentsMargins(2, 2, 2, 2)
-        description_layout.setSpacing(2)
-        description_layout.setAlignment(Qt.AlignLeft)
-        widget_layout.addLayout(description_layout)
+        self.versions_tab = QTabWidget()
+
+        working_widget = QWidget()
+        working_layout = QVBoxLayout()
+        working_widget.setLayout(working_layout)
+        publish_widget = QWidget()
+        publish_layout = QVBoxLayout()
+        publish_widget.setLayout(publish_layout)
+        self.versions_tab.addTab(working_widget, 'Working')
+        self.versions_tab.addTab(publish_widget, 'Published')
+        widget_layout.addWidget(self.versions_tab)
 
         widget_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
 
+        open_btn = QToolButton()
+        # open_btn.setText('Shots')
+        open_btn.setMaximumWidth(40)
+        open_btn.setIcon(solstice_resource.icon('shots'))
+        open_btn.setToolTip('Load Sequence Shots')
+        open_btn.setStatusTip('Load Sequence Shots')
+        # open_btn.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        open_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        widget_layout.addWidget(open_btn)
+
         # Master Layout
-        master_layout = QVBoxLayout()
-        master_layout.setContentsMargins(2, 2, 2, 2)
-        master_layout.setSpacing(2)
-        master_layout.setAlignment(Qt.AlignLeft)
-        widget_layout.addLayout(master_layout)
+        master_layout = self._sequence_files.get('master_layout', None)
+        if not master_layout:
+            return
 
-        master_layout_lbl = QLabel(' - MASTER LAYOUT - ')
-        open_master_layout_btn = QPushButton('Open')
-        master_layout.addWidget(master_layout_lbl)
-        master_layout.addLayout(solstice_splitters.SplitterLayout())
-        master_layout.addWidget(open_master_layout_btn)
+        working_master_layout = SequenceFile(
+            status='working',
+            root_path=master_layout.get('path', None),
+            base_path=master_layout['working'].get('path', None),
+            file_path=master_layout['working'].get('file', None)
+        )
+        # published_master_layout = SequenceFile(
+        #     status='published',
+        #     base_path=master_layout.get('path', None),
+        #     file_path=master_layout['working'].get('file', None)
+        # )
 
-        open_master_layout_btn.clicked.connect(self.open_master_layout)
+        working_layout.addWidget(working_master_layout)
+        # publish_layout.addWidget(published_master_layout)
 
-    def open_master_layout(self):
-        artella.open_file_in_maya(file_path=self._master_layout)
+        # open_master_layout_btn.clicked.connect(self.open_master_layout)
 
-    def sync(self):
-        solstice_sync_dialog.SolsticeSyncPath(paths=[self.path]).sync()
+        shot_icon = self.get_icon()
+        if shot_icon:
+            icon_lbl.setPixmap(shot_icon)
+
+        open_btn.clicked.connect(self._on_open_shots)
 
     def mousePressEvent(self, event):
         super(SequenceWidget, self).mousePressEvent(event)
+
+    def get_data_folder(self):
+        data_folder = os.path.join(self.path, '_data')
+
+        if not os.path.exists(data_folder):
+            return
+
+        return data_folder
+
+    def get_icon(self):
+        data_folder = self.get_data_folder()
+        if data_folder:
+            for root, dirs, files in os.walk(data_folder):
+                if dirs and '__working__' in dirs:
+                    shot_path = root
+                    sequence_data_file = os.path.join(shot_path, '__working__', 'data.json')
+                    if os.path.isfile(sequence_data_file):
+                        sequence_data = py_utils.read_json(sequence_data_file)
+                        icon = sequence_data['sequence']['icon'].encode('utf-8')
+                        icon_format = sequence_data['sequence']['icon_format']
+                        sequence_icon = QPixmap.fromImage(img.base64_to_image(icon, image_format=icon_format))
+                        return sequence_icon
+        else:
+            return solstice_resource.pixmap(name='solstice_logo', extension='png')
+
+    def _on_open_shots(self):
+        self.syncShots.emit(self)
 
 
 class ShotWidget(QWidget, object):
@@ -140,9 +285,6 @@ class ShotWidget(QWidget, object):
         # ===================================================================
 
         self.custom_ui()
-
-    def custom_ui(self):
-        pass
 
     @property
     def name(self):
@@ -181,16 +323,9 @@ class ShotWidget(QWidget, object):
 
         widget_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
 
-        # Description Layout
-        description_layout = QVBoxLayout()
-        description_layout.setContentsMargins(2, 2, 2, 2)
-        description_layout.setSpacing(2)
-        description_layout.setAlignment(Qt.AlignLeft)
-        widget_layout.addLayout(description_layout)
-        # self._description_lbl = QLabel('Here goes the description of the shot')
-        # description_layout.addWidget(self._description_lbl)
-
-        widget_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        shot_icon = self.get_icon()
+        if shot_icon:
+            icon_lbl.setPixmap(shot_icon)
 
         # Previs Layout
         if self._has_previs:
@@ -259,6 +394,20 @@ class ShotWidget(QWidget, object):
             lighting_layout.addWidget(open_lighting_btn)
 
             widget_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+
+    def get_icon(self):
+        for root, dirs, files in os.walk(self.path):
+            if dirs and '__working__' in dirs:
+                shot_path = root
+                shot_data_file = os.path.join(shot_path, '__working__', 'data.json')
+                if os.path.isfile(shot_data_file):
+                    shot_data = py_utils.read_json(shot_data_file)
+                    icon = shot_data['shot']['icon'].encode('utf-8')
+                    icon_format = shot_data['shot']['icon_format']
+                    shot_icon = QPixmap.fromImage(img.base64_to_image(icon, image_format=icon_format))
+                    return shot_icon
+        else:
+            return solstice_resource.pixmap(name='solstice_logo', extension='png')
 
 
 
@@ -489,7 +638,7 @@ class ShotWidget(QWidget, object):
 #         arrow = None
 #
 #         if item.data(IS_SEQUENCE):
-#             padding = utils.dpi_scale(3)
+#             paddºing = utils.dpi_scale(3)
 #             painter.translate(rect.left()+padding, rect.top()+utils.dpi_scale(2))
 #             arrow = COLLAPSED_ARROW
 #             if self._view().isExpanded(item):

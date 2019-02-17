@@ -124,9 +124,12 @@ class SolsticeLoginProcess(solstice_spinner.WaitSpinner, object):
         user_login_file = os.path.normpath(os.path.join(sp.get_solstice_project_path(), 'Assets', 'Scripts', 'PIPELINE', '__working__', 'user_login.json'))
         if not os.path.isfile(user_login_file):
             artella.synchronize_file(user_login_file)
-        if not user_login_file:
+        if not user_login_file or not os.path.isfile(user_login_file):
             sp.logger.debug('Error during logging into Artella, please try it later!')
             return False
+
+        # We force the unlock of the file
+        artella.unlock_file(user_login_file)
 
         user_name = '{0}_{1}'.format(getpass.getuser(), sys.platform)
         user_id = None

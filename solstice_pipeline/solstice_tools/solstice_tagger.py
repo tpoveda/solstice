@@ -91,9 +91,7 @@ class NameEditor(TaggerEditor, object):
         :param name: str, name of the selection tag to add/remove
         """
 
-        tag_data_node = SolsticeTagger.get_tag_data_node_from_curr_sel(sel)
-        if tag_data_node is None:
-            return
+        º
 
         attr_exists = cmds.attributeQuery('name', node=tag_data_node, exists=True)
         if attr_exists:
@@ -683,6 +681,8 @@ class SolsticeTagger(solstice_windows.Window, object):
         super(SolsticeTagger, self).custom_ui()
 
         self.set_logo('solstice_tagger_logo')
+
+        self.resize(300, 300)
 
         self._error_pixmap = solstice_resource.pixmap('error', category='icons').scaled(QSize(24, 24))
         self._warning_pixmap = solstice_resource.pixmap('warning', category='icons').scaled(QSize(24, 24))
