@@ -14,10 +14,8 @@ from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_gui import solstice_assetviewer
+from solstice_pipeline.solstice_gui import solstice_assetviewer, solstice_splitters
 from solstice_pipeline.solstice_utils import solstice_qt_utils, solstice_maya_utils
-
-reload(solstice_assetviewer)
 
 
 global solstice_asset_viewer_window
@@ -91,6 +89,23 @@ class SolsticeAssetViewer(QWidget, object):
 
         self._asset_viewer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.main_layout.addWidget(self._asset_viewer)
+
+        import_types_layout = QHBoxLayout()
+        import_types_layout.setContentsMargins(0, 0, 0, 0)
+        import_types_layout.setSpacing(0)
+        import_types_layout.setAlignment(Qt.AlignTop)
+        self._import_type_buttons = QButtonGroup(self)
+        self._import_type_buttons.setExclusive(True)
+        rig_btn = QPushButton('Rig')
+        alembic_btn = QPushButton('Alembic')
+        rig_btn.setCheckable(True)
+        alembic_btn.setCheckable(True)
+        self._import_type_buttons.addButton(rig_btn)
+        self._import_type_buttons.addButton(alembic_btn)
+        import_types_layout.addWidget(rig_btn)
+        import_types_layout.addWidget(alembic_btn)
+        self.main_layout.addLayout(import_types_layout)
+        alembic_btn.setChecked(True)
 
     def update_asset_info(self, asset=None, check_published_info=None, check_working_info=None, check_lock_info=None):
         asset.reference_asset_file()

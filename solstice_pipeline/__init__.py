@@ -20,6 +20,7 @@ import maya.cmds as cmds
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 
 from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
+from solstice_pipeline.resources import solstice_resources
 
 # =================================================================================
 

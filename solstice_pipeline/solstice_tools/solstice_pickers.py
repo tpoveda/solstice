@@ -37,6 +37,7 @@ class SolsticePickers(solstice_windows.Window, object):
         super(SolsticePickers, self).custom_ui()
 
         self.set_logo('solstice_pickers_logo')
+        self.set_info_url('https://tpoveda.github.io/solstice/solsticepipeline/solsticetools/solsticepickers/')
 
         self.resize(300, 200)
 

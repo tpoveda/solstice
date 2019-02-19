@@ -19,6 +19,8 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters
 from solstice_pipeline.solstice_utils import solstice_maya_utils
 
+reload(solstice_windows)
+
 
 class TexturesRelinker(solstice_windows.Window, object):
     name = 'Solstice_TexturesRelinker'
@@ -173,8 +175,6 @@ class TexturesRelinker(solstice_windows.Window, object):
 
         relink_textures_btn = QPushButton('Relink Textures')
         self.main_layout.addWidget(relink_textures_btn)
-
-        self.statusBar().showMessage('Solstice Tools - Textures Relinker - V1.0')
 
         menubar = self.menuBar()
         menubar.addMenu('&Help')

@@ -157,6 +157,7 @@ class Pipelinizer(solstice_windows.Window, object):
 
         # Set Tool Logo
         self.set_logo('solstice_pipeline_logo')
+        self.set_info_url('https://tpoveda.github.io/solstice/solsticepipeline/solsticetools/pipelinizer/tool/')
 
         self.resize(1100, 900)
 

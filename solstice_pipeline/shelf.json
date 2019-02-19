@@ -16,6 +16,18 @@
                 "label": ""
             },
             {
+                "icon": "assetviewer.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_assetviewer; solstice_assetviewer.run();",
+                "annotation": "Solstice Asset Viewer",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
                 "icon": "pipeline.png",
                 "command": "from solstice_pipeline.solstice_tools import solstice_pipelinizer; solstice_pipelinizer.run();",
                 "annotation": "Solstice Pipelinizer Tool",

@@ -8,6 +8,8 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
+import webbrowser
+
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
@@ -20,6 +22,63 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_utils import solstice_maya_utils, solstice_config
 from solstice_pipeline.solstice_gui import solstice_dragger, solstice_animations
 from resources import solstice_resource
+
+
+class WindowStatusBar(QStatusBar, object):
+    def __init__(self, parent=None):
+        super(WindowStatusBar, self).__init__(parent)
+
+        self._info_url = None
+
+        self.setSizeGripEnabled(True)
+        self.setStyleSheet("""
+                QStatusBar
+                {
+                    border-bottom-left-radius: 5;
+                    border-bottom-right-radius: 5;
+                    background-color: rgb(50,50,50);
+                }
+                QSizeGrip
+                {
+                    image:url(:/icons/size_grip);
+                    width:16px;
+                    height:16px;
+                }
+                """)
+
+        self._info_btn = QPushButton()
+        self._info_btn.setIconSize(QSize(25, 25))
+        self._info_btn.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
+        self._info_btn.setIcon(solstice_resource.icon('info1'))
+        self._info_btn.setStyleSheet('QWidget {background-color: rgba(255, 255, 255, 0); border:0px;}')
+        self.addWidget(self._info_btn)
+        self.showMessage(' ')
+
+        self._info_btn.clicked.connect(self._on_open_url)
+
+    def showMessage(self, text):
+        if self.has_url():
+            text = '          {}'.format(text)
+        super(WindowStatusBar, self).showMessage(text)
+
+    def set_info_url(self, url):
+        self._info_url = url
+
+    def has_url(self):
+        if self._info_url:
+            return True
+
+        return False
+
+    def show_info(self):
+        self._info_btn.setVisible(True)
+
+    def hide_info(self):
+        self._info_btn.setVisible(False)
+
+    def _on_open_url(self):
+        if self._info_url:
+            webbrowser.open_new_tab(self._info_url)
 
 
 class Window(QMainWindow, object):
@@ -45,28 +104,24 @@ class Window(QMainWindow, object):
         self.setWindowTitle('{} - {}'.format(self.title, self.version))
         self.main_layout = None
 
-        self.statusBar().setSizeGripEnabled(True)
-        self.statusBar().setStyleSheet("""
-        QStatusBar
-        {
-            border-bottom-left-radius: 5;
-            border-bottom-right-radius: 5;
-            background-color: rgb(50,50,50);
-        }
-        QSizeGrip
-        {
-            image:url(:/icons/size_grip);
-            width:16px;
-            height:16px;
-        }
-        """)
+        self.setStatusBar(WindowStatusBar())
 
         self.custom_ui()
+
+        if not self.statusBar().has_url():
+            self.statusBar().hide_info()
+
 
         for widget in self.parent().findChildren(QMainWindow):
             if widget is not self:
                 if widget.objectName() == self.objectName():
                     widget.close()
+
+    def set_info_url(self, url):
+        if not url:
+            return
+
+        self.statusBar().set_info_url(url)
 
     def add_callback(self, callback_id):
         self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(callback_id=callback_id))

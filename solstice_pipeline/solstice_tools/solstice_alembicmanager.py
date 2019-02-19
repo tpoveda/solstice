@@ -699,9 +699,9 @@ class AlembicExporter(QWidget, object):
             anim_node.addChild(root_grp)
             hires_grp = None
             tag_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(obj)
-            if tag_node:
+            has_hires = cmds.attributeQuery('hires', node=tag_node, exists=True)
+            if tag_node and has_hires:
                 hires_grp = cmds.listConnections(tag_node + '.hires')
-            if tag_node and hires_grp:
                 hires_node = AlembicExporterModelHires(hires_grp)
                 root_grp.addChild(hires_node)
                 for model in geo_list:

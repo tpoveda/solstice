@@ -92,6 +92,7 @@ class LightRigManager(solstice_windows.Window, object):
         super(LightRigManager, self).custom_ui()
 
         self.set_logo('solstice_lightrigs_logo')
+        self.set_info_url('https://tpoveda.github.io/solstice/solsticepipeline/solsticetools/solsticelightrigmanager/')
 
         self.resize(100, 150)
 
