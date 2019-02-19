@@ -844,6 +844,13 @@ def delete_turtle_nodes():
                 turtle_nodes = delete_nodes_of_type(turtle_types)
                 break
 
+    try:
+        cmds.lockNode('TurtleDefaultBakeLayer', lock=False)
+        cmds.delete('TurtleDefaultBakeLayer')
+        turtle_nodes.append('TurtleDefaultBakeLayer')
+    except Exception:
+        pass
+
     print('Removed Turtle nodes: {}'.format(turtle_nodes))
 
 

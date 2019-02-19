@@ -290,9 +290,7 @@ class SolsticeAssetNode(SolsticeNode, object):
 
         if self.valid:
             valid_asset_name = FULL_NAME_REGEX.search(self.filename)
-            if valid_asset_name:
-                print('ASSET IS VALID')
-            else:
+            if not valid_asset_name:
                 sp.logger.warning('File "{0}" does not follow a correct nomenclature!'.format(self.filename))
 
     def get_local_versions(self, status='published', categories=None):

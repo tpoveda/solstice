@@ -167,7 +167,6 @@ class SolsticePickers(solstice_windows.Window, object):
             sp.logger.warning('Solstice Picker Scripts have not been loaded successfully! Picker Scripts will not work!')
             pass
 
-
     def _update_pickers_label(self):
         sp.logger.debug('Updating Pickers Path label ...')
         externals_path = sp.get_externals_path()

@@ -660,6 +660,8 @@ class SolsticeOutliner(QWidget, object):
     @staticmethod
     def load_shaders():
         from solstice_pipeline.solstice_tools import solstice_shaderlibrary
+        reload(solstice_shaderlibrary)
+
         solstice_shaderlibrary.ShaderLibrary.load_scene_shaders()
 
     def custom_ui(self):

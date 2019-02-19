@@ -792,9 +792,9 @@ class PublishShadingTask(solstice_task.Task, object):
 
             shading_meshes = list()
             self.write('Getting meshes of shading file ...')
-            for obj in cmds.listRelatives(valid_obj, children=True, type='transform', shapes=False, noIntermediate=True, fullPath=True):
+            for obj in cmds.listRelatives(valid_obj, allDescendents=True, type='transform', shapes=False, noIntermediate=True, fullPath=True):
                 if cmds.objExists(obj):
-                    shapes = cmds.listRelatives(obj, shapes=True)
+                    shapes = cmds.listRelatives(obj, shapes=True, children=True, noIntermediate=True, fullPath=True)
                     if shapes:
                         self.write('Found mesh on shading file: {}'.format(obj))
                         shading_meshes.append(obj)

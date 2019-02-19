@@ -82,7 +82,19 @@
                 "label": ""
             },
             {
-                "icon": "refresh.png",
+                "icon": "studiolibrary.png",
+                "command": "from solstice_pipeline.solstice_tools import solstice_studiolib; reload(solstice_studiolib); solstice_studiolib.run()",
+                "annotation": "Solstice Studio Library",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
+                "icon": "refreshvl.png",
                 "command": "from solstice_pipeline.solstice_pickers.picker import picker_utils; picker_utils.load_vl_scripts();",
                 "annotation": "Load Picker Scripts",
                 "label": ""

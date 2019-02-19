@@ -145,7 +145,11 @@ class ShadingNetwork(object):
             elif as_type == 'asShader':
                 node = cls.create_shader_node(node_type=node_type, as_type=as_type, name=key)
                 nodeSG = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=key+'SG')
-                cmds.connectAttr(node+'.outColor', nodeSG+'.surfaceShader', force=True)
+
+                if node_type == 'displacementShader':
+                    cmds.connectAttr(node+'.displacement', nodeSG+'.displacementShader', force=True)
+                else:
+                    cmds.connectAttr(node+'.outColor', nodeSG+'.surfaceShader', force=True)
             else:
                 cls.create_shader_node(node_type=node_type, as_type=as_type, name=key)
 
@@ -584,6 +588,8 @@ class ShaderLibrary(solstice_windows.Window, object):
 
         self.set_logo('solstice_shaderlibrary_logo')
 
+        self.resize(1400, 800)
+
         self.main_layout.setAlignment(Qt.AlignTop)
 
         top_layout = QHBoxLayout()
@@ -624,7 +630,11 @@ class ShaderLibrary(solstice_windows.Window, object):
         self.main_layout.addWidget(shader_splitter)
 
         shader_widget = QWidget()
-        self.shader_viewer = solstice_shaderviewer.ShaderViewer()
+        shader_scroll = QScrollArea()
+        shader_scroll.setWidgetResizable(True)
+        shader_scroll.setWidget(shader_widget)
+        self.shader_viewer = solstice_shaderviewer.ShaderViewer(grid_size=2)
+        shader_scroll.setMinimumWidth(900)
         self.shader_viewer.setAlignment(Qt.AlignTop)
         shader_widget.setLayout(self.shader_viewer)
 
@@ -635,7 +645,7 @@ class ShaderLibrary(solstice_windows.Window, object):
         self._asset_viewer.setMinimumWidth(420)
 
         shader_splitter.addWidget(self._asset_viewer)
-        shader_splitter.addWidget(shader_widget)
+        shader_splitter.addWidget(shader_scroll)
 
         self._export_sel_btn.clicked.connect(self._export_selected_shaders)
         self._export_all_btn.clicked.connect(self._export_all_shaders)
@@ -849,6 +859,7 @@ class ShaderLibrary(solstice_windows.Window, object):
         exporter.exec_()
 
     @staticmethod
+    @utils.maya_undo
     def load_scene_shaders():
         """
         Loops through all tag data scene nodes and loads all necessary shaders into the current scene
@@ -857,12 +868,13 @@ class ShaderLibrary(solstice_windows.Window, object):
         """
 
         from solstice_pipeline.solstice_tools import solstice_outliner
-        reload(solstice_outliner)
-        
+
         tag_nodes = solstice_outliner.SolsticeOutliner.get_tag_data_nodes()
         if not tag_nodes or len(tag_nodes) <= 0:
             sp.logger.error('No tag nodes found in the current scene. Aborting shaders loading ...')
             return []
+
+        added_mats = list()
 
         for tag in tag_nodes:
             shaders = tag.get_shaders()
@@ -875,7 +887,10 @@ class ShaderLibrary(solstice_windows.Window, object):
                 sp.logger.error('No Hires group found for asset: {}'.format(tag.get_asset().node))
                 continue
 
-            hires_meshes = [obj for obj in cmds.listRelatives(hires_group, children=True, type='transform', shapes=False, noIntermediate=True, fullPath=True) if cmds.objExists(obj) and cmds.listRelatives(obj, shapes=True)]
+            hires_meshes = [obj for obj in
+                            cmds.listRelatives(hires_group, allDescendents=True, type='transform', shapes=False,
+                                               noIntermediate=True, fullPath=True) if
+                            cmds.objExists(obj) and cmds.listRelatives(obj, shapes=True)]
             if not hires_meshes or len(hires_meshes) <= 0:
                 sp.logger.error('No Hires meshes found for asset: {}'.format(tag.get_asset().node))
                 continue
@@ -897,11 +912,18 @@ class ShaderLibrary(solstice_windows.Window, object):
             for mesh in hires_meshes:
                 mesh_no_namespace = mesh.replace(namespace, '')
                 asset_group = mesh_no_namespace.split('|')[1]
-                asset_mesh = mesh_no_namespace.split('|')[-1]
-                group_mesh_name = '|{0}|{1}'.format(asset_group, asset_mesh)
+
+                hires_grp_no_namespace = hires_group.replace(namespace, '')
+                hires_split = mesh_no_namespace.split(hires_grp_no_namespace)
+
+                group_mesh_name = hires_split[-1]
+                group_mesh_name = '|{0}{1}'.format(asset_group, group_mesh_name)
+
                 for shader_mesh in shaders.keys():
                     if shader_mesh == group_mesh_name:
                         valid_meshes.append(mesh)
+                        break
+
             if len(valid_meshes) <= 0:
                 sp.logger.error('No valid meshes found on asset. Please contact TD!'.format(tag.get_asset()))
                 continue
@@ -928,15 +950,20 @@ class ShaderLibrary(solstice_windows.Window, object):
                 shading_info = mesh_info[1]
                 for shading_grp, materials in shading_info.items():
                     if not materials or len(materials) <= 0:
-                        sp.logger.error('No valid materials found on mesh {0} of asset {1}'.format(mesh, tag.get_asset()))
+                        sp.logger.error(
+                            'No valid materials found on mesh {0} of asset {1}'.format(mesh, tag.get_asset()))
+                        continue
+
+                    # If shading group already exists we do not create the material
+                    if cmds.objExists(shading_grp):
                         continue
 
                     for mat in materials:
 
-                        # TODO: This check is already done in load shader function. Remove?
-                        if not mat or cmds.objExists(mat):
-                            sp.logger.warning('Shader {} already exists on scene. Skipping creation ...'.format(mat))
+                        if not mat or mat in added_mats:
                             continue
+
+                        added_mats.append(mat)
 
                         sp.logger.debug('Loading Shader: {}'.format(mat))
                         valid_shader = ShaderLibrary.load_shader(mat)
@@ -944,26 +971,19 @@ class ShaderLibrary(solstice_windows.Window, object):
                             sp.logger.error('Error while loading shader {}'.format(mat))
 
                 # After materials are created we try to apply to the meshes
-                # mesh_transform = cmds.listRelatives(mesh, parent=True, fullPath=True)
-                # if mesh_transform:
-                #     mesh_transform = mesh_transform[0]
-                #     if not cmds.objExists(mesh_transform):
-                #         sp.logger.error('Mesh Transform {} does not exists in the scene!'.format(mesh_transform))
-                # else:
-                #     sp.logger.error('Mesh Shape {} has not a valid transform!'.format(mesh))
-                #     continue
-
                 try:
                     for shading_grp, materials in shading_info.items():
                         if not cmds.objExists(shading_grp):
                             for mat in materials:
                                 if not materials or len(materials) <= 0:
                                     continue
-                                sp.logger.error('Shading group {}  loaded from shader info does not exists!'.format(shading_grp))
+                                sp.logger.error(
+                                    'Shading group {}  loaded from shader info does not exists!'.format(shading_grp))
                                 shading_grp = mat + 'SG'
                                 sp.logger.error('Applying shading group based on nomenclature: {}'.format(shading_grp))
                                 if cmds.objExists(shading_grp):
-                                    sp.logger.error('Impossible to set shading group {0} to mesh {1}'.format(shading_grp, mesh))
+                                    sp.logger.error(
+                                        'Impossible to set shading group {0} to mesh {1}'.format(shading_grp, mesh))
                                     break
                         cmds.sets(mesh, edit=True, forceElement=shading_grp)
                         sp.logger.debug('Shading set {0} applied to mesh {1}'.format(shading_grp, mesh))
@@ -1001,4 +1021,4 @@ def run():
     # Update Solstice Project Environment Variable
     sp.update_solstice_project_path()
 
-    win = ShaderLibrary().show()
+    ShaderLibrary().show()

@@ -336,7 +336,10 @@ def dock_window(window_class):
 
     cmds.evalDeferred(lambda *args: cmds.workspaceControl(main_control, e=True, rs=True))
 
-    return win.run()
+    try:
+        return win.run()
+    except Exception:
+        return win.show()
 
 
 def center_widget_on_screen(widget):

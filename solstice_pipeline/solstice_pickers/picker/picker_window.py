@@ -20,11 +20,6 @@ from solstice_pipeline.solstice_pickers.picker import picker_utils as utils
 from solstice_pipeline.solstice_gui import solstice_windows
 from solstice_pipeline.solstice_pickers.picker import picker_widget
 
-import solstice_studiolibrarymaya
-solstice_studiolibrarymaya.registerItems()
-solstice_studiolibrarymaya.enableMayaClosedEvent()
-import solstice_studiolibrarymaya.mayalibrarywidget
-import solstice_studiolibrary.librarywidget
 
 global window_picker
 
@@ -140,6 +135,7 @@ class PickerWindow(QWidget, object):
         self.update_pickers()
 
     def update_namespaces(self):
+        self.namespace.clear()
         current_namespaces = cmds.namespaceInfo(listOnlyNamespaces=True, recurse=True)
         for ns in current_namespaces:
             if ns not in ['UI', 'shared']:
@@ -178,27 +174,6 @@ class PickerWindow(QWidget, object):
         self.body_picker = self.get_body_picker()
         self.facial_picker = self.get_facial_picker()
 
-        try:
-            self.pose_widget = solstice_studiolibrary.librarywidget.LibraryWidget.instance()
-        except Exception:
-            reload(solstice_studiolibrary.librarywidget)
-            self.pose_widget = solstice_studiolibrary.librarywidget.LibraryWidget.instance()
-
-        # solstice_project_folder = os.environ.get('SOLSTICE_PROJECT')
-        # if not os.path.exists(solstice_project_folder):
-        #     sp.update_solstice_project()
-        #     solstice_project_folder = os.environ.get('SOLSTICE_PROJECT')
-        # if solstice_project_folder and os.path.exists(solstice_project_folder):
-        #     solstice_assets = os.path.join(solstice_project_folder, 'Asset')
-        #     if os.path.exists(solstice_assets):
-        #         anims = os.path.join(solstice_assets, 'AnimationLibrary')
-        #         if os.path.exists(anims):
-        #             self.pose_widget.setPath(anims)
-        #         else:
-        #             self.pose_widget.setPath(solstice_assets)
-        #     else:
-        #         self.pose_widget.setPath(solstice_project_folder)
-
         if full_window:
 
             main_pickers_widget = QWidget()
@@ -208,12 +183,10 @@ class PickerWindow(QWidget, object):
             for picker in [self.body_picker, self.facial_picker]:
                 main_pickers_layout.addWidget(picker)
             self.add_tab(main_pickers_widget, 'Body & Facial')
-            self.add_tab(self.pose_widget, 'Pose Library')
 
         else:
             self.add_tab(self.body_picker, 'Body')
             self.add_tab(self.facial_picker, 'Facial')
-            self.add_tab(self.pose_widget, 'Pose Library')
 
     def run(self):
         return self
