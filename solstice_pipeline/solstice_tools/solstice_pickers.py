@@ -28,7 +28,7 @@ class SolsticePickers(solstice_windows.Window, object):
 
     name = 'Solstice_Pickers'
     title = 'Solstice Tools - Picker Tool'
-    version = '1.1'
+    version = '1.2'
 
     def __init__(self):
         super(SolsticePickers, self).__init__()
@@ -37,6 +37,8 @@ class SolsticePickers(solstice_windows.Window, object):
         super(SolsticePickers, self).custom_ui()
 
         self.set_logo('solstice_pickers_logo')
+
+        self.resize(300, 200)
 
         buttons_layout = QHBoxLayout()
         buttons_layout.setContentsMargins(5, 5, 5, 5)
@@ -59,55 +61,49 @@ class SolsticePickers(solstice_windows.Window, object):
             character_layout.addWidget(character_lbl)
             character_layout.addWidget(character_btn)
 
-        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+        # self.main_layout.addLayout(solstice_splitters.SplitterLayout())
 
-        anim_school_layout = QHBoxLayout()
-        anim_school_layout.setAlignment(Qt.AlignLeft)
-        self.main_layout.addLayout(anim_school_layout)
-        main_warning_layout = QVBoxLayout()
-        warning_layout = QHBoxLayout()
-        folder_warning_layout = QHBoxLayout()
-        warning_layout.setContentsMargins(2, 2, 2, 2)
-        warning_layout.setSpacing(2)
-        folder_warning_layout.setContentsMargins(2, 2, 2, 2)
-        folder_warning_layout.setSpacing(2)
-        main_warning_layout.addLayout(warning_layout)
-        main_warning_layout.addLayout(solstice_splitters.SplitterLayout())
-        main_warning_layout.addLayout(folder_warning_layout)
-        warning_lbl = QLabel()
-        warning_lbl.setPixmap(solstice_resource.pixmap('warning', category='icons'))
-        warning_info = QLabel('If you have problems opening Solstice Pickers, please contact Solstice TD team.\nMeanwhile, you can use Solstice Anim School Pickers.')
-        warning_layout.addWidget(warning_lbl)
-        warning_layout.addWidget(warning_info)
-        self.pickers_path_lbl = QLabel()
-        open_pickers_path_btn = QPushButton()
-        open_pickers_path_btn.setIcon(solstice_resource.icon('folder'))
-        folder_warning_layout.addWidget(self.pickers_path_lbl)
-        folder_warning_layout.addWidget(open_pickers_path_btn)
-        anim_school_btn = QPushButton()
-        anim_school_btn.setIconSize(QSize(50, 50))
-        anim_school_btn.setIcon(solstice_resource.icon('anim_school_logo'))
-        anim_school_btn.setMinimumSize(QSize(45, 45))
-        studio_library_btn = QPushButton()
-        studio_library_btn.setIconSize(QSize(50, 50))
-        studio_library_btn.setIcon(solstice_resource.icon('studio_library'))
-        studio_library_btn.setMinimumSize(QSize(45, 45))
-        documentation_btn = QPushButton()
-        documentation_btn.setIconSize(QSize(50, 50))
-        documentation_btn.setIcon(solstice_resource.icon('documentation'))
-        documentation_btn.setMinimumSize(QSize(45, 45))
-        anim_school_layout.addLayout(main_warning_layout)
-        anim_school_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
-        anim_school_layout.addWidget(anim_school_btn)
-        anim_school_layout.addWidget(studio_library_btn)
-        anim_school_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
-        anim_school_layout.addWidget(documentation_btn)
-        anim_school_btn.clicked.connect(self.open_anim_school_picker)
+        # anim_school_layout = QHBoxLayout()
+        # anim_school_layout.setAlignment(Qt.AlignLeft)
+        # self.main_layout.addLayout(anim_school_layout)
+        # main_warning_layout = QVBoxLayout()
+        # warning_layout = QHBoxLayout()
+        # folder_warning_layout = QHBoxLayout()
+        # warning_layout.setContentsMargins(2, 2, 2, 2)
+        # warning_layout.setSpacing(2)
+        # folder_warning_layout.setContentsMargins(2, 2, 2, 2)
+        # folder_warning_layout.setSpacing(2)
+        # main_warning_layout.addLayout(warning_layout)
+        # main_warning_layout.addLayout(solstice_splitters.SplitterLayout())
+        # main_warning_layout.addLayout(folder_warning_layout)
+        # warning_lbl = QLabel()
+        # warning_lbl.setPixmap(solstice_resource.pixmap('warning', category='icons'))
+        # warning_info = QLabel('If you have problems opening Solstice Pickers, please contact Solstice TD team.\nMeanwhile, you can use Solstice Anim School Pickers.')
+        # warning_layout.addWidget(warning_lbl)
+        # warning_layout.addWidget(warning_info)
+        # self.pickers_path_lbl = QLabel()
+        # open_pickers_path_btn = QPushButton()
+        # open_pickers_path_btn.setIcon(solstice_resource.icon('folder'))
+        # folder_warning_layout.addWidget(self.pickers_path_lbl)
+        # folder_warning_layout.addWidget(open_pickers_path_btn)
+        # anim_school_btn = QPushButton()
+        # anim_school_btn.setIconSize(QSize(50, 50))
+        # anim_school_btn.setIcon(solstice_resource.icon('anim_school_logo'))
+        # anim_school_btn.setMinimumSize(QSize(45, 45))
+        # documentation_btn = QPushButton()
+        # documentation_btn.setIconSize(QSize(50, 50))
+        # documentation_btn.setIcon(solstice_resource.icon('documentation'))
+        # documentation_btn.setMinimumSize(QSize(45, 45))
+        # anim_school_layout.addLayout(main_warning_layout)
+        # anim_school_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        # anim_school_layout.addWidget(anim_school_btn)
+        # anim_school_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        # anim_school_layout.addWidget(documentation_btn)
+        # anim_school_btn.clicked.connect(self.open_anim_school_picker)
 
         self._update_pickers_label()
-        studio_library_btn.clicked.connect(self._open_studio_library)
-        open_pickers_path_btn.clicked.connect(self._open_pickers_folder)
-        documentation_btn.clicked.connect(self._open_pickers_documentation)
+        # open_pickers_path_btn.clicked.connect(self._open_pickers_folder)
+        # documentation_btn.clicked.connect(self._open_pickers_documentation)
 
     def open_picker(self, character_name):
         command = 'from solstice_pipeline.solstice_pickers.{0} import picker;reload(picker);picker.run(full_window=False);'.format(character_name)
@@ -182,7 +178,8 @@ class SolsticePickers(solstice_windows.Window, object):
         if not os.path.exists(anim_school_pickers_folder):
             sp.logger.warning('Solstice Pickers for Anim School Picker not found!')
         else:
-            self.pickers_path_lbl.setText('Pickers Path: {}'.format(anim_school_pickers_folder))
+            pass
+            # self.pickers_path_lbl.setText('Pickers Path: {}'.format(anim_school_pickers_folder))
 
     def _open_pickers_folder(self):
         sp.logger.debug('Opening Pickers Folder')
@@ -202,7 +199,7 @@ class SolsticePickers(solstice_windows.Window, object):
             solstice_python_utils.open_file(anim_school_pickers_folder)
 
     def _open_pickers_documentation(self):
-        pickers_documentation_url = 'https://solstice-short-film.gitbook.io/solstice/solstice-tools/solstice-pickers/'
+        pickers_documentation_url = 'https://tpoveda.github.io/solstice/solsticepipeline/solsticetools/solsticepickers/'
         solstice_python_utils.open_web(pickers_documentation_url)
 
     def _open_studio_library(self):
@@ -245,4 +242,4 @@ class SolsticePickers(solstice_windows.Window, object):
         utils.load_script('vl_contextualMenuBuilder.mel')
 
 def run():
-    win = SolsticePickers().show()
+    SolsticePickers().show()

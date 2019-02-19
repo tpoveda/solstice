@@ -101,7 +101,7 @@
             },
             {
                 "icon": "picker.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_pickers; solstice_pickers.run();",
+                "command": "from solstice_pipeline.solstice_tools import solstice_pickers; reload(solstice_pickers); solstice_pickers.run();",
                 "annotation": "Solstice Pickers",
                 "label": ""
             },
