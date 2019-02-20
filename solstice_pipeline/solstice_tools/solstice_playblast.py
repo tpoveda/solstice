@@ -9,10 +9,12 @@
 import os
 import re
 import sys
+import ast
 import math
 import glob
 import json
 import tempfile
+import datetime
 import contextlib
 from functools import partial
 from collections import OrderedDict
@@ -30,12 +32,13 @@ import maya.api.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_dialog, solstice_label, solstice_buttons
-from solstice_pipeline.solstice_gui import  solstice_accordion, solstice_sync_dialog, solstice_splitters
+from solstice_pipeline.solstice_gui import solstice_accordion, solstice_sync_dialog, solstice_splitters
 from solstice_pipeline.solstice_gui import solstice_color
 from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
 from solstice_pipeline.solstice_utils import solstice_python_utils as python
 from solstice_pipeline.solstice_utils import solstice_qt_utils
 from solstice_pipeline.resources import solstice_resource
+
 
 
 # ========================================================================================================
@@ -100,7 +103,7 @@ ViewportOptions = {
     "nParticles": False,
     "nRigids": False,
     "dynamicConstraints": False,
-    "locators": False,
+    "locators": True,                   # We need to enable this option by default so Mask plugin can is showed
     "manipulators": False,
     "dimensions": False,
     "handles": False,
@@ -210,6 +213,52 @@ class ScaleSettings(object):
     SCALE_RENDER_SETTINGS = 'From Render Settings'
     SCALE_CUSTOM = 'Custom'
 
+# ========================================================================================================
+
+_registered_tokens = dict()
+
+def format_tokens(token_str, attrs_dict):
+    """
+    Replace the tokens with the given strings
+    :param token_str: str, filename of the playbalst with tokens
+    :param attrs_dict: dict, parsed capture options
+    :return: str, formatted filename with all tokens resolved
+    """
+
+    if not token_str:
+        return token_str
+
+    for token, value in _registered_tokens.items():
+        if token in token_str:
+            fn = value['fn']
+            token_str = token_str.replace(token, fn(attrs_dict))
+
+    return token_str
+
+
+def register_token(token, fn, label=''):
+    assert token.startswith('<') and token.endswith('>')
+    assert callable(fn)
+    _registered_tokens[token] = {'fn': fn, 'label': label}
+
+
+def list_tokens():
+    return _registered_tokens.keys()
+
+
+def camera_token(attrs_dict):
+    """
+    Returns short name of camera from options
+    :param attrs_dict: dict, parsed capture options
+    """
+
+    camera = attrs_dict['camera']
+    camera = camera.rsplit('|', 1)[-1]
+    camera = camera.replace(':', '_')
+
+    return camera
+
+# ========================================================================================================
 
 class SolsticePlayblastWidget(QWidget, object):
 
@@ -481,6 +530,10 @@ class SolsticeTimeRange(SolsticePlayblastWidget, object):
     def initialize(self):
         self._register_callbacks()
 
+    def closeEvent(self, event):
+        self.uninitialize()
+        event.accept()
+
     def uninitialize(self):
         self._remove_callbacks()
 
@@ -535,7 +588,6 @@ class SolsticeCameras(SolsticePlayblastWidget, object):
         self.refresh.setIcon(refresh_icon)
         self.refresh.setToolTip('Refresh the list of cameras')
         self.refresh.setStatusTip('Refresh the list of cameras')
-
 
         for widget in [self.refresh, self.cameras, self.get_active]:
             self.main_layout.addWidget(widget)
@@ -1352,6 +1404,270 @@ class SolsticePanZoom(SolsticePlayblastWidget, object):
         return {'pan_zoom': self.pan_zoom.isChecked()}
 
 
+class RecentPlayblastAction(QAction, object):
+    def __init__(self, parent, file_path):
+        super(RecentPlayblastAction, self).__init__(parent)
+
+        action_lbl = os.path.basename(file_path)
+
+        self.setText(action_lbl)
+        self.setData(file_path)
+
+        self.setEnabled(os.path.isfile(file_path))
+
+        info = QFileInfo(file_path)
+        icon_provider = QFileIconProvider()
+        self.setIcon(icon_provider.icon(info))
+
+        self.triggered.connect(self._on_open_object_data)
+
+    def _on_open_object_data(self):
+        python.open_file(self.data())
+
+
+class SolsticeSave(SolsticePlayblastWidget, object):
+    """
+    Allows user to set playblast display settings
+    """
+
+    id = 'Save'
+    max_recent_playblasts = 5
+
+    def __init__(self, parent=None):
+        super(SolsticeSave, self).__init__(parent=parent)
+
+        self._recent_playblasts = list()
+
+    def get_main_layout(self):
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        return layout
+
+    def custom_ui(self):
+        super(SolsticeSave, self).custom_ui()
+
+        self.save_file = QCheckBox('Save')
+        self.open_viewer = QCheckBox('Open Viewer when finished')
+        self.raw_frame_numbers = QCheckBox('Raw Frame Numbers')
+
+        cbx_layout = QHBoxLayout()
+        cbx_layout.setContentsMargins(5, 0, 5, 0)
+        cbx_layout.addWidget(self.save_file)
+        cbx_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        cbx_layout.addWidget(self.open_viewer)
+        cbx_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        cbx_layout.addWidget(self.raw_frame_numbers)
+        cbx_layout.addStretch(True)
+
+        self.play_recent_widget = QWidget()
+        play_recent_layout = QVBoxLayout()
+        self.play_recent_widget.setLayout(play_recent_layout)
+        self.play_recent = QPushButton('Play recent playblast')
+        self.recent_menu = QMenu()
+        self.play_recent.setMenu(self.recent_menu)
+        play_recent_layout.addWidget(self.play_recent)
+        cbx_layout.addWidget(self.play_recent_widget)
+
+
+        self.path_widget = QWidget()
+        self.path_widget.setEnabled(False)
+        path_layout = QVBoxLayout()
+        path_layout.setContentsMargins(0, 0, 0, 0)
+        path_layout.setSpacing(0)
+        path_base_layout = QHBoxLayout()
+        path_base_layout.setContentsMargins(0, 0, 0, 0)
+        path_base_layout.setSpacing(0)
+        path_layout.addLayout(path_base_layout)
+        self.path_widget.setLayout(path_layout)
+        path_lbl = QLabel('Path: ')
+        path_lbl.setFixedWidth(30)
+        self.file_path = QLineEdit()
+        tip = 'Right click in the text filed to insert tokens'
+        self.file_path.setToolTip(tip)
+        self.file_path.setStatusTip(tip)
+        self.file_path.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.file_path.customContextMenuRequested.connect(self._on_show_token_menu)
+        browse_icon = solstice_resource.icon('open')
+        self.browse = QPushButton()
+        self.browse.setIcon(browse_icon)
+        self.browse.setFixedWidth(30)
+        self.browse.setToolTip('Playblast Save Path')
+        self.browse.setStatusTip('Playblast Save Path')
+        path_base_layout.addWidget(path_lbl)
+        path_base_layout.addWidget(self.file_path)
+        path_base_layout.addWidget(self.browse)
+
+        self.main_layout.addLayout(cbx_layout)
+        self.main_layout.addWidget(self.path_widget)
+        self.main_layout.addWidget(self.play_recent_widget)
+
+        self.browse.clicked.connect(self._on_show_browse)
+        self.file_path.textChanged.connect(self.optionsChanged)
+        self.save_file.stateChanged.connect(self.optionsChanged)
+        self.raw_frame_numbers.stateChanged.connect(self.optionsChanged)
+        self.save_file.stateChanged.connect(self._on_save_changed)
+
+        self._on_save_changed()
+
+    def get_inputs(self, as_preset=False):
+        inputs = {
+            'name': self.file_path.text(),
+            'save_file': self.save_file.isChecked(),
+            'open_finished': self.open_viewer.isChecked(),
+            'recent_playblasts': self._recent_playblasts,
+            'raw_frame_numbers': self.raw_frame_numbers.isChecked()
+        }
+
+        if as_preset:
+            inputs['recent_playblasts'] = list()
+
+        return inputs
+
+    def get_outputs(self):
+        output = {'filename': None,
+                  'raw_frame_numbers': self.raw_frame_numbers.isChecked(),
+                  'viewer': self.open_viewer.isChecked()}
+
+        save = self.save_file.isChecked()
+        if not save:
+            return output
+
+        save_path = self.file_path.text()
+        if not save_path:
+            scene = utils.get_current_scene_name()
+            time_stamp = datetime.datetime.today()
+            str_time_stamp = time_stamp.strftime("%d-%m-%Y_%H-%M-%S")
+            save_path = '{}_{}'.format(scene, str_time_stamp)
+
+        output['filename'] = save_path
+
+        return output
+
+    def apply_inputs(self, attrs_dict):
+        directory = attrs_dict.get('name', None)
+        save_file = attrs_dict.get('save_file', True)
+        open_finished = attrs_dict.get('open_finished', True)
+        raw_frame_numbers = attrs_dict.get('raw_frame_numbers', False)
+        prev_playblasts = attrs_dict.get('recent_playblasts', list())
+
+        print(save_file)
+
+        self.save_file.setChecked(bool(save_file))
+        self.open_viewer.setChecked(bool(open_finished))
+        self.raw_frame_numbers.setChecked(bool(raw_frame_numbers))
+
+        for playblast in reversed(prev_playblasts):
+            self.add_playblast(playblast)
+
+        self.file_path.setText(directory)
+
+    def add_playblast(self, item):
+        """
+        Adds an item into the playblast menu
+        :param item: str, full path to a playblast file
+        """
+
+        if item in self._recent_playblasts:
+            self._recent_playblasts.remove(item)
+
+        self._recent_playblasts.insert(0, item)
+
+        if len(self._recent_playblasts) > self.max_recent_playblasts:
+            del self._recent_playblasts[self.max_recent_playblasts:]
+
+        self.recent_menu.clear()
+        for playblast in self._recent_playblasts:
+            action = RecentPlayblastAction(parent=self, file_path=playblast)
+            self.recent_menu.addAction(action)
+
+    def on_playblast_finished(self, options):
+        """
+        Takes action after the play blast is completed
+        :param options:
+        """
+
+        print('lyablast finished ...')
+        print(options)
+
+        playblast_file = options['filename']
+        if not playblast_file:
+            return
+
+        self.add_playblast(playblast_file)
+
+    def _token_menu(self):
+        """
+        Internal function that builds the token menu based on the registered tokens
+        :return: QMenu
+        """
+
+        menu = QMenu(self)
+        registered_tokens = list_tokens()
+        for token, value in _registered_tokens.items():
+            lbl = '{} \t{}'.format(token, value['label'])
+            action = QAction(lbl, menu)
+            action.triggered.connect(partial(self.file_path.insert, token))
+            menu.addAction(action)
+
+        return menu
+
+    def _on_show_browse(self, path=None):
+        """
+        Internal function used to set the path of the playblast file
+        :param path: str
+        """
+
+        if path is None:
+            scene_path = cmds.file(query=True, sceneName=True)
+            default_filename = os.path.splitext(os.path.basename(scene_path))[0]
+            if not default_filename:
+                default_filename = 'playblast'
+
+            # default_root = os.path.normpath(utils.get_project_rule('images'))
+            # default_path = os.path.join(default_root, default_filename)
+            default_path = sp.get_solstice_project_path()
+            path = cmds.fileDialog2(fileMode=0, dialogStyle=2, startingDirectory=default_path)
+
+        if not path:
+            return
+
+        if isinstance(path, (tuple, list)):
+            path = path[0]
+
+        if path.endswith('.*'):
+            path = path[:-2]
+
+        # Fix for playblasts that result in nesting of the extension (eg. '.mov.mov.mov') which happens if the format
+        # is defined in the filename used for saving.
+        ext = os.path.splitext(path)[-1]
+        if ext:
+            path = path[:-len(ext)]
+
+        path = os.path.normpath(path)
+
+        self.file_path.setText(path)
+        self.file_path.setCursorPosition(0)
+
+    def _on_save_changed(self):
+        """
+        Internal function used to update the visibility of the path field
+        """
+
+        if self.save_file.isChecked():
+            self.path_widget.setEnabled(True)
+        else:
+            self.path_widget.setEnabled(False)
+
+    def _on_show_token_menu(self, pos):
+        """
+        Internal function that shows a custom menu
+        """
+
+        menu = self._token_menu()
+        global_pos = QPoint(self.file_path.mapToGlobal(pos))
+        menu.exec_(global_pos)
+
+
 class SolsticeMaskObject(object):
 
     mask_plugin = 'solstice_playblast.py'
@@ -1366,7 +1682,7 @@ class SolsticeMaskObject(object):
     def create_mask(cls):
         if not cmds.pluginInfo('solstice_playblast.py', query=True, loaded=True):
             try:
-                cmds.loadPlugin(cls.mask_plugin)
+                cmds.loadPlugin(os.path.abspath(__file__))
             except Exception:
                 sp.logger.error('Failed to load SolsticeMask plugin!')
                 return
@@ -1425,10 +1741,13 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
     def __init__(self, parent=None):
         super(SolsticeMaskWidget, self).__init__(parent=parent)
 
+        self._mask = None
+
     def custom_ui(self):
         super(SolsticeMaskWidget, self).custom_ui()
 
         self.enable_mask_cbx = QCheckBox('Enable')
+        self.enable_mask_cbx.setEnabled(True)
         self.main_layout.addWidget(self.enable_mask_cbx)
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
 
@@ -1546,6 +1865,7 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         self.main_layout.addWidget(counter_group)
 
         self.enable_cbx = QCheckBox('Enable: ')
+        self.enable_mask_cbx.setChecked(True)
         grid_layout_3 = QGridLayout()
         counter_layout.addWidget(self.enable_cbx)
         counter_layout.addLayout(grid_layout_3)
@@ -1570,11 +1890,106 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         grid_layout_3.addWidget(self.align_combo, 0, 1)
         grid_layout_3.addWidget(self.padding_spn, 1, 1)
 
-    def apply_inputs(self, attr_dict):
-        pass
+        self.enable_mask_cbx.stateChanged.connect(self.optionsChanged)
+        self.top_left_line.textChanged.connect(self.optionsChanged)
+        self.top_center_line.textChanged.connect(self.optionsChanged)
+        self.top_right_line.textChanged.connect(self.optionsChanged)
+        self.bottom_left_line.textChanged.connect(self.optionsChanged)
+        self.bottom_center_line.textChanged.connect(self.optionsChanged)
+        self.bottom_right_line.textChanged.connect(self.optionsChanged)
+        self.color_btn.colorChanged.connect(self.optionsChanged)
+        self.alpha_btn.colorChanged.connect(self.optionsChanged)
+        self.scale_spn.valueChanged.connect(self.optionsChanged)
+        self.top_cbx.stateChanged.connect(self.optionsChanged)
+        self.bottom_cbx.stateChanged.connect(self.optionsChanged)
+        self.border_color_btn.colorChanged.connect(self.optionsChanged)
+        self.border_alpha_btn.colorChanged.connect(self.optionsChanged)
+        self.border_scale_spn.valueChanged.connect(self.optionsChanged)
+        self.enable_cbx.stateChanged.connect(self.optionsChanged)
+        self.align_combo.currentIndexChanged.connect(self.optionsChanged)
+        self.padding_spn.valueChanged.connect(self.optionsChanged)
 
-    def get_outputs(self):
-        return {}
+    def apply_inputs(self, attr_dict):
+
+        enable = attr_dict.get('enable', True)
+        top_left = attr_dict.get('top_left', '')
+        top_center = attr_dict.get('top_center', '')
+        top_right = attr_dict.get('top_right', '')
+        bottom_left = attr_dict.get('bottom_left', '')
+        bottom_center = attr_dict.get('bottom_center', '')
+        bottom_right = attr_dict.get('bottom_right', '')
+        color = attr_dict.get('color', (255, 255, 255, 255))
+        transparency = attr_dict.get('transparency', (255, 255, 255, 255))
+        scale = attr_dict.get('scale', 1.0)
+        top_border = attr_dict.get('top_border', True)
+        bottom_border = attr_dict.get('bottom_border', True)
+        border_color = attr_dict.get('border_color', (0, 0, 0, 0))
+        border_transparency = attr_dict.get('border_transparency', (255, 255, 255, 255))
+        border_scale = attr_dict.get('border_scale', 1.0)
+        enable_counter = attr_dict.get('enable_counter', True)
+        counter_align = attr_dict.get('counter_align', 0)
+        counter_padding = attr_dict.get('counter_padding', 1)
+
+        if type(color) not in [list, tuple]:
+            color = ast.literal_eval(color)
+        if type(transparency) not in [list, tuple]:
+            transparency = ast.literal_eval(transparency)
+        if type(border_color) not in [list, tuple]:
+            border_color = ast.literal_eval(border_color)
+        if type(border_transparency) not in [list, tuple]:
+            border_transparency = ast.literal_eval(border_transparency)
+
+        self.enable_mask_cbx.setChecked(bool(enable))
+        self.top_left_line.setText(top_left)
+        self.top_center_line.setText(top_center)
+        self.top_right_line.setText(top_right)
+        self.bottom_left_line.setText(bottom_left)
+        self.bottom_center_line.setText(bottom_center)
+        self.bottom_right_line.setText(bottom_right)
+        self.color_btn.color = QColor(*color)
+        self.alpha_btn.color =QColor(*transparency)
+        self.scale_spn.setValue(float(scale))
+        self.top_cbx.setChecked(bool(top_border))
+        self.bottom_cbx.setChecked(bool(bottom_border))
+        self.border_color_btn.color = QColor(*border_color)
+        self.border_alpha_btn.color = QColor(*border_transparency)
+        self.border_scale_spn.setValue(float(border_scale))
+        self.enable_cbx.setChecked(bool(enable_counter))
+        self.align_combo.setCurrentIndex(int(counter_align))
+        self.padding_spn.setValue(int(counter_padding))
+
+    def get_inputs(self, as_preset=False):
+
+        inputs = {
+            'enable': self.enable_mask_cbx.isChecked(),
+            'top_left': self.top_left_line.text(),
+            'top_center': self.top_center_line.text(),
+            'top_right': self.top_right_line.text(),
+            'bottom_left': self.bottom_left_line.text(),
+            'bottom_center': self.bottom_center_line.text(),
+            'bottom_right': self.bottom_right_line.text(),
+            'color': self.color_btn.color.toTuple(),
+            'transparency': self.alpha_btn.color.toTuple(),
+            'scale': self.scale_spn.value(),
+            'top_border': self.top_cbx.isChecked(),
+            'bottom_border': self.bottom_cbx.isChecked(),
+            'border_color': self.border_color_btn.color.toTuple(),
+            'border_transparency': self.border_alpha_btn.color.toTuple(),
+            'border_scale': self.border_scale_spn.value(),
+            'enable_counter': self.enable_cbx.isChecked(),
+            'counter_align': self.align_combo.currentIndex(),
+            'counter_padding': self.padding_spn.value()
+        }
+
+        return inputs
+
+    def on_playblast_finished(self, options):
+        SolsticeMaskObject.delete_mask()
+
+    def create_mask(self, *args, **kwargs):
+        SolsticeMaskObject.create_mask()
+        mask = SolsticeMaskObject.get_mask()
+        print(mask)
 
 
 class DefaultPlayblastOptions(SolsticePlayblastWidget, object):
@@ -1684,27 +2099,21 @@ class PlayblastPreview(QWidget, object):
         self.preview.setFixedWidth(self.__DEFAULT_WIDTH__)
         self.preview.setFixedHeight(self.__DEFAULT_HEIGHT__)
 
-        tip = 'Click to refresh playblast preview'
-        self.preview.setToolTip(tip)
-        self.preview.setStatusTip(tip)
-
         self.layout = QVBoxLayout()
         self.layout.setAlignment(Qt.AlignHCenter)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.layout)
         self.layout.addWidget(self.preview)
 
-        open_playblasts_folder_icon = solstice_resource.icon('movies_folder')
-        self.open_playblasts_folder_btn = QPushButton()
-        self.open_playblasts_folder_btn.setIcon(open_playblasts_folder_icon)
-        self.open_playblasts_folder_btn.setFixedWidth(25)
-        self.open_playblasts_folder_btn.setFixedHeight(25)
-        self.open_playblasts_folder_btn.setIconSize(QSize(25, 25))
-        self.open_playblasts_folder_btn.setToolTip('Open Playblasts Folder')
-        self.open_playblasts_folder_btn.setStatusTip('Open Playblasts Folder')
-        self.open_playblasts_folder_btn.setParent(self.preview)
-        self.open_playblasts_folder_btn.setStyleSheet("background-color: rgba(255, 255, 255, 0); border: 0px solid rgba(255,255,255,0);")
-        self.open_playblasts_folder_btn.move(5, 5)
+        # open_playblasts_folder_icon = solstice_resource.icon('movies_folder')
+        # self.open_playblasts_folder_btn = QPushButton()
+        # self.open_playblasts_folder_btn.setIcon(open_playblasts_folder_icon)
+        # self.open_playblasts_folder_btn.setFixedWidth(25)
+        # self.open_playblasts_folder_btn.setFixedHeight(25)
+        # self.open_playblasts_folder_btn.setIconSize(QSize(25, 25))
+        # self.open_playblasts_folder_btn.setParent(self.preview)
+        # self.open_playblasts_folder_btn.setStyleSheet("background-color: rgba(255, 255, 255, 0); border: 0px solid rgba(255,255,255,0);")
+        # self.open_playblasts_folder_btn.move(5, 5)
 
         sync_icon = solstice_resource.icon('sync')
         self.sync_preview_btn = QPushButton()
@@ -1716,10 +2125,12 @@ class PlayblastPreview(QWidget, object):
         self.sync_preview_btn.setStatusTip('Sync Preview')
         self.sync_preview_btn.setParent(self.preview)
         self.sync_preview_btn.setStyleSheet("background-color: rgba(255, 255, 255, 0); border: 0px solid rgba(255,255,255,0);")
-        self.sync_preview_btn.move(32, 5)
+        # self.sync_preview_btn.move(32, 5)
+        self.sync_preview_btn.move(5, 5)
 
         # self.preview.clicked.connect(self.refresh)
         self.sync_preview_btn.clicked.connect(self.refresh)
+        # self.open_playblasts_folder_btn.clicked.connect(self.open_playblasts_folder)
 
     def showEvent(self, event):
         self.refresh()
@@ -1830,6 +2241,7 @@ class PlayblastPreset(QWidget, object):
         self.load.clicked.connect(self.import_preset)
         self.preset_config.clicked.connect(self.configOpened)
         self.presets.currentIndexChanged.connect(self.load_active_preset)
+        self.open_templates_folder_btn.clicked.connect(self.open_templates_folder)
 
         solstice_presets_folder = os.path.normpath(os.path.join(sp.get_solstice_project_path(), 'Assets', 'Scripts', 'PIPELINE', '__working__', 'PlayblastPresets'))
         if not os.path.exists(solstice_presets_folder):
@@ -2010,6 +2422,14 @@ class PlayblastPreset(QWidget, object):
 
         return preset
 
+    def open_templates_folder(self):
+        """
+        Opens folder where templates are stored
+        :return:
+        """
+
+        python.open_folder(os.path.dirname(self._default_browse_path()))
+
     def _process_presets(self):
         """
         Adds all preset files from preset paths
@@ -2067,16 +2487,9 @@ class SolsticeTemplateConfiguration(solstice_dialog.Dialog, object):
         self.setMinimumHeight(810)
         self.setMaximumWidth(400)
 
-        self.tab = QTabWidget()
-        self.main_layout.addWidget(self.tab)
-
         self.options_widget = solstice_accordion.AccordionWidget(parent=self)
         self.options_widget.rollout_style = solstice_accordion.AccordionStyle.MAYA
-        self.tab.addTab(self.options_widget, 'Options')
-
-        self.mask_widget = solstice_accordion.AccordionWidget(parent=self)
-        self.mask_widget.rollout_style = solstice_accordion.AccordionStyle.MAYA
-        self.tab.addTab(self.mask_widget, 'Mask')
+        self.main_layout.addWidget(self.options_widget)
 
         self.codec = SolsticeCodec()
         self.renderer = SolsticeRenderer()
@@ -2093,13 +2506,6 @@ class SolsticeTemplateConfiguration(solstice_dialog.Dialog, object):
             self.playblast_config_widgets.append(widget)
             if item is not None:
                 widget.labelChanged.connect(item.setTitle)
-
-        self.mask = SolsticeMaskWidget()
-        self.mask.initialize()
-        item = self.mask_widget.add_item(self.mask.id, self.mask)
-        self.playblast_config_widgets.append(self.mask)
-        if item is not None:
-            self.mask.labelChanged.connect(item.setTitle)
 
 
 class SolsticePlayBlast(solstice_windows.Window, object):
@@ -2118,6 +2524,13 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         self.playblast_widgets = list()
         self.config_dialog = None
 
+        register_token('<Camera>', camera_token, label='Insert camera name')
+        register_token('<Scene>', lambda attrs_dict: utils.get_current_scene_name() or 'playblast', label='Insert current scene name')
+        register_token('<RenderLayer>', lambda attrs_dict: utils.get_current_render_layer(), label='Insert active render layer name')
+        register_token('<Images>', lambda attrs_dict: utils.get_project_rule('images'), label='Insert image directory of set project')
+        register_token('<Movies>', lambda attrs_dict: utils.get_project_rule('movie'), label='Insert movies directory of set project')
+        register_token('<Solstice>', lambda attrs_dict: sp.get_solstice_project_path(), label='Insert Solstice project path')
+
         super(SolsticePlayBlast, self).__init__()
 
 
@@ -2126,12 +2539,12 @@ class SolsticePlayBlast(solstice_windows.Window, object):
 
         self.set_logo('solstice_playblast_logo')
 
-        self.setMinimumHeight(545)
-        self.setMinimumWidth(380)
+        self.setMinimumHeight(710)
+        self.setMinimumWidth(445)
 
         # ========================================================================================================
 
-        self._build_configuration_dialog()
+        # self._build_configuration_dialog()
 
         # ========================================================================================================
 
@@ -2158,12 +2571,18 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         self.time_range = SolsticeTimeRange()
         self.cameras = SolsticeCameras()
         self.resolution = SolsticeResolution()
+        self.mask = SolsticeMaskWidget()
+        self.save = SolsticeSave()
 
-        for widget in [self.cameras, self.resolution, self.time_range]:
+        for widget in [self.cameras, self.resolution, self.time_range, self.mask, self.save]:
             widget.initialize()
             widget.optionsChanged.connect(self._on_update_settings)
             self.playblastFinished.connect(widget.on_playblast_finished)
-            item = self.main_widget.add_item(widget.id, widget, collapsed=True)
+
+            if widget == self.save:
+                item = self.main_widget.add_item(widget.id, widget, collapsed=False)
+            else:
+                item = self.main_widget.add_item(widget.id, widget, collapsed=True)
             self.playblast_widgets.append(widget)
             if item is not None:
                 widget.labelChanged.connect(item.setTitle)
@@ -2171,6 +2590,8 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         # We force the reload of the camera plugin title
         self.cameras._on_update_label()
         self.resolution._on_resolution_changed()
+
+        self.playblastStart.connect(self.mask.create_mask)
 
         # ========================================================================================================
 
@@ -2182,12 +2603,13 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         self.preset_widget.presetLoaded.connect(self.apply_inputs)
         self.apply_inputs(inputs=self._read_configuration())
 
-    def cleanup(self):
-        super(SolsticePlayBlast, self).cleanup()
+    def closeEvent(self, event):
+        self.cleanup()
         self._store_configuration()
-        for widget in self.playblast_widgets:
-            if hasattr(widget, 'uninitialize'):
-                widget.uninitialize()
+    #     for widget in self.playblast_widgets:
+    #         if hasattr(widget, 'uninitialize'):
+    #             widget.uninitialize()
+        event.accept()
 
     def validate(self):
         errors = list()
@@ -2253,9 +2675,11 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         Shows advanced configuration dialog
         """
 
+        self._build_configuration_dialog()
+
         geometry = self.geometry()
         self.config_dialog.move(QPoint(geometry.x() + 30, geometry.y()))
-        self.config_dialog.show()
+        self.config_dialog.exec_()
 
     def _read_configuration(self):
         inputs = dict()
@@ -2309,7 +2733,7 @@ class SolsticePlayBlast(solstice_windows.Window, object):
         options['filename'] = filename
         options['filename'] = capture_scene(options=options)
 
-        self.playblastFinished.emit(filename)
+        self.playblastFinished.emit(options)
 
         filename = options['filename']
 
@@ -2403,6 +2827,15 @@ def capture(**kwargs):
             utils.isolated_nodes(nodes=isolate, panel=panel),
             utils.reset_time()
         ):
+            
+
+
+            # Only image format supports raw frame numbers
+            # so we ignore the state when calling it with a movie
+            # format
+            if format != "image" and raw_frame_numbers:
+                sp.logger.warning("Capturing to image format with raw frame numbers is not supported. Ignoring raw frame numbers...")
+                raw_frame_numbers = False
 
             output = cmds.playblast(
                 compression=compression,
@@ -2698,6 +3131,7 @@ def _applied_viewport_options(options, panel):
     options = dict(ViewportOptions, **(options or {}))
     playblast_widgets = cmds.pluginDisplayFilter(query=True, listFilters=True)
     widget_options = dict()
+
     for widget in playblast_widgets:
         if widget in options:
             widget_options[widget] = options.pop(widget)
@@ -3038,8 +3472,6 @@ class SolsticeMaskDrawOverride(OpenMayaRender.MPxDrawOverride, object):
         draw_manager.setFontSize(int((border_height - border_height * 0.15) * data.font_scale))
         draw_manager.setColor(data.font_color)
 
-        print(data.border_color)
-
         if data.top_border:
             self.draw_border(draw_manager, OpenMaya.MPoint(mask_x, mask_top_y - border_height), background_size, data.border_color)
         if data.bottom_border:
@@ -3120,4 +3552,4 @@ def uninitializePlugin(obj):
 
 
 def run():
-    win = SolsticePlayBlast().show()
+    SolsticePlayBlast().show()

@@ -111,7 +111,6 @@ class Window(QMainWindow, object):
         if not self.statusBar().has_url():
             self.statusBar().hide_info()
 
-
         for widget in self.parent().findChildren(QMainWindow):
             if widget is not self:
                 if widget.objectName() == self.objectName():
@@ -205,9 +204,9 @@ class Window(QMainWindow, object):
         self.cleanup()
         event.accept()
 
-    def deleteLater(self):
-        self.cleanup()
-        super(Window, self).deleteLater()
+    # def deleteLater(self):
+    #     self.cleanup()
+    #     super(Window, self).deleteLater()
 
 
 class DockWindow(QMainWindow, object):

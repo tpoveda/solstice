@@ -122,6 +122,7 @@
     "Added Solstice AnimShifter Tool to easily shift (move) anim keys",
     "Added Solstice Asset Viewer Tool",
     "Added Solstice Textures Relinker Tool with new functionalities",
-    "Studio Library now is located in a separated tool with custom functionality"
+    "Studio Library now is located in a separated tool with custom functionality",
+    "Added info button to window status bar"
   ]
 }

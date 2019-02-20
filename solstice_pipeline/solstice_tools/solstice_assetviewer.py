@@ -65,7 +65,7 @@ class SolsticeAssetViewer(QWidget, object):
             assets_path=sp.get_solstice_assets_path(),
             item_pressed_callback=self.update_asset_info,
             parent=self,
-            column_count=1,
+            column_count=2,
             show_only_published_assets=True
         )
 

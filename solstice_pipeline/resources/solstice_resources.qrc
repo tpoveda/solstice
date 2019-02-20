@@ -49,6 +49,7 @@
 		<file alias="import">icons/import.png</file>
 		<file alias="importer">icons/importer.png</file>
 		<file alias="info">icons/info.png</file>
+		<file alias="info1">icons/info1.png</file>
 		<file alias="info_square">icons/info_square.png</file>
 		<file alias="left_arrow">icons/left_arrow.png</file>
 		<file alias="left_arrow_disabled">icons/left_arrow_disabled.png</file>

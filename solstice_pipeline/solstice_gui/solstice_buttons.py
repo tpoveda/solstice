@@ -147,6 +147,9 @@ class CategoryButtonWidget(QWidget, object):
 
 
 class ColorButton(QPushButton, object):
+
+    colorChanged = Signal()
+
     def __init__(self, colorR=1.0, colorG=0.0, colorB=0.0, parent=None):
         super(ColorButton, self).__init__(parent=parent)
         self._color = QColor.fromRgbF(colorR, colorG, colorB)
@@ -168,6 +171,7 @@ class ColorButton(QPushButton, object):
             return
         new_color = cmds.colorEditor(query=True, rgbValue=True)
         self.color = QColor.fromRgbF(new_color[0], new_color[1], new_color[2])
+        self.colorChanged.emit()
 
     def _update_color(self):
         self.setStyleSheet('background-color:rgb({0},{1},{2});'.format(self._color.redF()*255, self._color.greenF()*255, self._color.blueF()*255))
