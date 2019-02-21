@@ -71,6 +71,12 @@
               "command": "from solstice_pipeline.solstice_tools import solstice_playblast; solstice_playblast.run();",
               "annotation": "Solstice Playblast",
               "label": ""
+          },
+         {
+          "icon": "solsticeanimshifter.png",
+          "command": "from solstice_pipeline.solstice_tools import solstice_animshifter; reload(solstice_animshifter); solstice_animshifter.run();",
+          "annotation": "Solstice Animation Shifter",
+          "label": ""
           }
         ],
         "anim":
@@ -140,6 +146,12 @@
                 "command": "from solstice_pipeline.solstice_tools import solstice_playblast; solstice_playblast.run();",
                 "annotation": "Solstice Playblast",
                 "label": ""
+            },
+             {
+              "icon": "solsticeanimshifter.png",
+              "command": "from solstice_pipeline.solstice_tools import solstice_animshifter; reload(solstice_animshifter); solstice_animshifter.run();",
+              "annotation": "Solstice Animation Shifter",
+              "label": ""
             }
         ],
         "light":

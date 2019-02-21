@@ -222,6 +222,8 @@ def clean_python_files(path):
     if os.path.exists(path):
         for parent, dirnames, filenames in os.walk(path):
             for fn in filenames:
+                if 'solstice_playblast' in fn.lower():
+                    continue
                 if fn.lower().endswith('.py') and 'userSetup' not in fn:
                     print('Removing file: {}'.format(fn))
                     os.remove(os.path.join(parent, fn))

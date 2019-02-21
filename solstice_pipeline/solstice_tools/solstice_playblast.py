@@ -1682,9 +1682,10 @@ class SolsticeMaskObject(object):
     def create_mask(cls):
         if not cmds.pluginInfo('solstice_playblast.py', query=True, loaded=True):
             try:
-                cmds.loadPlugin(os.path.abspath(__file__))
-            except Exception:
-                sp.logger.error('Failed to load SolsticeMask plugin!')
+                cmds.loadPlugin(os.path.realpath(__file__).replace('.pyc', '.py'))
+            except Exception as e:
+                sp.logger.error('Failed to load SolsticeMask plugin! | {}'.format(str(e)))
+                sp.logger.debug('Please import solstice_playblast.py plugin manually!')
                 return
 
         if not cls.get_mask():
