@@ -1746,9 +1746,23 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
     def custom_ui(self):
         super(SolsticeMaskWidget, self).custom_ui()
 
+        enable_layout = QHBoxLayout()
+        enable_layout.setContentsMargins(0, 0, 0, 0)
+        enable_layout.setSpacing(2)
+
         self.enable_mask_cbx = QCheckBox('Enable')
         self.enable_mask_cbx.setEnabled(True)
-        self.main_layout.addWidget(self.enable_mask_cbx)
+        create_mask_btn = QPushButton('Create')
+        delete_mask_btn = QPushButton('Delete')
+
+        enable_layout.addWidget(self.enable_mask_cbx)
+        enable_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        enable_layout.addLayout(solstice_splitters.SplitterLayout())
+        enable_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        enable_layout.addWidget(create_mask_btn)
+        enable_layout.addWidget(delete_mask_btn)
+
+        self.main_layout.addLayout(enable_layout)
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
 
         labels_layout = QVBoxLayout()
@@ -1765,6 +1779,7 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         bottom_left_lbl = QLabel('Bottom Left: ')
         bottom_center_lbl = QLabel('Bottom Center: ')
         bottom_right_lbl = QLabel('Bottom Right: ')
+        padding_text_lbl = QLabel('Text Padding: ')
         font_lbl = QLabel('Font: ')
         color_lbl = QLabel('Color: ')
         alpha_lbl = QLabel('Transparency: ')
@@ -1776,8 +1791,10 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         self.bottom_left_line = QLineEdit()
         self.bottom_center_line = QLineEdit()
         self.bottom_right_line = QLineEdit()
+        self.padding_text_spn = QSpinBox()
         self.font_line = QLineEdit()
         self.font_line.setReadOnly(True)
+        self.font_line.setText('Consolas')
         self.font_btn = QPushButton('...')
         self.color_btn = solstice_buttons.ColorButton(colorR=1, colorG=1, colorB=1)
         self.alpha_btn = solstice_buttons.ColorButton(colorR=1, colorG=1, colorB=1)
@@ -1794,10 +1811,11 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         grid_layout.addWidget(bottom_left_lbl, 3, 0, alignment=Qt.AlignLeft)
         grid_layout.addWidget(bottom_center_lbl, 4, 0, alignment=Qt.AlignLeft)
         grid_layout.addWidget(bottom_right_lbl, 5, 0, alignment=Qt.AlignLeft)
-        grid_layout.addWidget(font_lbl, 6, 0, alignment=Qt.AlignLeft)
-        grid_layout.addWidget(color_lbl, 7, 0, alignment=Qt.AlignLeft)
-        grid_layout.addWidget(alpha_lbl, 8, 0, alignment=Qt.AlignLeft)
-        grid_layout.addWidget(scale_lbl, 9, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(padding_text_lbl, 6, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(font_lbl, 7, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(color_lbl, 8, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(alpha_lbl, 9, 0, alignment=Qt.AlignLeft)
+        grid_layout.addWidget(scale_lbl, 10, 0, alignment=Qt.AlignLeft)
 
         grid_layout.addWidget(self.top_left_line, 0, 1)
         grid_layout.addWidget(self.top_center_line, 1, 1)
@@ -1805,12 +1823,12 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         grid_layout.addWidget(self.bottom_left_line, 3, 1)
         grid_layout.addWidget(self.bottom_center_line, 4, 1)
         grid_layout.addWidget(self.bottom_right_line, 5, 1)
-        grid_layout.addWidget(self.font_line, 6, 1)
-        grid_layout.addWidget(self.font_btn, 6, 2)
-        grid_layout.addWidget(self.font_btn, 6, 2)
-        grid_layout.addWidget(self.color_btn, 7, 1)
-        grid_layout.addWidget(self.alpha_btn, 8, 1)
-        grid_layout.addWidget(self.scale_spn, 9, 1)
+        grid_layout.addWidget(self.padding_text_spn, 6, 1)
+        grid_layout.addWidget(self.font_line, 7, 1)
+        grid_layout.addWidget(self.font_btn, 7, 2)
+        grid_layout.addWidget(self.color_btn, 8, 1)
+        grid_layout.addWidget(self.alpha_btn, 9, 1)
+        grid_layout.addWidget(self.scale_spn, 10, 1)
 
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
 
@@ -1864,19 +1882,19 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         counter_group.setLayout(counter_layout)
         self.main_layout.addWidget(counter_group)
 
-        self.enable_cbx = QCheckBox('Enable: ')
-        self.enable_mask_cbx.setChecked(True)
         grid_layout_3 = QGridLayout()
-        counter_layout.addWidget(self.enable_cbx)
         counter_layout.addLayout(grid_layout_3)
 
         align_lbl = QLabel('Alignment: ')
         padding_lbl = QLabel('Padding: ')
 
         self.align_combo = QComboBox()
+        self.align_combo.addItem('None')
         self.align_combo.addItem('Top-Left')
+        self.align_combo.addItem('Top-Center')
         self.align_combo.addItem('Top-Right')
         self.align_combo.addItem('Bottom-Left')
+        self.align_combo.addItem('Bottom-Center')
         self.align_combo.addItem('Bottom-Right')
         self.padding_spn = QSpinBox()
         self.padding_spn.setRange(1, 6)
@@ -1890,6 +1908,8 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         grid_layout_3.addWidget(self.align_combo, 0, 1)
         grid_layout_3.addWidget(self.padding_spn, 1, 1)
 
+        create_mask_btn.clicked.connect(self._on_create_mask)
+        delete_mask_btn.clicked.connect(self._on_delete_mask)
         self.enable_mask_cbx.stateChanged.connect(self.optionsChanged)
         self.top_left_line.textChanged.connect(self.optionsChanged)
         self.top_center_line.textChanged.connect(self.optionsChanged)
@@ -1905,9 +1925,31 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         self.border_color_btn.colorChanged.connect(self.optionsChanged)
         self.border_alpha_btn.colorChanged.connect(self.optionsChanged)
         self.border_scale_spn.valueChanged.connect(self.optionsChanged)
-        self.enable_cbx.stateChanged.connect(self.optionsChanged)
         self.align_combo.currentIndexChanged.connect(self.optionsChanged)
         self.padding_spn.valueChanged.connect(self.optionsChanged)
+        self.font_line.textChanged.connect(self.optionsChanged)
+        self.padding_text_spn.valueChanged.connect(self.optionsChanged)
+        self.font_btn.clicked.connect(self._on_select_font)
+
+        self.enable_mask_cbx.stateChanged.connect(self._on_update_enable_mask)
+        self.top_left_line.textChanged.connect(self._on_update_top_left_text)
+        self.top_center_line.textChanged.connect(self._on_update_top_center_text)
+        self.top_right_line.textChanged.connect(self._on_update_top_right_text)
+        self.bottom_left_line.textChanged.connect(self._on_update_bottom_left_text)
+        self.bottom_center_line.textChanged.connect(self._on_update_bottom_center_text)
+        self.bottom_right_line.textChanged.connect(self._on_update_bottom_right_text)
+        self.padding_text_spn.valueChanged.connect(self._on_update_text_padding)
+        self.font_line.textChanged.connect(self._on_update_font_name)
+        self.color_btn.colorChanged.connect(self._on_update_color)
+        self.alpha_btn.colorChanged.connect(self._on_update_transparency)
+        self.scale_spn.valueChanged.connect(self._on_update_font_scale)
+        self.top_cbx.stateChanged.connect(self._on_update_top_border)
+        self.bottom_cbx.stateChanged.connect(self._on_update_bottom_border)
+        self.border_color_btn.colorChanged.connect(self._on_update_border_color)
+        self.border_alpha_btn.colorChanged.connect(self._on_update_border_alpha)
+        self.border_scale_spn.valueChanged.connect(self._on_update_border_scale)
+        self.align_combo.currentIndexChanged.connect(self._on_update_counter_position)
+        self.padding_spn.valueChanged.connect(self._on_update_counter_padding)
 
     def apply_inputs(self, attr_dict):
 
@@ -1918,6 +1960,8 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         bottom_left = attr_dict.get('bottom_left', '')
         bottom_center = attr_dict.get('bottom_center', '')
         bottom_right = attr_dict.get('bottom_right', '')
+        font = attr_dict.get('font', 'Consolas')
+        text_padding = attr_dict.get('text_padding', 10)
         color = attr_dict.get('color', (255, 255, 255, 255))
         transparency = attr_dict.get('transparency', (255, 255, 255, 255))
         scale = attr_dict.get('scale', 1.0)
@@ -1926,7 +1970,6 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         border_color = attr_dict.get('border_color', (0, 0, 0, 0))
         border_transparency = attr_dict.get('border_transparency', (255, 255, 255, 255))
         border_scale = attr_dict.get('border_scale', 1.0)
-        enable_counter = attr_dict.get('enable_counter', True)
         counter_align = attr_dict.get('counter_align', 0)
         counter_padding = attr_dict.get('counter_padding', 1)
 
@@ -1946,6 +1989,8 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         self.bottom_left_line.setText(bottom_left)
         self.bottom_center_line.setText(bottom_center)
         self.bottom_right_line.setText(bottom_right)
+        self.padding_text_spn.setValue(int(text_padding))
+        self.font_line.setText(font)
         self.color_btn.color = QColor(*color)
         self.alpha_btn.color =QColor(*transparency)
         self.scale_spn.setValue(float(scale))
@@ -1954,7 +1999,6 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
         self.border_color_btn.color = QColor(*border_color)
         self.border_alpha_btn.color = QColor(*border_transparency)
         self.border_scale_spn.setValue(float(border_scale))
-        self.enable_cbx.setChecked(bool(enable_counter))
         self.align_combo.setCurrentIndex(int(counter_align))
         self.padding_spn.setValue(int(counter_padding))
 
@@ -1967,7 +2011,10 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
             'top_right': self.top_right_line.text(),
             'bottom_left': self.bottom_left_line.text(),
             'bottom_center': self.bottom_center_line.text(),
+            'text_padding': self.padding_text_spn.value(),
             'bottom_right': self.bottom_right_line.text(),
+            'text_padding': self.padding_text_spn.value(),
+            'font': self.font_line.text(),
             'color': self.color_btn.color.toTuple(),
             'transparency': self.alpha_btn.color.toTuple(),
             'scale': self.scale_spn.value(),
@@ -1976,7 +2023,6 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
             'border_color': self.border_color_btn.color.toTuple(),
             'border_transparency': self.border_alpha_btn.color.toTuple(),
             'border_scale': self.border_scale_spn.value(),
-            'enable_counter': self.enable_cbx.isChecked(),
             'counter_align': self.align_combo.currentIndex(),
             'counter_padding': self.padding_spn.value()
         }
@@ -1986,10 +2032,203 @@ class SolsticeMaskWidget(SolsticePlayblastWidget, object):
     def on_playblast_finished(self, options):
         SolsticeMaskObject.delete_mask()
 
-    def create_mask(self, *args, **kwargs):
+    def create_mask(self, options=None):
+
+        mask = SolsticeMaskObject.get_mask()
+        if not self.enable_mask_cbx.isChecked() and mask:
+            SolsticeMaskObject.delete_mask()
+            return
+
         SolsticeMaskObject.create_mask()
         mask = SolsticeMaskObject.get_mask()
-        print(mask)
+        cmds.setAttr(mask + '.hiddenInOutliner', True)
+
+        if options:
+            cmds.setAttr('{}.camera'.format(mask), options.get('camera', SolsticeMaskObject.get_camera_name()), type='string')
+        else:
+            cmds.setAttr('{}.camera'.format(mask), SolsticeMaskObject.get_camera_name(), type='string')
+
+        color = self.color_btn.color
+        alpha = self.alpha_btn.color
+        border_color = self.border_color_btn.color
+        border_alpha = self.border_alpha_btn.color
+
+        cmds.setAttr('{}.counterPosition'.format(mask), self.align_combo.currentIndex())
+        cmds.setAttr('{}.counterPadding'.format(mask), self.padding_spn.value())
+        cmds.setAttr('{}.topLeftText'.format(mask), self.top_left_line.text(), type='string')
+        cmds.setAttr('{}.topCenterText'.format(mask), self.top_center_line.text(), type='string')
+        cmds.setAttr('{}.topRightText'.format(mask), self.top_right_line.text(), type='string')
+        cmds.setAttr('{}.bottomLeftText'.format(mask), self.bottom_left_line.text(), type='string')
+        cmds.setAttr('{}.bottomCenterText'.format(mask), self.bottom_center_line.text(), type='string')
+        cmds.setAttr('{}.bottomRightText'.format(mask), self.bottom_right_line.text(), type='string')
+        cmds.setAttr('{}.textPadding'.format(mask), self.padding_text_spn.value())
+        cmds.setAttr('{}.fontName'.format(mask), self.font_line.text(), type='string')
+        cmds.setAttr('{}.fontColor'.format(mask), color.red()/255.0, color.green()/255.0, color.blue()/255.0, type='double3')
+        cmds.setAttr('{}.fontAlpha'.format(mask), alpha.red()/255.0)
+        cmds.setAttr('{}.fontScale'.format(mask), self.scale_spn.value())
+        cmds.setAttr('{}.topBorder'.format(mask), self.top_cbx.isChecked())
+        cmds.setAttr('{}.bottomBorder'.format(mask), self.bottom_cbx.isChecked())
+        cmds.setAttr('{}.borderColor'.format(mask), border_color.red()/255.0, border_color.green()/255.0, border_color.blue()/255.0, type='double3')
+        cmds.setAttr('{}.borderAlpha'.format(mask), border_alpha.red()/255.0)
+        cmds.setAttr('{}.borderScale'.format(mask), self.border_scale_spn.value())
+
+    def _on_create_mask(self):
+        self.create_mask()
+        # if not self.enable_mask_cbx.isChecked():
+        #     self.enable_mask_cbx.blockSignals(True)
+        #     self.enable_mask_cbx.setChecked(True)
+        #     self.enable_mask_cbx.blockSignals(False)
+
+    def _on_delete_mask(self):
+        SolsticeMaskObject.delete_mask()
+
+    def _on_select_font(self):
+        new_font = QFontDialog.getFont(self.font_line.text())
+        if new_font:
+            self.font_line.setText(new_font[0].family())
+
+    def _on_update_enable_mask(self, flag):
+        mask = SolsticeMaskObject.get_mask()
+        if mask and not flag:
+            res = QMessageBox.question(self, 'Removing Solstice Mask', 'Are you sure you want disable mask option. Current mask will be deleted')
+            if res == QMessageBox.Yes:
+                SolsticeMaskObject.delete_mask()
+            else:
+                self.enable_mask_cbx.blockSignals(True)
+                self.enable_mask_cbx.setChecked(True)
+                self.enable_mask_cbx.blockSignals(False)
+
+    def _on_update_counter_position(self, index):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.counterPosition'.format(mask), index)
+
+    def _on_update_counter_padding(self, value):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.counterPadding'.format(mask), value)
+
+    def _on_update_top_left_text(self, new_text):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.topLeftText'.format(mask), new_text, type='string')
+
+    def _on_update_top_center_text(self, new_text):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.topCenterText'.format(mask), new_text, type='string')
+
+    def _on_update_top_right_text(self, new_text):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.topRightText'.format(mask), new_text, type='string')
+
+    def _on_update_bottom_left_text(self, new_text):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.bottomLeftText'.format(mask), new_text, type='string')
+
+    def _on_update_bottom_center_text(self, new_text):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.bottomCenterText'.format(mask), new_text, type='string')
+
+    def _on_update_bottom_right_text(self, new_text):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.bottomRightText'.format(mask), new_text, type='string')
+
+    def _on_update_text_padding(self, value):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.textPadding'.format(mask), value)
+
+    def _on_update_font_name(self, new_text):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.fontName'.format(mask), new_text, type='string')
+
+    def _on_update_color(self):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        new_color = self.color_btn.color
+        cmds.setAttr('{}.fontColor'.format(mask), new_color.red(), new_color.green(), new_color.blue(), type='double3')
+
+    def _on_update_transparency(self):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        new_alpha = self.alpha.color
+        cmds.setAttr('{}.fontAlpha'.format(mask), new_alpha.red()/255.0)
+
+    def _on_update_font_scale(self, value):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.fontScale'.format(mask), value)
+
+    def _on_update_top_border(self, flag):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.topBorder'.format(mask), bool(flag))
+
+
+    def _on_update_bottom_border(self, flag):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.bottomBorder'.format(mask), bool(flag))
+
+    def _on_update_border_color(self):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        border_color = self.border_color_btn.color
+        cmds.setAttr('{}.borderColor'.format(mask), border_color.red(), border_color.green(), border_color.blue(), type='double3')
+
+    def _on_update_border_alpha(self):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        border_alpha = self.border_alpha_btn.color
+
+        cmds.setAttr('{}.borderAlpha'.format(mask), max(min(border_alpha.red()/255.0, 1.0), 0.0))
+
+    def _on_update_border_scale(self, value):
+        mask = SolsticeMaskObject.get_mask()
+        if not mask:
+            return
+
+        cmds.setAttr('{}.borderScale'.format(mask), value)
 
 
 class DefaultPlayblastOptions(SolsticePlayblastWidget, object):
