@@ -123,6 +123,8 @@
     "Added Solstice Asset Viewer Tool",
     "Added Solstice Textures Relinker Tool with new functionalities",
     "Studio Library now is located in a separated tool with custom functionality",
-    "Added info button to window status bar"
+    "Added functionality to Solstice Library to manage animations",
+    "Added info button to window status bar",
+    "First release version of Playblast tool"
   ]
 }

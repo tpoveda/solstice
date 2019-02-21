@@ -72,6 +72,9 @@ class SolsticeHelloDialog(solstice_dialog.Dialog, object):
         self.ui.documentation_btn.clicked.connect(lambda : solstice_python_utils.open_web('https://tpoveda.github.io/solstice/'))
         self.ui.changelog_btn.clicked.connect(self.open_chagelog)
 
+        self.ui.label_4.setVisible(False)
+        self.ui.hotkey.setVisible(False)
+
         self.set_index(0)
 
         current_version = sp.get_version()

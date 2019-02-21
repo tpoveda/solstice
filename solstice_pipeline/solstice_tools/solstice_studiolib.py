@@ -64,7 +64,9 @@ class StudioLibrary(solstice_windows.Window, object):
             sp.update_solstice_project_path()
             solstice_project_folder = os.environ.get('SOLSTICE_PROJECT')
 
-        self.pose_widget = solstice_studiolibrary.main(show=False)
+        self.pose_widget = solstice_studiolibrary.LibraryWidget.instance(show=False)
+
+        # self.pose_widget = solstice_studiolibrary.main(show=False)
 
         if solstice_project_folder and os.path.exists(solstice_project_folder):
             solstice_assets = os.path.join(solstice_project_folder, 'Assets', 'Scripts', 'PIPELINE', '__working__')
