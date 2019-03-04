@@ -39,6 +39,38 @@
         Solstice Launcher for Windows does not need any kind of installation. At this point, you can copy
         **solstice_launcher.exe** and copy it anywhere in your computer (for example, your Desktop)
         
+    ***
+    
+    !!! tip "Manual Installation"
+    
+        To install Solstice Tools manaully follow next steps:
+        
+        * Sync in Artella Files (in Pipeline/Scripts folder) the file called **solstice_pipeline.zip**
+        
+        ![Solstice Launcher Install 12](../../img/solstice_installer_12.png?style=centerme)
+        
+        * Open it and extract **solistce_pipeline** in **Documentos/maya/2017/scripts**
+        
+        ![Solstice Launcher Install 13](../../img/solstice_installer_13.png?style=centerme)
+
+        * Open **userSetup.py** file in the samer folder (if that file does not exists create a new file with that name
+        and extension). At the end of the file write:
+        
+                import maya.utils
+                def run_solstice_tools():
+                        import solstice_pipeline
+                        solstice_pipeline.init()
+                maya.utils.executeDeferred(run_solstice_tools)
+        
+        ![Solstice Launcher Install 14](../../img/solstice_installer_14.png?style=centerme)
+        
+        * Launch Maya with its normal shortcut
+        
+        ![Solstice Launcher Install 15](../../img/solstice_installer_15.png?style=centerme)
+
+            
+        
+        
 ???+ example "MacOS"
     
     !!! error "IMPORTANT"
