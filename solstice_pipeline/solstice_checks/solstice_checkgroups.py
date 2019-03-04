@@ -116,7 +116,6 @@ class TexturesSanityCheck(SanityCheckGroup, object):
     def __init__(self, asset, auto_fix=False, stop_on_error=False, parent=None):
         super(TexturesSanityCheck, self).__init__(name='Textures', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
 
-
 class AssetShadingPublishSantiyCheck(SanityCheckGroup, object):
     def __init__(self, asset, file_type, auto_fix=False, stop_on_error=False, parent=None):
         super(AssetShadingPublishSantiyCheck, self).__init__(name='AssetPublish', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)

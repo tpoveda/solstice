@@ -155,19 +155,6 @@ class AlembicGroup(QWidget, object):
         if res and res == 'Yes':
             cmds.delete(abc_sets)
 
-
-# ===================================================================================================================
-
-class AlembicImporter(QWidget, object):
-    def __init__(self, parent=None):
-        super(AlembicImporter, self).__init__(parent=parent)
-
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(2, 2, 2, 2)
-        self.main_layout.setSpacing(2)
-        self.setLayout(self.main_layout)
-
-
 # ===================================================================================================================
 
 class AlembicExporterNode(object):
@@ -504,7 +491,6 @@ class AlembicExporter(QWidget, object):
 
     def refresh(self):
         """
-        Function that update necessary info of the tool
         Function that update necessary info of the tool
         """
 
@@ -852,6 +838,175 @@ class AlembicExporter(QWidget, object):
             return
 
         self._export_alembics(export_info)
+
+
+class AlembicImporter(QWidget, object):
+    def __init__(self, parent=None):
+        super(AlembicImporter, self).__init__(parent=parent)
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(2, 2, 2, 2)
+        self.main_layout.setSpacing(2)
+        self.main_layout.setAlignment(Qt.AlignTop)
+        self.main_layout.setAlignment(Qt.AlignTop)
+        self.setLayout(self.main_layout)
+
+        buttons_layout = QGridLayout()
+        self.main_layout.addLayout(buttons_layout)
+
+        shot_name_lbl = QLabel('Shot Name: ')
+        self.shot_line = QLineEdit()
+        buttons_layout.addWidget(shot_name_lbl, 1, 0, 1, 1, Qt.AlignRight)
+        buttons_layout.addWidget(self.shot_line, 1, 1)
+
+        folder_icon = solstice_resource.icon('open')
+        alembic_path_layout = QHBoxLayout()
+        alembic_path_layout.setContentsMargins(2, 2, 2, 2)
+        alembic_path_layout.setSpacing(2)
+        alembic_path_widget = QWidget()
+        alembic_path_widget.setLayout(alembic_path_layout)
+        alembic_path_lbl = QLabel('Alembic File: ')
+        self.alembic_path_line = QLineEdit()
+        self.alembic_path_line.setReadOnly(True)
+        self.alembic_path_btn = QPushButton()
+        self.alembic_path_btn.setIcon(folder_icon)
+        self.alembic_path_btn.setIconSize(QSize(18, 18))
+        self.alembic_path_btn.setStyleSheet(
+            "background-color: rgba(255, 255, 255, 0); border: 0px solid rgba(255,255,255,0);")
+        alembic_path_layout.addWidget(self.alembic_path_line)
+        alembic_path_layout.addWidget(self.alembic_path_btn)
+        buttons_layout.addWidget(alembic_path_lbl, 2, 0, 1, 1, Qt.AlignRight)
+        buttons_layout.addWidget(alembic_path_widget, 2, 1)
+
+        import_mode_layout = QHBoxLayout()
+        import_mode_layout.setContentsMargins(2, 2, 2, 2)
+        import_mode_layout.setSpacing(2)
+        import_mode_widget = QWidget()
+        import_mode_widget.setLayout(import_mode_layout)
+        import_mode_lbl = QLabel('Import mode: ')
+        self.create_radio = QRadioButton('Create')
+        self.add_radio = QRadioButton('Add')
+        self.merge_radio = QRadioButton('Merge')
+        self.create_radio.setChecked(True)
+        import_mode_layout.addWidget(self.create_radio)
+        import_mode_layout.addWidget(self.add_radio)
+        import_mode_layout.addWidget(self.merge_radio)
+        buttons_layout.addWidget(import_mode_lbl, 3, 0, 1, 1, Qt.AlignRight)
+        buttons_layout.addWidget(import_mode_widget, 3, 1)
+
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        self.merge_abc_widget = QWidget()
+        self.merge_abc_widget.setVisible(False)
+        merge_abc_layout = QVBoxLayout()
+        merge_abc_layout.setContentsMargins(2, 2, 2, 2)
+        merge_abc_layout.setSpacing(2)
+        self.merge_abc_widget.setLayout(merge_abc_layout)
+        self.main_layout.addWidget(self.merge_abc_widget)
+
+        merge_abc_layout.addWidget(solstice_splitters.Splitter('Select Alembic Group to merge into'))
+
+        alembic_set_lbl = QLabel('Alembic Groups')
+        self.alembic_groups_combo = QComboBox()
+        self.alembic_groups_combo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        abc_layout = QHBoxLayout()
+        abc_layout.setContentsMargins(2, 2, 2, 2)
+        abc_layout.setSpacing(2)
+        abc_layout.addWidget(alembic_set_lbl)
+        abc_layout.addWidget(self.alembic_groups_combo)
+        merge_abc_layout.addLayout(abc_layout)
+
+        import_btn = QPushButton('Import')
+        import_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.main_layout.addWidget(import_btn)
+
+        self.create_radio.clicked.connect(self._on_mode_changed)
+        self.add_radio.clicked.connect(self._on_mode_changed)
+        self.merge_radio.clicked.connect(self._on_mode_changed)
+        self.alembic_path_btn.clicked.connect(self._on_browse_alembic)
+        import_btn.clicked.connect(self._on_import_alembic)
+
+        self._on_mode_changed()
+
+    def refresh(self):
+        """
+        Function that update necessary info of the tool
+        """
+
+        self._refresh_alembic_groups()
+        self._refresh_shot_name()
+
+    def _refresh_alembic_groups(self):
+        """
+        Internal function that updates the list of alembic groups
+        """
+
+        filtered_sets = filter(lambda x: x.endswith(ALEMBIC_GROUP_SUFFIX), cmds.ls(type='objectSet'))
+        filtered_sets.insert(0, '')
+        self.alembic_groups_combo.blockSignals(True)
+        try:
+            self.alembic_groups_combo.clear()
+            self.alembic_groups_combo.addItems(filtered_sets)
+        except Exception:
+            pass
+        self.alembic_groups_combo.blockSignals(False)
+
+    def _refresh_shot_name(self):
+        """
+        Internal function that updates the shot name QLineEdit text
+        """
+
+        shot_name = 'Undefined'
+        current_scene = cmds.file(q=True, sn=True)
+        if current_scene:
+            current_scene = os.path.basename(current_scene)
+
+        shot_regex = sp.get_solstice_shot_name_regex()
+        m = shot_regex.match(current_scene)
+        if m:
+            shot_name = m.group(1)
+
+        self.shot_line.setText(shot_name)
+
+    def _on_mode_changed(self):
+        self.merge_abc_widget.setVisible(self.merge_radio.isChecked())
+
+    def _on_browse_alembic(self):
+
+        shot_name = self.shot_line.text()
+        abc_folder = os.path.normpath(os.path.join(sp.get_solstice_project_path(), shot_name)) if shot_name != 'unresolved' else sp.get_solstice_project_path()
+
+        res = cmds.fileDialog2(fm=1, dir=abc_folder, cap='Select Alembc to Import', ff='Alembic Files (*.abc)')
+        if res:
+            abc_file = res[0]
+        else:
+            abc_file = ''
+
+        self.alembic_path_line.setText(abc_file)
+
+    def _on_import_alembic(self):
+        abc_file = self.alembic_path_line.text()
+        if not abc_file or not os.path.isfile(abc_file):
+            cmds.confirmDialog(t='Error', m='No Alembic File is selected or file is not currently available on disk')
+            return None
+
+        sel_set = self.alembic_groups_combo.currentText()
+        if self.merge_radio.isChecked() and not sel_set:
+            cmds.confirmDialog(t='Error', m='No Alembic Group selected. Please create the Alembic Group first and retry')
+            return None
+
+        nodes = sorted(cmds.sets(sel_set, query=True, no=True)) if sel_set else None
+
+        abc_name = os.path.basename(abc_file).split('.')[0].lower()
+
+        if self.create_radio.isChecked():
+            root = cmds.group(n=abc_name, empty=True, world=True)
+            sel = [root]
+        else:
+            sel = cmds.ls(sl=True, l=True) or [cmds.group(n=abc_name, empty=True, world=True)]
+
+        sel = sel or None
+        res = solstice_alembic.import_alembic(abc_file, mode='import', nodes=nodes, parent=sel[0])
 
 
 class AlembicManager(solstice_windows.Window, object):

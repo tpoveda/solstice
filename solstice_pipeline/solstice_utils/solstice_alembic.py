@@ -1,4 +1,5 @@
 import os
+import traceback
 
 import maya.cmds as cmds
 
@@ -230,3 +231,26 @@ def export(alembicFile,
 
     sp.logger.debug('Abc export completed!')
     return os.path.exists(alembicFile)
+
+
+def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
+    if not os.path.exists(alembic_file):
+        cmds.confirmDialog(t='Error', m='Alembic File does not exists:\n{}'.format(alembic_file))
+        return None
+
+    sp.logger.debug('Import Alembic File ({}) with job arguments:\n{}\n\n{}'.format(mode, alembic_file, nodes))
+
+    try:
+        if nodes:
+            res = cmds.AbcImport(alembic_file, ct=' '.join(nodes))
+        elif parent:
+            res = cmds.AbcImport(alembic_file, mode=mode, rpr=parent)
+        else:
+            res = cmds.AbcImport(alembic_file, mode=mode)
+    except Exception as e:
+        sp.logger.error(traceback.format_exc())
+        raise Exception(e)
+
+    sp.logger.debug('Alembic File {} imported successfully!'.format(os.path.basename(alembic_file)))
+
+    return res

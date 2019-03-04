@@ -17,9 +17,7 @@ import maya.cmds as cmds
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters
-from solstice_pipeline.solstice_utils import solstice_maya_utils
-
-reload(solstice_windows)
+from solstice_pipeline.solstice_utils import solstice_maya_utils, solstice_file_utils
 
 
 class TexturesRelinker(solstice_windows.Window, object):
@@ -49,10 +47,29 @@ class TexturesRelinker(solstice_windows.Window, object):
 
         self.resize(900, 700)
 
+        self.tabs = QTabWidget()
+        self.main_layout.addWidget(self.tabs)
+
+        relinker_widget = RelinkerWidget()
+        checker_widget = CheckerWidget()
+        self.tabs.addTab(relinker_widget, 'Relinker')
+        self.tabs.addTab(checker_widget, 'Checker')
+
+
+class RelinkerWidget(QWidget, object):
+    def __init__(self, parent=None):
+        super(RelinkerWidget, self).__init__(parent)
+
+        relinker_layout = QVBoxLayout()
+        relinker_layout.setContentsMargins(0, 0, 0, 0)
+        relinker_layout.setSpacing(0)
+        relinker_layout.setAlignment(Qt.AlignTop)
+        self.setLayout(relinker_layout)
+
         paths_layout = QVBoxLayout()
         paths_layout.setContentsMargins(5, 5, 5, 5)
         paths_layout.setSpacing(2)
-        self.main_layout.addLayout(paths_layout)
+        relinker_layout.addLayout(paths_layout)
 
         target_layout = QHBoxLayout()
         target_layout.setContentsMargins(5, 5, 5, 5)
@@ -67,8 +84,8 @@ class TexturesRelinker(solstice_windows.Window, object):
 
         check_textures_btn = QPushButton('Check Textures Path')
         check_textures_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.main_layout.addWidget(check_textures_btn)
-        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+        relinker_layout.addWidget(check_textures_btn)
+        relinker_layout.addLayout(solstice_splitters.SplitterLayout())
 
         options_layout = QHBoxLayout()
         options_layout.setContentsMargins(2, 2, 2, 2)
@@ -82,9 +99,9 @@ class TexturesRelinker(solstice_windows.Window, object):
         options_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
         options_layout.addWidget(target_assset_name)
         options_layout.addWidget(self.target_asset_name)
-        self.main_layout.addLayout(options_layout)
+        relinker_layout.addLayout(options_layout)
 
-        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+        relinker_layout.addLayout(solstice_splitters.SplitterLayout())
 
         lists_layout = QHBoxLayout()
         lists_layout.setContentsMargins(5, 5, 5, 5)
@@ -97,7 +114,7 @@ class TexturesRelinker(solstice_windows.Window, object):
         new_list_layout.setSpacing(2)
         lists_layout.addLayout(curr_list_layout)
         lists_layout.addLayout(new_list_layout)
-        self.main_layout.addLayout(lists_layout)
+        relinker_layout.addLayout(lists_layout)
 
         curr_lists_layout = QHBoxLayout()
         curr_lists_layout.setContentsMargins(5, 5, 5, 5)
@@ -174,10 +191,7 @@ class TexturesRelinker(solstice_windows.Window, object):
         bottom_new_list_layout.addWidget(self.new_textures_path_update_btn)
 
         relink_textures_btn = QPushButton('Relink Textures')
-        self.main_layout.addWidget(relink_textures_btn)
-
-        menubar = self.menuBar()
-        menubar.addMenu('&Help')
+        relinker_layout.addWidget(relink_textures_btn)
 
         # === SIGNALS === #
 
@@ -278,18 +292,43 @@ class TexturesRelinker(solstice_windows.Window, object):
             for file_name, file_path in self.relinking_list.iteritems():
                 for i in range(self.curr_asset_textures_path_list.count()):
                     if self.original_asset_line.text() and self.target_asset_name.text():
-                        mod_txt = self.curr_asset_textures_path_list.item(i).text().replace(self.original_asset_line.text(), self.target_asset_name.text())
+                        mod_txt = self.curr_asset_textures_path_list.item(i).text().replace(
+                            self.original_asset_line.text(), self.target_asset_name.text())
                         if file_name in mod_txt:
                             for f in files:
-                                if cmds.getAttr(f + '.fileTextureName') == self.curr_asset_textures_path_list.item(i).text():
+                                if cmds.getAttr(f + '.fileTextureName') == self.curr_asset_textures_path_list.item(
+                                        i).text():
                                     sp.logger.debug('Relinking texture {} to {}'.format(mod_txt, file_path))
                                     cmds.setAttr(f + '.fileTextureName', file_path, type='string')
                     else:
                         if file_name in self.curr_asset_textures_path_list.item(i).text():
                             for f in files:
-                                if cmds.getAttr(f + '.fileTextureName') == self.curr_asset_textures_path_list.item(i).text():
-                                    sp.logger.debug('Relinking texture {} to {}'.format(self.curr_asset_textures_path_list.item(i).text(), file_path))
+                                if cmds.getAttr(f + '.fileTextureName') == self.curr_asset_textures_path_list.item(
+                                        i).text():
+                                    sp.logger.debug('Relinking texture {} to {}'.format(
+                                        self.curr_asset_textures_path_list.item(i).text(), file_path))
                                     cmds.setAttr(f + '.fileTextureName', file_path, type='string')
+
+
+class CheckerWidget(QWidget, object):
+    def __init__(self, parent=None):
+        super(CheckerWidget, self).__init__(parent)
+
+        relinker_layout = QVBoxLayout()
+        relinker_layout.setContentsMargins(0, 0, 0, 0)
+        relinker_layout.setSpacing(0)
+        relinker_layout.setAlignment(Qt.AlignTop)
+        self.setLayout(relinker_layout)
+
+        self.file_paths = QListWidget()
+        relinker_layout.addWidget(self.file_paths)
+
+        self._update_file_paths()
+
+    def _update_file_paths(self):
+        self.file_paths.clear()
+        for f in solstice_file_utils.get_file_paths():
+            self.file_paths.addItem(f)
 
 
 def run():

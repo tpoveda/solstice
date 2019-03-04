@@ -8,8 +8,6 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-import weakref
-
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
@@ -18,13 +16,14 @@ from solstice_pipeline.resources import solstice_resource
 
 
 class SanityCheckTask(QWidget, object):
-    def __init__(self, name, auto_fix=False, auto_check=False, parent=None):
+    def __init__(self, name, auto_fix=False, auto_check=False, log=None, parent=None):
         super(SanityCheckTask, self).__init__(parent=parent)
 
         self._name = name
         self._auto_fix = auto_fix
         self._auto_check = auto_check
         self._valid_check = False
+        self._log = log
         self._error_message = 'Check {0} finished with errors'.format(name)
 
         self._error_pixmap = solstice_resource.pixmap('error', category='icons').scaled(QSize(24, 24))
@@ -83,6 +82,33 @@ class SanityCheckTask(QWidget, object):
     def get_error_message(self):
         return self._error_message
 
+    def set_log(self, log):
+        self._log = log
+
+    def write(self, msg):
+        if self._log is None:
+            return
+        self._log.write(msg)
+        self.repaint()
+
+    def write_error(self, msg):
+        if self._log is None:
+            return
+        self._log.write_error(msg)
+        self.repaint()
+
+    def write_ok(self, msg):
+        if self._log is None:
+            return
+        self._log.write_ok(msg)
+        self.repaint()
+
+    def write_warning(self, msg):
+        if self._log is None:
+            return
+        self._log.write_warning(msg)
+        self.repaint()
+
     def check(self):
         return False
 
@@ -132,4 +158,6 @@ class SanityCheckTask(QWidget, object):
         self.image_separator.setVisible(True)
         self.fix_btn.setVisible(False)
         self.fix_separator.setVisible(not self._auto_fix)
+
+
 

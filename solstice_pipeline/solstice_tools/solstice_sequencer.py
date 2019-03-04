@@ -293,7 +293,7 @@ class SolsticeSequencer(QWidget, object):
 
         return sequences_dict
 
-    def get_sequence_shots(self,  thread_result=None, sequence=None, status='published',  thread_event=None):
+    def get_sequence_shots(self, thread_result=None, sequence=None, status='published',  thread_event=None):
         if status == 'working':
             sequence_info = artella.get_status(os.path.join(sp.get_solstice_production_path(), sequence.name))
             if not sequence_info:

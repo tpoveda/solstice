@@ -39,7 +39,17 @@
         Solstice Launcher for Windows does not need any kind of installation. At this point, you can copy
         **solstice_launcher.exe** and copy it anywhere in your computer (for example, your Desktop)
         
-??? example "MacOS"
+???+ example "MacOS"
+    
+    !!! error "IMPORTANT"
+        **If you have already installed Solstice Tools previously**, you need to **DELETE** **modules** and 
+        **solstice_pipeline** folders located in **Library/Preferences/Autodesk/maya** folder
+        
+        ![Solstice Launcher Install 10](../../img/solstice_installer_10.png?style=centerme)
+    
+    ***
+        
+
     1. **Download the Solstice Launcher Executable**
         * Visit <a href="https://www.artella.com/" target="_blank" rel="noopener">www.artella.com</a>
         * Create a new Account **(Sign up button)** if you do not have one
@@ -59,7 +69,36 @@
         
         * Wait until file is **synced**
         * The file is located in your local **Artella** folder
-        * Double click on it to install and **follow instaler instructions**
+        * Double click on it to open the installer
+        
+        ![Solstice Launcher Install 5](../../img/solstice_installer_5.png?style=centerme)
+        
+        * Follow the steps (just press Continue button) in all the windows
+        
+        ![Solstice Launcher Install 6](../../img/solstice_installer_6.png?style=centerme)
+        
+        ![Solstice Launcher Install 7](../../img/solstice_installer_7.png?style=centerme)
+        
+        * Press **Install** button
+        
+        ![Solstice Launcher Install 8](../../img/solstice_installer_8.png?style=centerme)
+        
+        !!! warning
+            During installation maybe MacOS will ask for your password. Just write to continue the installation.
+        
+        * Press **Close** button to close installation window
+        
+        ![Solstice Launcher Install 9](../../img/solstice_installer_9.png?style=centerme)
+        
+        * Execute Maya using its normal shortcut
+        
+        ![Solstice Launcher Install 11](../../img/solstice_installer_11.png?style=centerme)
+
+        
+
+
+        
+        
         
         
         

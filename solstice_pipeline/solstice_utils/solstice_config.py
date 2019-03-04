@@ -10,6 +10,7 @@
 
 import os
 import platform
+import traceback
 import subprocess
 import ConfigParser
 
@@ -34,9 +35,12 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
         try:
             self.readfp(open(self.config_file, 'r'))
             print('{0}: Solstice Configuration File read successfully!'.format(self._app_name))
-        except IOError:
-            print('{0}: Solstice Configuration file not found! Creating it...'.format(self._app_name))
-            self._create()
+        except Exception:
+            try:
+                print('{0}: Solstice Configuration file not found! Creating it...'.format(self._app_name))
+                self._create()
+            except Exception as e:
+                print('{0}: Error reading Solstice Configuration file: {} | {}'.format(e, traceback.format_exc()))
 
     @property
     def app_name(self):

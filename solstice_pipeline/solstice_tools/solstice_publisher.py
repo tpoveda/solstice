@@ -64,7 +64,7 @@ class PublishTexturesTask(solstice_task.Task, object):
                 self.write_error('Textures Path {} does not exists after sync! Aborting textures publishing ...'.format(textures_path))
                 return False
 
-        # Check if there are folders inside textures folder
+        # Check if there are textures inside textures folder
         self.write('Checking if textures folder is not empty ...')
         textures = [os.path.join(textures_path, f) for f in os.listdir(textures_path) if os.path.isfile(os.path.join(textures_path, f))]
         if len(textures) <= 0:
@@ -200,7 +200,7 @@ class PublishModelTask(solstice_task.Task, object):
         model_path = self._asset().get_asset_file(file_type='model', status='working')
         self.write('Check if model path {} is valid ...'.format(model_path))
         if model_path is None or not os.path.isfile(model_path):
-            self.write_error('Model Path {} is not vaild!'.format(model_path))
+            self.write_error('Model Path {} is not valid!'.format(model_path))
             return False
 
         # Check if model file can be unlocked
