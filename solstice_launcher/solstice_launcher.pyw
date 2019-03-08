@@ -23,6 +23,12 @@ import solstice_maya_utils
 from PySide.QtGui import *
 from PySide.QtCore import *
 
+# ==============================================
+
+MAYA_VERSION = 2019
+
+# ==============================================
+
 
 class SolsticeLauncher(QObject, object):
 
@@ -52,7 +58,7 @@ class SolsticeLauncher(QObject, object):
         console.move(300, 405)
         console.show()
 
-        config = cfg.create_config(window=self, console=console)
+        config = cfg.create_config(window=self, maya_version=MAYA_VERSION, console=console)
 
         if config is None:
             console.write('Maya location not found! Solstice Launcher will not launch Maya!')

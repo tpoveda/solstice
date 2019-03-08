@@ -16,7 +16,6 @@ from pathlib2 import Path
 
 from PySide.QtGui import *
 
-DEF_MAYA_PATH_INSTALLATIONS = ['C:/Program Files/Autodesk/Maya2017']
 DEF_MAYA_EXECUTABLE = 'maya.exe'
 
 
@@ -68,7 +67,7 @@ def get_maya_executables_from_installation_path(installation_path):
     return None
 
 
-def get_maya_2017_installation():
+def get_maya_installation(maya_version):
     """
     Returns the installation folder of Maya
     :return:
@@ -79,16 +78,15 @@ def get_maya_2017_installation():
         try:
             from _winreg import *
             a_reg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
-            a_key = OpenKey(a_reg, r"SOFTWARE\Autodesk\Maya\2017\Setup\InstallPath")
+            a_key = OpenKey(a_reg, r"SOFTWARE\Autodesk\Maya\{}\Setup\InstallPath".format(maya_version))
             value = QueryValueEx(a_key, 'MAYA_INSTALL_LOCATION')
             maya_location = value[0]
         except Exception:
             maya_location = os.getenv('MAYA_LOCATION')
             if not maya_location:
-                for path in DEF_MAYA_PATH_INSTALLATIONS:
-                    if os.path.exists(path):
-                        maya_location = path
-                        break
+                path = 'C:/Program Files/Autodesk/Maya{}'.format(maya_version)
+                if os.path.exists(path):
+                    maya_location = path
 
     if not os.path.exists(maya_location):
         QMessageBox.information(None, 'Maya location not found', 'Solstice Launcher will not launch Maya!')
@@ -97,10 +95,10 @@ def get_maya_2017_installation():
     maya_executable = get_maya_executables_from_installation_path(maya_location)
 
     if maya_executable is None or not os.path.isfile(maya_executable):
-        maya_executable = str(QFileDialog.getOpenFileName(None, 'Select Maya 2017 installation')[0])
+        maya_executable = str(QFileDialog.getOpenFileName(None, 'Select Maya {} installation'.format(maya_version))[0])
         if not os.path.isfile(maya_executable):
             return None
-    versions['2017'] = maya_executable
+    versions['{}'.format(maya_version)] = maya_executable
 
     # We are not interested in supporting multiple Maya versions
     # return versions

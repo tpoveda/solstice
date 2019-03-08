@@ -46,7 +46,7 @@ class SolsticeConfig(QSettings, object):
             subprocess.call(call, self.config_file)
 
 
-def create_config(console, window, config_file=None):
+def create_config(console, window, maya_version, config_file=None):
     """
     Construct the Solstice configuration object from necessary elements
     """
@@ -55,7 +55,7 @@ def create_config(console, window, config_file=None):
         config_file = utils.get_system_config_directory(console=console)
     config = SolsticeConfig(filename=config_file, window=window, console=console)
 
-    application_versions = utils.get_maya_2017_installation()
+    application_versions = utils.get_maya_installation(maya_version)
     if not application_versions:
         console.write('Maya Location not found: Solstice Launcher will not launch Maya!')
         return None

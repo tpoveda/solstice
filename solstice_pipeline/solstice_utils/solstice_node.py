@@ -15,7 +15,7 @@ import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
+from solstice_pipeline.solstice_utils import solstice_artella_utils as artella, solstice_maya_utils as maya_utils
 
 # =================================================================================================
 
@@ -246,7 +246,7 @@ class SolsticeAssetNode(SolsticeNode, object):
         return self._name
 
     def get_short_name(self):
-        return self._name.split(':')[-1].split('|')[-1]
+        return maya_utils.get_short_name(self._name)
 
     def get_asset_path(self):
         return self._asset_path

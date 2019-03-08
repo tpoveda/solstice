@@ -589,12 +589,9 @@ def run():
     # # Check if the current scene needs to save and ask user if the want to do it
     # needs_save = cmds.file(query=True, modified=True)
     # if needs_save:
-    #     result = cmds.confirmDialog(
-    #         title='Current scene has unsaved changes',
-    #         message='Before using Solstice Pipelinizer you should save your changes if you do not want to lose them. Do you want to save and continue?',
-    #         button=['Yes', 'No'], cancelButton='No', dismissString='No')
-    #     if result == 'Yes':
-    #         cmds.file(save=True)
+    #     result = solstice_qt_utils.show_question(None, 'Current scene has unsaved changes', 'Before using Solstice Pipelinizer you should save your changes if you do not want to lose them. Do you want to save and continue?')
+    #     if result == QMessageBox.Yes:
+    #         cmds.SaveScene()
 
     win = Pipelinizer()
     win.show()

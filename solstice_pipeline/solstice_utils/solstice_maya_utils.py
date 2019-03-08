@@ -907,3 +907,43 @@ def get_project_rule(rule):
         sp.logger.warning('File Rule Entry "{}" has no value, please check if the rule name is typed correctly!'.format(rule))
 
     return os.path.join(workspace, workspace_folder)
+
+
+def get_short_name(node):
+    """
+    Returns short name of a Maya node
+    :param node: str, maya node
+    :return: str
+    """
+
+    return node.split(':')[-1].split('|')[-1]
+
+
+def attribute_exists(node, attr):
+    """
+    Returns whether give attribute exists in given node
+    :param node: str, maya node
+    :param attr: str, attribute name to check
+    :return: bool
+    """
+
+    return cmds.attributeQuery(attr, node=node, exists=True)
+
+
+def get_mdag_path(node):
+    """
+    Returns MDag path object of the given node
+    :param node: str, Maya node name
+    :return: OpenMaya.MDagPath
+    """
+
+    new_node = node
+    if node.startswith('|'):
+        new_node = node[1:]
+    sel = cmds.ls(new_node)[0]
+    dag_path = OpenMaya.MDagPath()
+    sel_list = OpenMaya.MSelectionList()
+    sel_list.add(sel)
+    sel_list.getDagPath(0, dag_path)
+
+    return dag_path
