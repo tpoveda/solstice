@@ -495,7 +495,7 @@ def get_asset_image(asset_path, project_id):
     data = urllib2.urlopen(image_url).read()
 
 
-def launch_maya(file_path, maya_version=2017):
+def launch_maya(file_path, maya_version=2019):
     """
     :param file_path: str
     :param maya_version: int
@@ -515,7 +515,7 @@ def launch_maya(file_path, maya_version=2017):
     sp.logger.debug(rsp)
 
 
-def open_file_in_maya(file_path, maya_version=2017):
+def open_file_in_maya(file_path, maya_version=2019):
     """
     Open the given path in the given Maya version
     :param file_path: str
@@ -543,7 +543,7 @@ def open_file_in_maya(file_path, maya_version=2017):
     return rsp
 
 
-def import_file_in_maya(file_path, maya_version=2017):
+def import_file_in_maya(file_path, maya_version=2019):
     """
     Import the given asset path in the given Maya version current scene
     :param file_path: str
@@ -567,7 +567,7 @@ def import_file_in_maya(file_path, maya_version=2017):
     return rsp
 
 
-def reference_file_in_maya(file_path, maya_version=2017):
+def reference_file_in_maya(file_path, maya_version=2019):
     """
     Import the given asset path in the given Maya version current scene
     :param file_path: str

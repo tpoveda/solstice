@@ -947,3 +947,42 @@ def get_mdag_path(node):
     sel_list.getDagPath(0, dag_path)
 
     return dag_path
+
+
+def add_message_attribute(node_a, node_b, attr_name, force=True):
+    """
+    Connects node_a and node_b using a message attribute with the given name
+    :param node_a: str, name of a Maya node
+    :param node_b: str, name of a Maya node
+    :param attr_name: str, name of the message attribute
+    :param force: bool, Whether to force the connection or not
+    """
+
+    if not attribute_exists(node_a, attr_name):
+        cmds.addAttr(node_a, longName=attr_name, attributeType='message')
+    if not attribute_exists(node_b, attr_name):
+        cmds.addAttr(node_b, longName=attr_name, attributeType='message')
+    try:
+        cmds.connectAttr('{}.{}'.format(node_a, attr_name), '{}.{}'.format(node_b, attr_name), f=force)
+    except StandardError as e:
+        sp.logger.debug(e)
+
+
+def get_locked_attributes(node, mode='rotate'):
+    """
+    Returns a list of the locked attributes of the given node
+    :param node: str, name of Maya node
+    :param mode: str, type of locked attributes we want to check
+    :return: list<str>
+    """
+
+    locked_attrs = list()
+    if mode == 'rotate':
+        attrs = ['rotateX', 'rotateY', 'rotateZ']
+    if mode == 'translate':
+        attrs = ['translateX', 'translateY', 'translateZ']
+    for attr in attrs:
+        if not cmds.getAttr('%s.%s' % (node, attr), settable=True):
+            locked_attrs.append(attr.replace(mode, '').lower())
+
+    return locked_attrs

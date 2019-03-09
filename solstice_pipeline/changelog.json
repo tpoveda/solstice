@@ -131,6 +131,7 @@
   [
     "New version of Sanity Check",
     "Fixed small error on Solstice Pipelinizer initial window",
-    "Improve stability of the tools"
+    "Improve stability of the tools",
+    "Artella operations now use Maya 2019 to execute them"
   ]
 }
