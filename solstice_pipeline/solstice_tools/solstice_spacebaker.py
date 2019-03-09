@@ -162,10 +162,6 @@ class SpaceAnimBaker(solstice_windows.Window, object):
         self.spaces_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.spaces_widget.setFrameShape(QFrame.StyledPanel)
         self.spaces_widget.setFrameShadow(QFrame.Raised)
-
-        self.spaces_layout = QVBoxLayout()
-        self.spaces_layout.setAlignment(Qt.AlignTop)
-        self.spaces_widget.drop_layout.addLayout(self.spaces_layout)
         main_spaces_layout.addWidget(self.spaces_widget)
 
         target_control_btn.clicked.connect(self._on_set_target_control)
@@ -220,7 +216,7 @@ class SpaceAnimBaker(solstice_windows.Window, object):
 
     def _create_space(self, switch_control, driver_node):
         new_space = SpaceWidget(switch_control, driver_node)
-        self.spaces_layout.addWidget(new_space)
+        self.spaces_widget.drop_layout.addWidget(new_space)
         self._space_widgets.append(new_space)
         new_space.closeSpace.connect(self.remove_space)
         new_space.setFixedHeight(0)
@@ -384,7 +380,7 @@ class SpaceAnimBaker(solstice_windows.Window, object):
             return False
 
     def _on_delete_space_switch(self, space_widget):
-        self.spaces_layout.removeWidget(space_widget)
+        self.spaces_widget.drop_layout.removeWidget(space_widget)
         space_widget._animation = None
         space_widget.deleteLater()
 
@@ -1126,6 +1122,19 @@ class SpaceWidget(QFrame, object):
             cmds.addAttr(self.driver_node, ln='SS_driverName', dt='string')
         cmds.setAttr('{}.SS_driverName'.format(self.driver_node), new_name, type='string')
 
+        switch_control = self.switch_control
+        if not switch_control or not cmds.objExists(switch_control):
+            return
+        switch_node = utils.get_mdag_path(switch_control).fullPathName()
+        space_cnt = cmds.listConnections(switch_node+'.SS_spaceDriver', p=True)[0]
+        space_index = self.parentWidget().drop_layout.indexOf(self)
+        enum_name = cmds.addAttr(space_cnt, query=True, enumName=True)
+        enum_list = enum_name.split(':')
+        enum_list[space_index] = self.name
+        new_enum = ':'.join(enum_list)
+        space_cnt = cmds.listConnections(switch_node+'.SS_spaceDriver', p=True)[0]
+        cmds.addAttr(space_cnt, edit=True, enumName=new_enum)
+
     def _on_open_bake(self, toggle):
         self.bake_widget.setVisible(toggle)
         self.close_btn.repaint()
@@ -1201,9 +1210,7 @@ def launch_space_switch_marking_menu():
             return
 
         space_attr = object_space.split('.')[-1]
-        print('OBJECT SPACE: {}'.format(object_space))
         current_space = cmds.getAttr(object_space, asString=True)
-        print('CURRENT SPACE: {}'.format(current_space))
         bake_space_menu = cmds.menuItem(l='Bake Space', parent=SPACE_SWITCH_MENU_NAME, sm=True, to=True)
         start_frame, end_frame = anim_utils.get_playback_range()
         all_spaces = cmds.attributeQuery(space_attr, node=full_object_name, le=1)[0]
@@ -1222,10 +1229,6 @@ def launch_space_switch_marking_menu():
                     cmds.menuItem(l=space, c=spaces_cmd, rp=RADIAL_POSITIONS[radial_index], parent=SPACE_SWITCH_MENU_NAME)
                     radial_index += 1
             cmds.menuItem(l=space, c=bake_cmd, parent=bake_space_menu)
-
-
-
-
 
     sp.logger.debug('Initializing Space Switch marking menu ...')
     if cmds.popupMenu(SPACE_SWITCH_MENU_NAME, exists=True):
