@@ -170,7 +170,6 @@ class SpaceAnimBaker(solstice_windows.Window, object):
         self.parent_space_group_delete_btn.clicked.connect(partial(self._on_clear_line, self.parent_space_group_line))
         self.create_space_btn.clicked.connect(self._on_create_space_switch)
         self.delete_all_spaces_btn.clicked.connect(self._on_clear_spaces)
-        self.refresh_spaces_btn.clicked.connect(self._on_create_spaces)
 
         self._update_ui()
 
@@ -214,6 +213,7 @@ class SpaceAnimBaker(solstice_windows.Window, object):
 
         self._create_space(self.switch_control, None)
 
+    @utils.maya_undo
     def _create_space(self, switch_control, driver_node):
         new_space = SpaceWidget(switch_control, driver_node)
         self.spaces_widget.drop_layout.addWidget(new_space)
@@ -221,6 +221,111 @@ class SpaceAnimBaker(solstice_windows.Window, object):
         new_space.closeSpace.connect(self.remove_space)
         new_space.setFixedHeight(0)
         new_space._animate_expand(True)
+
+        if not self._space_widgets:
+            sp.logger.warning('No spaces created yet! Please add a space first!')
+            return
+
+        if not self.parent_group or not cmds.objExists(self.parent_group):
+            if cmds.referenceQuery(self.switch_control, isNodeReferenced=True):
+                self.parent_space_group_line.setStyleSheet('border: 2px solid red;')
+                QMessageBox.warning(
+                    self,
+                    'Error',
+                    'When working with reference files you must manually set the Parent Group, that needs '
+                    'to have the same pivot as the target control'
+                )
+                return
+
+            self._create_parent_group()
+
+        if not self.parent_group:
+            sp.logger.warning('Parent Group not selected!')
+            return
+        if not self.switch_control:
+            sp.logger.warning('Switch Control not selected!')
+            return
+        if not self.switch_attribute:
+            sp.logger.warning('Switch Attribute Name not specified!')
+            return
+
+        if self.parent_group == self.switch_control:
+            sp.logger.warning('Parent Group and Switch Control cannot be the same object!')
+            return
+
+        for required in [self.parent_group, self.switch_control]:
+            if not cmds.objExists(required):
+                sp.logger.warning('{} does not exists in the scene!'.format(required))
+                return
+
+        spaces_group_name = 'SS_spaces_grp'
+        if not cmds.objExists(spaces_group_name):
+            spaces_group = cmds.group(n=spaces_group_name, w=True, empty=True)
+        else:
+            spaces_group = spaces_group_name
+
+        if not utils.attribute_exists(spaces_group, 'SS_spacesGroup'):
+            cmds.addAttr(spaces_group, longName='SS_spacesGroup', at='message')
+        if not utils.attribute_exists(self.switch_control, 'SS_spacesGroup'):
+            cmds.addAttr(self.switch_control, longName='SS_spacesGroup', at='message')
+
+        try:
+            cmds.connectAttr('{}.SS_spacesGroup'.format(spaces_group), '{}.SS_spacesGroup'.format(self.switch_control), force=True)
+        except Exception as e:
+            pass
+
+        driver_node = self.get_space_driver_node(new_space)
+        if not driver_node:
+            return
+
+        if self.check_space_exists(driver_node):
+            sp.logger.warning('Already found space driver node: {}'.format(driver_node))
+            return
+
+        display_name = self.get_space_name(new_space)
+        if not cmds.objExists(driver_node):
+            sp.logger.warning('{} space driver node does not exist in the scene!'.format(driver_node))
+            return
+        if not display_name:
+            display_name = utils.get_short_name(driver_node)
+
+        spaces = [{driver_node: display_name}]
+
+        try:
+            self._space_switch(self.parent_group, self.switch_control, self.constraint_type, spaces, spaces_group, self.switch_attribute)
+        except Exception as e:
+            QMessageBox.warning(self, 'Error', traceback.format_exc())
+            return
+
+
+
+        # for space_widget in self.spaces_widgets:
+        #     driver_node = self.get_space_driver_node(space_widget)
+        #     if not driver_node:
+        #         continue
+        #     if self.check_space_exists(driver_node):
+        #         sp.logger.warning('Already found space driver node: {}'.format(driver_node))
+        #         continue
+        #     display_name = self.get_space_name(space_widget)
+        #     if not cmds.objExists(driver_node):
+        #         sp.logger.warning('{} space driver node does not exist in the scene!'.format(driver_node))
+        #         return
+        #     if not display_name:
+        #         display_name = utils.get_short_name(driver_node)
+        #
+        #     spaces_dict = {driver_node: display_name}
+        #     spaces.append(spaces_dict)
+        #
+        # if not spaces:
+        #     return
+        #
+        # try:
+        #     self._space_switch(self.parent_group, self.switch_control, self.constraint_type, spaces, spaces_group, self.switch_attribute)
+        # except Exception as e:
+        #     QMessageBox.warning(self, 'Error', traceback.format_exc())
+        #     return
+
+        sp.logger.debug('Space Switch Setup sucessfully created!')
 
         return new_space
 
@@ -243,6 +348,8 @@ class SpaceAnimBaker(solstice_windows.Window, object):
                     cmds.delete(space_grp[0])
             cmds.deleteAttr('{}.SS_driverGroup'.format(driver_node))
 
+        if not utils.attribute_exists(space_widget.switch_control, SPACE_DRIVER_ATTR):
+            return
         space_cnt = cmds.listConnections(space_widget.switch_control + '.{}'.format(SPACE_DRIVER_ATTR), p=True)
         if not space_cnt:
             return
@@ -256,7 +363,8 @@ class SpaceAnimBaker(solstice_windows.Window, object):
         if new_enum:
             space_cnt = cmds.listConnections(space_widget.switch_control + '.{}'.format(SPACE_DRIVER_ATTR))[0]
             if enum_list:
-                cmds.addAttr(space_cnt, edit=True, enumName=enum_list)
+                enum_list = ':'.join(enum_list)
+                cmds.addAttr('{}.space'.format(space_cnt), edit=True, enumName=enum_list)
             else:
                 cmds.deleteAttr('{}.space'.format(space_cnt))
 
@@ -425,11 +533,13 @@ class SpaceAnimBaker(solstice_windows.Window, object):
         cns = None
         if driven_node:
             cns = cmds.listConnections(driven_node[0]+'.SS_spaceConstraint')
-        if cns:
-            QMessageBox.warning(self, 'Warning', '{} already ahs a space group: {}'.format(utils.get_short_name(self.switch_control), driven_node[0]))
-            return
 
         offset_grp = '{}_space_grp'.format(utils.get_short_name(self.switch_control))
+
+        if cns:
+            if offset_grp and cmds.objExists(offset_grp):
+                self.parent_space_group_line.setText(offset_grp)
+
         if not cmds.objExists(offset_grp):
             offset_grp = cmds.group(n=offset_grp, world=True, empty=True)
             cmds.addAttr(offset_grp, longName='SS_autoSpace', at='bool')
@@ -440,6 +550,12 @@ class SpaceAnimBaker(solstice_windows.Window, object):
                     parent = cmds.listRelatives(grp, p=True)
                     if not parent:
                         cmds.delete(grp)
+
+        switch_control_parent = cmds.listRelatives(self.switch_control, parent=True)
+        if switch_control_parent:
+            if switch_control_parent[0] == offset_grp:
+                self.parent_space_group_line.setText(offset_grp)
+                return
 
         cmds.delete(cmds.pointConstraint(self.switch_control, offset_grp)[0])
         driven_node_rot = cmds.xform(self.switch_control, query=True, rotation=True, worldSpace=True)
@@ -536,90 +652,6 @@ class SpaceAnimBaker(solstice_windows.Window, object):
 
     def get_space_name(self, space_widget):
         return space_widget.name
-
-    @utils.maya_undo
-    def _on_create_spaces(self):
-        if not self._space_widgets:
-            sp.logger.warning('No spaces created yet! Please add a space first!')
-            return
-
-        if not self.parent_group or not cmds.objExists(self.parent_group):
-            if cmds.referenceQuery(self.switch_control, isNodeReferenced=True):
-                self.parent_space_group_line.setStyleSheet('border: 2px solid red;')
-                QMessageBox.warning(
-                    self,
-                    'Error',
-                    'When working with reference files you must manually set the Parent Group, that needs '
-                    'to have the same pivot as the target control'
-                )
-                return
-
-            self._create_parent_group()
-
-        if not self.parent_group:
-            sp.logger.warning('Parent Group not selected!')
-            return
-        if not self.switch_control:
-            sp.logger.warning('Switch Control not selected!')
-            return
-        if not self.switch_attribute:
-            sp.logger.warning('Switch Attribute Name not specified!')
-            return
-
-        if self.parent_group == self.switch_control:
-            sp.logger.warning('Parent Group and Switch Control cannot be the same object!')
-            return
-
-        for required in [self.parent_group, self.switch_control]:
-            if not cmds.objExists(required):
-                sp.logger.warning('{} does not exists in the scene!'.format(required))
-                return
-
-        spaces_group_name = 'SS_spaces_grp'
-        if not cmds.objExists(spaces_group_name):
-            spaces_group = cmds.group(n=spaces_group_name, w=True, empty=True)
-        else:
-            spaces_group = spaces_group_name
-
-        if not utils.attribute_exists(spaces_group, 'SS_spacesGroup'):
-            cmds.addAttr(spaces_group, longName='SS_spacesGroup', at='message')
-        if not utils.attribute_exists(self.switch_control, 'SS_spacesGroup'):
-            cmds.addAttr(self.switch_control, longName='SS_spacesGroup', at='message')
-
-        try:
-            cmds.connectAttr('{}.SS_spacesGroup'.format(spaces_group), '{}.SS_spacesGroup'.format(self.switch_control), force=True)
-        except Exception as e:
-            pass
-
-        spaces = list()
-
-        for space_widget in self.spaces_widgets:
-            driver_node = self.get_space_driver_node(space_widget)
-            if not driver_node:
-                continue
-            if self.check_space_exists(driver_node):
-                sp.logger.warning('Already found space driver node: {}'.format(driver_node))
-                continue
-            display_name = self.get_space_name(space_widget)
-            if not cmds.objExists(driver_node):
-                sp.logger.warning('{} space driver node does not exist in the scene!'.format(driver_node))
-                return
-            if not display_name:
-                display_name = utils.get_short_name(driver_node)
-
-            spaces_dict = {driver_node: display_name}
-            spaces.append(spaces_dict)
-
-        if not spaces:
-            return
-
-        try:
-            self._space_switch(self.parent_group, self.switch_control, self.constraint_type, spaces, spaces_group, self.switch_attribute)
-        except Exception as e:
-            QMessageBox.warning(self, 'Error', traceback.format_exc())
-            return
-
-        sp.logger.debug('Space Switch Setup sucessfully created!')
 
     def get_constraint_groups(self, switcher_node):
         if not utils.attribute_exists(switcher_node, 'SS_drivenNode'):
@@ -1126,8 +1158,18 @@ class SpaceWidget(QFrame, object):
         if not switch_control or not cmds.objExists(switch_control):
             return
         switch_node = utils.get_mdag_path(switch_control).fullPathName()
-        space_cnt = cmds.listConnections(switch_node+'.SS_spaceDriver', p=True)[0]
-        space_index = self.parentWidget().drop_layout.indexOf(self)
+
+        if not utils.attribute_exists(switch_node, 'SS_spaceDriver'):
+            return
+        space_cnt = cmds.listConnections(switch_node+'.SS_spaceDriver', p=True)
+        if not space_cnt:
+            return
+        space_cnt = space_cnt[0]
+
+        space_index = self.parentWidget()
+        if not space_index:
+            return
+        space_index = space_index.drop_layout.indexOf(self)
         enum_name = cmds.addAttr(space_cnt, query=True, enumName=True)
         enum_list = enum_name.split(':')
         enum_list[space_index] = self.name
