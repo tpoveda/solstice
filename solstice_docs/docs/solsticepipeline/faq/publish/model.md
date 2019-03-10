@@ -9,14 +9,36 @@
     ![Solstice Working Button](../../../img/model_publish_0.png?style=centerme)
 
     ***
+    
+2. Execute Sanity Checker
 
-2. Launch **Solstice Pipelinizer** tool
+    ![Solstice Working Button](../../../img/model_publish_24.png?style=centerme)
+    
+    ***
+    
+3. Select the asset you are working on and click on **Check Model** button
+
+    ![Solstice Working Button](../../../img/model_publish_25.png?style=centerme)
+    
+    ***
+    
+4. Make sure that **all checks are valid**
+
+    !!! error
+        If some checks fail please read Sanity Checker Log to know what is failing.
+        If you have any doubt, please contact TD team!
+    
+    ![Solstice Working Button](../../../img/model_publish_26.png?style=centerme)
+    
+    ***
+
+5. Launch **Solstice Pipelinizer** tool
 
     > Solstice Pipelinizer Button in Solstice Shelf
     ![Solstice Working Button](../../../img/model_publish_1.png?style=centerme)
 
     ***
-
+  
 3. Open **Model File** you want to create new version for
 
     ![Solstice Working Button](../../../img/model_publish_2.png?style=centerme)
@@ -225,7 +247,37 @@ to translate/rotate/scale assets in Solstice world!
     
     ***
  
-15. Open **Solstice Publisher** by pressing **>PUBLISH NEW VERSION<** button located in the bottom right corner of  **Solstice Pipelinizer**
+16. Open **Solstice Alembic Manager** tool
+
+    > Solstice Alembic Manager Icon 
+    ![Solstice Alembic Manager Icon](../../../img/alembic_0.png?style=centerme)
+    
+    
+    ***
+    
+17. Select asset **main group** and create a new Alembic Group (you can use any name) and press **Create** button
+    
+    ![Solstice Alembic Manager Icon](../../../img/model_publish_27.png?style=centerme)
+    
+    ***
+    
+18. Open **Exporter** tab and:
+    * Select previously created **Alembic Group** in the combo box
+    * Make sure that Start and End frame ranges are 1
+    * Select model asset path as **Export Path**
+    * Press **Export** button
+    
+    ![Solstice Alembic Manager Icon](../../../img/model_publish_28.png?style=centerme)
+
+    ***
+    
+19. Make sure that **.abc** and **.info** files are exported
+    
+    ![Solstice Alembic Manager Icon](../../../img/model_publish_29.png?style=centerme)
+    
+    ***
+    
+15.  Launch **Solstice Pipelinizer** again and open **Solstice Publisher** by pressing **>PUBLISH NEW VERSION<** button located in the bottom right corner of  **Solstice Pipelinizer**
     
     ![Solstice Working Button](../../../img/shading_publish_7.png?style=centerme)
     

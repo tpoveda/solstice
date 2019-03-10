@@ -203,6 +203,13 @@ class PublishModelTask(solstice_task.Task, object):
             self.write_error('Model Path {} is not valid!'.format(model_path))
             return False
 
+        # Check Alembic File
+        abc_path = self._asset().get_alembic_file()
+        self.write('Check if Alembic file exists ...'.format(abc_path))
+        if abc_path is None or not os.path.isfile(abc_path):
+            self.write_error('Alembic File Path {} is not valid!'.format(model_path))
+            return False
+
         # Check if model file can be unlocked
         self.write('Check if model file is already locked by other user or workspace ...')
         can_unlock = artella.can_unlock(model_path)

@@ -1053,6 +1053,7 @@ class AlembicImporter(QWidget, object):
 
         self.alembic_path_line.setText(abc_file)
 
+
     @staticmethod
     def reference_alembic(alembic_path):
         if not alembic_path or not os.path.isfile(alembic_path):

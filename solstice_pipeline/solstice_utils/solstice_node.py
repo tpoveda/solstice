@@ -389,6 +389,36 @@ class SolsticeAssetNode(SolsticeNode, object):
 
         return asset_data_file
 
+    def get_alembic_file(self, status='working'):
+        """
+        Returns alembic file path of the node
+        :return: str
+        """
+
+        model_file = self.get_asset_file(file_type='model', status=status)
+        base_path = os.path.dirname(model_file)
+        asset_name = self.get_short_name()
+        asset_name = asset_name+'.abc'
+        abc_file = os.path.join(base_path, asset_name)
+
+        return abc_file
+
+    def get_standin_files(self, status='working'):
+        """
+        Returns file of standins
+        :return: str
+        """
+
+        model_file = self.get_asset_file(file_type='model', status=status)
+        base_path = os.path.dirname(model_file)
+        asset_name = self.get_short_name()
+        asset_standin = asset_name + '.ass'
+        asset_standing_bbox = asset_name + '.assoc'
+        standin_file = os.path.join(base_path, asset_standin)
+        standin_bbox = os.path.join(base_path, asset_standing_bbox)
+
+        return [standin_file, standin_bbox]
+
     def get_asset_file(self, file_type, status):
         """
         Returns file to an asset file

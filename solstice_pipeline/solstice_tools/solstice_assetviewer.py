@@ -75,12 +75,12 @@ class SolsticeAssetViewer(QWidget, object):
         top_layout = QHBoxLayout()
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(2)
-        top_layout.setAlignment(Qt.AlignLeft)
+        top_layout.setAlignment(Qt.AlignCenter)
         self.main_layout.addLayout(top_layout)
 
-        refresh_btn = solstice_buttons.IconButton(icon_name='refresh', icon_hover='refresh_hover')
-        top_layout.addWidget(refresh_btn)
-        top_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+        # refresh_btn = solstice_buttons.IconButton(icon_name='refresh', icon_hover='refresh_hover')
+        # top_layout.addWidget(refresh_btn)
+        # top_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
 
         categories_menu_layout = QHBoxLayout()
         categories_menu_layout.setContentsMargins(0, 0, 0, 0)
@@ -111,39 +111,28 @@ class SolsticeAssetViewer(QWidget, object):
         self._import_type_buttons.setExclusive(True)
         self.rig_btn = QPushButton('Rig')
         self.alembic_btn = QPushButton('Alembic')
+        self.standin_btn = QPushButton('Standin')
         self.rig_btn.setCheckable(True)
         self.alembic_btn.setCheckable(True)
+        self.standin_btn.setCheckable(True)
         self._import_type_buttons.addButton(self.rig_btn)
         self._import_type_buttons.addButton(self.alembic_btn)
+        self._import_type_buttons.addButton(self.standin_btn)
         import_types_layout.addWidget(self.rig_btn)
         import_types_layout.addWidget(self.alembic_btn)
+        import_types_layout.addWidget(self.standin_btn)
         self.main_layout.addLayout(import_types_layout)
         self.alembic_btn.setChecked(True)
 
-        # Store current items
-        for i in range(self._asset_viewer.rowCount()):
-            for j in range(self._asset_viewer.columnCount()):
-                item = self._asset_viewer.cellWidget(i, j)
-                if not item:
-                    continue
-                asset = item.containedWidget
-                asset_name = asset.name + '.ma'
-                local_max_versions = asset.get_max_local_versions()
-                if local_max_versions['model']:
-                    published_path = os.path.join(asset._asset_path, local_max_versions['model'][1], 'model', asset_name)
-                    print(published_path)
-                    if not os.path.isfile(published_path):
-                        item.setEnabled(False)
-                        self._create_sync_btn(item)
-                else:
-                    # item.setEnabled(False)
-                    self._create_sync_btn(item)
+        self._update_asset_status()
 
     def update_asset_info(self, asset=None, check_published_info=None, check_working_info=None, check_lock_info=None):
         if self.alembic_btn.isChecked():
             asset.reference_alembic_file()
         elif self.rig_btn.isChecked():
             asset.reference_asset_file()
+        elif self.standin_btn.isChecked():
+            print('Importint Stand-in')
 
     def _change_category(self, category, flag):
         self._asset_viewer.change_category(category=category)
@@ -155,7 +144,6 @@ class SolsticeAssetViewer(QWidget, object):
         sync_btn.setParent(item.containedWidget)
 
         not_published_pixmap = solstice_resource.pixmap('not_published', category='icons')
-        print(not_published_pixmap)
         not_published_lbl = QLabel()
         not_published_lbl.move(9, 9)
         not_published_lbl.setFixedSize(65, 65)
@@ -165,6 +153,24 @@ class SolsticeAssetViewer(QWidget, object):
         asset = item.containedWidget
         sync_btn.clicked.connect(partial(asset.sync, 'all', 'all', True))
 
+    def _update_asset_status(self):
+        # Store current items
+        for i in range(self._asset_viewer.rowCount()):
+            for j in range(self._asset_viewer.columnCount()):
+                item = self._asset_viewer.cellWidget(i, j)
+                if not item:
+                    continue
+                asset = item.containedWidget
+                asset_name = asset.name + '.ma'
+                local_max_versions = asset.get_max_local_versions()
+                if local_max_versions['model']:
+                    published_path = os.path.join(asset._asset_path, local_max_versions['model'][1], 'model', asset_name)
+                    if not os.path.isfile(published_path):
+                        item.setEnabled(False)
+                        self._create_sync_btn(item)
+                else:
+                    # item.setEnabled(False)
+                    self._create_sync_btn(item)
 
 
 def run():

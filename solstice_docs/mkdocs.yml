@@ -38,6 +38,7 @@ nav:
           - Sequences Manager: solsticepipeline/solsticetools/pipelinizer/sequencesmanager.md
         - Solstice Publisher: solsticepipeline/solsticetools/solsticepublisher.md
         - Solstice Pickers: solsticepipeline/solsticetools/solsticepickers.md
+        - Solstice Alembic Manager: solsticepipeline/solsticetools/solsticealembicmanager.md
         - Solstice Light Rigs Manager: solsticepipeline/solsticetools/solsticelightrigmanager.md
       - Departments:
         - Layout:
