@@ -67,6 +67,57 @@ class MCallbackIdWrapper(object):
         return 'MCallbackIdWrapper(%r)' % self.callback_id
 
 
+class TrackNodes(object):
+    """
+    Helps track new nodes that get added to a scene after a function is called
+    Example of use:
+    track_nodes = TrackNodes()
+    track_nodes.load()
+    custom_funct()
+    new_nodes = track_nodes.get_delta()
+    """
+
+    def __init__(self):
+        self._nodes = None
+        self._node_type = None
+        self._delta = None
+
+    def load(self, node_type=None):
+        """
+        Initializes TrackNodes states
+        :param node_type: str, Maya node type we want to track. If not given, all current scene objects wil lbe tracked
+        """
+
+        self._node_type = node_type
+        if self._node_type:
+            self._nodes = cmds.ls(type=node_type)
+        else:
+            self._nodes = cmds.ls()
+
+    def get_delta(self):
+        """
+        Returns the new nodes in the Maya scen created after load() was executed
+        :return: list<str>
+        """
+
+        if self._node_type:
+            current_nodes = cmds.ls(type=self._node_type)
+        else:
+            current_nodes = cmds.ls()
+
+        new_set = set(current_nodes).difference(self._nodes)
+
+        return list(new_set)
+
+def get_maya_version():
+    """
+    Returns version of the executed Maya, or 0 if not Maya version is found
+    @returns: int, Version of Maya
+    """
+
+    return int(cmds.about(version=True))
+
+
 def maya_undo(fn):
     """
     Undo function decorator for Maya function calls

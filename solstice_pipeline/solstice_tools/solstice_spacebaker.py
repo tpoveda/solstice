@@ -329,13 +329,20 @@ class SpaceAnimBaker(solstice_windows.Window, object):
 
         return new_space
 
-    def remove_space(self, space_widget):
+    def _remove_space_ui(self, space_widget):
         space_widget.deleteSpace.connect(self._on_delete_space_switch)
         self._space_widgets.remove(space_widget)
         space_widget._animate_expand(False)
+
+    def remove_space(self, space_widget):
+        self._remove_space_ui(space_widget)
         driver_node = space_widget.driver_node
         if not driver_node or not cmds.objExists(driver_node):
             return
+
+        stored_name = None
+        if utils.attribute_exists(driver_node, 'SS_driverName'):
+            stored_name = cmds.getAttr('{}.SS_driverName'.format(driver_node))
 
         if utils.attribute_exists(driver_node, 'SS_driverName'):
             cmds.deleteAttr('{}.SS_driverName'.format(driver_node))
@@ -359,6 +366,9 @@ class SpaceAnimBaker(solstice_windows.Window, object):
         new_enum = False
         if driver_node_short in enum_list:
             enum_list.remove(driver_node_short)
+            new_enum = True
+        if stored_name and stored_name in enum_list:
+            enum_list.remove(stored_name)
             new_enum = True
         if new_enum:
             space_cnt = cmds.listConnections(space_widget.switch_control + '.{}'.format(SPACE_DRIVER_ATTR))[0]
@@ -499,6 +509,8 @@ class SpaceAnimBaker(solstice_windows.Window, object):
     def _on_reset_control(self):
         self._on_clear_line(self.target_control_line)
         self.parent_space_group_line.setText('')
+        for w in reversed(self._space_widgets):
+            self._remove_space_ui(w)
         self._update_ui()
 
     def _get_selected(self, line_widget):
@@ -572,7 +584,7 @@ class SpaceAnimBaker(solstice_windows.Window, object):
                 cmds.parent(self.switch_control, offset_grp)
         else:
             cmds.parent(self.switch_control, offset_grp)
-        cmds.select(switch_control.fullPathName())
+        # cmds.select(switch_control.fullPathName())
         self.parent_space_group_line.setText(offset_grp)
 
         return offset_grp

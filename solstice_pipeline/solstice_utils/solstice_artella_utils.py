@@ -495,12 +495,15 @@ def get_asset_image(asset_path, project_id):
     data = urllib2.urlopen(image_url).read()
 
 
-def launch_maya(file_path, maya_version=2019):
+def launch_maya(file_path, maya_version=None):
     """
     :param file_path: str
     :param maya_version: int
     :return:
     """
+
+    if maya_version is None:
+        maya_version = utils.get_maya_version()
 
     spigot = get_spigot_client()
 
@@ -515,12 +518,15 @@ def launch_maya(file_path, maya_version=2019):
     sp.logger.debug(rsp)
 
 
-def open_file_in_maya(file_path, maya_version=2019):
+def open_file_in_maya(file_path, maya_version=None):
     """
     Open the given path in the given Maya version
     :param file_path: str
     :param maya_version: int
     """
+
+    if maya_version is None:
+        maya_version = utils.get_maya_version()
 
     spigot = get_spigot_client()
 
@@ -543,12 +549,15 @@ def open_file_in_maya(file_path, maya_version=2019):
     return rsp
 
 
-def import_file_in_maya(file_path, maya_version=2019):
+def import_file_in_maya(file_path, maya_version=None):
     """
     Import the given asset path in the given Maya version current scene
     :param file_path: str
     :param maya_version: int
     """
+
+    if maya_version is None:
+        maya_version = utils.get_maya_version()
 
     spigot = get_spigot_client()
 
@@ -567,12 +576,15 @@ def import_file_in_maya(file_path, maya_version=2019):
     return rsp
 
 
-def reference_file_in_maya(file_path, maya_version=2019):
+def reference_file_in_maya(file_path, maya_version=None):
     """
     Import the given asset path in the given Maya version current scene
     :param file_path: str
     :param maya_version: int
     """
+
+    if maya_version is None:
+        maya_version = utils.get_maya_version()
 
     spigot = get_spigot_client()
 

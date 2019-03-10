@@ -870,13 +870,19 @@ class ShaderLibrary(solstice_windows.Window, object):
         from solstice_pipeline.solstice_tools import solstice_outliner
 
         tag_nodes = solstice_outliner.SolsticeOutliner.get_tag_data_nodes()
-        if not tag_nodes or len(tag_nodes) <= 0:
+        tag_info_nodes = solstice_outliner.SolsticeOutliner.get_tag_info_nodes()
+
+        if not tag_nodes and not tag_info_nodes:
             sp.logger.error('No tag nodes found in the current scene. Aborting shaders loading ...')
-            return []
+            return None
 
         added_mats = list()
 
-        for tag in tag_nodes:
+        found_nodes = list()
+        found_nodes.extend(tag_nodes)
+        found_nodes.extend(tag_info_nodes)
+
+        for tag in found_nodes:
             shaders = tag.get_shaders()
             if not shaders:
                 sp.logger.error('No shaders found for asset: {}'.format(tag.get_asset().node))
@@ -896,20 +902,28 @@ class ShaderLibrary(solstice_windows.Window, object):
                 continue
 
             asset = tag.get_asset()
-            is_referenced = cmds.referenceQuery(asset.node, isNodeReferenced=True)
-            if not is_referenced:
-                sp.logger.error('Node {} is not referenced! All scene assets should be referenced (not imported). Please contact TD!'.format(asset))
-                continue
+            if asset.node != hires_group:
+                is_referenced = cmds.referenceQuery(asset.node, isNodeReferenced=True)
+                if not is_referenced:
+                    sp.logger.error('Node {} is not referenced! All scene assets should be referenced (not imported). Please contact TD!'.format(asset))
+                    continue
 
-            namespace = cmds.referenceQuery(asset.node, namespace=True)
-            if not namespace or not namespace.startswith(':'):
-                sp.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(asset.node))
-                continue
-            else:
-                namespace = namespace[1:] + ':'
+                namespace = cmds.referenceQuery(asset.node, namespace=True)
+                if not namespace or not namespace.startswith(':'):
+                    sp.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(asset.node))
+                    continue
+                else:
+                    namespace = namespace[1:] + ':'
 
             valid_meshes = list()
             for mesh in hires_meshes:
+
+                namespace = cmds.referenceQuery(mesh, namespace=True)
+                if not namespace or not namespace.startswith(':'):
+                    continue
+                else:
+                    namespace = namespace[1:] + ':'
+
                 mesh_no_namespace = mesh.replace(namespace, '')
                 asset_group = mesh_no_namespace.split('|')[1]
 
@@ -950,8 +964,7 @@ class ShaderLibrary(solstice_windows.Window, object):
                 shading_info = mesh_info[1]
                 for shading_grp, materials in shading_info.items():
                     if not materials or len(materials) <= 0:
-                        sp.logger.error(
-                            'No valid materials found on mesh {0} of asset {1}'.format(mesh, tag.get_asset()))
+                        sp.logger.error('No valid materials found on mesh {0} of asset {1}'.format(mesh, tag.get_asset()))
                         continue
 
                     # If shading group already exists we do not create the material
@@ -959,10 +972,8 @@ class ShaderLibrary(solstice_windows.Window, object):
                         continue
 
                     for mat in materials:
-
                         if not mat or mat in added_mats:
                             continue
-
                         added_mats.append(mat)
 
                         sp.logger.debug('Loading Shader: {}'.format(mat))

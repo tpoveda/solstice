@@ -669,7 +669,7 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
 
         if status == 'all' or status == 'working':
             if sync_type == 'all':
-                paths_to_sync.append(os.path.join(self._asset_path, '__working__'))
+                paths_to_sync.appefnd(os.path.join(self._asset_path, '__working__'))
             else:
                 paths_to_sync.append(os.path.join(self._asset_path, '__working__', sync_type))
 
@@ -710,6 +710,16 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
             published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', asset_name)
             if os.path.isfile(published_path):
                 artella.reference_file_in_maya(file_path=published_path)
+
+    def reference_alembic_file(self):
+        from solstice_pipeline.solstice_tools import solstice_alembicmanager
+        reload(solstice_alembicmanager)
+        alembic_name = self._name + '.abc'
+        local_max_versions = self.get_max_local_versions()
+        if local_max_versions['model']:
+            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', alembic_name)
+            if os.path.isfile(published_path):
+                solstice_alembicmanager.AlembicImporter.reference_alembic(published_path)
 
     def open_textures_folder(self, status):
         if status != 'working' and status != 'published':

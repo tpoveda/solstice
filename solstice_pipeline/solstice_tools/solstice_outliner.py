@@ -24,6 +24,8 @@ from solstice_pipeline.solstice_utils import solstice_node, solstice_maya_utils,
 from solstice_pipeline.solstice_gui import solstice_messagehandler
 from solstice_pipeline.resources import solstice_resource
 
+reload(solstice_node)
+
 global solstice_outliner_window
 try:
     # We do this to remove callbacks when we reload the module
@@ -513,9 +515,20 @@ class SolsticeAssetsOutliner(SolsticeAbstractOutliner, object):
 
     @staticmethod
     def get_assets():
+
         asset_nodes = list()
+
+        # We find tag data nodes
         tag_data_nodes = SolsticeOutliner.get_tag_data_nodes()
         for tag_data in tag_data_nodes:
+            asset = tag_data.get_asset()
+            if asset is None:
+                continue
+            asset_nodes.append(asset)
+
+        # We find nodes with tag info attribute (alembics)
+        tag_info_nodes = SolsticeOutliner.get_tag_info_nodes()
+        for tag_data in tag_info_nodes:
             asset = tag_data.get_asset()
             if asset is None:
                 continue
@@ -562,9 +575,13 @@ class SolsticeAssetsOutliner(SolsticeAbstractOutliner, object):
         node_name = widget.asset.node
         if cmds.objExists(node_name):
             main_control = widget.asset.get_main_control()
-            if not cmds.objExists(main_control):
-                sp.logger.warning('Main Control {} for node {} does not exists!'.format(main_control, node_name))
-                return
+            if main_control:
+                if not cmds.objExists(main_control):
+                    return
+            # if not main_control or not cmds.objExists(main_control):
+            #     if state:
+            #
+            #     return
             if state is True:
                 cmds.showHidden(node_name)
             else:
@@ -656,6 +673,19 @@ class SolsticeOutliner(QWidget, object):
                     tag_nodes.append(tag_node)
 
         return tag_nodes
+
+    @staticmethod
+    def get_tag_info_nodes():
+        tag_info_nodes = list()
+        objs = cmds.ls(l=True)
+        for obj in objs:
+            valid_tag_info_data = cmds.attributeQuery('tag_info', node=obj, exists=True)
+            if valid_tag_info_data:
+                tag_info = cmds.getAttr(obj+'.tag_info')
+                tag_node = solstice_node.SolsticeTagDataNode(node=obj, tag_info=tag_info)
+                tag_info_nodes.append(tag_node)
+
+        return tag_info_nodes
 
     @staticmethod
     def load_shaders():

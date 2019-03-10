@@ -10,6 +10,8 @@
 
 import os
 import sys
+import json
+from functools import partial
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
@@ -22,11 +24,12 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters
 from solstice_pipeline.resources import solstice_resource
 from solstice_pipeline.solstice_tools import solstice_tagger
-from solstice_pipeline.solstice_utils import solstice_browser_utils, solstice_alembic, solstice_maya_utils
+from solstice_pipeline.solstice_utils import solstice_browser_utils, solstice_alembic, solstice_maya_utils, solstice_python_utils
 
 ALEMBIC_GROUP_SUFFIX = '_ABCGroup'
 
 reload(solstice_alembic)
+reload(solstice_maya_utils)
 
 
 class AlembicGroup(QWidget, object):
@@ -423,10 +426,15 @@ class AlembicExporter(QWidget, object):
         buttons_layout.addWidget(export_tag_lbl, 0, 0, 1, 1, Qt.AlignRight)
         buttons_layout.addWidget(self.alembic_groups_combo, 0, 1)
 
+        name_lbl = QLabel('Alembic Name: ')
+        self.name_line = QLineEdit()
+        buttons_layout.addWidget(name_lbl, 1, 0, 1, 1, Qt.AlignRight)
+        buttons_layout.addWidget(self.name_line, 1, 1)
+
         shot_name_lbl = QLabel('Shot Name: ')
         self.shot_line = QLineEdit()
-        buttons_layout.addWidget(shot_name_lbl, 1, 0, 1, 1, Qt.AlignRight)
-        buttons_layout.addWidget(self.shot_line, 1, 1)
+        buttons_layout.addWidget(shot_name_lbl, 2, 0, 1, 1, Qt.AlignRight)
+        buttons_layout.addWidget(self.shot_line, 2, 1)
 
         frame_range_lbl = QLabel('Frame Range: ')
         self.start = QSpinBox()
@@ -444,8 +452,8 @@ class AlembicExporter(QWidget, object):
         frame_range_widget.setLayout(frame_range_layout)
         for widget in [frame_range_lbl, self.start, self.end]:
             frame_range_layout.addWidget(widget)
-        buttons_layout.addWidget(frame_range_lbl, 2, 0, 1, 1, Qt.AlignRight)
-        buttons_layout.addWidget(frame_range_widget, 2, 1)
+        buttons_layout.addWidget(frame_range_lbl, 3, 0, 1, 1, Qt.AlignRight)
+        buttons_layout.addWidget(frame_range_widget, 3, 1)
 
         folder_icon = solstice_resource.icon('open')
         export_path_layout = QHBoxLayout()
@@ -463,8 +471,8 @@ class AlembicExporter(QWidget, object):
         self.export_path_btn.setStyleSheet("background-color: rgba(255, 255, 255, 0); border: 0px solid rgba(255,255,255,0);")
         export_path_layout.addWidget(self.export_path_line)
         export_path_layout.addWidget(self.export_path_btn)
-        buttons_layout.addWidget(export_path_lbl, 3, 0, 1, 1, Qt.AlignRight)
-        buttons_layout.addWidget(export_path_widget, 3, 1)
+        buttons_layout.addWidget(export_path_lbl, 4, 0, 1, 1, Qt.AlignRight)
+        buttons_layout.addWidget(export_path_widget, 4, 1)
 
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
 
@@ -487,6 +495,7 @@ class AlembicExporter(QWidget, object):
         self.main_layout.addWidget(self._abc_tree)
 
         self.shot_line.textChanged.connect(self._on_update_tree)
+        self.name_line.textChanged.connect(self._on_update_tree)
         self.alembic_groups_combo.currentIndexChanged.connect(self._on_update_tree)
 
     def refresh(self):
@@ -498,6 +507,7 @@ class AlembicExporter(QWidget, object):
         self._refresh_alembic_groups()
         self._refresh_frame_ranges()
         self._refresh_shot_name()
+        self._refresh_alembic_name()
 
     def get_selected_alembic_group(self):
         """
@@ -543,6 +553,18 @@ class AlembicExporter(QWidget, object):
 
         return set_nodes
 
+    def _refresh_alembic_name(self):
+        """
+        Internal function that updates Alembic name
+        """
+
+        if self.name_line.text() != '':
+            return
+
+        sel = cmds.ls(sl=True)
+        if sel:
+            self.name_line.setText(sel[0])
+
     def _refresh_alembic_groups(self):
         """
         Internal function that updates the list of alembic groups
@@ -575,7 +597,7 @@ class AlembicExporter(QWidget, object):
         Internal function that updates the shot name QLineEdit text
         """
 
-        shot_name = 'Undefined'
+        shot_name = ''
         current_scene = cmds.file(q=True, sn=True)
         if current_scene:
             current_scene = os.path.basename(current_scene)
@@ -648,13 +670,10 @@ class AlembicExporter(QWidget, object):
         if m:
             shot_name = m.group(1)
         else:
-            shot_name = 'Undefined'
-        if not shot_name:
-            sp.logger.warning(
-                'Invalid shot name: {}! Please write a valid Solstice Short Name or load a valid shot scene and try again!'.format(
-                    shot_name)
-            )
-            return
+            if self.shot_line.text():
+                shot_name = 'Undefined'
+            else:
+                shot_name = ''
 
         out_folder = self.export_path_line.text()
         if not os.path.exists(out_folder):
@@ -676,8 +695,17 @@ class AlembicExporter(QWidget, object):
 
         export_name = export_name.replace(ALEMBIC_GROUP_SUFFIX, '')
 
-        anim_path = '{}_{}'.format(shot_name, export_name+'.abc')
-        filename = os.path.normpath(os.path.join(out_folder, shot_name, anim_path))
+        abc_name = self.name_line.text()
+        if not abc_name:
+            abc_name = export_name
+
+        if shot_name:
+            anim_path = '{}_{}'.format(shot_name, abc_name+'.abc')
+            filename = os.path.normpath(os.path.join(out_folder, shot_name, anim_path))
+        else:
+            anim_path = '{}'.format(abc_name+'.abc')
+            filename = os.path.normpath(os.path.join(out_folder, anim_path))
+
         anim_node = AlembicNode(solstice_browser_utils.get_relative_path(filename, sp.get_solstice_project_path())[1:])
         abc_group_node.addChild(anim_node)
         for obj, geo_list in exports_dict.items():
@@ -712,12 +740,27 @@ class AlembicExporter(QWidget, object):
             except Exception:
                 pass
         if not tag_info:
-            sp.logger.warning('Node has not valid tag data: {}'.format(attr_node))
+            sp.logger.warning('Node has not valid tag data: {}'.format(tag_node))
             return
 
         if not cmds.attributeQuery('tag_info', n=attr_node, exists=True):
             cmds.addAttr(attr_node, ln='tag_info', dt='string', k=True)
         cmds.setAttr('{}.tag_info'.format(attr_node), str(tag_info), type='string')
+
+    def _get_tag_atributes_dict(self, tag_node):
+        # We add attributes to the first node in the list
+        attrs = cmds.listAttr(tag_node, ud=True)
+        tag_info = dict()
+        for attr in attrs:
+            try:
+                tag_info[attr] = str(cmds.getAttr('{}.{}'.format(tag_node, attr)))
+            except Exception:
+                pass
+        if not tag_info:
+            sp.logger.warning('Node has not valid tag data: {}'.format(tag_node))
+            return
+
+        return tag_info
 
     def _export_alembics(self, alembic_nodes):
 
@@ -753,30 +796,57 @@ class AlembicExporter(QWidget, object):
                         if type(c_name) in [list, tuple]:
                             c_name = c_name[0]
                         if isinstance(c, AlembicExporterModelHires):
-                            if tag_node:
-                                self._add_tag_attributes(c_name, tag_node)
-                            export_list.append(c_name)
+                            children = cmds.listRelatives(c_name, children=True, allDescendents=True, shapes=False, fullPath=True)
+                            export_list.extend(children)
+
+                            # if tag_node:
+                            #     self._add_tag_attributes(c_name, tag_node)
+                            # export_list.append(c_name)
                         else:
                             if 'transform' != cmds.nodeType(c_name):
                                 parent_xform = cmds.listRelatives(c_name, fullPath=True, parent=True)
-                                export_list.append(parent_xform[0])
+                                if parent_xform:
+                                    children = cmds.listRelatives(parent_xform[0], children=True, allDescendents=True, shapes=False, fullPath=True)
+                                    export_list.extend(children)
                             else:
-                                export_list.append(c_name)
-                            if tag_node:
-                                self._add_tag_attributes(c_name, tag_node)
-                else:
-                    export_list.append(root_node_name)
+                                children = cmds.listRelatives(c_name, children=True, allDescendents=True, shapes=False, fullPath=True)
+                                export_list.extend(children)
+                            #     export_list.append(c_name)
+                            # if tag_node:
+                            #     self._add_tag_attributes(c_name, tag_node)
+                # else:
+                #     export_list.append(root_node_name)
+
+            for obj in reversed(export_list):
+                if cmds.nodeType(obj) != 'transform':
+                    export_list.remove(obj)
 
             if not export_list:
                 sp.logger.debug('No geometry to export! Aborting Alembic Export operation ...')
                 return
 
-            solstice_alembic.export(
+            valid_alembic = solstice_alembic.export(
                 root=export_list,
                 alembicFile=export_path,
                 frameRange=[[float(self.start.value()), float(self.end.value())]],
-                userAttr=['tag_info']
+                userAttr=['tag_info'],
+                uvWrite=True,
+                writeUVSets=True,
+                writeCreases=True
             )
+            if not valid_alembic:
+                sp.logger.warning('Error while exporting Alembic file: {}'.format(export_path))
+                return
+
+            tag_info = self._get_tag_atributes_dict(tag_node)
+            if not tag_info:
+                sp.logger.warning('Impossible to retrieve tag info ...')
+                return
+            tag_json_file = os.path.join(os.path.dirname(export_path), abc_node.name.replace('.abc', '_abc.info')[1:])
+            with open(tag_json_file, 'w') as f:
+                json.dump(tag_info, f)
+
+            solstice_python_utils.open_folder(os.path.dirname(export_path))
 
             for n in export_list:
                 if cmds.attributeQuery('tag_info', n=n, exists=True):
@@ -786,15 +856,6 @@ class AlembicExporter(QWidget, object):
                         pass
 
     def _on_export(self):
-
-        shot_name = self.shot_line.text()
-        if not shot_name:
-            cmds.confirmDialog(
-                t='Error during Alembic Exportation',
-                m='Invalid shot name: {}! Please write a valid Solstice Short Name or load a valid shot scene and try again!'.format(
-                    shot_name)
-            )
-            return
 
         out_folder = self.export_path_line.text()
         if not os.path.exists(out_folder):
@@ -916,15 +977,23 @@ class AlembicImporter(QWidget, object):
         abc_layout.addWidget(self.alembic_groups_combo)
         merge_abc_layout.addLayout(abc_layout)
 
+        buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(2, 2, 2, 2)
+        buttons_layout.setSpacing(2)
+        self.main_layout.addLayout(buttons_layout)
         import_btn = QPushButton('Import')
         import_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.main_layout.addWidget(import_btn)
+        reference_btn = QPushButton('Reference')
+        reference_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        buttons_layout.addWidget(import_btn)
+        buttons_layout.addWidget(reference_btn)
 
         self.create_radio.clicked.connect(self._on_mode_changed)
         self.add_radio.clicked.connect(self._on_mode_changed)
         self.merge_radio.clicked.connect(self._on_mode_changed)
         self.alembic_path_btn.clicked.connect(self._on_browse_alembic)
         import_btn.clicked.connect(self._on_import_alembic)
+        reference_btn.clicked.connect(partial(self._on_import_alembic, True))
 
         self._on_mode_changed()
 
@@ -984,7 +1053,45 @@ class AlembicImporter(QWidget, object):
 
         self.alembic_path_line.setText(abc_file)
 
-    def _on_import_alembic(self):
+    @staticmethod
+    def reference_alembic(alembic_path):
+        if not alembic_path or not os.path.isfile(alembic_path):
+            sp.logger.warning('Alembic file {} does not exits!'.format(alembic_path))
+            return None
+
+        abc_name = os.path.basename(alembic_path).split('.')[0]
+        tag_json_file = os.path.join(os.path.dirname(alembic_path), os.path.basename(alembic_path).replace('.abc', '_abc.info'))
+        if not os.path.isfile(tag_json_file):
+            sp.logger.warning('No Alembic Info file found!')
+            return
+
+        with open(tag_json_file, 'r') as f:
+            tag_info = json.loads(f.read())
+        if not tag_info:
+            sp.logger.warning('No Alembic Info loaded!')
+            return
+
+        root = cmds.group(n=abc_name, empty=True, world=True)
+        AlembicImporter._add_tag_info_data(tag_info, root)
+        sel = [root]
+        sel = sel or None
+
+        track_nodes = solstice_maya_utils.TrackNodes()
+        track_nodes.load()
+        valid_reference = solstice_alembic.reference_alembic(alembic_path, namespace=abc_name)
+        if not valid_reference:
+            sp.logger.warning('Error while reference Alembic file: {}'.format(alembic_path))
+            return
+        res = track_nodes.get_delta()
+        for obj in res:
+            if not cmds.nodeType(obj) == 'transform':
+                continue
+            obj_parent = cmds.listRelatives(obj, parent=True)
+            if obj_parent:
+                continue
+            cmds.parent(obj, sel[0])
+
+    def _on_import_alembic(self, as_reference=False):
         abc_file = self.alembic_path_line.text()
         if not abc_file or not os.path.isfile(abc_file):
             cmds.confirmDialog(t='Error', m='No Alembic File is selected or file is not currently available on disk')
@@ -997,16 +1104,55 @@ class AlembicImporter(QWidget, object):
 
         nodes = sorted(cmds.sets(sel_set, query=True, no=True)) if sel_set else None
 
-        abc_name = os.path.basename(abc_file).split('.')[0].lower()
+        abc_name = os.path.basename(abc_file).split('.')[0]
+        tag_json_file = os.path.join(os.path.dirname(abc_file), os.path.basename(abc_file).replace('.abc', '_abc.info'))
+        if not os.path.isfile(tag_json_file):
+            sp.logger.warning('No Alembic Info file found!')
+            return
+
+        with open(tag_json_file, 'r') as f:
+            tag_info = json.loads(f.read())
+        if not tag_info:
+            sp.logger.warning('No Alembic Info loaded!')
+            return
 
         if self.create_radio.isChecked():
             root = cmds.group(n=abc_name, empty=True, world=True)
+            self._add_tag_info_data(tag_info, root)
             sel = [root]
         else:
-            sel = cmds.ls(sl=True, l=True) or [cmds.group(n=abc_name, empty=True, world=True)]
+            sel = cmds.ls(sl=True, l=True)
+            if not sel:
+                sel = cmds.group(n=abc_name, empty=True, world=True)
+                self._add_tag_info_data(tag_info, sel)
 
         sel = sel or None
-        res = solstice_alembic.import_alembic(abc_file, mode='import', nodes=nodes, parent=sel[0])
+
+        if as_reference:
+            track_nodes = solstice_maya_utils.TrackNodes()
+            track_nodes.load()
+            valid_reference = solstice_alembic.reference_alembic(abc_file, namespace=abc_name)
+            if not valid_reference:
+                sp.logger.warning('Error while reference Alembic file: {}'.format(abc_file))
+                return
+            res = track_nodes.get_delta()
+            for obj in res:
+                if not cmds.nodeType(obj) == 'transform':
+                    continue
+                obj_parent = cmds.listRelatives(obj, parent=True)
+                if obj_parent:
+                    continue
+                cmds.parent(obj, sel[0])
+        else:
+            res = solstice_alembic.import_alembic(abc_file, mode='import', nodes=nodes, parent=sel[0])
+
+        return res
+
+    @staticmethod
+    def _add_tag_info_data(tag_info, attr_node):
+        if not cmds.attributeQuery('tag_info', n=attr_node, exists=True):
+            cmds.addAttr(attr_node, ln='tag_info', dt='string', k=True)
+        cmds.setAttr('{}.tag_info'.format(attr_node), str(tag_info), type='string')
 
 
 class AlembicManager(solstice_windows.Window, object):

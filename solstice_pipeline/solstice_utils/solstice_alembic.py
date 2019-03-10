@@ -254,3 +254,22 @@ def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
     sp.logger.debug('Alembic File {} imported successfully!'.format(os.path.basename(alembic_file)))
 
     return res
+
+def reference_alembic(alembic_file, namespace=None):
+    if not os.path.exists(alembic_file):
+        cmds.confirmDialog(t='Error', m='Alembic File does not exists:\n{}'.format(alembic_file))
+        return None
+
+    try:
+        if namespace:
+            print('NS: {}'.format(namespace))
+            cmds.file(alembic_file, type='Alembic', reference=True, namespace=namespace)
+        else:
+            cmds.file(alembic_file, type='Alembic', reference=True)
+    except Exception as e:
+        sp.logger.error(traceback.format_exc())
+        raise Exception(e)
+
+    sp.logger.debug('Alembic File {} referenced successfully!'.format(os.path.basename(alembic_file)))
+
+    return True

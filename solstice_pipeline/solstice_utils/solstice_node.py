@@ -451,10 +451,13 @@ class SolsticeAssetNode(SolsticeNode, object):
 
 
 class SolsticeTagDataNode(object):
-    def __init__(self, node):
+    def __init__(self, node, tag_info=None):
         super(SolsticeTagDataNode, self).__init__()
 
         self._node = node
+        self._tag_info_dict = None
+        if tag_info:
+            self._tag_info_dict = ast.literal_eval(tag_info)
 
     def get_node(self):
         return self._node
@@ -462,13 +465,17 @@ class SolsticeTagDataNode(object):
     def get_asset(self):
         if not self._node or not cmds.objExists(self._node):
             return None
-        if not cmds.attributeQuery('node', node=self._node, exists=True):
-            return None
 
-        connections = cmds.listConnections(self._node+'.node')
-        if connections:
-            node = connections[0]
-            return SolsticeAssetNode(node=node)
+        if self._tag_info_dict:
+            return SolsticeAssetNode(node=self._node)
+        else:
+            if not cmds.attributeQuery('node', node=self._node, exists=True):
+                return None
+
+            connections = cmds.listConnections(self._node+'.node')
+            if connections:
+                node = connections[0]
+                return SolsticeAssetNode(node=node)
 
         return None
 
@@ -491,43 +498,66 @@ class SolsticeTagDataNode(object):
     def get_proxy_group(self):
         if not self._node or not cmds.objExists(self._node):
             return None
-        if not cmds.attributeQuery('proxy', node=self._node, exists=True):
-            return None
 
-        connections = cmds.listConnections(self._node + '.proxy')
-        if connections:
-            node = connections[0]
-            if cmds.objExists(node):
-                return node
+        if self._tag_info_dict:
+            return self._node
+        else:
+            if not cmds.attributeQuery('proxy', node=self._node, exists=True):
+                return None
+
+            connections = cmds.listConnections(self._node + '.proxy')
+            if connections:
+                node = connections[0]
+                if cmds.objExists(node):
+                    return node
 
         return None
 
     def get_hires_group(self):
         if not self._node or not cmds.objExists(self._node):
             return None
-        if not cmds.attributeQuery('hires', node=self._node, exists=True):
-            return None
 
-        connections = cmds.listConnections(self._node + '.hires')
-        if connections:
-            node = connections[0]
-            if cmds.objExists(node):
-                return node
+        if self._tag_info_dict:
+            return self._node
+        else:
+            if not cmds.attributeQuery('hires', node=self._node, exists=True):
+                return None
+
+            connections = cmds.listConnections(self._node + '.hires')
+            if connections:
+                node = connections[0]
+                if cmds.objExists(node):
+                    return node
 
         return None
 
     def get_shaders(self):
         if not self._node or not cmds.objExists(self._node):
             return None
-        if not cmds.attributeQuery('shaders', node=self._node, exists=True):
-            return None
 
-        shaders_attr = cmds.getAttr(self._node + '.shaders')
-        shaders_attr_fixed = shaders_attr.replace("'", "\"")
-        shaders_dict = ast.literal_eval(shaders_attr_fixed)
-        if type(shaders_dict) != dict:
-            sp.logger.error('Impossible to get dictionary from shaders attribute. Maybe shaders are not set up properly. Please contact TD!')
+        if self._tag_info_dict:
+            shaders_info = self._tag_info_dict.get('shaders', None)
+            if not shaders_info:
+                sp.logger.warning('Impossible retrieve shaders info of node: {}'.format(self._node))
+                return
+            shaders_info_fixed = shaders_info.replace("'", "\"")
+            shaders_dict = ast.literal_eval(shaders_info_fixed)
+            if type(shaders_dict) != dict:
+                sp.logger.error('Impossible to get dictionary from shaders info. Maybe shaders are not set up properly. Please contact TD!')
+            else:
+                return shaders_dict
         else:
-            return shaders_dict
+            if not cmds.attributeQuery('shaders', node=self._node, exists=True):
+                return None
 
-        return shaders_attr
+            shaders_attr = cmds.getAttr(self._node + '.shaders')
+            shaders_attr_fixed = shaders_attr.replace("'", "\"")
+            shaders_dict = ast.literal_eval(shaders_attr_fixed)
+            if type(shaders_dict) != dict:
+                sp.logger.error('Impossible to get dictionary from shaders attribute. Maybe shaders are not set up properly. Please contact TD!')
+            else:
+                return shaders_dict
+
+            return shaders_attr
+
+        return None

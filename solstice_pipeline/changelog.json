@@ -132,6 +132,14 @@
     "New version of Sanity Check",
     "Fixed small error on Solstice Pipelinizer initial window",
     "Improve stability of the tools",
-    "Artella operations now use Maya 2019 to execute them"
+    "Artella operations now use Maya 2019 to execute them",
+    "Alembic Manager now can handle asset names and shot names properly",
+    "Assets Viewer tool now gives user info about which assets are published",
+    "Now not published assets can be synced directly from Assets Viewer tool",
+    "Assets Viewer tool now can reference/import alembic and rig files",
+    "Alembic Manager not exports Alembics without root group",
+    "Alembic Manager exports Tag Info in an individual JSON file",
+    "Alembic Manager imports Alembics and loads proper JSON info",
+    "Shader Pipeline now is supported in Alembic files"
   ]
 }
