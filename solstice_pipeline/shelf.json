@@ -232,6 +232,30 @@
                 "label": ""
             },
             {
+              "icon": "alembic.png",
+              "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
+              "annotation": "Solstice Alembic Manager",
+              "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
+                "icon": "shaders_sync",
+                "command": "from solstice_pipeline.solstice_tools import solstice_shaderlibrary; reload(solstice_shaderlibrary); solstice_shaderlibrary.ShaderLibrary.load_scene_shaders();",
+                "annotation": "Solstice Shaders Sync",
+                "label": ""
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
                 "icon": "clean",
                 "command": "from solstice_pipeline.solstice_utils import solstice_maya_utils; reload(solstice_maya_utils); solstice_maya_utils.clean_scene();",
                 "annotation": "Clean Scene",

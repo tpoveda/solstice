@@ -11,6 +11,7 @@
 import os
 import re
 import json
+import string
 import traceback
 from functools import partial
 
@@ -176,7 +177,7 @@ class ShadingNetwork(object):
                     name = key
                 else:
                     name = key+'_'
-                name = re.sub('(?<=[A-z])[0-9]+', '', name)
+                # name = re.sub('(?<=[A-z])[0-9]+', '', name)
                 try:
                     cmds.rename(key, name)
                 except Exception:
@@ -904,25 +905,25 @@ class ShaderLibrary(solstice_windows.Window, object):
             asset = tag.get_asset()
             if asset.node != hires_group:
                 is_referenced = cmds.referenceQuery(asset.node, isNodeReferenced=True)
-                if not is_referenced:
-                    sp.logger.error('Node {} is not referenced! All scene assets should be referenced (not imported). Please contact TD!'.format(asset))
-                    continue
-
-                namespace = cmds.referenceQuery(asset.node, namespace=True)
-                if not namespace or not namespace.startswith(':'):
-                    sp.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(asset.node))
-                    continue
-                else:
-                    namespace = namespace[1:] + ':'
+                if is_referenced:
+                    namespace = cmds.referenceQuery(asset.node, namespace=True)
+                    if not namespace or not namespace.startswith(':'):
+                        sp.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(asset.node))
+                        continue
+                    else:
+                        namespace = namespace[1:] + ':'
 
             valid_meshes = list()
             for mesh in hires_meshes:
-
-                namespace = cmds.referenceQuery(mesh, namespace=True)
-                if not namespace or not namespace.startswith(':'):
-                    continue
+                is_referenced = cmds.referenceQuery(mesh, isNodeReferenced=True)
+                if is_referenced:
+                    namespace = cmds.referenceQuery(mesh, namespace=True)
+                    if not namespace or not namespace.startswith(':'):
+                        continue
+                    else:
+                        namespace = namespace[1:] + ':'
                 else:
-                    namespace = namespace[1:] + ':'
+                    namespace = ''
 
                 mesh_no_namespace = mesh.replace(namespace, '')
                 asset_group = mesh_no_namespace.split('|')[1]
@@ -937,6 +938,14 @@ class ShaderLibrary(solstice_windows.Window, object):
                     if shader_mesh == group_mesh_name:
                         valid_meshes.append(mesh)
                         break
+
+                for shader_mesh in shaders.keys():
+                    shader_short = utils.get_short_name(shader_mesh)
+                    group_short = utils.get_short_name(group_mesh_name)
+                    if shader_short == group_short:
+                        if mesh not in valid_meshes:
+                            valid_meshes.append(mesh)
+                            break
 
             if len(valid_meshes) <= 0:
                 sp.logger.error('No valid meshes found on asset. Please contact TD!'.format(tag.get_asset()))

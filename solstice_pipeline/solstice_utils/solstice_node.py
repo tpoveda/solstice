@@ -104,30 +104,23 @@ class SolsticeNode(object):
         if not self._exists:
             return False
 
-        try:
+        is_referenced = cmds.referenceQuery(self.node, isNodeReferenced=True)
+
+        if not is_referenced:
+            self._nodes_list = cmds.listRelatives(self.node, children=True, allDescendents=True, fullPath=True, type='transform')
+        else:
             self._loaded = cmds.referenceQuery(self.node, isLoaded=True)
-        except Exception as e:
-            sp.logger.error('Cannot query this reference node: "{}"'.format(self.node))
-        if self._loaded:
-            try:
-                self._filename = cmds.referenceQuery(self.node, filename=True, withoutCopyNumber=True)
-                self._valid = True
-            except Exception as e:
-                self._valid = False
-
-        try:
+            if self._loaded:
+                try:
+                    self._filename = cmds.referenceQuery(self.node, filename=True, withoutCopyNumber=True)
+                    self._valid = True
+                except Exception as e:
+                    self._valid = False
             self._namespace = cmds.referenceQuery(self.node, namespace=True)
-        except Exception as e:
-            pass
-
-        try:
             self._parent_namespace = cmds.referenceQuery(self.node, parentNamespace=True)
-        except Exception as e:
-            pass
-
-        if self._valid:
-            self._filename_with_copy_number = cmds.referenceQuery(self.node, filename=True, withoutCopyNumber=False)
-            self._nodes_list = cmds.referenceQuery(self.node, nodes=True)
+            if self._valid:
+                self._filename_with_copy_number = cmds.referenceQuery(self.node, filename=True, withoutCopyNumber=False)
+                self._nodes_list = cmds.referenceQuery(self.node, nodes=True)
 
     def change_namespace(self, new_namespace):
         """

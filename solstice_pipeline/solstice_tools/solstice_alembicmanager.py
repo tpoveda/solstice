@@ -563,7 +563,17 @@ class AlembicExporter(QWidget, object):
 
         sel = cmds.ls(sl=True)
         if sel:
-            self.name_line.setText(sel[0])
+            sel = sel[0]
+            is_referenced = cmds.referenceQuery(sel, isNodeReferenced=True)
+            if is_referenced:
+                sel_namespace = cmds.referenceQuery(sel, namespace=True)
+                if not sel_namespace or not sel_namespace.startswith(':'):
+                    pass
+                else:
+                    sel_namespace = sel_namespace[1:] + ':'
+                    sel = sel.replace(sel_namespace, '')
+
+            self.name_line.setText(sel)
 
     def _refresh_alembic_groups(self):
         """
@@ -719,6 +729,10 @@ class AlembicExporter(QWidget, object):
                 hires_node = AlembicExporterModelHires(hires_grp)
                 root_grp.addChild(hires_node)
                 for model in geo_list:
+                    model_xform = cmds.listRelatives(model, parent=True, fullPath=True)[0]
+                    obj_is_visible = cmds.getAttr('{}.visibility'.format(model_xform))
+                    if not obj_is_visible:
+                        continue
                     obj_node = AlembicExporterNode(model)
                     hires_node.addChild(obj_node)
             else:
@@ -817,9 +831,24 @@ class AlembicExporter(QWidget, object):
                 # else:
                 #     export_list.append(root_node_name)
 
+            ref_objs = list()
             for obj in reversed(export_list):
                 if cmds.nodeType(obj) != 'transform':
                     export_list.remove(obj)
+                    continue
+                is_visible = cmds.getAttr('{}.visibility'.format(obj))
+                if not is_visible:
+                    export_list.remove(obj)
+                    continue
+                cmds.setAttr('{}.displaySmoothMesh '.format(obj), 2)
+
+                is_referenced = cmds.referenceQuery(obj, isNodeReferenced=True)
+                if is_referenced:
+                    ref_objs.append(obj)
+
+            if ref_objs:
+                sp.logger.warning('Alembic Manager does not support references: {}'.format(ref_objs))
+                return
 
             if not export_list:
                 sp.logger.debug('No geometry to export! Aborting Alembic Export operation ...')
@@ -954,6 +983,12 @@ class AlembicImporter(QWidget, object):
         import_mode_layout.addWidget(self.merge_radio)
         buttons_layout.addWidget(import_mode_lbl, 3, 0, 1, 1, Qt.AlignRight)
         buttons_layout.addWidget(import_mode_widget, 3, 1)
+
+        auto_display_lbl = QLabel('Auto Display Smooth?: ')
+        self.auto_smooth_display = QCheckBox()
+        self.auto_smooth_display.setChecked(True)
+        buttons_layout.addWidget(auto_display_lbl, 4, 0, 1, 1, Qt.AlignRight)
+        buttons_layout.addWidget(self.auto_smooth_display, 4, 1)
 
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
 
@@ -1146,6 +1181,17 @@ class AlembicImporter(QWidget, object):
                 cmds.parent(obj, sel[0])
         else:
             res = solstice_alembic.import_alembic(abc_file, mode='import', nodes=nodes, parent=sel[0])
+
+        if self.auto_smooth_display.isChecked():
+            for obj in res:
+                if cmds.nodeType(obj) == 'shape':
+                    if cmds.attributeQuery('aiSubdivType', node=obj, exists=True):
+                        cmds.setAttr('{}.aiSubdivType '.format(obj), 1)
+                elif cmds.nodeType(obj) == 'transform':
+                    shapes = cmds.listRelatives(obj, shapes=True, fullPath=True)
+                    for s in shapes:
+                        if cmds.attributeQuery('aiSubdivType', node=s, exists=True):
+                            cmds.setAttr('{}.aiSubdivType '.format(s), 1)
 
         return res
 
