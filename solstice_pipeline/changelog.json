@@ -140,6 +140,7 @@
     "Alembic Manager not exports Alembics without root group",
     "Alembic Manager exports Tag Info in an individual JSON file",
     "Alembic Manager imports Alembics and loads proper JSON info",
-    "Shader Pipeline now is supported in Alembic files"
+    "Shader Pipeline now is supported in Alembic files",
+    "Added Standin Manger tools. Used to export and import Standin files in Solstice short film"
   ]
 }

@@ -854,11 +854,15 @@ class AlembicExporter(QWidget, object):
                 sp.logger.debug('No geometry to export! Aborting Alembic Export operation ...')
                 return
 
+            # Retrieve all Arnold attributes to export from the first element of the list
+            geo_shape = cmds.listRelatives(export_list[0], shapes=True)
+            arnold_attrs = [attr for attr in cmds.listAttr(geo_shape) if attr.startswith('ai')]
+
             valid_alembic = solstice_alembic.export(
                 root=export_list,
                 alembicFile=export_path,
                 frameRange=[[float(self.start.value()), float(self.end.value())]],
-                userAttr=['tag_info'],
+                userAttr=arnold_attrs,
                 uvWrite=True,
                 writeUVSets=True,
                 writeCreases=True

@@ -721,6 +721,16 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
             if os.path.isfile(published_path):
                 solstice_alembicmanager.AlembicImporter.reference_alembic(published_path)
 
+    def import_standin_file(self):
+        from solstice_pipeline.solstice_tools import solstice_standinmanager
+        reload(solstice_standinmanager)
+        standin_name = self._name + '.ass'
+        local_max_versions = self.get_max_local_versions()
+        if local_max_versions['model']:
+            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', standin_name)
+            if os.path.isfile(published_path):
+                solstice_standinmanager.StandinImporter.import_standin(published_path)
+
     def open_textures_folder(self, status):
         if status != 'working' and status != 'published':
             return

@@ -132,7 +132,7 @@ class SolsticeAssetViewer(QWidget, object):
         elif self.rig_btn.isChecked():
             asset.reference_asset_file()
         elif self.standin_btn.isChecked():
-            print('Importint Stand-in')
+            asset.import_standin_file()
 
     def _change_category(self, category, flag):
         self._asset_viewer.change_category(category=category)
