@@ -61,6 +61,12 @@
               "label": ""
           },
           {
+              "icon": "standin.png",
+              "command": "from solstice_pipeline.solstice_tools import solstice_standinmanager; reload(solstice_standinmanager); solstice_standinmanager.run();",
+              "annotation": "Solstice Alembic Manager",
+              "label": ""
+          },
+          {
                 "icon": "",
                 "command": "",
                 "annotation": "separator",
@@ -234,6 +240,12 @@
             {
               "icon": "alembic.png",
               "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
+              "annotation": "Solstice Alembic Manager",
+              "label": ""
+            },
+            {
+              "icon": "standin.png",
+              "command": "from solstice_pipeline.solstice_tools import solstice_standinmanager; reload(solstice_standinmanager); solstice_standinmanager.run();",
               "annotation": "Solstice Alembic Manager",
               "label": ""
             },

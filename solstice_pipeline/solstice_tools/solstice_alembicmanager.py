@@ -286,6 +286,7 @@ class AlembicExporterNode(object):
     def resource(self):
         pass
 
+
 class AlembicExporterGroupNode(AlembicExporterNode, object):
     def __init__(self, name, parent=None):
         super(AlembicExporterGroupNode, self).__init__(name=name, parent=parent)
@@ -473,6 +474,10 @@ class AlembicExporter(QWidget, object):
         export_path_layout.addWidget(self.export_path_btn)
         buttons_layout.addWidget(export_path_lbl, 4, 0, 1, 1, Qt.AlignRight)
         buttons_layout.addWidget(export_path_widget, 4, 1)
+
+        self.open_folder_after_export_cbx = QCheckBox('Open Folder After Export?')
+        self.open_folder_after_export_cbx.setChecked(True)
+        buttons_layout.addWidget(self.open_folder_after_export_cbx, 5, 1)
 
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
 
@@ -721,7 +726,6 @@ class AlembicExporter(QWidget, object):
         for obj, geo_list in exports_dict.items():
             root_grp = AlembicExporterNode(obj)
             anim_node.addChild(root_grp)
-            hires_grp = None
             tag_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(obj)
             has_hires = cmds.attributeQuery('hires', node=tag_node, exists=True)
             if tag_node and has_hires:
@@ -812,6 +816,7 @@ class AlembicExporter(QWidget, object):
                         if isinstance(c, AlembicExporterModelHires):
                             children = cmds.listRelatives(c_name, children=True, allDescendents=True, shapes=False, fullPath=True)
                             export_list.extend(children)
+                            export_list.append(c_name)
 
                             # if tag_node:
                             #     self._add_tag_attributes(c_name, tag_node)
@@ -825,7 +830,6 @@ class AlembicExporter(QWidget, object):
                             else:
                                 children = cmds.listRelatives(c_name, children=True, allDescendents=True, shapes=False, fullPath=True)
                                 export_list.extend(children)
-                            #     export_list.append(c_name)
                             # if tag_node:
                             #     self._add_tag_attributes(c_name, tag_node)
                 # else:
@@ -840,22 +844,46 @@ class AlembicExporter(QWidget, object):
                 if not is_visible:
                     export_list.remove(obj)
                     continue
-                cmds.setAttr('{}.displaySmoothMesh '.format(obj), 2)
+                if cmds.attributeQuery('displaySmoothMesh', node=obj, exists=True):
+                    cmds.setAttr('{}.displaySmoothMesh '.format(obj), 2)
 
                 is_referenced = cmds.referenceQuery(obj, isNodeReferenced=True)
                 if is_referenced:
                     ref_objs.append(obj)
 
-            if ref_objs:
-                sp.logger.warning('Alembic Manager does not support references: {}'.format(ref_objs))
-                return
+            childs_to_remove = list()
+            for obj in export_list:
+                children = cmds.listRelatives(obj, children=True, allDescendents=True, shapes=False, fullPath=True)
+                shapes = cmds.listRelatives(obj, children=True, allDescendents=True, shapes=True, fullPath=True)
+                if children and not shapes:
+                    childs_to_remove.extend(children)
+
+            if childs_to_remove:
+                for obj in childs_to_remove:
+                    if obj in export_list:
+                        export_list.remove(obj)
+
+            # if ref_objs:
+            #     sp.logger.warning('Alembic Manager does not support references: {}'.format(ref_objs))
+            #     return
 
             if not export_list:
                 sp.logger.debug('No geometry to export! Aborting Alembic Export operation ...')
                 return
 
             # Retrieve all Arnold attributes to export from the first element of the list
-            geo_shape = cmds.listRelatives(export_list[0], shapes=True)
+            geo_shapes = cmds.listRelatives(export_list, shapes=True)
+            if not geo_shapes:
+                children = cmds.listRelatives(export_list, children=True, allDescendents=True, shapes=False, fullPath=True)
+                for child in children:
+                    geo_shapes = cmds.listRelatives(child, shapes=True)
+                    if geo_shapes:
+                        break
+            if not geo_shapes:
+                sp.logger.debug('No geometry data to export! Aborting Alembic Export operation ...')
+                return
+            geo_shape = geo_shapes[0]
+
             arnold_attrs = [attr for attr in cmds.listAttr(geo_shape) if attr.startswith('ai')]
 
             valid_alembic = solstice_alembic.export(
@@ -879,7 +907,8 @@ class AlembicExporter(QWidget, object):
             with open(tag_json_file, 'w') as f:
                 json.dump(tag_info, f)
 
-            solstice_python_utils.open_folder(os.path.dirname(export_path))
+            if self.open_folder_after_export_cbx.isChecked():
+                solstice_python_utils.open_folder(os.path.dirname(export_path))
 
             for n in export_list:
                 if cmds.attributeQuery('tag_info', n=n, exists=True):
@@ -1209,7 +1238,7 @@ class AlembicImporter(QWidget, object):
 class AlembicManager(solstice_windows.Window, object):
     name = 'Solstice_AlembicManager'
     title = 'Solstice Tools - Alembic Manager'
-    version = '1.1'
+    version = '1.2'
 
     def __init__(self):
         super(AlembicManager, self).__init__()

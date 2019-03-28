@@ -382,7 +382,7 @@ class SolsticeAssetNode(SolsticeNode, object):
 
         return asset_data_file
 
-    def get_alembic_file(self, status='working'):
+    def get_alembic_files(self, status='working'):
         """
         Returns alembic file path of the node
         :return: str
@@ -390,11 +390,13 @@ class SolsticeAssetNode(SolsticeNode, object):
 
         model_file = self.get_asset_file(file_type='model', status=status)
         base_path = os.path.dirname(model_file)
-        asset_name = self.get_short_name()
-        asset_name = asset_name+'.abc'
+        asset_base_name = self.get_short_name()
+        asset_name = asset_base_name+'.abc'
+        asset_info_name = asset_base_name+'_abc.info'
         abc_file = os.path.join(base_path, asset_name)
+        abc_info_file = os.path.join(base_path, asset_info_name)
 
-        return abc_file
+        return [abc_file, abc_info_file]
 
     def get_standin_files(self, status='working'):
         """

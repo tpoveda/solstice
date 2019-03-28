@@ -57,6 +57,7 @@ class StandinImporter(QWidget, object):
 
         self.import_btn = QPushButton('Import')
         self.import_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.reference_btn = QPushButton('Reference')
         buttons_layout.addWidget(self.import_btn, 2, 0, 2, 2)
         self.import_btn.setEnabled(False)
 
@@ -77,8 +78,6 @@ class StandinImporter(QWidget, object):
         xform = cmds.listRelatives(standin_node, parent=True)[0]
         cmds.rename(xform, standin_name)
         cmds.setAttr('{}.dso'.format(standin_node), standin_path, type='string')
-
-
 
     def refresh(self):
         if self.standin_path_line.text() and os.path.isfile(self.standin_path_line.text()):
@@ -175,7 +174,6 @@ class StandinExporter(QWidget, object):
         self.auto_sync_shaders.setChecked(True)
         buttons_layout.addWidget(auto_sync_shaders_lbl, 5, 0, 1, 1, Qt.AlignRight)
         buttons_layout.addWidget(self.auto_sync_shaders, 5, 1)
-
 
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
 
@@ -296,7 +294,8 @@ class StandinExporter(QWidget, object):
 
         standin_file = os.path.join(out_folder, self.name_line.text()+'.ass')
         bbox_file = os.path.join(out_folder, self.name_line.text()+'.asstoc')
-        arnold_files = [standin_file, bbox_file]
+        # arnold_files = [standin_file, bbox_file]
+        arnold_files = [standin_file]
 
         if not self.auto_sync_shaders.isChecked():
             res = cmds.confirmDialog(
@@ -328,7 +327,7 @@ class StandinExporter(QWidget, object):
         if os.path.isfile(standin_file):
             res = cmds.confirmDialog(
                 t='Alembic File already exits!',
-                m='Are you sure you want to overwrite exising Alembic file?\n\n{}'.format(export_path),
+                m='Are you sure you want to overwrite exising Alembic file?\n\n{}'.format(standin_file),
                 button=['Yes', 'No'],
                 defaultButton='Yes',
                 cancelButton='No',
@@ -338,6 +337,8 @@ class StandinExporter(QWidget, object):
                 sp.logger.debug('Aborting Alembic Export operation ...')
                 return
 
+        sel = cmds.ls(sl=True)
+
         solstice_shaderlibrary.ShaderLibrary.load_scene_shaders()
 
         start_frame = self.start.value()
@@ -345,26 +346,49 @@ class StandinExporter(QWidget, object):
         if end_frame < start_frame:
             end_frame = start_frame
         if start_frame == end_frame:
-            cmds.arnoldExportAss(
-                filename=standin_file,
-                s=True,
-                shadowLinks=1,
-                mask=2303,
-                ll=1,
-                boundingBox=True
-            )
+            if sel:
+                cmds.arnoldExportAss(
+                    filename=standin_file,
+                    s=True,
+                    shadowLinks=1,
+                    mask=2303,
+                    ll=1,
+                    boundingBox=True
+                )
+            else:
+                cmds.arnoldExportAss(
+                    self.name_line.text(),
+                    filename=standin_file,
+                    shadowLinks=1,
+                    mask=2303,
+                    ll=1,
+                    boundingBox=True
+                )
         else:
-            cmds.arnoldExportAss(
-                filename=standin_file,
-                s=True,
-                shadowLinks=1,
-                mask=2303,
-                ll=1,
-                boundingBox=True,
-                startFrame=start_frame,
-                endFrame=end_frame,
-                frameStep=1.0
-            )
+            if sel:
+                cmds.arnoldExportAss(
+                    filename=standin_file,
+                    s=True,
+                    shadowLinks=1,
+                    mask=2303,
+                    ll=1,
+                    boundingBox=True,
+                    startFrame=start_frame,
+                    endFrame=end_frame,
+                    frameStep=1.0
+                )
+            else:
+                cmds.arnoldExportAss(
+                    self.name_line.text(),
+                    filename=standin_file,
+                    shadowLinks=1,
+                    mask=2303,
+                    ll=1,
+                    boundingBox=True,
+                    startFrame=start_frame,
+                    endFrame=end_frame,
+                    frameStep=1.0
+                )
             cmds.currentTime(start_frame, edit=True)
 
 

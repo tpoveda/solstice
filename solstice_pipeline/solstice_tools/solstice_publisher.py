@@ -184,6 +184,7 @@ class PublishModelTask(solstice_task.Task, object):
     def run(self):
 
         from solstice_pipeline.solstice_tools import solstice_tagger, solstice_shaderlibrary
+        from solstice_pipeline.solstice_tools import solstice_alembicmanager, solstice_standinmanager
 
         self.write_ok('>>> PUBLISH MODEL LOG')
         self.write_ok('------------------------------------')
@@ -202,13 +203,6 @@ class PublishModelTask(solstice_task.Task, object):
         if model_path is None or not os.path.isfile(model_path):
             self.write_error('Model Path {} is not valid!'.format(model_path))
             return False
-
-        # # Check Alembic File
-        # abc_path = self._asset().get_º_file()
-        # self.write('Check if Alembic file exists ...'.format(abc_path))
-        # if abc_path is None or not os.path.isfile(abc_path):
-        #     self.write_error('Alembic File Path {} is not valid!'.format(model_path))
-        #     return False
 
         # Check if model file can be unlocked
         self.write('Check if model file is already locked by other user or workspace ...')
@@ -478,7 +472,6 @@ class PublishModelTask(solstice_task.Task, object):
             artella.unlock_file(model_path)
             return False
 
-        shader_data = None
         with open(shaders_file) as f:
             shader_data = json.load(f)
         if shader_data is None:
@@ -552,6 +545,30 @@ class PublishModelTask(solstice_task.Task, object):
             if solstice_maya_utils.file_has_student_line(filename=model_path):
                 self.write_error('After updating model path the Student License could not be fixed again!')
                 return False
+
+        # Exporting Alembic File
+        abc_paths = self._asset().get_alembic_files()
+        abc_file_path = abc_paths[0]
+        abc_info_path = abc_paths[1]
+        self.write('Check if Alembic file exists ...'.format(abc_file_path))
+        if abc_file_path and os.path.isfile(abc_file_path):
+            artella.lock_file(abc_file_path)
+        self.write('Check if Alembic Info file exists ...'.format(abc_info_path))
+        if abc_info_path and os.path.isfile(abc_info_path):
+            artella.lock_file(abc_info_path)
+
+        cmds.select(valid_obj)
+        abc_group = solstice_alembicmanager.AlembicGroup()
+        new_abc_group = abc_group.create_alembic_group(valid_obj)
+        alembic_exporter = solstice_alembicmanager.AlembicExporter()
+        alembic_exporter.refresh()
+        alembic_exporter.alembic_groups_combo.setCurrentIndex(1)
+        alembic_exporter.export_path_line.setText(os.path.dirname(abc_file_path))
+        alembic_exporter.start.setValue(1)
+        alembic_exporter.end.setValue(1)
+        alembic_exporter.open_folder_after_export_cbx.setChecked(False)
+        alembic_exporter._on_export()
+        cmds.delete(new_abc_group)
 
         result = solstice_qt_utils.show_question(None, 'Publishing file {0}'.format(model_path), 'File validated successfully! Do you want to continue with the publish process?')
         published_done = False
