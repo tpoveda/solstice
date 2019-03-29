@@ -15,14 +15,15 @@ from functools import partial
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 
-import maya.cmds as cmds
-import maya.mel as mel
-import maya.OpenMayaUI as OpenMayaUI
-
 import solstice_pipeline as sp
-from solstice_utils import solstice_maya_utils as utils
 from solstice_utils import solstice_qt_utils as qt
 from resources import solstice_resource
+
+if sp.dcc == sp.SolsticeDCC.Maya:
+    import maya.cmds as cmds
+    import maya.mel as mel
+    import maya.OpenMayaUI as OpenMayaUI
+    from solstice_utils import solstice_maya_utils as utils
 
 
 class SolsticeShelf(object):
@@ -35,7 +36,6 @@ class SolsticeShelf(object):
 
         self.category_btn = None
         self.category_menu = None
-
 
     @staticmethod
     def add_menu_item(parent, label, command='', icon=''):

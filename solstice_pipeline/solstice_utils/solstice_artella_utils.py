@@ -21,11 +21,15 @@ except:
 
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
-import maya.cmds as cmds
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
 from solstice_pipeline.solstice_utils import solstice_artella_classes as classes
+
+if sp.dcc == sp.SolsticeDCC.Maya:
+    import maya.cmds as cmds
+    from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
+elif sp.dcc == sp.SolsticeDCC.Houdini:
+    from solstice_pipeline.solstice_utils import solstice_houdini_utils as utils
 
 artella_maya_plugin_name = 'Artella.py'
 artella_app_name = 'lifecycler'
@@ -107,9 +111,18 @@ def get_artella_data_folder():
     return artella_folder
 
 
+def get_artella_python_folder():
+    """
+    Returns folder where Artella stores Python scripts
+    :return: str
+    """
+
+    return os.path.join(get_artella_data_folder(), 'python')
+
+
 def get_artella_plugins_folder():
     """
-    Returns folder where Artelle stores its plugins
+    Returns folder where Artella stores its plugins
     :return: str
     """
 
@@ -215,9 +228,30 @@ def connect_artella_app_to_spigot(cli=None):
 
     artella_app_identifier = get_artella_app_identifier()
 
-    cli.listen(artella_app_identifier, artella.passMsgToMainThread)
+    if sp.dcc == sp.SolsticeDCC.Houdini:
+        def pass_msg_to_main_thread(json_msg):
+            main_thread_fn = utils.get_houdini_pass_main_thread_function()
+            main_thread_fn(get_handle_msg, json_msg)
+
+    if sp.dcc == sp.SolsticeDCC.Maya:
+        pass_msg_fn = artella.passMsgToMainThread
+    else:
+        pass_msg_fn = pass_msg_to_main_thread
+
+    cli.listen(artella_app_identifier, pass_msg_fn)
 
     return cli
+
+
+def get_handle_msg(json_msg):
+    if sp.dcc == sp.SolsticeDCC.Houdini:
+        try:
+            msg = json.loads(json_msg)
+            sp.logger.debug(msg)
+        except Exception:
+            sp.logger.warning('Unknown command!')
+    else:
+        return artella.handleMessage(json_msg)
 
 
 def load_artella_maya_plugin():
@@ -226,13 +260,14 @@ def load_artella_maya_plugin():
     :return: bool
     """
 
-    sp.logger.debug('Loading Artella Maya Plugin ...')
-    artella_maya_plugin_folder = get_artella_dcc_plugin(dcc='maya')
-    artella_maya_plugin_file = os.path.join(artella_maya_plugin_folder, artella_maya_plugin_name)
-    if os.path.isfile(artella_maya_plugin_file):
-        if not cmds.pluginInfo(artella_maya_plugin_name, query=True, loaded=True):
-            cmds.loadPlugin(artella_maya_plugin_file)
-            return True
+    if sp.dcc == sp.SolsticeDCC.Maya:
+        sp.logger.debug('Loading Artella Maya Plugin ...')
+        artella_maya_plugin_folder = get_artella_dcc_plugin(dcc='maya')
+        artella_maya_plugin_file = os.path.join(artella_maya_plugin_folder, artella_maya_plugin_name)
+        if os.path.isfile(artella_maya_plugin_file):
+            if not cmds.pluginInfo(artella_maya_plugin_name, query=True, loaded=True):
+                cmds.loadPlugin(artella_maya_plugin_file)
+                return True
 
     return False
 
@@ -245,7 +280,8 @@ def get_spigot_client():
 
     global spigot_client
     if spigot_client is None:
-        utils.force_stack_trace_on()
+        if sp.dcc == sp.SolsticeDCC.Maya:
+            utils.force_stack_trace_on()
         from am.artella.spigot.spigot import SpigotClient
         spigot_client = SpigotClient()
         connect_artella_app_to_spigot(spigot_client)
@@ -260,8 +296,11 @@ def get_artella_app_identifier():
 
     app_identifier = os.environ.get('ARTELLA_APP_IDENTIFIER', None)
     if app_identifier is None:
-        maya_version = cmds.about(version=True).split()[0]
-        app_identifier = 'maya.{0}'.format(maya_version)
+        if sp.dcc == sp.SolsticeDCC.Maya:
+            maya_version = cmds.about(version=True).split()[0]
+            app_identifier = 'maya.{0}'.format(maya_version)
+        elif sp.dcc == sp.SolsticeDCC.Houdini:
+            app_identifier = utils.get_houdini_version(as_string=True)
 
     return app_identifier
 

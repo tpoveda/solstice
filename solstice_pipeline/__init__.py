@@ -15,12 +15,8 @@ import datetime
 import platform
 import webbrowser
 
-import maya.cmds as cmds
-
 from solstice_pipeline.externals.solstice_qt.QtCore import *
-
-from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
-from solstice_pipeline.resources import solstice_resources
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 # =================================================================================
 
@@ -36,6 +32,7 @@ valid_status = ['working', 'published']
 
 # =================================================================================
 
+dcc = None
 sys.solstice_dispatcher = None
 logger = None
 tray = None
@@ -43,6 +40,11 @@ settings = None
 info_dialog = None
 
 # =================================================================================
+
+
+class SolsticeDCC(object):
+    Maya = 'Maya'
+    Houdini = 'Houdini'
 
 
 class SolsticePipeline(QObject):
@@ -53,7 +55,9 @@ class SolsticePipeline(QObject):
         self.settings = self.create_solstice_settings()
         self.update_paths()
         self.set_environment_variables()
+        self.detect_dcc()
         self.reload_all()
+
         self.info_dialog = self.create_solstice_info_window()
         self.create_solstice_shelf()
         self.create_solstice_menu()
@@ -62,7 +66,9 @@ class SolsticePipeline(QObject):
         self.show_changelog()
         self.init_searcher()
 
-        utils.viewport_message('Solstice Pipeline Tools loaded successfully!')
+        if dcc == SolsticeDCC.Maya:
+            from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
+            utils.viewport_message('Solstice Pipeline Tools loaded successfully!')
 
     @staticmethod
     def create_solstice_logger():
@@ -115,10 +121,12 @@ class SolsticePipeline(QObject):
 
     @staticmethod
     def show_changelog():
-        if platform.system() == 'Darwin':
-            from solstice_pipeline.solstice_tools import solstice_changelog
-            solstice_changelog.run()
-            cmds.evalDeferred('import solstice_pipeline; solstice_pipeline.update_tools()')
+        if dcc == SolsticeDCC.Maya:
+            import maya.cmds as cmds
+            if platform.system() == 'Darwin':
+                from solstice_pipeline.solstice_tools import solstice_changelog
+                solstice_changelog.run()
+                cmds.evalDeferred('import solstice_pipeline; solstice_pipeline.update_tools()')
 
     @staticmethod
     def init_searcher():
@@ -130,6 +138,9 @@ class SolsticePipeline(QObject):
         Updates system path with Solstice Tools Paths
         :return:
         """
+
+        from solstice_pipeline.solstice_utils import solstice_artella_utils
+
         root_path = os.path.dirname(os.path.abspath(__file__))
         extra_paths = [os.path.join(root_path, 'resources', 'icons'), os.path.join(root_path, 'externals', 'animBot')]
         for path in extra_paths:
@@ -138,6 +149,11 @@ class SolsticePipeline(QObject):
                 sys.path.append(path)
             else:
                 self.logger.debug('Path {} not added to SYS_PATH because it does not exists or is already included in SYS_PATH!'.format(path))
+
+        # We add Artella Paths if they are not already added
+        scripts_folder = solstice_artella_utils.get_artella_python_folder()
+        if scripts_folder not in sys.path:
+            sys.path.append(scripts_folder)
 
         for subdir, dirs, files in os.walk(root_path):
             if subdir not in sys.path:
@@ -166,11 +182,14 @@ class SolsticePipeline(QObject):
 
         icons_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'icons')
         if os.path.exists(icons_path):
-            if platform.system() == 'Darwin':
-                os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ':' + icons_path
+            if dcc == SolsticeDCC.Maya:
+                if platform.system() == 'Darwin':
+                    os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ':' + icons_path
+                else:
+                    os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ';' + icons_path
+                self.logger.debug('Artella Icons Folder "{}" added to Maya Icons Paths ...'.format(icons_path))
             else:
-                os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ';' + icons_path
-            self.logger.debug('Artella Icons Folder "{}" added to Maya Icons Paths ...'.format(icons_path))
+                self.logger.debug('Icon Path not found for DCC: {}'.format(dcc))
         else:
             self.logger.debug('Solstice Icons not found! Solstice Shelf maybe will not show icons! Please contact TD!')
 
@@ -184,6 +203,27 @@ class SolsticePipeline(QObject):
         if os.environ.get('SOLSTICE_PIPELINE_SHOW'):
             from solstice_pipeline.solstice_tools import solstice_hello
             solstice_hello.run()
+
+    def detect_dcc(self):
+        """
+        Function that updates current DCC
+        """
+
+        global dcc
+
+        try:
+            import maya.cmds as cmds
+            dcc = SolsticeDCC.Maya
+        except ImportError:
+            try:
+                import hou
+                dcc = SolsticeDCC.Houdini
+            except ImportError:
+                print('No valid DCC found!')
+
+        self.logger.debug('Current DCC: {}'.format(dcc))
+
+        return dcc
 
     def create_solstice_shelf(self):
         """
@@ -233,7 +273,6 @@ class SolsticePipeline(QObject):
         """
 
         from solstice_pipeline.solstice_gui import solstice_traymessage
-        reload(solstice_traymessage)
 
         global tray
         self.logger.debug('Creating Solstice Tray ...')
@@ -246,14 +285,18 @@ class SolsticePipeline(QObject):
         """
 
         try:
-            self.logger.debug('Setting Solstice Project ...')
-            solstice_project_folder = os.environ.get('SOLSTICE_PROJECT', 'folder-not-defined')
-            if solstice_project_folder and os.path.exists(solstice_project_folder):
-                cmds.workspace(solstice_project_folder, openWorkspace=True)
-                self.logger.debug(
-                    'Solstice Project setup successfully! => {}'.format(solstice_project_folder))
+            if dcc == SolsticeDCC.Maya:
+                import maya.cmds as cmds
+                self.logger.debug('Setting Solstice Project ...')
+                solstice_project_folder = os.environ.get('SOLSTICE_PROJECT', 'folder-not-defined')
+                if solstice_project_folder and os.path.exists(solstice_project_folder):
+                    cmds.workspace(solstice_project_folder, openWorkspace=True)
+                    self.logger.debug(
+                        'Solstice Project setup successfully! => {}'.format(solstice_project_folder))
+                else:
+                    self.logger.debug('Unable to set Solstice Project! => {}'.format(solstice_project_folder))
             else:
-                self.logger.debug('Unable to set Solstice Project! => {}'.format(solstice_project_folder))
+                logger.warning('Impossible to setup Solstice Project in DCC: {}'.format(dcc))
         except Exception as e:
             self.logger.debug(str(e))
 
@@ -267,11 +310,15 @@ def update_solstice_project_path():
     :return: str
     """
 
+    from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
+
     artella_var = os.environ.get('ART_LOCAL_ROOT', None)
     if artella_var and os.path.exists(artella_var):
         os.environ['SOLSTICE_PROJECT'] = '{0}/_art/production/{1}'.format(artella_var, solstice_project_id)
     else:
-        logger.debug('ERROR: Impossible to set Solstice Project Environment Variable! Contact TD please!')
+        print('CONNECTING TO ARTELLA APP ...')
+        artella.connect_artella_app_to_spigot()
+        # logger.debug('ERROR: Impossible to set Solstice Project Environment Variable! Contact TD please!')
 
 
 def get_solstice_project_path():
@@ -289,8 +336,9 @@ def get_solstice_project_path():
     env_var = os.environ.get('SOLSTICE_PROJECT', None)
     if env_var is None:
         try:
-            artella.launch_artella_app()
-            artella.load_artella_maya_plugin()
+            if dcc == SolsticeDCC.Maya:
+                artella.launch_artella_app()
+                artella.load_artella_maya_plugin()
             update_solstice_project_path()
         except Exception as e:
             raise RuntimeError('Solstice Project not setted up properly. Is Artella running? Contact TD!')

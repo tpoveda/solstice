@@ -172,8 +172,16 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
 
         menu = QMenu(self)
         menu.setStyleSheet('background-color: rgb(68,68,68);')
+        replace_menu = QMenu('Replace by', self)
+        menu.addMenu(replace_menu)
+        replace_abc = replace_menu.addAction('Alembic')
+        replace_rig = replace_menu.addAction('Rig')
+        replace_standin = replace_menu.addAction('Standin')
         remove_act = menu.addAction('Delete')
         menu.addSeparator()
+
+        replace_abc.triggered.connect(self._on_replace_alembic)
+
         action = menu.exec_(self.mapToGlobal(event.pos()))
         self.contextRequested.emit(self, action)
 
@@ -196,10 +204,6 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
         self.expand_btn.setChecked(False)
         self._on_toggle_children()
 
-    def _on_toggle_children(self):
-        state = self.expand_btn.isChecked()
-        self.child_widget.setVisible(state)
-
     def set_select(self, select=False):
         if select:
             self.select()
@@ -207,6 +211,68 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
             self.deselect()
 
         return self.is_selected
+
+    def is_rig(self):
+        """
+        Returns whether current asset is a rig or not
+        :return: bool
+        """
+
+        valid_tag_data = False
+        main_group_connections = cmds.listConnections(self.asset.node, source=True)
+        for connection in main_group_connections:
+            attrs = cmds.listAttr(connection, userDefined=True)
+            if attrs and type(attrs) == list:
+                for attr in attrs:
+                    if attr == 'tag_type':
+                        valid_tag_data = True
+                        break
+
+        print(valid_tag_data)
+
+    def is_alembic(self):
+        """
+        Returns whether current asset is an alembic or not
+        :return: bool
+        """
+
+        valid_tag_data = False
+        main_group_connections = cmds.listConnections(self.asset.node, source=True)
+        for connection in main_group_connections:
+            attrs = cmds.listAttr(connection, userDefined=True)
+            if attrs and type(attrs) == list:
+                for attr in attrs:
+                    if attr == 'tag_type':
+                        valid_tag_data = True
+                        break
+
+        print(valid_tag_data)
+
+    def is_standin(self):
+        """
+        Returns whether current asset is an standin or not
+        :return: bool
+        """
+
+        pass
+
+    def _on_toggle_children(self):
+        state = self.expand_btn.isChecked()
+        self.child_widget.setVisible(state)
+
+    def _on_replace_alembic(self):
+        abc_file = self.asset.get_alembic_files()
+        is_referenced = cmds.referenceQuery(self.asset.node,  isNodeReferenced=True)
+        self.is_rig()
+        # if self.asset.node != hires_group:
+        #     is_referenced = cmds.referenceQuery(asset.node, isNodeReferenced=True)
+        #     if is_referenced:
+        #         namespace = cmds.referenceQuery(asset.node, namespace=True)
+        #         if not namespace or not namespace.startswith(':'):
+        #             sp.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(asset.node))
+        #             continue
+        #         else:
+        #             namespace = namespace[1:] + ':'
 
 
 class OutlinerFileItem(OutlinerTreeItemWidget, object):

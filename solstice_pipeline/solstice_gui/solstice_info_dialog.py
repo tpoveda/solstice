@@ -14,25 +14,31 @@ import solstice_pipeline as sp
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
-from solstice_utils import solstice_maya_utils
 from solstice_gui import solstice_animations
 from resources import solstice_resource
 
-import maya.cmds as cmds
-
-reload(solstice_animations)
+if sp.dcc == sp.SolsticeDCC.Maya:
+    import maya.cmds as cmds
+    from solstice_utils import solstice_maya_utils
 
 
 class InfoDialog(QDialog, object):
     def __init__(self):
-        super(InfoDialog, self).__init__(parent=solstice_maya_utils.get_maya_window())
+
+        if sp.dcc == sp.SolsticeDCC.Maya:
+            parent = solstice_maya_utils.get_maya_window()
+        else:
+            parent = None
+
+        super(InfoDialog, self).__init__(parent=parent)
 
         name = 'SolsticeInfoDialog'
 
-        if cmds.window(name, exists=True):
-            cmds.deleteUI(name, window=True)
-        elif cmds.windowPref(name, exists=True):
-            cmds.windowPref(name, remove=True)
+        if sp.dcc == sp.SolsticeDCC.Maya:
+            if cmds.window(name, exists=True):
+                cmds.deleteUI(name, window=True)
+            elif cmds.windowPref(name, exists=True):
+                cmds.windowPref(name, remove=True)
 
         self.setObjectName(name)
         self.setWindowTitle('Solstice Tools - Info Dialog')
@@ -40,11 +46,6 @@ class InfoDialog(QDialog, object):
         self.setFocusPolicy(Qt.StrongFocus)
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setFixedSize(QSize(280, 180))
-
-        ph = self.parent().geometry().height()
-        pw = self.parent().geometry().width()
-        dw = self.width()
-        dh = self.height()
 
         self.setStyleSheet(
             """

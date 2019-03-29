@@ -12,10 +12,11 @@ import os
 import json
 from collections import OrderedDict
 
-import maya.cmds as cmds
-
 import solstice_pipeline as sp
-from solstice_utils import solstice_maya_utils as utils
+
+if sp.dcc == sp.SolsticeDCC.Maya:
+    import maya.cmds as cmds
+    from solstice_utils import solstice_maya_utils as utils
 
 
 class SolsticeMenu(object):

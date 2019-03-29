@@ -18,8 +18,6 @@ import treelib
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
-import maya.cmds as cmds
-
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_user, solstice_asset, solstice_stack, solstice_assetviewer, solstice_splitters, solstice_spinner
 from solstice_pipeline.solstice_utils import solstice_python_utils, solstice_artella_utils
@@ -27,7 +25,11 @@ from solstice_pipeline.solstice_tools import solstice_sequencer
 from solstice_pipeline.solstice_utils import solstice_artella_classes, solstice_qt_utils
 from solstice_pipeline.resources import solstice_resource
 
+if sp.dcc == sp.SolsticeDCC.Maya:
+    import maya.cmds as cmds
+
 reload(solstice_sequencer)
+
 
 class PipelinizerSettings(QDialog, object):
     def __init__(self, parent):

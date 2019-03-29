@@ -13,15 +13,19 @@ import webbrowser
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
-try:
-    from shiboken import wrapInstance
-except ImportError:
-    from shiboken2 import wrapInstance
-
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_utils import solstice_maya_utils, solstice_config
+from solstice_pipeline.solstice_utils import solstice_config
 from solstice_pipeline.solstice_gui import solstice_dragger, solstice_animations
 from resources import solstice_resource
+
+if sp.dcc == sp.SolsticeDCC.Maya:
+    try:
+        from shiboken import wrapInstance
+    except ImportError:
+        from shiboken2 import wrapInstance
+    from solstice_pipeline.solstice_utils import solstice_maya_utils
+elif sp.dcc == sp.SolsticeDCC.Houdini:
+    from solstice_pipeline.solstice_utils import solstice_houdini_utils
 
 
 class WindowStatusBar(QStatusBar, object):
@@ -90,7 +94,14 @@ class Window(QMainWindow, object):
     title = 'Solstice Tools'
     version = '1.0'
 
-    def __init__(self, parent=solstice_maya_utils.get_maya_window()):
+    def __init__(self, parent=None):
+
+        if parent is None:
+            if sp.dcc == sp.SolsticeDCC.Maya:
+                parent = solstice_maya_utils.get_maya_window()
+            elif sp.dcc == sp.SolsticeDCC.Houdini:
+                parent = solstice_houdini_utils.get_houdini_window()
+
         super(Window, self).__init__(parent=parent)
 
         self.setParent(parent)

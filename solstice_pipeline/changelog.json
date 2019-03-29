@@ -149,6 +149,7 @@
   ],
   "12.0":
   [
-    "Alembic file is generated automatically during publish process of an asset"
+    "Alembic file is generated automatically during publish process of an asset",
+    "Added Standin Manager Import/Exporter Tool into Layout and TD shelves"
   ]
 }

@@ -12,10 +12,6 @@ import os
 import re
 import subprocess
 
-import maya.cmds as cmds
-import maya.OpenMayaUI as OpenMayaUI
-import shiboken2 as shiboken
-
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
@@ -23,10 +19,20 @@ from solstice_pipeline.externals.solstice_qt import QtCompat
 try:
     from shiboken import wrapInstance
 except ImportError:
-    from shiboken2 import wrapInstance
+    try:
+        from shiboken2 import wrapInstance
+    except Exception:
+        pass
 
 import solstice_pipeline as sp
-from solstice_utils import solstice_maya_utils, solstice_python_utils, solstice_browser_utils
+
+if sp.dcc == sp.SolsticeDCC.Maya:
+    import maya.cmds as cmds
+    import maya.OpenMayaUI as OpenMayaUI
+    import shiboken2 as shiboken
+    from solstice_utils import solstice_maya_utils
+
+from solstice_utils import solstice_python_utils, solstice_browser_utils
 
 
 def ui_loader(ui_file, widget=None):

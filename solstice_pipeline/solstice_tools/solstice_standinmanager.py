@@ -395,7 +395,7 @@ class StandinExporter(QWidget, object):
 class StandinManager(solstice_windows.Window, object):
     name = 'SolsticeStandinManager'
     title = 'Solstice Tools - Standin Manager'
-    version = '1.0'
+    version = '1.1'
 
     def __init__(self):
         super(StandinManager, self).__init__()

@@ -13,9 +13,6 @@ import sys
 import json
 from functools import partial
 
-import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
-
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
@@ -24,12 +21,16 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters
 from solstice_pipeline.resources import solstice_resource
 from solstice_pipeline.solstice_tools import solstice_tagger
-from solstice_pipeline.solstice_utils import solstice_browser_utils, solstice_alembic, solstice_maya_utils, solstice_python_utils
+from solstice_pipeline.solstice_utils import solstice_browser_utils, solstice_alembic, solstice_python_utils
+
+if sp.dcc == sp.SolsticeDCC.Maya:
+    import maya.cmds as cmds
+    import maya.OpenMaya as OpenMaya
+    from solstice_pipeline.solstice_utils import solstice_maya_utils
+elif sp.dcc == sp.SolsticeDCC.Houdini:
+    import hou
 
 ALEMBIC_GROUP_SUFFIX = '_ABCGroup'
-
-reload(solstice_alembic)
-reload(solstice_maya_utils)
 
 
 class AlembicGroup(QWidget, object):
@@ -140,7 +141,7 @@ class AlembicGroup(QWidget, object):
 
         return cmds.sets(sel, n=name)
 
-    @solstice_maya_utils.maya_undo
+    # @solstice_maya_utils.maya_undo
     def clean_alembic_groups(self):
         """
         Removes all alembic groups in current scene
@@ -1113,14 +1114,18 @@ class AlembicImporter(QWidget, object):
         shot_name = self.shot_line.text()
         abc_folder = os.path.normpath(os.path.join(sp.get_solstice_project_path(), shot_name)) if shot_name != 'unresolved' else sp.get_solstice_project_path()
 
-        res = cmds.fileDialog2(fm=1, dir=abc_folder, cap='Select Alembc to Import', ff='Alembic Files (*.abc)')
-        if res:
-            abc_file = res[0]
-        else:
-            abc_file = ''
+        res = None
+        abc_file = ''
+        if sp.dcc == sp.SolsticeDCC.Maya:
+            res = cmds.fileDialog2(fm=1, dir=abc_folder, cap='Select Alembic to Import', ff='Alembic Files (*.abc)')
+            if res:
+                abc_file = res[0]
+        elif sp.dcc == sp.SolsticeDCC.Houdini:
+            res = hou.ui.selectFile(start_directory=abc_folder, title='Select Alembic to Import', pattern='*.abc')
+            if res:
+                abc_file = res
 
         self.alembic_path_line.setText(abc_file)
-
 
     @staticmethod
     def reference_alembic(alembic_path):
@@ -1186,7 +1191,11 @@ class AlembicImporter(QWidget, object):
             return
 
         if self.create_radio.isChecked():
-            root = cmds.group(n=abc_name, empty=True, world=True)
+            if sp.dcc == sp.SolsticeDCC.Maya:
+                root = cmds.group(n=abc_name, empty=True, world=True)
+            elif sp.dcc == sp.SolsticeDCC.Houdini:
+                n = hou.node('obj')
+                root = n.createNode('alembicarchive')
             self._add_tag_info_data(tag_info, root)
             sel = [root]
         else:
@@ -1230,9 +1239,17 @@ class AlembicImporter(QWidget, object):
 
     @staticmethod
     def _add_tag_info_data(tag_info, attr_node):
-        if not cmds.attributeQuery('tag_info', n=attr_node, exists=True):
-            cmds.addAttr(attr_node, ln='tag_info', dt='string', k=True)
-        cmds.setAttr('{}.tag_info'.format(attr_node), str(tag_info), type='string')
+        if sp.dcc == sp.SolsticeDCC.Maya:
+            if not cmds.attributeQuery('tag_info', n=attr_node, exists=True):
+                cmds.addAttr(attr_node, ln='tag_info', dt='string', k=True)
+            cmds.setAttr('{}.tag_info'.format(attr_node), str(tag_info), type='string')
+        elif sp.dcc == sp.SolsticeDCC.Houdini:
+            parm_group = attr_node.parmTemplateGroup()
+            parm_folder = hou.FolderParmTemplate('folder', 'Solstice Info')
+            parm_folder.addParmTemplate(hou.StringParmTemplate('tag_info', 'Tag Info', 1))
+            parm_group.append(parm_folder)
+            attr_node.setParmTemplateGroup(parm_group)
+            attr_node.parm('tag_info').set(str(tag_info))
 
 
 class AlembicManager(solstice_windows.Window, object):
@@ -1242,7 +1259,9 @@ class AlembicManager(solstice_windows.Window, object):
 
     def __init__(self):
         super(AlembicManager, self).__init__()
-        self.add_callback(OpenMaya.MEventMessage.addEventCallback('SelectionChanged', self._on_selection_changed, self))
+
+        if sp.dcc == sp.SolsticeDCC.Maya:
+            self.add_callback(OpenMaya.MEventMessage.addEventCallback('SelectionChanged', self._on_selection_changed, self))
 
     def custom_ui(self):
         super(AlembicManager, self).custom_ui()

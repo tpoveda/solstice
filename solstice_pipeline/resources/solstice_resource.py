@@ -10,7 +10,7 @@
 
 import os
 
-from Qt.QtGui import *
+from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 from solstice_gui import solstice_pixmap
 from solstice_utils import solstice_qt_utils, solstice_browser_utils
