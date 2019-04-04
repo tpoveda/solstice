@@ -81,4 +81,8 @@ To publsh new versions you need to use <a href="https://tpoveda.github.io/solsti
 
 When publishing assets, depending of tye type of asset your're working on you need to follow different steps:
 
-**WIP**
+**<a href="https://tpoveda.github.io/solstice/solsticepipeline/faq/publish/shading" target="_blank" rel="noopener">How to publish shading files?</a>**
+
+**<a href="https://tpoveda.github.io/solstice/solsticepipeline/faq/publish/textures" target="_blank" rel="noopener">How to publish texture files?</a>**
+
+**<a href="https://tpoveda.github.io/solstice/solsticepipeline/faq/publish/model" target="_blank" rel="noopener">How to publish model/rig files?</a>**
