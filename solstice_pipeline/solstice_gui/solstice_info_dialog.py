@@ -14,12 +14,12 @@ import solstice_pipeline as sp
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
-from solstice_gui import solstice_animations
-from resources import solstice_resource
+from solstice_pipeline.solstice_gui import solstice_animations
+from solstice_pipeline.resources import solstice_resource
 
 if sp.dcc == sp.SolsticeDCC.Maya:
     import maya.cmds as cmds
-    from solstice_utils import solstice_maya_utils
+    from solstice_pipeline.solstice_utils import solstice_maya_utils
 
 
 class InfoDialog(QDialog, object):

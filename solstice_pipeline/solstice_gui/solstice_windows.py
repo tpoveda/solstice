@@ -16,7 +16,7 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_utils import solstice_config
 from solstice_pipeline.solstice_gui import solstice_dragger, solstice_animations
-from resources import solstice_resource
+from solstice_pipeline.resources import solstice_resource
 
 if sp.dcc == sp.SolsticeDCC.Maya:
     try:
@@ -134,7 +134,8 @@ class Window(QMainWindow, object):
         self.statusBar().set_info_url(url)
 
     def add_callback(self, callback_id):
-        self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(callback_id=callback_id))
+        if sp.dcc == sp.SolsticeDCC.Maya:
+            self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(callback_id=callback_id))
 
     def remove_callbacks(self):
         for c in self.callbacks:

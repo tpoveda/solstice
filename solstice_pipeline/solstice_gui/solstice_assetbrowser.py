@@ -15,10 +15,11 @@ import os
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
-from resources import solstice_resource
-import solstice_breadcrumb
-import solstice_navigationwidget
-import solstice_filelistwidget
+from solstice_pipeline.solstice_gui import solstice_breadcrumb
+from solstice_pipeline.solstice_gui import solstice_navigationwidget
+from solstice_pipeline.solstice_gui import solstice_filelistwidget
+from solstice_pipeline.resources import solstice_resource
+
 
 class AssetBrowserListBase(QWidget, object):
 

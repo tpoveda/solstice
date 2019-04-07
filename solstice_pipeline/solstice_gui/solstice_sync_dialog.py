@@ -16,9 +16,9 @@ from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
-from solstice_utils import solstice_maya_utils
-from solstice_utils import solstice_artella_utils as artella
-from resources import solstice_resource
+from solstice_pipeline.solstice_utils import solstice_maya_utils
+from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
+from solstice_pipeline.resources import solstice_resource
 
 
 class SolsticeSyncSplash(QSplashScreen, object):

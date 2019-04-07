@@ -11,9 +11,15 @@
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
-from solstice_pipeline.solstice_utils import solstice_qt_utils, solstice_maya_utils
+import solstice_pipeline as sp
+from solstice_pipeline.solstice_utils import solstice_qt_utils
 from solstice_pipeline.solstice_gui import solstice_dragger, solstice_animations
 from solstice_pipeline.resources import solstice_resource
+
+if sp.dcc == sp.SolsticeDCC.Maya:
+    from solstice_pipeline.solstice_utils import solstice_maya_utils
+elif sp.dcc == sp.SolsticeDCC.Houdini:
+    from solstice_pipeline.solstice_utils import solstice_houdini_utils
 
 
 class Dialog(QDialog, object):
@@ -25,8 +31,15 @@ class Dialog(QDialog, object):
     title = 'Solstice Tools'
     version = '1.0'
 
-    def __init__(self, **kwargs):
-        super(Dialog, self).__init__(parent=solstice_maya_utils.get_maya_window())
+    def __init__(self, parent=None):
+
+        if parent is None:
+            if sp.dcc == sp.SolsticeDCC.Maya:
+                parent = solstice_maya_utils.get_maya_window()
+            elif sp.dcc == sp.SolsticeDCC.Houdini:
+                parent = solstice_houdini_utils.get_houdini_window()
+
+        super(Dialog, self).__init__(parent=parent)
 
         # Window needs to have a unique name to avoid problems with Maya workspaces
         self.callbacks = list()
@@ -44,7 +57,8 @@ class Dialog(QDialog, object):
         solstice_qt_utils.center_widget_on_screen(self)
 
     def add_callback(self, callback_id):
-        self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(callback_id=callback_id))
+        if sp.dcc == sp.SolsticeDCC.Maya:
+            self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(callback_id=callback_id))
 
     def remove_callbacks(self):
         for c in self.callbacks:

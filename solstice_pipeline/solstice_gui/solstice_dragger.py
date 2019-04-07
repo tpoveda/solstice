@@ -12,7 +12,7 @@ from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 
-from resources import solstice_resource
+from solstice_pipeline.resources import solstice_resource
 
 
 class WindowDragger(QFrame, object):

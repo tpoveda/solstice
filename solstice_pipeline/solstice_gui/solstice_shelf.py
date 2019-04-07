@@ -16,8 +16,8 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 
 import solstice_pipeline as sp
-from solstice_utils import solstice_qt_utils as qt
-from resources import solstice_resource
+from solstice_pipeline.solstice_utils import solstice_qt_utils as qt
+from solstice_pipeline.resources import solstice_resource
 
 if sp.dcc == sp.SolsticeDCC.Maya:
     import maya.cmds as cmds

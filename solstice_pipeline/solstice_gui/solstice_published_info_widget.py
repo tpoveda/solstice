@@ -16,12 +16,9 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
-from resources import solstice_resource
-from solstice_utils import solstice_qt_utils
-from solstice_gui import solstice_splitters
-
-reload(solstice_qt_utils)
-reload(solstice_splitters)
+from solstice_pipeline.solstice_utils import solstice_qt_utils
+from solstice_pipeline.solstice_gui import solstice_splitters
+from solstice_pipeline.resources import solstice_resource
 
 
 class PublishedInfoWidget(QWidget, object):

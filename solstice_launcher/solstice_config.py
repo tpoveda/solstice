@@ -46,7 +46,7 @@ class SolsticeConfig(QSettings, object):
             subprocess.call(call, self.config_file)
 
 
-def create_config(console, window, maya_version, config_file=None):
+def create_config(console, window, dcc_install_path, config_file=None):
     """
     Construct the Solstice configuration object from necessary elements
     """
@@ -55,12 +55,11 @@ def create_config(console, window, maya_version, config_file=None):
         config_file = utils.get_system_config_directory(console=console)
     config = SolsticeConfig(filename=config_file, window=window, console=console)
 
-    application_versions = utils.get_maya_installation(maya_version)
-    if not application_versions:
-        console.write('Maya Location not found: Solstice Launcher will not launch Maya!')
+    if not dcc_install_path:
+        console.write('Dcc Location not found: Solstice Launcher will not launch DCC!')
         return None
 
     # for item in application_versions.items():
-    config.setValue('executable', os.path.abspath(application_versions))
+    config.setValue('executable', os.path.abspath(dcc_install_path))
 
     return config

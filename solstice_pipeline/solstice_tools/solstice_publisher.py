@@ -30,7 +30,7 @@ from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
 from solstice_pipeline.solstice_checks import solstice_validators
 from solstice_pipeline.solstice_tasks import solstice_taskgroups, solstice_task
 
-from resources import solstice_resource
+from solstice_pipeline.resources import solstice_resource
 
 
 class PublishTexturesTask(solstice_task.Task, object):

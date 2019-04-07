@@ -38,7 +38,6 @@ class SolsticeHelloDialog(solstice_dialog.Dialog, object):
     def custom_ui(self):
         super(SolsticeHelloDialog, self).custom_ui()
 
-
         self.resize(685, 290)
 
         self.logo_view.setVisible(False)

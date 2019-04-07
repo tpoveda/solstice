@@ -17,6 +17,7 @@ from pathlib2 import Path
 from PySide.QtGui import *
 
 DEF_MAYA_EXECUTABLE = 'maya.exe'
+DEF_HOUDINI_EXECUTABLE = 'houdini.exe'
 
 
 def get_system_config_directory(console=None, as_path=False):
@@ -74,6 +75,7 @@ def get_maya_installation(maya_version):
     """
     versions = dict()
 
+    maya_location = None
     if platform.system().lower() == 'windows':
         try:
             from _winreg import *
@@ -88,8 +90,8 @@ def get_maya_installation(maya_version):
                 if os.path.exists(path):
                     maya_location = path
 
-    if not os.path.exists(maya_location):
-        QMessageBox.information(None, 'Maya location not found', 'Solstice Launcher will not launch Maya!')
+    if maya_location is None or not os.path.exists(maya_location):
+        # QMessageBox.information(None, 'Maya location not found', 'Solstice Launcher will not launch Maya!')
         return None
 
     maya_executable = get_maya_executables_from_installation_path(maya_location)
@@ -104,6 +106,54 @@ def get_maya_installation(maya_version):
     # return versions
 
     return maya_executable
+
+
+def get_houdini_executables_from_installation_path(installation_path):
+    """
+    Returns Houdini executable from its installation path
+    :param installation_path: str
+    """
+
+    if os.path.exists(installation_path):
+        bin_path = os.path.join(installation_path, 'bin')
+
+        if not os.path.exists(bin_path):
+            return None
+        houdini_files = os.listdir(bin_path)
+        if DEF_HOUDINI_EXECUTABLE in houdini_files:
+            return os.path.join(bin_path, DEF_HOUDINI_EXECUTABLE)
+
+    return None
+
+
+def get_houdini_installation():
+    """
+    Returns the installation folder of Houdini
+    :return:
+    """
+
+    if platform.system().lower() == 'windows':
+        try:
+            from _winreg import *
+            a_reg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
+            a_key = OpenKey(a_reg, r"SOFTWARE\Side Effects Software\Houdini 17.5.173")
+            value = QueryValueEx(a_key, 'InstallPath')
+            houdini_location = value[0]
+        except Exception:
+            houdini_location = None
+
+        if houdini_location is None or not os.path.exists(houdini_location):
+            # QMessageBox.information(None, 'Houdini 17.5.173 location not found', 'Solstice Launcher will not launch Houdini!')
+            return None
+
+        houdini_executable = get_houdini_executables_from_installation_path(houdini_location)
+
+        if houdini_executable is None or not os.path.isfile(houdini_executable):
+            houdini_executable = str(QFileDialog.getOpenFileName(None, 'Select Houdini 17.5.173 installation')[0])
+            if not os.path.isfile(houdini_executable):
+                return None
+
+        return houdini_executable
 
 
 def str2bool(v):

@@ -22,11 +22,11 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_shaderviewer, solstice_sync_dialog, solstice_assetviewer
-from solstice_utils import solstice_maya_utils as utils
-from solstice_utils import solstice_image as img
-from solstice_utils import solstice_python_utils, solstice_shader_utils, solstice_artella_utils, solstice_qt_utils
-from resources import solstice_resource
+from solstice_pipeline.solstice_gui import solstice_windows, solstice_shaderviewer, solstice_sync_dialog, solstice_assetviewer
+from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
+from solstice_pipeline.solstice_utils import solstice_image as img
+from solstice_pipeline.solstice_utils import solstice_python_utils, solstice_shader_utils, solstice_artella_utils, solstice_qt_utils
+from solstice_pipeline.resources import solstice_resource
 
 
 IGNORE_SHADERS = ['particleCloud1', 'shaderGlow1', 'defaultColorMgtGlobals', 'lambert1']

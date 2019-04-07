@@ -19,13 +19,13 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
-from solstice_utils import solstice_image as img
-from solstice_utils import solstice_artella_utils as artella
-from solstice_utils import solstice_naming_utils as naming
-from solstice_utils import solstice_qt_utils, solstice_python_utils, solstice_node
-from solstice_gui import solstice_splitters, solstice_published_info_widget, solstice_sync_dialog, solstice_buttons
-from solstice_tools import solstice_publisher
-from resources import solstice_resource
+from solstice_pipeline.solstice_utils import solstice_image as img
+from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
+from solstice_pipeline.solstice_utils import solstice_naming_utils as naming
+from solstice_pipeline.solstice_utils import solstice_qt_utils, solstice_python_utils, solstice_node
+from solstice_pipeline.solstice_gui import solstice_splitters, solstice_published_info_widget, solstice_sync_dialog, solstice_buttons
+from solstice_pipeline.solstice_tools import solstice_publisher
+from solstice_pipeline.resources import solstice_resource
 
 # ================================================================================================================
 

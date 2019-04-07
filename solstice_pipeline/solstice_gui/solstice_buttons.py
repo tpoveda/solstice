@@ -17,7 +17,7 @@ from solstice_pipeline.externals.solstice_qt.QtGui import *
 import maya.cmds as cmds
 import maya.utils as utils
 
-from resources import solstice_resource
+from solstice_pipeline.resources import solstice_resource
 
 NORMAL, DOWN, DISABLED = 1, 2, 3
 INNER, OUTER = 1, 2
