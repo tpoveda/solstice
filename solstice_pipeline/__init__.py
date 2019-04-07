@@ -17,6 +17,7 @@ import traceback
 import webbrowser
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.resources import solstice_resources
 
 # =================================================================================
 
