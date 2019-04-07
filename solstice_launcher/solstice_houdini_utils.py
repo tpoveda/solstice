@@ -26,7 +26,7 @@ def launch_houdini(exec_, console, script_path):
 
     cmd = [exec_]
 
-    cmd.extend([script_path])
+    cmd.extend(['waitforui', script_path])
 
     console.write_ok('Launching Houdini with commands: {}'.format(cmd))
     QCoreApplication.processEvents()

@@ -27,11 +27,11 @@ def launch_maya(exec_, console):
         console.write_error('Solstice Launcher could not find Maya executable, please contact TD!')
         return
 
-    watched = utils.WatchFile()
+    # watched = utils.WatchFile()
     cmd = [exec_]
-    cmd.extend(['-hideConsole', '-log', watched.path])
+    # cmd.extend(['-hideConsole', '-log', watched.path])
 
     console.write_ok('Launching Maya with commands: {}'.format(cmd))
     QCoreApplication.processEvents()
 
-    maya = subprocess.Popen([exec_])
+    maya = subprocess.Popen(cmd)
