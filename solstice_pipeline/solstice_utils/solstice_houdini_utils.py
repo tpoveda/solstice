@@ -8,11 +8,8 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-import solstice_pipeline as sp
-
-if sp.is_houdini():
-    import hou
-    import hdefereval
+import hou
+import hdefereval
 
 
 def get_houdini_version(as_string=True):

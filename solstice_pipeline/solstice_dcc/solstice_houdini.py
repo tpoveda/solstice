@@ -16,10 +16,13 @@ from __future__ import print_function, division, absolute_import
 
 import solstice_pipeline as sp
 import hou
+import hdefereval
+
+from solstice_pipeline.solstice_dcc import solstice_dcc
 from solstice_pipeline.solstice_utils import solstice_houdini_utils
 
 
-class SolsticeHoudini(object):
+class SolsticeHoudini(solstice_dcc.SolsticeDCC, object):
 
     @staticmethod
     def get_name():
@@ -47,6 +50,14 @@ class SolsticeHoudini(object):
         """
 
         return solstice_houdini_utils.get_houdini_window()
+
+    @staticmethod
+    def execute_deferred(fn):
+        """
+        Executes given function in deferred mode
+        """
+
+        hdefereval.executeDeferred(fn)
 
     @staticmethod
     def object_exists(node):

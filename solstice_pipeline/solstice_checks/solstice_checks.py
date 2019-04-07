@@ -10,11 +10,8 @@
 
 import os
 
-import maya.cmds as cmds
-
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_checks import solstice_check
-from solstice_pipeline.solstice_utils import solstice_maya_utils
 
 
 class StudentLicenseCheck(solstice_check.SanityCheckTask, object):

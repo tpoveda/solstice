@@ -18,6 +18,7 @@ import webbrowser
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.resources import solstice_resources
+from solstice_pipeline.solstice_dcc import solstice_dcc
 
 # =================================================================================
 
@@ -33,7 +34,7 @@ valid_status = ['working', 'published']
 
 # =================================================================================
 
-dcc = None
+dcc = solstice_dcc.SolsticeDCC()
 sys.solstice_dispatcher = None
 logger = None
 tray = None
@@ -228,7 +229,8 @@ class SolsticePipeline(QObject):
             except ImportError:
                 print('No valid DCC found!')
 
-        self.logger.debug('Current DCC: {}'.format(dcc))
+        if dcc:
+            self.logger.debug('Current DCC: {}'.format(dcc.get_name()))
 
         return dcc
 
@@ -249,7 +251,7 @@ class SolsticePipeline(QObject):
                 s_shelf.build(shelf_file=shelf_file)
                 s_shelf.set_as_active()
         except Exception as e:
-            self.logger.warning('Error during Solstice Shelf Creation: {}'.format(e))
+            self.logger.warning('Error during Solstice Shelf Creation: {} | {}'.format(e, traceback.format_exc()))
 
     def create_solstice_menu(self):
         """
@@ -259,12 +261,13 @@ class SolsticePipeline(QObject):
         self.logger.debug('Building Solstice Tools Menu ...')
 
         from solstice_gui import solstice_menu
-        from solstice_utils import solstice_maya_utils
 
-        try:
-            solstice_maya_utils.remove_menu('Solstice')
-        except Exception:
-            pass
+        if is_maya():
+            from solstice_utils import solstice_maya_utils
+            try:
+                solstice_maya_utils.remove_menu('Solstice')
+            except Exception:
+                pass
 
         try:
             s_menu = solstice_menu.SolsticeMenu()
@@ -272,7 +275,7 @@ class SolsticePipeline(QObject):
             if menu_file and os.path.isfile(menu_file):
                 s_menu.create_menu(file_path=menu_file, parent_menu='Solstice')
         except Exception as e:
-            self.logger.warning('Error during Solstice Menu Creation: {}'.format(e))
+            self.logger.warning('Error during Solstice Menu Creation: {} | {}'.format(e, traceback.format_exc()))
 
     def create_solstice_tray(self):
         """

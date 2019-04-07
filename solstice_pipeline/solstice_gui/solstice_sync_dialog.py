@@ -16,7 +16,6 @@ from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_utils import solstice_maya_utils
 from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
 from solstice_pipeline.resources import solstice_resource
 
@@ -37,7 +36,7 @@ class SolsticeSync(QDialog, object):
 
     def __init__(self):
         super(SolsticeSync, self).__init__()
-        self.setParent(solstice_maya_utils.get_maya_window())
+        self.setParent(sp.dcc.get_main_window())
         self.custom_ui()
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._update_progress_bar)

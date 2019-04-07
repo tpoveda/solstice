@@ -11,11 +11,8 @@ import re
 import ast
 import collections
 
-import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
-
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_utils import solstice_artella_utils as artella, solstice_maya_utils as maya_utils
+from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
 
 # =================================================================================================
 
@@ -100,27 +97,27 @@ class SolsticeNode(object):
         if self._node is None:
             return False
 
-        self._exists = cmds.objExists(self.node)
+        self._exists = sp.dcc.object_exists(self.node)
         if not self._exists:
             return False
 
-        is_referenced = cmds.referenceQuery(self.node, isNodeReferenced=True)
+        is_referenced = sp.dcc.node_is_referenced(self.node)
 
         if not is_referenced:
-            self._nodes_list = cmds.listRelatives(self.node, children=True, allDescendents=True, fullPath=True, type='transform')
+            self._nodes_list = sp.dcc.list_children(self.node, all_hierarchy=True, full_path=True, children_type='transform')
         else:
-            self._loaded = cmds.referenceQuery(self.node, isLoaded=True)
+            self._loaded = sp.dcc.node_is_loaded(self.node)
             if self._loaded:
                 try:
-                    self._filename = cmds.referenceQuery(self.node, filename=True, withoutCopyNumber=True)
+                    self._filename = sp.dcc.node_filename(self.node, no_copy_number=True)
                     self._valid = True
                 except Exception as e:
                     self._valid = False
-            self._namespace = cmds.referenceQuery(self.node, namespace=True)
-            self._parent_namespace = cmds.referenceQuery(self.node, parentNamespace=True)
+            self._namespace = sp.dcc.node_namespace(self.node)
+            self._parent_namespace = sp.dcc.node_parent_namespace(self.node)
             if self._valid:
-                self._filename_with_copy_number = cmds.referenceQuery(self.node, filename=True, withoutCopyNumber=False)
-                self._nodes_list = cmds.referenceQuery(self.node, nodes=True)
+                self._filename_with_copy_number = sp.dcc.node_filename(self.node, no_copy_number=False)
+                self._nodes_list = sp.dcc.node_nodes(self.node)
 
     def change_namespace(self, new_namespace):
         """
@@ -131,7 +128,7 @@ class SolsticeNode(object):
 
         result = None
         try:
-            result = cmds.namespace(rename=[self.namespace, new_namespace])
+            result = sp.dcc.change_namespace(self.namespace, new_namespace)
         except Exception as e:
             sp.logger.warning('Impossible to change namespace for reference node: "{0}" >> "{1}" to "{2}" --> {3}'.format(self.node, self.namespace, new_namespace, e))
 
@@ -151,7 +148,7 @@ class SolsticeNode(object):
 
         result = None
         try:
-            result = cmds.file(new_filename, loadReference=self.node)
+            result = sp.dcc.change_filename(node=self.node, new_filename=new_filename)
         except Exception as e:
             sp.logger.error('Impossible to change filename for reference node: "{0}" > "{1}" to "{2}" --> {3}'.format(self.node, self.filename, new_filename, e))
 
@@ -195,7 +192,7 @@ class SolsticeNode(object):
                 if os.path.exists(artella_absolute_path):
                     self.change_filename(artella_absolute_path)
 
-            result = cmds.file(self.filename, importReference=True)
+            result = sp.dcc.import_reference(self.filename)
         except Exception as e:
             sp.logger.error('Impossible to import objects from reference node: "{0}" --> {1}'.format(self.node, e))
 
@@ -207,10 +204,17 @@ class SolsticeNode(object):
         return result
 
     def get_mobject(self):
-        sel = OpenMaya.MSelectionList()
-        sel.add(self.node)
-        obj = OpenMaya.MObject()
-        sel.getDependNode(0, obj)
+
+        obj = None
+
+        if sp.is_maya():
+            import maya.OpenMaya as OpenMaya
+            sel = OpenMaya.MSelectionList()
+            sel.add(self.node)
+            obj = OpenMaya.MObject()
+            sel.getDependNode(0, obj)
+
+        sp.logger.warning('Impossible to retreive MObject in current DCC: {}'.format(sp.dcc.get_name()))
 
         return obj
 
@@ -239,7 +243,7 @@ class SolsticeAssetNode(SolsticeNode, object):
         return self._name
 
     def get_short_name(self):
-        return maya_utils.get_short_name(self._name)
+        return sp.dcc.node_short_name(self._name)
 
     def get_asset_path(self):
         return self._asset_path
@@ -455,11 +459,15 @@ class SolsticeAssetNode(SolsticeNode, object):
         return asset_files
 
     def get_main_control(self):
-        if not cmds.objExists(self.node):
+        if not sp.dcc.object_exists(self.node):
             sp.logger.warning('Impossible to get main control because node {} does not exists!'.format(self.node))
             return None
 
-        for obj in cmds.listRelatives(self.node, allDescendents=True, fullPath=True):
+        all_relatives = sp.dcc.list_relatives(self.node, all_hierarchy=True, full_path=True)
+        if not all_relatives:
+            return
+
+        for obj in all_relatives:
             if obj.endswith('root_ctrl'):
                 return obj
 
@@ -488,16 +496,16 @@ class SolsticeTagDataNode(object):
         return self._node
 
     def get_asset(self):
-        if not self._node or not cmds.objExists(self._node):
+        if not self._node or not sp.dcc.object_exists(self._node):
             return None
 
         if self._tag_info_dict:
             return SolsticeAssetNode(node=self._node)
         else:
-            if not cmds.attributeQuery('node', node=self._node, exists=True):
+            if not sp.dcc.attribute_exists(node=self._node, attribute_name='node'):
                 return None
 
-            connections = cmds.listConnections(self._node+'.node')
+            connections = sp.dcc.list_connections(node=self._node, attribute_name='node')
             if connections:
                 node = connections[0]
                 return SolsticeAssetNode(node=node)
@@ -505,59 +513,59 @@ class SolsticeTagDataNode(object):
         return None
 
     def get_tag_type(self):
-        if not self._node or not cmds.objExists(self._node):
+        if not self._node or not sp.dcc.object_exists(self._node):
             return None
-        if not cmds.attributeQuery('tag_type', node=self._node, exists=True):
+        if not sp.dcc.attribute_exists(node=self._node, attribute_name='tag_type'):
             return None
 
-        return cmds.getAttr(self._node + '.tag_type')
+        return sp.dcc.get_attribute_value(node=self._node, attribute_name='tag_type')
 
     def get_types(self):
-        if not self._node or not cmds.objExists(self._node):
+        if not self._node or not sp.dcc.object_exists(self._node):
             return []
-        if not cmds.attributeQuery('types', node=self._node, exists=True):
+        if not sp.dcc.attribute_exists(node=self._node, attribute_name='types'):
             return []
 
-        return cmds.getAttr(self._node + '.types')
+        return sp.dcc.get_attribute_value(node=self._node, attribute_name='types')
 
     def get_proxy_group(self):
-        if not self._node or not cmds.objExists(self._node):
+        if not self._node or not sp.dcc.object_exists(self._node):
             return None
 
         if self._tag_info_dict:
             return self._node
         else:
-            if not cmds.attributeQuery('proxy', node=self._node, exists=True):
+            if not sp.dcc.attribute_exists(node=self._node, attribute_name='proxy'):
                 return None
 
-            connections = cmds.listConnections(self._node + '.proxy')
+            connections = sp.dcc.list_connections(node=self._node, attribute_name='proxy')
             if connections:
                 node = connections[0]
-                if cmds.objExists(node):
+                if sp.dcc.object_exists(node):
                     return node
 
         return None
 
     def get_hires_group(self):
-        if not self._node or not cmds.objExists(self._node):
+        if not self._node or not sp.dcc.object_exists(self._node):
             return None
 
         if self._tag_info_dict:
             return self._node
         else:
-            if not cmds.attributeQuery('hires', node=self._node, exists=True):
+            if not sp.dcc.attribute_exists(node=self._node, attribute_name='hires'):
                 return None
 
-            connections = cmds.listConnections(self._node + '.hires')
+            connections = sp.dcc.list_connections(node=self._node, attribute_name='hires')
             if connections:
                 node = connections[0]
-                if cmds.objExists(node):
+                if sp.dcc.object_exists(node):
                     return node
 
         return None
 
     def get_shaders(self):
-        if not self._node or not cmds.objExists(self._node):
+        if not self._node or not sp.dcc.object_exists(self._node):
             return None
 
         if self._tag_info_dict:
@@ -572,10 +580,10 @@ class SolsticeTagDataNode(object):
             else:
                 return shaders_dict
         else:
-            if not cmds.attributeQuery('shaders', node=self._node, exists=True):
+            if not sp.dcc.attribute_exists(node=self._node, attribute_name='shaders'):
                 return None
 
-            shaders_attr = cmds.getAttr(self._node + '.shaders')
+            shaders_attr = sp.dcc.get_attribute_value(node=self._node, attribute_name='shaders')
             shaders_attr_fixed = shaders_attr.replace("'", "\"")
             shaders_dict = ast.literal_eval(shaders_attr_fixed)
             if type(shaders_dict) != dict:

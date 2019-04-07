@@ -10,10 +10,7 @@
 
 import os
 import time
-import treelib
 from collections import OrderedDict
-
-import maya.cmds as cmds
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
@@ -22,9 +19,6 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_sequencerwidgets, solstice_stack, solstice_spinner, solstice_label
 from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
 from solstice_pipeline.resources import solstice_resource
-from solstice_pipeline.solstice_utils import solstice_artella_classes
-
-reload(solstice_sequencerwidgets)
 
 
 class SequencerBackground(QFrame, object):

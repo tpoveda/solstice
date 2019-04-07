@@ -11,11 +11,8 @@
 import os
 import json
 
-import maya.cmds as cmds
-
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_checks import solstice_check
-from solstice_pipeline.solstice_utils import solstice_maya_utils
 from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
 from solstice_pipeline.solstice_gui import solstice_sync_dialog
 
@@ -207,34 +204,40 @@ class StudentLicenseCheck(solstice_check.SanityCheckTask, object):
 
     def check(self):
 
-        self._file_path = self._asset().get_asset_file(file_type=self._file_type, status=self._status)
-        if self._file_path is None or not os.path.isfile(self._file_path):
-            error_msg = 'File Path {} does not exists!'.format(self._file_path)
-            sp.logger.error(error_msg)
-            self.set_error_message(error_msg)
-            return False
+        if sp.is_maya():
+            from solstice_pipeline.solstice_utils import solstice_maya_utils
+            self._file_path = self._asset().get_asset_file(file_type=self._file_type, status=self._status)
+            if self._file_path is None or not os.path.isfile(self._file_path):
+                error_msg = 'File Path {} does not exists!'.format(self._file_path)
+                sp.logger.error(error_msg)
+                self.set_error_message(error_msg)
+                return False
 
-        return not solstice_maya_utils.file_has_student_line(filename=self._file_path)
+            return not solstice_maya_utils.file_has_student_line(filename=self._file_path)
+
+        return True
 
     def fix(self):
         if self._file_path is None or not os.path.isfile(self._file_path):
             return False
 
-        artella.lock_file(self._file_path)
-        try:
-            sp.logger.debug('Cleaning Student License from file: {}'.format(self._file_path))
-            self._valid_check = solstice_maya_utils.clean_student_line(filename=self._file_path)
-            valid = super(StudentLicenseCheck, self).fix()
-            if not valid:
-                sp.logger.warning('Impossible to fix Maya Student License Check')
+        if sp.is_maya():
+            from solstice_pipeline.solstice_utils import solstice_maya_utils
+            artella.lock_file(self._file_path)
+            try:
+                sp.logger.debug('Cleaning Student License from file: {}'.format(self._file_path))
+                self._valid_check = solstice_maya_utils.clean_student_line(filename=self._file_path)
+                valid = super(StudentLicenseCheck, self).fix()
+                if not valid:
+                    sp.logger.warning('Impossible to fix Maya Student License Check')
+                    artella.unlock_file(self._file_path)
+                    return False
+            except Exception as e:
                 artella.unlock_file(self._file_path)
                 return False
-        except Exception as e:
-            artella.unlock_file(self._file_path)
-            return False
 
-        artella.unlock_file(self._file_path)
-        return True
+            artella.unlock_file(self._file_path)
+            return True
 
 
 class ValidTexturesPath(solstice_check.SanityCheckTask, object):
@@ -462,18 +465,18 @@ class CleanModelUnknownNodes(solstice_check.SanityCheckTask, object):
             return False
 
         self.write('Opening model file in Maya ...')
-        cmds.file(model_path, o=True, f=True)
+        sp.dcc.open_file(model_path, force=True)
 
         # Clean unknown nodes and old plugins for the current scene
         self.write('Cleaning unknown nodes from the asset scene ...')
-        unknown_nodes = cmds.ls(type='unknown')
+        unknown_nodes = sp.dcc.list_nodes(node_type='unknown')
         if unknown_nodes and type(unknown_nodes) == list:
             for i in unknown_nodes:
-                if cmds.objExists(i):
-                    if not cmds.referenceQuery(i, isNodeReferenced=True):
+                if sp.dcc.object_exists(i):
+                    if not sp.dcc.node_is_referenced(i):
                         self.write_ok('Removing {} item ...'.format(i))
-                        cmds.delete(i)
-        unknown_nodes = cmds.ls(type='unknown')
+                        sp.dcc.delete_object(i)
+        unknown_nodes = sp.dcc.list_nodes(node_type='unknown')
         if unknown_nodes and type(unknown_nodes) == list:
             if len(unknown_nodes) > 0:
                 self.write_error('Error while removing unknown nodes. Please contact TD!')
@@ -481,12 +484,12 @@ class CleanModelUnknownNodes(solstice_check.SanityCheckTask, object):
                 self.write_ok('Unknown nodes removed successfully!')
 
         self.write('Cleaning old plugins nodes from the asset scene ...')
-        old_plugins = cmds.unknownPlugin(query=True, list=True)
+        old_plugins = sp.dcc.list_old_plugins()
         if old_plugins and type(old_plugins) == list:
             for plugin in old_plugins:
                 self.write_ok('Removing {} old plugin ...'.format(plugin))
-                cmds.unknownPlugin(plugin, remove=True)
-        old_plugins = cmds.unknownPlugin(query=True, list=True)
+                sp.dcc.remove_old_plugin(plugin)
+        old_plugins = sp.dcc.list_old_plugins()
         if old_plugins and type(old_plugins) == list:
             if len(old_plugins) > 0:
                 self.write_error('Error while removing old plugins nodes. Please contact TD!')
@@ -517,10 +520,10 @@ class CheckModelMainGroup(solstice_check.SanityCheckTask, object):
 
         self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
         valid_obj = None
-        if cmds.objExists(self._asset().name):
-            objs = cmds.ls(self._asset().name)
+        if sp.dcc.object_exists(self._asset().name):
+            objs = sp.dcc.list_nodes(node_name=self._asset().name)
             for obj in objs:
-                parent = cmds.listRelatives(obj, parent=True)
+                parent = sp.dcc.node_parent(obj)
                 if parent is None:
                     valid_obj = obj
             if not valid_obj:
@@ -551,7 +554,7 @@ class ModelHasNoShaders(solstice_check.SanityCheckTask, object):
             return False
 
         # Check that model file has no shaders stored inside it
-        shaders = cmds.ls(materials=True)
+        shaders = sp.dcc.list_materials()
         invalid_shaders = list()
         for shader in shaders:
             if shader not in ['lambert1', 'particleCloud1']:
@@ -583,10 +586,10 @@ class ModelProxyHiresGroups(solstice_check.SanityCheckTask, object):
             return False
 
         valid_obj = None
-        if cmds.objExists(self._asset().name):
-            objs = cmds.ls(self._asset().name)
+        if sp.dcc.object_exists(self._asset().name):
+            objs = sp.dcc.list_nodes(node_name=self._asset().name)
             for obj in objs:
-                parent = cmds.listRelatives(obj, parent=True)
+                parent = sp.dcc.node_parent(obj)
                 if parent is None:
                     valid_obj = obj
             if not valid_obj:
@@ -606,12 +609,12 @@ class ModelProxyHiresGroups(solstice_check.SanityCheckTask, object):
         hires_grp = None
         proxy_grp_name = '{}_proxy_grp'.format(self._asset().name)
         hires_grp_name = '{}_hires_grp'.format(self._asset().name)
-        children = cmds.listRelatives(valid_obj, allDescendents=True, type='transform', fullPath=True)
+        children = sp.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True, relative_type='transform')
         if children:
             for child in children:
                 child_name = child.split('|')[-1]
                 if child_name == proxy_grp_name:
-                    proxy_children = cmds.listRelatives(child_name, allDescendents=True, type='transform')
+                    proxy_children = sp.dcc.list_relatives(node=child_name, all_hierarchy=True, relative_type='transform')
                     if len(proxy_children) > 0:
                         valid_proxy = True
                         if proxy_grp is None:
@@ -623,7 +626,7 @@ class ModelProxyHiresGroups(solstice_check.SanityCheckTask, object):
                         self.write_error('Proxy group has no children!. Please check it!')
                         return False
                 if child_name == hires_grp_name:
-                    hires_children = cmds.listRelatives(child_name, allDescendents=True, type='transform')
+                    hires_children = sp.dcc.list_relatives(node=child_name, all_hierarchy=True, relative_type='transform')
                     if len(hires_children) > 0:
                         valid_hires = True
                         if hires_grp is None:
@@ -648,7 +651,7 @@ class ModelProxyHiresGroups(solstice_check.SanityCheckTask, object):
             return False
 
         # Check if proxy group has valid proxy mesh stored
-        if proxy_grp is None or not cmds.objExists(proxy_grp):
+        if proxy_grp is None or not sp.dcc.object_exists(proxy_grp):
             self.write_error(
                 'Proxy Group not found! Group with name {} must exist in the model asset Maya file!'.format(
                     hires_grp_name))
@@ -656,8 +659,8 @@ class ModelProxyHiresGroups(solstice_check.SanityCheckTask, object):
 
         proxy_mesh = None
         proxy_name = '{}_proxy'.format(self._asset().name)
-        proxy_meshes = cmds.listRelatives(proxy_grp, allDescendents=True, type='transform', fullPath=True)
-        hires_meshes = cmds.listRelatives(hires_grp, allDescendents=True, type='transform', fullPath=True)
+        proxy_meshes = sp.dcc.list_relatives(node=proxy_grp, all_hierarchy=True, full_path=True, relative_type='transform')
+        hires_meshes = sp.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='transform')
         for mesh in proxy_meshes:
             child_name = mesh.split('|')[-1]
             if child_name == proxy_name:
@@ -667,7 +670,7 @@ class ModelProxyHiresGroups(solstice_check.SanityCheckTask, object):
                     self.write_error('Multiple Proxy Meshes in the file. Please check it!')
                     return False
 
-        if proxy_mesh is None or not cmds.objExists(proxy_mesh):
+        if proxy_mesh is None or not sp.dcc.object_exists(proxy_mesh):
             self.write_error(
                 'No valid Proxy Mesh in the file. Please check that proxy mesh follows nomenclature {}_proxy!'.format(
                     self._asset().name))
@@ -699,10 +702,10 @@ class ValidTagDataNode(solstice_check.SanityCheckTask, object):
             return False
 
         valid_obj = None
-        if cmds.objExists(self._asset().name):
-            objs = cmds.ls(self._asset().name)
+        if sp.dcc.object_exists(self._asset().name):
+            objs = sp.dcc.list_nodes(node_name=self._asset().name)
             for obj in objs:
-                parent = cmds.listRelatives(obj, parent=True)
+                parent = sp.dcc.node_parent(obj)
                 if parent is None:
                     valid_obj = obj
             if not valid_obj:
@@ -716,9 +719,9 @@ class ValidTagDataNode(solstice_check.SanityCheckTask, object):
             return False
 
         valid_tag_data = False
-        main_group_connections = cmds.listConnections(valid_obj, source=True)
+        main_group_connections = sp.dcc.list_connections(node=valid_obj)
         for connection in main_group_connections:
-            attrs = cmds.listAttr(connection, userDefined=True)
+            attrs = sp.dcc.list_user_attributes(connection)
             if attrs and type(attrs) == list:
                 for attr in attrs:
                     if attr == 'tag_type':
@@ -729,15 +732,15 @@ class ValidTagDataNode(solstice_check.SanityCheckTask, object):
             self.write_warning('Main group has not a valid tag data node connected to. Creating it ...')
             try:
                 from solstice_pipeline.solstice_tools import solstice_tagger
-                cmds.select(valid_obj)
+                sp.dcc.select_object(valid_obj)
                 solstice_tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(self._asset().category)
-                cmds.select(clear=True)
+                sp.dcc.clear_selection()
                 self.write_ok('Tag Data Node created successfully!')
                 self.write('Checking if Tag Data Node was created successfully ...')
                 valid_tag_data = False
-                main_group_connections = cmds.listConnections(valid_obj, source=True)
+                main_group_connections = sp.dcc.list_source_destination_connections(valid_obj)
                 for connection in main_group_connections:
-                    attrs = cmds.listAttr(connection, userDefined=True)
+                    attrs = sp.dcc.list_user_attributes(connection)
                     if attrs and type(attrs) == list:
                         for attr in attrs:
                             if attr == 'tag_type':
@@ -751,7 +754,7 @@ class ValidTagDataNode(solstice_check.SanityCheckTask, object):
                 return False
 
             tag_data_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(new_selection=valid_obj)
-            if not tag_data_node or not cmds.objExists(tag_data_node):
+            if not tag_data_node or not sp.dcc.object_exists(tag_data_node):
                 self.write_error('Impossible to get tag data of current selection: {}!'.format(tag_data_node))
                 return False
 
@@ -778,10 +781,10 @@ class SetupTagDataNode(solstice_check.SanityCheckTask, object):
             return False
 
         valid_obj = None
-        if cmds.objExists(self._asset().name):
-            objs = cmds.ls(self._asset().name)
+        if sp.dcc.object_exists(self._asset().name):
+            objs = sp.dcc.list_nodes(node_name=self._asset().name)
             for obj in objs:
-                parent = cmds.listRelatives(obj, parent=True)
+                parent = sp.dcc.node_parent(obj)
                 if parent is None:
                     valid_obj = obj
             if not valid_obj:
@@ -790,7 +793,7 @@ class SetupTagDataNode(solstice_check.SanityCheckTask, object):
             return False
 
         tag_data_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(new_selection=valid_obj)
-        if not tag_data_node or not cmds.objExists(tag_data_node):
+        if not tag_data_node or not sp.dcc.object_exists(tag_data_node):
             self.write_error('Impossible to get tag data of current selection: {}!'.format(tag_data_node))
             return False
 
@@ -841,12 +844,12 @@ class SetupTagDataNode(solstice_check.SanityCheckTask, object):
         hires_grp = None
         proxy_grp_name = '{}_proxy_grp'.format(self._asset().name)
         hires_grp_name = '{}_hires_grp'.format(self._asset().name)
-        children = cmds.listRelatives(valid_obj, allDescendents=True, type='transform', fullPath=True)
+        children = sp.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True, relative_type='transform')
         if children:
             for child in children:
                 child_name = child.split('|')[-1]
                 if child_name == proxy_grp_name:
-                    proxy_children = cmds.listRelatives(child_name, allDescendents=True, type='transform')
+                    proxy_children = sp.dcc.list_relatives(node=child_name, all_hierarchy=True, relative_type='transform')
                     if len(proxy_children) > 0:
                         if proxy_grp is None:
                             proxy_grp = child
@@ -857,7 +860,7 @@ class SetupTagDataNode(solstice_check.SanityCheckTask, object):
                         self.write_error('Proxy group has no children!. Please check it!')
                         return False
                 if child_name == hires_grp_name:
-                    hires_children = cmds.listRelatives(child_name, allDescendents=True, type='transform')
+                    hires_children = sp.dcc.list_relatives(node=child_name, all_hierarchy=True, relative_type='transform')
                     if len(hires_children) > 0:
                         if hires_grp is None:
                             hires_grp = child
@@ -865,7 +868,7 @@ class SetupTagDataNode(solstice_check.SanityCheckTask, object):
                             self.write_error('Multiple Hires groups in the file. Please check it!')
                             return False
 
-        hires_meshes = cmds.listRelatives(hires_grp, allDescendents=True, type='transform', fullPath=True)
+        hires_meshes = sp.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='transform')
 
         self.write('Checking if shading meshes names and hires model meshes names are the same')
         check_meshes = dict()
@@ -889,18 +892,18 @@ class SetupTagDataNode(solstice_check.SanityCheckTask, object):
             self.write_ok('Shading Meshes and Model Hires meshes are valid!')
 
         # Create if necessary shaders attribute in model tag data node
-        if not tag_data_node or not cmds.objExists(tag_data_node):
+        if not tag_data_node or not sp.dcc.object_exists(tag_data_node):
             self.write_error('Tag data does not exists in the current scene!'.format(tag_data_node))
             return False
 
-        attr_exists = cmds.attributeQuery('shaders', node=tag_data_node, exists=True)
+        attr_exists = sp.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
         if attr_exists:
             self.write('Unlocking shaders tag data attribute on tag data node: {}'.format(tag_data_node))
-            cmds.setAttr(tag_data_node + '.shaders', lock=False)
+            sp.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
         else:
             self.write('Creating shaders attribute on tag data node: {}'.format(tag_data_node))
-            cmds.addAttr(tag_data_node, ln='shaders', dt='string')
-            attr_exists = cmds.attributeQuery('shaders', node=tag_data_node, exists=True)
+            sp.dcc.add_string_attribute(node=tag_data_node, attribute_name='shaders')
+            attr_exists = sp.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
             if not attr_exists:
                 self.write_error('No Shaders attribute found on model tag data node: {}'.format(tag_data_node))
                 return False
@@ -908,8 +911,8 @@ class SetupTagDataNode(solstice_check.SanityCheckTask, object):
                 self.write_ok('Shaders attribute created successfully on tag data node!')
 
         self.write('Storing shaders data into shaders tag data node attribute ...')
-        cmds.setAttr(tag_data_node + '.shaders', str(shader_data), type='string')
-        cmds.setAttr(tag_data_node + '.shaders', lock=True)
+        sp.dcc.set_string_attribute_value(node=shader_data, attribute_name='shaders', attribute_value=shader_data)
+        sp.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
         self.write_ok('Shaders data added to model tag data node successfully!')
 
         return True
@@ -958,18 +961,18 @@ class CleanShadingUnknownNodes(solstice_check.SanityCheckTask, object):
             return False
 
         self.write('Opening shading file in Maya ...')
-        cmds.file(shading_path, o=True, f=True)
+        sp.dcc.open_file(shading_path, force=True)
 
         # Clean unknown nodes and old plugins for the current scene
         self.write('Cleaning unknown nodes from the asset scene ...')
-        unknown_nodes = cmds.ls(type='unknown')
+        unknown_nodes = sp.dcc.list_nodes(node_type='unknown')
         if unknown_nodes and type(unknown_nodes) == list:
             for i in unknown_nodes:
-                if cmds.objExists(i):
-                    if not cmds.referenceQuery(i, isNodeReferenced=True):
+                if sp.dcc.object_exists(i):
+                    if not sp.dcc.node_is_referenced(i):
                         self.write_ok('Removing {} item ...'.format(i))
-                        cmds.delete(i)
-        unknown_nodes = cmds.ls(type='unknown')
+                        sp.dcc.delete_object(i)
+        unknown_nodes = sp.dcc.list_nodes(node_type='unknown')
         if unknown_nodes and type(unknown_nodes) == list:
             if len(unknown_nodes) > 0:
                 self.write_error('Error while removing unknown nodes. Please contact TD!')
@@ -977,12 +980,12 @@ class CleanShadingUnknownNodes(solstice_check.SanityCheckTask, object):
                 self.write_ok('Unknown nodes removed successfully!')
 
         self.write('Cleaning old plugins nodes from the asset scene ...')
-        old_plugins = cmds.unknownPlugin(query=True, list=True)
+        old_plugins = sp.dcc.list_old_plugins()
         if old_plugins and type(old_plugins) == list:
             for plugin in old_plugins:
                 self.write_ok('Removing {} old plugin ...'.format(plugin))
-                cmds.unknownPlugin(plugin, remove=True)
-        old_plugins = cmds.unknownPlugin(query=True, list=True)
+                sp.dcc.remove_old_plugin(plugin)
+        old_plugins = sp.dcc.list_old_plugins()
         if old_plugins and type(old_plugins) == list:
             if len(old_plugins) > 0:
                 self.write_error('Error while removing old plugins nodes. Please contact TD!')
@@ -1041,10 +1044,10 @@ class CheckShadingMainGroup(solstice_check.SanityCheckTask, object):
 
         self.write('Checking if shading main group has a valid nomenclature: {}'.format(self._asset().name))
         valid_obj = None
-        if cmds.objExists(self._asset().name):
-            objs = cmds.ls(self._asset().name)
+        if sp.dcc.object_exists(self._asset().name):
+            objs = sp.dcc.list_nodes(node_name=self._asset().name)
             for obj in objs:
-                parent = cmds.listRelatives(obj, parent=True)
+                parent = sp.dcc.node_parent(obj)
                 if parent is None:
                     valid_obj = obj
             if not valid_obj:
@@ -1075,7 +1078,7 @@ class CheckShadingShaders(solstice_check.SanityCheckTask, object):
             return False
 
         self.write('Getting asset shaders from shading file ...')
-        shaders = cmds.ls(materials=True)
+        shaders = sp.dcc.list_materials()
         asset_shaders = list()
         for shader in shaders:
             if shader not in ['lambert1', 'particleCloud1']:
@@ -1087,17 +1090,16 @@ class CheckShadingShaders(solstice_check.SanityCheckTask, object):
             return False
 
         self.write('Checking that nomenclature of shaders and shading groups are valid')
-        shader_types = cmds.listNodeTypes('shader')
+        shader_types = sp.dcc.list_node_types('shader')
         for shader in asset_shaders:
             if shader in ['lambert1', 'particleCloud1']:
                 continue
             if 'displacement' in shader or 'Displacement' in shader:
                 continue
             if not shader.startswith(self._asset().name):
-                self.write_error('Shader {} has not a valid nomenclature. Rename it with prefix {}'.format(shader,
-                                                                                                           self._asset().name))
+                self.write_error('Shader {} has not a valid nomenclature. Rename it with prefix {}'.format(shader, self._asset().name))
                 return False
-            shading_groups = cmds.listConnections(shader, type='shadingEngine')
+            shading_groups = sp.dcc.list_connections_of_type(node=shader, connection_type='shadingEngine')
             if not shading_groups or len(shading_groups) <= 0:
                 self.write_warning('Shader {} has not a shading group connected to it!'.format(shader))
                 continue
@@ -1107,14 +1109,14 @@ class CheckShadingShaders(solstice_check.SanityCheckTask, object):
                                                                                                               shading_groups))
                 return False
             shading_group = shading_groups[0]
-            connections = cmds.listConnections(shading_group, source=True, destination=False)
+            connections = sp.dcc.list_source_connections(node=shading_group)
             if connections is not None:
                 connected_shaders = list()
                 for cnt in connections:
-                    if cmds.objectType(cnt) in shader_types:
+                    if sp.dcc.object_type(cnt) in shader_types:
                         connected_shaders.append(cnt)
                 if len(connected_shaders) > 0:
-                    target_name = cmds.listConnections(shading_group + '.surfaceShader')[0]
+                    target_name = sp.dcc.list_connections(node=shading_group, attribute_name='surfaceShader')[0]
                     if shading_group != '{}SG'.format(target_name, shader):
                         self.write_error(
                             'Shader invalid nomenclature: Target name: {} ---------- {} => {}'.format(target_name,

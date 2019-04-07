@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # """ ==================================================================
-# Script Name: solstice_sequencer.py
+# Script Name: solstice_sequencerwidgets.py
 # by Tomas Poveda
 # This module contains widgets used in the Solstice Sequencer
 # ______________________________________________________________________
@@ -10,18 +10,14 @@
 
 import os
 
-import solstice_pipeline as sp
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 
-from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
 from solstice_pipeline.solstice_gui import solstice_splitters, solstice_sync_dialog
-from solstice_utils import solstice_image as img
+from solstice_pipeline.solstice_utils import solstice_image as img
 from solstice_pipeline.solstice_utils import solstice_artella_utils as artella, solstice_python_utils as py_utils
 from solstice_pipeline.resources import solstice_resource
-
-reload(solstice_splitters)
 
 
 class SequenceFile(QFrame, object):

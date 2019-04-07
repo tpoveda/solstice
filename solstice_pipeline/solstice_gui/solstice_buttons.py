@@ -14,9 +14,7 @@ from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 
-import maya.cmds as cmds
-import maya.utils as utils
-
+import solstice_pipeline as sp
 from solstice_pipeline.resources import solstice_resource
 
 NORMAL, DOWN, DISABLED = 1, 2, 3
@@ -182,12 +180,17 @@ class ColorButton(QPushButton, object):
         self._update_color()
 
     def show_color_editor(self):
-        cmds.colorEditor(rgbValue=(self._color.redF(), self._color.greenF(), self._color.blueF()))
-        if not cmds.colorEditor(query=True, result=True):
+        if sp.is_maya():
+            import maya.cmds as cmds
+            cmds.colorEditor(rgbValue=(self._color.redF(), self._color.greenF(), self._color.blueF()))
+            if not cmds.colorEditor(query=True, result=True):
+                return
+            new_color = cmds.colorEditor(query=True, rgbValue=True)
+            self.color = QColor.fromRgbF(new_color[0], new_color[1], new_color[2])
+            self.colorChanged.emit()
+        else:
+            sp.logger.warning('Color Editor is not supported in current DCC: {}'.format(sp.dcc.get_name()))
             return
-        new_color = cmds.colorEditor(query=True, rgbValue=True)
-        self.color = QColor.fromRgbF(new_color[0], new_color[1], new_color[2])
-        self.colorChanged.emit()
 
     def _update_color(self):
         self.setStyleSheet('background-color:rgb({0},{1},{2});'.format(self._color.redF()*255, self._color.greenF()*255, self._color.blueF()*255))
@@ -240,7 +243,7 @@ class Base(object):
             else:
                 self._glow_index -= 1
 
-        utils.executeDeferred(self.update)
+        sp.dcc.execute_deferred(self.update)
 
     #-----------------------------------------------------------------------------------------#
 

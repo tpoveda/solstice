@@ -10,6 +10,7 @@
 # ==================================================================="""
 
 import os
+import re
 import sys
 import json
 import urllib2
@@ -21,15 +22,10 @@ except:
 
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
-
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_utils import solstice_artella_classes as classes
 
-if sp.is_maya():
-    import maya.cmds as cmds
-    from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
-elif sp.is_houdini():
-    from solstice_pipeline.solstice_utils import solstice_houdini_utils as utils
+# ---------------------------------------------------------------------------------------
 
 artella_maya_plugin_name = 'Artella.py'
 artella_app_name = 'lifecycler'
@@ -75,7 +71,10 @@ def check_artella_plugin_loaded():
     :return: bool
     """
 
-    return cmds.pluginInfo('Artella', query=True, loaded=True)
+    if sp.is_maya():
+        return sp.dcc.is_plugin_loaded('Artella')
+
+    return False
 
 
 def get_artella_data_folder():
@@ -230,7 +229,8 @@ def connect_artella_app_to_spigot(cli=None):
 
     if sp.is_houdini():
         def pass_msg_to_main_thread(json_msg):
-            main_thread_fn = utils.get_houdini_pass_main_thread_function()
+            from solstice_pipeline.solstice_utils import solstice_houdini_utils
+            main_thread_fn = solstice_houdini_utils.get_houdini_pass_main_thread_function()
             main_thread_fn(get_handle_msg, json_msg)
 
     if sp.is_maya():
@@ -268,8 +268,8 @@ def load_artella_maya_plugin():
         artella_maya_plugin_folder = get_artella_dcc_plugin(dcc='maya')
         artella_maya_plugin_file = os.path.join(artella_maya_plugin_folder, artella_maya_plugin_name)
         if os.path.isfile(artella_maya_plugin_file):
-            if not cmds.pluginInfo(artella_maya_plugin_name, query=True, loaded=True):
-                cmds.loadPlugin(artella_maya_plugin_file)
+            if not sp.dcc.is_plugin_loaded(artella_maya_plugin_name):
+                sp.dcc.load_plugin(artella_maya_plugin_file)
                 return True
 
     return False
@@ -284,7 +284,8 @@ def get_spigot_client():
     global spigot_client
     if spigot_client is None:
         if sp.is_maya():
-            utils.force_stack_trace_on()
+            from solstice_pipeline.solstice_utils import solstice_maya_utils
+            solstice_maya_utils.force_stack_trace_on()
         from am.artella.spigot.spigot import SpigotClient
         spigot_client = SpigotClient()
         connect_artella_app_to_spigot(spigot_client)
@@ -300,10 +301,12 @@ def get_artella_app_identifier():
     app_identifier = os.environ.get('ARTELLA_APP_IDENTIFIER', None)
     if app_identifier is None:
         if sp.is_maya():
+            import maya.cmds as cmds
             maya_version = cmds.about(version=True).split()[0]
             app_identifier = 'maya.{0}'.format(maya_version)
         elif sp.is_houdini():
-            app_identifier = utils.get_houdini_version(as_string=True)
+            from solstice_pipeline.solstice_utils import solstice_houdini_utils
+            app_identifier = solstice_houdini_utils.get_houdini_version(as_string=True)
 
     return app_identifier
 
@@ -392,7 +395,7 @@ def get_cms_uri_current_file():
     :return: str
     """
 
-    current_file = cmds.file(query=True, sceneName=True)
+    current_file = sp.dcc.scene_name()
     sp.logger.debug('Getting CMS Uri of file {0}'.format(current_file))
 
     cms_uri = artella.getCmsUri(current_file)
@@ -413,7 +416,18 @@ def get_cms_uri(path):
     :return: dict
     """
 
-    cms_uri = artella.getCmsUri(path)
+    cms_uri = None
+    if sp.is_maya():
+        cms_uri = artella.getCmsUri(path)
+    elif sp.is_houdini():
+        path_parts = re.split(r'[/\\]', path)
+        while len(path_parts):
+            path_part = path_parts.pop(0)
+            if path_part == '_art':
+                relative_path = '/'.join(path_parts)
+                cms_uri = relative_path
+                break
+
     if not cms_uri:
         sp.logger.error('Unable to get CMS uri from path: {0}'.format(path))
         return False
@@ -428,7 +442,7 @@ def get_status_current_file():
     :return:
     """
 
-    current_file = cmds.file(query=True, sceneName=True)
+    current_file = sp.dcc.scene_name()
     sp.logger.debug('Getting Artella Status of file {0}'.format(current_file))
 
     status = get_status(current_file)
@@ -544,8 +558,11 @@ def launch_maya(file_path, maya_version=None):
     :return:
     """
 
+    if not sp.is_maya():
+        return
+
     if maya_version is None:
-        maya_version = utils.get_maya_version()
+        maya_version = sp.dcc.get_version()
 
     spigot = get_spigot_client()
 
@@ -567,8 +584,11 @@ def open_file_in_maya(file_path, maya_version=None):
     :param maya_version: int
     """
 
+    if not sp.is_maya():
+        return None
+
     if maya_version is None:
-        maya_version = utils.get_maya_version()
+        maya_version = sp.dcc.get_version()
 
     spigot = get_spigot_client()
 
@@ -598,8 +618,11 @@ def import_file_in_maya(file_path, maya_version=None):
     :param maya_version: int
     """
 
+    if not sp.is_maya():
+        return None
+
     if maya_version is None:
-        maya_version = utils.get_maya_version()
+        maya_version = sp.dcc.get_version()
 
     spigot = get_spigot_client()
 
@@ -625,8 +648,11 @@ def reference_file_in_maya(file_path, maya_version=None):
     :param maya_version: int
     """
 
+    if not sp.is_maya():
+        return None
+
     if maya_version is None:
-        maya_version = utils.get_maya_version()
+        maya_version = sp.dcc.get_version()
 
     spigot = get_spigot_client()
 
@@ -713,7 +739,7 @@ def lock_file(file_path=None, force=False):
     """
 
     if not file_path:
-        file_path = cmds.file(query=True, sceneName=True)
+        file_path = sp.dcc.scene_name()
     if not file_path:
         sp.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
@@ -723,7 +749,7 @@ def lock_file(file_path=None, force=False):
         msg = 'Current file ({}) is published and cannot be edited'.format(os.path.basename(file_path))
         sp.logger.info(msg)
         sp.message(msg)
-        cmds.confirmDialog(title='Solstice Tools - Cannot Lock File', message=msg, button=['OK'])
+        sp.dcc.confirm_dialog(title='Solstice Tools - Cannot Lock File', message=msg, button=['OK'])
         return False
 
     in_edit_mode, is_locked_by_me = is_locked(file_path=file_path)
@@ -741,7 +767,7 @@ def lock_file(file_path=None, force=False):
     if in_edit_mode and not is_locked_by_me:
         msg = 'Locked by another user or workspace or file is not uploaded to Artella yet: {}'.format(os.path.basename(file_path))
         sp.logger.info(msg)
-        cmds.warning(msg)
+        sp.dcc.warning(msg)
         return False
     elif force or not in_edit_mode:
         result = 'Yes'
@@ -749,7 +775,7 @@ def lock_file(file_path=None, force=False):
             msg = '{} needs to be in Edit mode to save your file. Would like to turn edit mode on now?'.format(os.path.basename(file_path))
             sp.logger.info(msg)
             sp.message(msg)
-            result = cmds.confirmDialog(title='Solstice Tools - Lock File', message=msg, button=['Yes', 'No'], cancelButton='No', dismissString='No')
+            result = sp.dcc.confirm_dialog(title='Solstice Tools - Lock File', message=msg, button=['Yes', 'No'], cancel_button='No', dismiss_string='No')
         if result != 'Yes':
             return False
 
@@ -768,8 +794,8 @@ def lock_file(file_path=None, force=False):
     if rsp.get('meta', {}).get('status') != 'OK':
         msg = 'Failed to lock {}'.format(os.path.basename(file_path))
         sp.logger.info(msg)
-        cmds.warning(msg)
-        cmds.confirmDialog(title='Solstice Tools - Failed to Lock File', message=msg, button=['OK'])
+        sp.dcc.warning(msg)
+        sp.dcc.confirm_dialog(title='Solstice Tools - Failed to Lock File', message=msg, button=['OK'])
         return False
 
     return True
@@ -792,8 +818,8 @@ def upload_file(file_path, comment):
     if rsp.get('status', {}).get('meta', {}).get('status') != 'OK':
         msg = 'Failed to publish version to Artella {}'.format(os.path.basename(file_path))
         sp.logger.info(msg)
-        cmds.warning(msg)
-        cmds.confirmDialog(title='Solstice Tools - Failed to Upload Bug. Restart Solstice Tools please!', message=msg, button=['OK'])
+        sp.dcc.warning(msg)
+        sp.dcc.confirm_dialog(title='Solstice Tools -  Failed to Upload Bug. Restart Solstice Tools please!', message=msg, button=['OK'])
         return False
 
     return True
@@ -869,7 +895,7 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
     from solstice_pipeline.solstice_utils import solstice_maya_utils
 
     if not file_path:
-        file_path = cmds.file(query=True, sceneName=True)
+        file_path = sp.dcc.scene_name()
     if not file_path:
         sp.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
@@ -883,8 +909,8 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
             return False
 
         if not skip_saving:
-            if cmds.file(query=True, modified=True):
-                cmds.file(save=True, f=True)
+            if sp.dcc.scene_is_modified():
+                sp.dcc.save_current_scene(force=True)
             if solstice_maya_utils.file_has_student_line(filename=file_path):
                 solstice_maya_utils.clean_student_line(filename=file_path)
                 if solstice_maya_utils.file_has_student_line(filename=file_path):
@@ -962,7 +988,7 @@ def within_artella_scene():
     :return: bool
     """
 
-    current_scene = cmds.file(query=True, sn=True) or 'untitled'
+    current_scene = sp.dcc.scene_name() or 'untitled'
     sp.logger.debug('Current scene name: {}'.format(current_scene))
     if 'artella' not in current_scene.lower():
         return False
@@ -1020,7 +1046,7 @@ def get_dependencies(file_path):
     """
 
     if not file_path:
-        file_path = cmds.file(query=True, sceneName=True)
+        file_path = sp.dcc.scene_name()
     if not file_path:
         sp.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
