@@ -49,7 +49,7 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         :return:
         """
 
-        return solstice_maya_utils.get_main_window()
+        return solstice_maya_utils.get_maya_window()
 
     @staticmethod
     def execute_deferred(fn):

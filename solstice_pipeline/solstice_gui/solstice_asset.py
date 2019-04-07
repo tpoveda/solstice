@@ -669,7 +669,7 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
 
         if status == 'all' or status == 'working':
             if sync_type == 'all':
-                paths_to_sync.appefnd(os.path.join(self._asset_path, '__working__'))
+                paths_to_sync.append(os.path.join(self._asset_path, '__working__'))
             else:
                 paths_to_sync.append(os.path.join(self._asset_path, '__working__', sync_type))
 
