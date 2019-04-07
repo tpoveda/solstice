@@ -11,5 +11,10 @@ try:
     print '| Solstice Pipeline | Solstice Tools loaded successfully!'
     print '='*100
 except Exception as e:
-    print('ERROR: Impossible to load Solstice Tools, contact TD!')
-    print(str(e))
+    try:
+        solstice_pipeline.init()
+        print '| Solstice Pipeline | Solstice Tools loaded successfully!'
+        print '='*100
+    except Exception as e:
+        print('ERROR: Impossible to load Solstice Tools, contact TD!')
+        print(str(e))

@@ -222,7 +222,7 @@ class SolsticeLauncher(QObject, object):
 
         time.sleep(1)
 
-        self.launch(exec_=exec_, console=console)
+        self.launch(exec_=exec_, console=console, install_path=os.path.join(config.value('solstice_pipeline_install'), 'solstice_pipeline'))
 
     def setup_ui(self):
         """
@@ -271,7 +271,7 @@ class SolsticeLauncher(QObject, object):
         # Create Solstice Configuration
         self._progress_text.setText('Creating Solstice Launcher Configuration ...')
 
-    def launch(self, exec_, console):
+    def launch(self, exec_, console, install_path):
         """
         Function that ready to use Maya for being used in Solstice Short Film
         """
@@ -279,7 +279,12 @@ class SolsticeLauncher(QObject, object):
         if self.selected_dcc == SolsticeDccs.Maya:
             solstice_maya_utils.launch_maya(exec_=exec_, console=console)
         elif self.selected_dcc == SolsticeDccs.Houdini:
-            solstice_houdini_utils.launch_houdini(exec_=exec_, console=console)
+            script_path = os.path.join(install_path, 'userSetup.py')
+            if not os.path.isfile(script_path):
+                QMessageBox.information(None, 'No valid init script for Houdini found!',
+                                        'Solstice Launcher cannot launch Houdini. Init Script not found: {}!'.format(script_path))
+                return None
+            solstice_houdini_utils.launch_houdini(exec_=exec_, console=console, script_path=script_path)
         else:
             QMessageBox.information(None, 'No supported DCC found!', 'Solstice Launcher cannot launch any supported DCC. Closing it ...!')
 
