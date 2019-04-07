@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_artella_utils.py
@@ -25,10 +25,10 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_utils import solstice_artella_classes as classes
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     import maya.cmds as cmds
     from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
-elif sp.dcc == sp.SolsticeDCC.Houdini:
+elif sp.is_houdini():
     from solstice_pipeline.solstice_utils import solstice_houdini_utils as utils
 
 artella_maya_plugin_name = 'Artella.py'
@@ -228,15 +228,18 @@ def connect_artella_app_to_spigot(cli=None):
 
     artella_app_identifier = get_artella_app_identifier()
 
-    if sp.dcc == sp.SolsticeDCC.Houdini:
+    if sp.is_houdini():
         def pass_msg_to_main_thread(json_msg):
             main_thread_fn = utils.get_houdini_pass_main_thread_function()
             main_thread_fn(get_handle_msg, json_msg)
 
-    if sp.dcc == sp.SolsticeDCC.Maya:
+    if sp.is_maya():
         pass_msg_fn = artella.passMsgToMainThread
-    else:
+    elif sp.is_houdini():
         pass_msg_fn = pass_msg_to_main_thread
+    else:
+        sp.logger.error('Impossible to connect Artella to Spigot!')
+        return
 
     cli.listen(artella_app_identifier, pass_msg_fn)
 
@@ -244,7 +247,7 @@ def connect_artella_app_to_spigot(cli=None):
 
 
 def get_handle_msg(json_msg):
-    if sp.dcc == sp.SolsticeDCC.Houdini:
+    if sp.is_houdini():
         try:
             msg = json.loads(json_msg)
             sp.logger.debug(msg)
@@ -260,7 +263,7 @@ def load_artella_maya_plugin():
     :return: bool
     """
 
-    if sp.dcc == sp.SolsticeDCC.Maya:
+    if sp.is_maya():
         sp.logger.debug('Loading Artella Maya Plugin ...')
         artella_maya_plugin_folder = get_artella_dcc_plugin(dcc='maya')
         artella_maya_plugin_file = os.path.join(artella_maya_plugin_folder, artella_maya_plugin_name)
@@ -280,7 +283,7 @@ def get_spigot_client():
 
     global spigot_client
     if spigot_client is None:
-        if sp.dcc == sp.SolsticeDCC.Maya:
+        if sp.is_maya():
             utils.force_stack_trace_on()
         from am.artella.spigot.spigot import SpigotClient
         spigot_client = SpigotClient()
@@ -296,10 +299,10 @@ def get_artella_app_identifier():
 
     app_identifier = os.environ.get('ARTELLA_APP_IDENTIFIER', None)
     if app_identifier is None:
-        if sp.dcc == sp.SolsticeDCC.Maya:
+        if sp.is_maya():
             maya_version = cmds.about(version=True).split()[0]
             app_identifier = 'maya.{0}'.format(maya_version)
-        elif sp.dcc == sp.SolsticeDCC.Houdini:
+        elif sp.is_houdini():
             app_identifier = utils.get_houdini_version(as_string=True)
 
     return app_identifier
@@ -1039,7 +1042,7 @@ def get_dependencies(file_path):
     return None
 
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     try:
         import Artella as artella
     except ImportError:

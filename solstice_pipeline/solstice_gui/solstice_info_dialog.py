@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_info_dialog.py
@@ -17,7 +17,7 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.solstice_gui import solstice_animations
 from solstice_pipeline.resources import solstice_resource
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     import maya.cmds as cmds
     from solstice_pipeline.solstice_utils import solstice_maya_utils
 
@@ -25,7 +25,7 @@ if sp.dcc == sp.SolsticeDCC.Maya:
 class InfoDialog(QDialog, object):
     def __init__(self):
 
-        if sp.dcc == sp.SolsticeDCC.Maya:
+        if sp.is_maya():
             parent = solstice_maya_utils.get_maya_window()
         else:
             parent = None
@@ -34,7 +34,7 @@ class InfoDialog(QDialog, object):
 
         name = 'SolsticeInfoDialog'
 
-        if sp.dcc == sp.SolsticeDCC.Maya:
+        if sp.is_maya():
             if cmds.window(name, exists=True):
                 cmds.deleteUI(name, window=True)
             elif cmds.windowPref(name, exists=True):

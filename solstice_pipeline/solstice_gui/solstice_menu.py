@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_menu.py
@@ -14,7 +14,7 @@ from collections import OrderedDict
 
 import solstice_pipeline as sp
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     import maya.cmds as cmds
     from solstice_utils import solstice_maya_utils as utils
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_shelf.py
@@ -19,7 +19,7 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_utils import solstice_qt_utils as qt
 from solstice_pipeline.resources import solstice_resource
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     import maya.cmds as cmds
     import maya.mel as mel
     import maya.OpenMayaUI as OpenMayaUI

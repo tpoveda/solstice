@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_maya_utils.py
@@ -19,24 +19,22 @@ from collections import OrderedDict
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
-from solstice_utils import solstice_python_utils as python
+from solstice_pipeline.solstice_utils import solstice_python_utils as python
 
-_DPI_SCALE = 1.0
-if sp.dcc == sp.SolsticeDCC.Maya:
-    try:
-        import shiboken2 as shiboken
-        from shiboken2 import wrapInstance
-    except ImportError:
-        import shiboken as shiboken
-        from shiboken import wrapInstance
+try:
+    import shiboken2 as shiboken
+    from shiboken2 import wrapInstance
+except ImportError:
+    import shiboken as shiboken
+    from shiboken import wrapInstance
 
-    import maya.cmds as cmds
-    import maya.mel as mel
-    import maya.utils as utils
-    import maya.OpenMayaUI as OpenMayaUI
-    import maya.OpenMaya as OpenMaya
+import maya.cmds as cmds
+import maya.mel as mel
+import maya.utils as utils
+import maya.OpenMayaUI as OpenMayaUI
+import maya.OpenMaya as OpenMaya
 
-    _DPI_SCALE = 1.0 if not hasattr(cmds, "mayaDpiSetting") else cmds.mayaDpiSetting(query=True, realScaleValue=True)
+_DPI_SCALE = 1.0 if not hasattr(cmds, "mayaDpiSetting") else cmds.mayaDpiSetting(query=True, realScaleValue=True)
 
 
 class MessageType(object):

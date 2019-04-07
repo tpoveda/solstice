@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # by Tomas Poveda
@@ -46,6 +46,7 @@ info_dialog = None
 class SolsticeDCC(object):
     Maya = 'Maya'
     Houdini = 'Houdini'
+    Nuke = 'Nuke'
 
 
 class SolsticePipeline(QObject):
@@ -67,7 +68,7 @@ class SolsticePipeline(QObject):
         self.show_changelog()
         self.init_searcher()
 
-        if dcc == SolsticeDCC.Maya:
+        if is_maya():
             from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
             utils.viewport_message('Solstice Pipeline Tools loaded successfully!')
 
@@ -118,11 +119,14 @@ class SolsticePipeline(QObject):
             if module_path == __file__:
                 continue
             if module_path.startswith(scripts_dir):
-                reload(module)
+                try:
+                    reload(module)
+                except Exception as e:
+                    logger.error('{} | {}'.format(e, traceback.format_exc()))
 
     @staticmethod
     def show_changelog():
-        if dcc == SolsticeDCC.Maya:
+        if is_maya():
             import maya.cmds as cmds
             if platform.system() == 'Darwin':
                 from solstice_pipeline.solstice_tools import solstice_changelog
@@ -174,8 +178,7 @@ class SolsticePipeline(QObject):
             artella_var = os.environ.get('ART_LOCAL_ROOT')
             self.logger.debug('Artella environment variable is set to: {}'.format(artella_var))
             if artella_var and os.path.exists(artella_var):
-                os.environ['SOLSTICE_PROJECT'] = '{}/_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'.format(
-                    artella_var)
+                os.environ['SOLSTICE_PROJECT'] = '{}/_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'.format(artella_var)
             else:
                 self.logger.debug('Impossible to set Artella environment variables! Solstice Tools wont work correctly! Please contact TD!')
         except Exception as e:
@@ -184,7 +187,7 @@ class SolsticePipeline(QObject):
 
         icons_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'icons')
         if os.path.exists(icons_path):
-            if dcc == SolsticeDCC.Maya:
+            if is_maya():
                 if platform.system() == 'Darwin':
                     os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ':' + icons_path
                 else:
@@ -215,11 +218,13 @@ class SolsticePipeline(QObject):
 
         try:
             import maya.cmds as cmds
-            dcc = SolsticeDCC.Maya
+            from solstice_pipeline.solstice_dcc import solstice_maya
+            dcc = solstice_maya.SolsticeMaya()
         except ImportError:
             try:
                 import hou
-                dcc = SolsticeDCC.Houdini
+                from solstice_pipeline.solstice_dcc import solstice_houdini
+                dcc = solstice_houdini.SolsticeHoudini()
             except ImportError:
                 print('No valid DCC found!')
 
@@ -287,7 +292,7 @@ class SolsticePipeline(QObject):
         """
 
         try:
-            if dcc == SolsticeDCC.Maya:
+            if is_maya():
                 import maya.cmds as cmds
                 self.logger.debug('Setting Solstice Project ...')
                 solstice_project_folder = os.environ.get('SOLSTICE_PROJECT', 'folder-not-defined')
@@ -338,7 +343,7 @@ def get_solstice_project_path():
     env_var = os.environ.get('SOLSTICE_PROJECT', None)
     if env_var is None:
         try:
-            if dcc == SolsticeDCC.Maya:
+            if is_maya():
                 artella.launch_artella_app()
                 artella.load_artella_maya_plugin()
             update_solstice_project_path()
@@ -561,6 +566,42 @@ def get_version():
             return lastoccr
 
     return 0
+
+
+def is_maya():
+    """
+    Returns whether current DCC is Maya or not
+    :return: bool
+    """
+
+    if not dcc:
+        return False
+
+    return dcc.get_name() == SolsticeDCC.Maya
+
+
+def is_houdini():
+    """
+    Returns whether current DCC is Houdini or not
+    :return: bool
+    """
+
+    if not dcc:
+        return False
+
+    return dcc.get_name() == SolsticeDCC.Houdini
+
+
+def is_nuke():
+    """
+    Returns whether current DC is Houdini or not
+    :return: bool
+    """
+
+    if not dcc:
+        return False
+
+    return dcc.get_name() == SolsticeDCC.Nuke
 
 
 def init():

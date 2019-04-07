@@ -3,9 +3,9 @@ import traceback
 
 import solstice_pipeline as sp
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     import maya.cmds as cmds
-elif sp.dcc == sp.SolsticeDCC.Houdini:
+elif sp.is_houdini():
     import hou
 
 
@@ -244,14 +244,14 @@ def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
     sp.logger.debug('Import Alembic File ({}) with job arguments:\n{}\n\n{}'.format(mode, alembic_file, nodes))
 
     try:
-        if sp.dcc == sp.SolsticeDCC.Maya:
+        if sp.is_maya():
             if nodes:
                 res = cmds.AbcImport(alembic_file, ct=' '.join(nodes))
             elif parent:
                 res = cmds.AbcImport(alembic_file, mode=mode, rpr=parent)
             else:
                 res = cmds.AbcImport(alembic_file, mode=mode)
-        elif sp.dcc == sp.SolsticeDCC.Houdini:
+        elif sp.is_houdini():
             parent.parm('fileName').set(alembic_file)
             parent.parm('buildHierarchy').pressButton()
 

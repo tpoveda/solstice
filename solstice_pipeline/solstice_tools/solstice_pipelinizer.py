@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_pipelinizer.py
@@ -25,10 +25,8 @@ from solstice_pipeline.solstice_tools import solstice_sequencer
 from solstice_pipeline.solstice_utils import solstice_artella_classes, solstice_qt_utils
 from solstice_pipeline.resources import solstice_resource
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     import maya.cmds as cmds
-
-reload(solstice_sequencer)
 
 
 class PipelinizerSettings(QDialog, object):

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # by Tomas Poveda
@@ -14,7 +14,7 @@ from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     import maya.cmds as cmds
     from solstice_pipeline.solstice_utils import solstice_maya_utils as utils
 
@@ -29,7 +29,7 @@ class SolsticeSearcher():
 
         system = sys.platform
 
-        if sp.dcc == sp.SolsticeDCC.Maya:
+        if sp.is_maya():
             maya_version = cmds.about(version=True)
             hotkey = ''
             if '2014' in maya_version:

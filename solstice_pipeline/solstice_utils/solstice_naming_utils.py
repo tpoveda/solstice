@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_naming_utils.py
@@ -10,7 +10,10 @@
 
 import os
 
-import maya.cmds as cmds
+import solstice_pipeline as sp
+
+if sp.is_maya():
+    import maya.cmds as cmds
 
 
 def get_alpha(value, capital=False):

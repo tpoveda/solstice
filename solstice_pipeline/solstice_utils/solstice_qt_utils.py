@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_qt_utils.py
@@ -26,7 +26,7 @@ except ImportError:
 
 import solstice_pipeline as sp
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     import maya.cmds as cmds
     import maya.OpenMayaUI as OpenMayaUI
     import shiboken2 as shiboken

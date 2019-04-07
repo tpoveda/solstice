@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_maya_utils.py
@@ -10,7 +10,7 @@
 
 import solstice_pipeline as sp
 
-if sp.dcc == sp.SolsticeDCC.Houdini:
+if sp.is_houdini():
     import hou
     import hdefereval
 

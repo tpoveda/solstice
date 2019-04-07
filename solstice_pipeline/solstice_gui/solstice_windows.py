@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_windows.py
@@ -18,13 +18,13 @@ from solstice_pipeline.solstice_utils import solstice_config
 from solstice_pipeline.solstice_gui import solstice_dragger, solstice_animations
 from solstice_pipeline.resources import solstice_resource
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     try:
         from shiboken import wrapInstance
     except ImportError:
         from shiboken2 import wrapInstance
     from solstice_pipeline.solstice_utils import solstice_maya_utils
-elif sp.dcc == sp.SolsticeDCC.Houdini:
+elif sp.is_houdini():
     from solstice_pipeline.solstice_utils import solstice_houdini_utils
 
 
@@ -97,9 +97,9 @@ class Window(QMainWindow, object):
     def __init__(self, parent=None):
 
         if parent is None:
-            if sp.dcc == sp.SolsticeDCC.Maya:
+            if sp.is_maya():
                 parent = solstice_maya_utils.get_maya_window()
-            elif sp.dcc == sp.SolsticeDCC.Houdini:
+            elif sp.is_houdini():
                 parent = solstice_houdini_utils.get_houdini_window()
 
         super(Window, self).__init__(parent=parent)
@@ -134,7 +134,7 @@ class Window(QMainWindow, object):
         self.statusBar().set_info_url(url)
 
     def add_callback(self, callback_id):
-        if sp.dcc == sp.SolsticeDCC.Maya:
+        if sp.is_maya():
             self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(callback_id=callback_id))
 
     def remove_callbacks(self):

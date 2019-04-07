@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_tagger.py
@@ -19,7 +19,7 @@ from solstice_pipeline.solstice_gui import solstice_windows, solstice_grid, sols
 from solstice_pipeline.solstice_utils import solstice_python_utils as utils
 from solstice_pipeline.resources import solstice_resource
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     import maya.cmds as cmds
     import maya.OpenMaya as OpenMaya
 

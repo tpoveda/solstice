@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # """ ==================================================================
 # Script Name: solstice_alembicmanager.py
@@ -23,11 +23,11 @@ from solstice_pipeline.resources import solstice_resource
 from solstice_pipeline.solstice_tools import solstice_tagger
 from solstice_pipeline.solstice_utils import solstice_browser_utils, solstice_alembic, solstice_python_utils
 
-if sp.dcc == sp.SolsticeDCC.Maya:
+if sp.is_maya():
     import maya.cmds as cmds
     import maya.OpenMaya as OpenMaya
     from solstice_pipeline.solstice_utils import solstice_maya_utils
-elif sp.dcc == sp.SolsticeDCC.Houdini:
+elif sp.is_houdini():
     import hou
 
 ALEMBIC_GROUP_SUFFIX = '_ABCGroup'
@@ -1116,11 +1116,11 @@ class AlembicImporter(QWidget, object):
 
         res = None
         abc_file = ''
-        if sp.dcc == sp.SolsticeDCC.Maya:
+        if sp.is_maya():
             res = cmds.fileDialog2(fm=1, dir=abc_folder, cap='Select Alembic to Import', ff='Alembic Files (*.abc)')
             if res:
                 abc_file = res[0]
-        elif sp.dcc == sp.SolsticeDCC.Houdini:
+        elif sp.is_houdini():
             res = hou.ui.selectFile(start_directory=abc_folder, title='Select Alembic to Import', pattern='*.abc')
             if res:
                 abc_file = res
@@ -1191,9 +1191,9 @@ class AlembicImporter(QWidget, object):
             return
 
         if self.create_radio.isChecked():
-            if sp.dcc == sp.SolsticeDCC.Maya:
+            if sp.is_maya():
                 root = cmds.group(n=abc_name, empty=True, world=True)
-            elif sp.dcc == sp.SolsticeDCC.Houdini:
+            elif sp.is_houdini():
                 n = hou.node('obj')
                 root = n.createNode('alembicarchive')
             self._add_tag_info_data(tag_info, root)
@@ -1239,11 +1239,11 @@ class AlembicImporter(QWidget, object):
 
     @staticmethod
     def _add_tag_info_data(tag_info, attr_node):
-        if sp.dcc == sp.SolsticeDCC.Maya:
+        if sp.is_maya():
             if not cmds.attributeQuery('tag_info', n=attr_node, exists=True):
                 cmds.addAttr(attr_node, ln='tag_info', dt='string', k=True)
             cmds.setAttr('{}.tag_info'.format(attr_node), str(tag_info), type='string')
-        elif sp.dcc == sp.SolsticeDCC.Houdini:
+        elif sp.is_houdini():
             parm_group = attr_node.parmTemplateGroup()
             parm_folder = hou.FolderParmTemplate('folder', 'Solstice Info')
             parm_folder.addParmTemplate(hou.StringParmTemplate('tag_info', 'Tag Info', 1))
@@ -1260,7 +1260,7 @@ class AlembicManager(solstice_windows.Window, object):
     def __init__(self):
         super(AlembicManager, self).__init__()
 
-        if sp.dcc == sp.SolsticeDCC.Maya:
+        if sp.is_maya():
             self.add_callback(OpenMaya.MEventMessage.addEventCallback('SelectionChanged', self._on_selection_changed, self))
 
     def custom_ui(self):
