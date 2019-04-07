@@ -13,10 +13,10 @@ import json
 import urllib2
 import datetime
 import platform
+import traceback
 import webbrowser
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
-from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 # =================================================================================
 
@@ -53,9 +53,9 @@ class SolsticePipeline(QObject):
 
         self.logger = self.create_solstice_logger()
         self.settings = self.create_solstice_settings()
+        self.detect_dcc()
         self.update_paths()
         self.set_environment_variables()
-        self.detect_dcc()
         self.reload_all()
 
         self.info_dialog = self.create_solstice_info_window()
@@ -177,8 +177,9 @@ class SolsticePipeline(QObject):
                     artella_var)
             else:
                 self.logger.debug('Impossible to set Artella environment variables! Solstice Tools wont work correctly! Please contact TD!')
-        except Exception:
+        except Exception as e:
             self.logger.debug('Error while setting Solstice Environment Variables. Solstice Tools may not work properly!')
+            self.logger.error('{} | {}'.format(e, traceback.format_exc()))
 
         icons_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'icons')
         if os.path.exists(icons_path):

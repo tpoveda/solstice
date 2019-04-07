@@ -1039,14 +1039,13 @@ def get_dependencies(file_path):
     return None
 
 
-try:
-    import Artella as artella
-except ImportError:
+if sp.dcc == sp.SolsticeDCC.Maya:
     try:
-        load_artella_maya_plugin()
-        update_artella_paths()
         import Artella as artella
-    except Exception:
-        sp.logger.debug('Artella is not set up properly in your computer!')
-
-
+    except ImportError:
+        try:
+            load_artella_maya_plugin()
+            update_artella_paths()
+            import Artella as artella
+        except Exception:
+            sp.logger.error('Impossible to load Artella Plugin!')
