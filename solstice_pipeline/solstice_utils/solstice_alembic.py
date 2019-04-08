@@ -3,11 +3,6 @@ import traceback
 
 import solstice_pipeline as sp
 
-if sp.is_maya():
-    import maya.cmds as cmds
-elif sp.is_houdini():
-    import hou
-
 
 def export(alembicFile,
            eulerFilter=False,
@@ -211,7 +206,7 @@ def export(alembicFile,
     jobArg += " -file {0}".format(alembicFile.replace("\\", "/"))
 
     # Execute export
-    cmds.loadPlugin("AbcExport.mll", quiet=True)
+    sp.dcc.load_plugin('AbcExport.mll', quiet=True)
 
     export_args = {
         "dontSkipUnwrittenFrames": dontSkipUnwrittenFrames,
@@ -235,10 +230,12 @@ def export(alembicFile,
     sp.logger.debug('Abc export completed!')
     return os.path.exists(alembicFile)
 
-
 def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
     if not os.path.exists(alembic_file):
-        cmds.confirmDialog(t='Error', m='Alembic File does not exists:\n{}'.format(alembic_file))
+        sp.dcc.confirm_dialog(
+            title='Error',
+            message='Alembic File does not exists:\n{}'.format(alembic_file)
+        )
         return None
 
     sp.logger.debug('Import Alembic File ({}) with job arguments:\n{}\n\n{}'.format(mode, alembic_file, nodes))
@@ -251,7 +248,11 @@ def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
                 res = cmds.AbcImport(alembic_file, mode=mode, rpr=parent)
             else:
                 res = cmds.AbcImport(alembic_file, mode=mode)
+            return res
         elif sp.is_houdini():
+            if not parent:
+                sp.logger.warning('Impossible to import Alembic File because not Alembic parent given!')
+                return
             parent.parm('fileName').set(alembic_file)
             parent.parm('buildHierarchy').pressButton()
 
@@ -261,16 +262,16 @@ def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
 
     sp.logger.debug('Alembic File {} imported successfully!'.format(os.path.basename(alembic_file)))
 
-    return res
-
 def reference_alembic(alembic_file, namespace=None):
     if not os.path.exists(alembic_file):
-        cmds.confirmDialog(t='Error', m='Alembic File does not exists:\n{}'.format(alembic_file))
+        sp.dcc.confirm_dialog(
+            title='Error',
+            message='Alembic File does not exists:\n{}'.format(alembic_file)
+        )
         return None
 
     try:
         if namespace:
-            print('NS: {}'.format(namespace))
             cmds.file(alembic_file, type='Alembic', reference=True, namespace=namespace)
         else:
             cmds.file(alembic_file, type='Alembic', reference=True)

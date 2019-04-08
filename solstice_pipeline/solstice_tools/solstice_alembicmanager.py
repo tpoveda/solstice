@@ -1118,13 +1118,12 @@ class AlembicImporter(QWidget, object):
         if abc_file:
             self.alembic_path_line.setText(abc_file)
 
-    @staticmethod
-    def import_alembic(alembic_path):
+    @classmethod
+    def import_alembic(cls, alembic_path, parent=None):
         if not alembic_path or not os.path.isfile(alembic_path):
             sp.logger.warning('Alembic file {} does not exits!'.format(alembic_path))
             return None
 
-        abc_name = os.path.basename(alembic_path).split('.')[0]
         tag_json_file = os.path.join(os.path.dirname(alembic_path), os.path.basename(alembic_path).replace('.abc', '_abc.info'))
         if not os.path.isfile(tag_json_file):
             sp.logger.warning('No Alembic Info file found!')
@@ -1135,6 +1134,15 @@ class AlembicImporter(QWidget, object):
         if not tag_info:
             sp.logger.warning('No Alembic Info loaded!')
             return
+
+        if sp.is_houdini():
+            import hou
+            n = hou.node('obj')
+            parent = n.createNode('alembicarchive')
+        if parent:
+            cls._add_tag_info_data(tag_info=tag_info, attr_node=parent)
+
+        solstice_alembic.import_alembic(alembic_path, mode='import', nodes=None, parent=parent)
 
     @staticmethod
     def reference_alembic(alembic_path):
@@ -1192,13 +1200,7 @@ class AlembicImporter(QWidget, object):
         if not os.path.isfile(tag_json_file):
             sp.logger.warning('No Alembic Info file found!')
             return
-
-        with open(tag_json_file, 'r') as f:
-            tag_info = json.loads(f.read())
-        if not tag_info:
-            sp.logger.warning('No Alembic Info loaded!')
-            return
-
+        
         if self.create_radio.isChecked():
             if sp.is_maya():
                 root = cmds.group(n=abc_name, empty=True, world=True)
@@ -1208,7 +1210,7 @@ class AlembicImporter(QWidget, object):
             self._add_tag_info_data(tag_info, root)
             sel = [root]
         else:
-            sel = cmds.ls(sl=True, l=True)
+            sel = sp.dcc.selected_nodes(full_path=True)
             if not sel:
                 sel = cmds.group(n=abc_name, empty=True, world=True)
                 self._add_tag_info_data(tag_info, sel)
@@ -1216,32 +1218,38 @@ class AlembicImporter(QWidget, object):
         sel = sel or None
 
         if as_reference:
-            track_nodes = solstice_maya_utils.TrackNodes()
-            track_nodes.load()
-            valid_reference = solstice_alembic.reference_alembic(abc_file, namespace=abc_name)
-            if not valid_reference:
-                sp.logger.warning('Error while reference Alembic file: {}'.format(abc_file))
-                return
-            res = track_nodes.get_delta()
-            for obj in res:
-                if not cmds.nodeType(obj) == 'transform':
-                    continue
-                obj_parent = cmds.listRelatives(obj, parent=True)
-                if obj_parent:
-                    continue
-                cmds.parent(obj, sel[0])
+            if sp.is_maya():
+                from solstice_pipeline.solstice_utils import solstice_maya_utils
+                track_nodes = solstice_maya_utils.TrackNodes()
+                track_nodes.load()
+                valid_reference = solstice_alembic.reference_alembic(abc_file, namespace=abc_name)
+                if not valid_reference:
+                    sp.logger.warning('Error while reference Alembic file: {}'.format(abc_file))
+                    return
+                res = track_nodes.get_delta()
+                for obj in res:
+                    if not sp.dcc.node_type(obj) == 'transform':
+                        continue
+                    obj_parent = sp.dcc.node_parent(obj)
+                    if obj_parent:
+                        continue
+                    sp.dcc.set_parent(node=obj, parent=sel[0])
+            else:
+                sp.logger.warning('Alembic Reference is only supported in Maya!')
+                return None
         else:
+
             res = solstice_alembic.import_alembic(abc_file, mode='import', nodes=nodes, parent=sel[0])
 
         if self.auto_smooth_display.isChecked():
             for obj in res:
-                if cmds.nodeType(obj) == 'shape':
-                    if cmds.attributeQuery('aiSubdivType', node=obj, exists=True):
+                if sp.dcc.node_type(obj) == 'shape':
+                    if sp.dcc.attribute_exists(node=obj, attribute_name='aiSubdivType'):
                         cmds.setAttr('{}.aiSubdivType '.format(obj), 1)
-                elif cmds.nodeType(obj) == 'transform':
-                    shapes = cmds.listRelatives(obj, shapes=True, fullPath=True)
+                elif sp.dcc.node_type(obj) == 'transform':
+                    shapes = sp.dcc.list_shapes(node=obj, full_path=True)
                     for s in shapes:
-                        if cmds.attributeQuery('aiSubdivType', node=s, exists=True):
+                        if sp.dcc.attribute_exists(node=s, attribute_name='aiSubdivType'):
                             cmds.setAttr('{}.aiSubdivType '.format(s), 1)
 
         return res
@@ -1249,10 +1257,11 @@ class AlembicImporter(QWidget, object):
     @staticmethod
     def _add_tag_info_data(tag_info, attr_node):
         if sp.is_maya():
-            if not cmds.attributeQuery('tag_info', n=attr_node, exists=True):
+            if not sp.dcc.attribute_exists(node=attr_node, attribute_name='tag_info'):
                 cmds.addAttr(attr_node, ln='tag_info', dt='string', k=True)
             cmds.setAttr('{}.tag_info'.format(attr_node), str(tag_info), type='string')
         elif sp.is_houdini():
+            import hou
             parm_group = attr_node.parmTemplateGroup()
             parm_folder = hou.FolderParmTemplate('folder', 'Solstice Info')
             parm_folder.addParmTemplate(hou.StringParmTemplate('tag_info', 'Tag Info', 1))

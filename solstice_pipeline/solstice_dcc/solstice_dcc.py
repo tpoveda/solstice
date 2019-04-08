@@ -474,10 +474,11 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function is_plugin_loaded() not implemented!')
 
     @staticmethod
-    def load_plugin(plugin_path):
+    def load_plugin(plugin_path, quiet=True):
         """
         Loads given plugin
         :param plugin_path: str
+        :param quiet: bool
         """
 
         raise NotImplementedError('abstract DCC function load_plugin() not implemented!')

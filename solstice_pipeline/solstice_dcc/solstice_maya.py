@@ -500,13 +500,14 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.pluginInfo(plugin_name, query=True, loaded=True)
 
     @staticmethod
-    def load_plugin(plugin_path):
+    def load_plugin(plugin_path, quiet=True):
         """
         Loads given plugin
         :param plugin_path: str
+        :param quiet: bool
         """
 
-        cmds.loadPlugin(plugin_path)
+        cmds.loadPlugin(plugin_path, quiet=True)
 
     @staticmethod
     def list_old_plugins():
