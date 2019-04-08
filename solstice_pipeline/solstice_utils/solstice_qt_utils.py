@@ -17,22 +17,18 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 from solstice_pipeline.externals.solstice_qt import QtCompat
 try:
+    import shiboken
     from shiboken import wrapInstance
 except ImportError:
     try:
+        import shiboken2 as shiboken
         from shiboken2 import wrapInstance
     except Exception:
         pass
 
 import solstice_pipeline as sp
 
-if sp.is_maya():
-    import maya.cmds as cmds
-    import maya.OpenMayaUI as OpenMayaUI
-    import shiboken2 as shiboken
-    from solstice_utils import solstice_maya_utils
-
-from solstice_utils import solstice_python_utils, solstice_browser_utils
+from solstice_pipeline.solstice_utils import solstice_python_utils, solstice_browser_utils
 
 
 def ui_loader(ui_file, widget=None):
@@ -54,26 +50,31 @@ def wrapinstance(ptr, base=None):
 
 def dock_solstice_widget(widget_class):
 
-    workspace_control = widget_class.__name__ + '_workspace_control'
+    if sp.is_maya():
+        import maya.cmds as cmds
+        import maya.OpenMayaUI as OpenMayaUI
+        from solstice_pipeline.solstice_utils import solstice_maya_utils
 
-    try:
-        cmds.deleteUI(workspace_control)
-        sp.logger.debug('Removing workspace {0}'.format(workspace_control))
-    except:
-        pass
+        workspace_control = widget_class.__name__ + '_workspace_control'
 
-    if solstice_maya_utils.get_maya_api_version() >= 201700:
+        try:
+            cmds.deleteUI(workspace_control)
+            sp.logger.debug('Removing workspace {0}'.format(workspace_control))
+        except:
+            pass
 
-        main_control = cmds.workspaceControl(workspace_control, ttc=["AttributeEditor", -1], iw=425, mw=True, wp='preferred', label='{0} - {1}'.format(widget_class.title, widget_class.version))
-        control_widget = OpenMayaUI.MQtUtil.findControl(workspace_control)
-        control_wrap = wrapInstance(long(control_widget), QWidget)
-        control_wrap.setAttribute(Qt.WA_DeleteOnClose)
-        win = widget_class(name=workspace_control, parent=control_wrap, layout=control_wrap.layout())
-        cmds.evalDeferred(lambda *args: cmds.workspaceControl(main_control, e=True, rs=True))
-    else:
-        pass
+        if solstice_maya_utils.get_maya_api_version() >= 201700:
 
-    return win
+            main_control = cmds.workspaceControl(workspace_control, ttc=["AttributeEditor", -1], iw=425, mw=True, wp='preferred', label='{0} - {1}'.format(widget_class.title, widget_class.version))
+            control_widget = OpenMayaUI.MQtUtil.findControl(workspace_control)
+            control_wrap = wrapInstance(long(control_widget), QWidget)
+            control_wrap.setAttribute(Qt.WA_DeleteOnClose)
+            win = widget_class(name=workspace_control, parent=control_wrap, layout=control_wrap.layout())
+            cmds.evalDeferred(lambda *args: cmds.workspaceControl(main_control, e=True, rs=True))
+        else:
+            pass
+
+        return win
 
 
 def ui_loader(ui_file, widget=None):
@@ -328,24 +329,29 @@ def get_horizontal_separator():
 
 
 def dock_window(window_class):
-    try:
-        cmds.deleteUI(window_class.name)
-    except Exception:
-        pass
 
-    main_control = cmds.workspaceControl(window_class.name, ttc=["AttributeEditor", -1], iw=300, mw=True, wp='preferred', label=window_class.title)
+    if sp.is_maya():
+        import maya.cmds as cmds
+        import maya.OpenMayaUI as OpenMayaUI
 
-    control_widget = OpenMayaUI.MQtUtil.findControl(window_class.name)
-    control_wrap = wrapInstance(long(control_widget), QWidget)
-    control_wrap.setAttribute(Qt.WA_DeleteOnClose)
-    win = window_class(control_wrap)
+        try:
+            cmds.deleteUI(window_class.name)
+        except Exception:
+            pass
 
-    cmds.evalDeferred(lambda *args: cmds.workspaceControl(main_control, e=True, rs=True))
+        main_control = cmds.workspaceControl(window_class.name, ttc=["AttributeEditor", -1], iw=300, mw=True, wp='preferred', label=window_class.title)
 
-    try:
-        return win.run()
-    except Exception:
-        return win.show()
+        control_widget = OpenMayaUI.MQtUtil.findControl(window_class.name)
+        control_wrap = wrapInstance(long(control_widget), QWidget)
+        control_wrap.setAttribute(Qt.WA_DeleteOnClose)
+        win = window_class(control_wrap)
+
+        cmds.evalDeferred(lambda *args: cmds.workspaceControl(main_control, e=True, rs=True))
+
+        try:
+            return win.run()
+        except Exception:
+            return win.show()
 
 
 def center_widget_on_screen(widget):

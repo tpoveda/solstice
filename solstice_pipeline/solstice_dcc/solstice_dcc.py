@@ -72,6 +72,16 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function object_type() not implemented!')
 
     @staticmethod
+    def node_type(node):
+        """
+        Returns node type of given object
+        :param node: str
+        :return: str
+        """
+
+        raise NotImplementedError('abstract DCC function node_type() not implemented!')
+
+    @staticmethod
     def select_object(node):
         """
         Selects given object in the current scene
@@ -96,6 +106,16 @@ class SolsticeDCC(object):
         """
 
         raise NotImplementedError('abstract DCC function delete_object() not implemented!')
+
+    @staticmethod
+    def selected_nodes(full_path=True):
+        """
+        Returns a list of selected nodes
+        :param full_path: bool
+        :return: list<str>
+        """
+
+        raise NotImplementedError('abstract DCC function selected_nodes() not implemented!')
 
     @staticmethod
     def node_short_name(node):
@@ -148,14 +168,25 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function node_is_loaded() not implemented!')
 
     @staticmethod
-    def node_parent(node):
+    def node_parent(node, full_path=True):
         """
         Returns parent node of the given node
         :param node: str
+        :param full_path: bool
         :return: str
         """
 
         raise NotImplementedError('abstract DCC function node_parent() not implemented!')
+
+    @staticmethod
+    def set_parent(node, parent):
+        """
+        Sets the node parent to the given parent
+        :param node: str
+        :param parent: str
+        """
+
+        raise NotImplementedError('abstract DCC function set_parent() not implemented!')
 
     @staticmethod
     def node_nodes(node):
@@ -278,6 +309,16 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function import_reference() not implemented!')
 
     @staticmethod
+    def list_attributes(node):
+        """
+        Returns list of attributes of given node
+        :param node: str
+        :return: list<str>
+        """
+
+        raise NotImplementedError('abstract DCC function list_attributes() not implemented!')
+
+    @staticmethod
     def list_user_attributes(node):
         """
         Returns list of user defined attributes
@@ -349,6 +390,16 @@ class SolsticeDCC(object):
         """
 
         raise NotImplementedError('abstract DCC function set_string_attribute_value() not implemented!')
+
+    @staticmethod
+    def delete_attribute(node, attribute_name):
+        """
+        Deletes given attribute of given node
+        :param node: str
+        :param attribute_name: str
+        """
+
+        raise NotImplementedError('abstract DCC function delete_attribute() not implemented!')
 
     @staticmethod
     def list_connections(node, attribute_name):
@@ -477,13 +528,14 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function save_current_scene() not implemented!')
 
     @staticmethod
-    def confirm_dialog(title, message, button=None, cancel_button=None, dismiss_string=None):
+    def confirm_dialog(title, message, button=None, cancel_button=None, default_button=None, dismiss_string=None):
         """
         Shows DCC confirm dialog
         :param title:
         :param message:
         :param button:
         :param cancel_button:
+        :param default_button:
         :param dismiss_string:
         :return:
         """
@@ -499,3 +551,78 @@ class SolsticeDCC(object):
         """
 
         raise NotImplementedError('abstract DCC function warning() not implemented!')
+
+    @staticmethod
+    def add_shelf_menu_item(parent, label, command='', icon=''):
+        """
+        Adds a new menu item
+        :param parent:
+        :param label:
+        :param command:
+        :param icon:
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function add_shelf_menu_item() not implemented!')
+
+    @staticmethod
+    def add_shelf_sub_menu_item(parent, label, icon=''):
+        """
+        Adds a new sub menu item
+        :param parent:
+        :param label:
+        :param icon:
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function add_shelf_sub_menu_item() not implemented!')
+
+    @staticmethod
+    def add_shelf_separator(shelf_name):
+        """
+        Adds a new separator to the given shelf
+        :param shelf_name: str
+        """
+
+        raise NotImplementedError('abstract DCC function add_shelf_separator() not implemented!')
+
+    @staticmethod
+    def shelf_exists(shelf_name):
+        """
+        Returns whether given shelf already exists or not
+        :param shelf_name: str
+        :return: bool
+        """
+
+        raise NotImplementedError('abstract DCC function shelf_exists() not implemented!')
+
+    @staticmethod
+    def create_shelf(shelf_name, shelf_label=None):
+        """
+        Creates a new shelf with the given name
+        :param shelf_name: str
+        :param shelf_label: str
+        """
+
+        raise NotImplementedError('abstract DCC function create_shelf() not implemented!')
+
+    @staticmethod
+    def delete_shelf(shelf_name):
+        """
+        Deletes shelf with given name
+        :param shelf_name: str
+        """
+
+        raise NotImplementedError('abstract DCC function delete_shelf() not implemented!')
+
+    @staticmethod
+    def select_file_dialog(title, start_directory=None, pattern=None):
+        """
+        Shows select file dialog
+        :param title: str
+        :param start_directory: str
+        :param pattern: str
+        :return: str
+        """
+
+        raise NotImplementedError('abstract DCC function select_file_dialog() not implemented!')

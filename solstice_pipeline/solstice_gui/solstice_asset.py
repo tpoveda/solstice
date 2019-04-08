@@ -719,7 +719,10 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
         if local_max_versions['model']:
             published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', alembic_name)
             if os.path.isfile(published_path):
-                solstice_alembicmanager.AlembicImporter.reference_alembic(published_path)
+                if sp.is_houdini():
+                    solstice_alembicmanager.AlembicImporter.import_alembic(published_path)
+                else:
+                    solstice_alembicmanager.AlembicImporter.reference_alembic(published_path)
 
     def import_standin_file(self):
         from solstice_pipeline.solstice_tools import solstice_standinmanager

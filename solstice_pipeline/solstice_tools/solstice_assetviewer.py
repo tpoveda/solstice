@@ -15,11 +15,10 @@ from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_gui import solstice_assetviewer, solstice_splitters, solstice_buttons, solstice_asset
-from solstice_pipeline.solstice_utils import solstice_qt_utils, solstice_maya_utils
+from solstice_pipeline.solstice_gui import solstice_windows, solstice_assetviewer, solstice_buttons
+from solstice_pipeline.solstice_utils import solstice_qt_utils
 from solstice_pipeline.resources import solstice_resource
 
-reload(solstice_asset)
 
 global solstice_asset_viewer_window
 
@@ -32,11 +31,14 @@ class SolsticeAssetViewer(QWidget, object):
 
     instances = list()
 
-    def __init__(self, parent=solstice_maya_utils.get_maya_window()):
+    def __init__(self, parent=None):
+        if parent is None:
+            parent = sp.dcc.get_main_window()
         super(SolsticeAssetViewer, self).__init__(parent=parent)
 
-        SolsticeAssetViewer._delete_instances()
-        self.__class__.instances.append(weakref.proxy(self))
+        if sp.is_maya():
+            SolsticeAssetViewer._delete_instances()
+            self.__class__.instances.append(weakref.proxy(self))
 
         self.custom_ui()
         self.resize(150, 800)
@@ -62,7 +64,11 @@ class SolsticeAssetViewer(QWidget, object):
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
-        self.parent().layout().addLayout(self.main_layout)
+
+        if sp.is_maya():
+            self.parent().layout().addLayout(self.main_layout)
+        else:
+            self.setLayout(self.main_layout)
 
         self._asset_viewer = solstice_assetviewer.AssetViewer(
             assets_path=sp.get_solstice_assets_path(),
@@ -173,5 +179,29 @@ class SolsticeAssetViewer(QWidget, object):
                     self._create_sync_btn(item)
 
 
+class SolsticeAssetViewerWindow(solstice_windows.Window, object):
+
+    name = 'SolsticeAssetBuilder'
+    title = 'Solstice Tools - Solstice Builder'
+    version = '1.1'
+
+    def __init__(self):
+        super(SolsticeAssetViewerWindow, self).__init__()
+
+    def custom_ui(self):
+        super(SolsticeAssetViewerWindow, self).custom_ui()
+
+        self.set_logo('solstice_assetbuilder_logo')
+        self.resize(150, 800)
+
+        self.viewer_widget = SolsticeAssetViewer()
+        self.main_layout.addWidget(self.viewer_widget)
+
+
 def run():
-    solstice_qt_utils.dock_window(SolsticeAssetViewer)
+    if sp.is_maya():
+        solstice_qt_utils.dock_window(SolsticeAssetViewer)
+    else:
+        win = SolsticeAssetViewerWindow()
+        win.show()
+        return win

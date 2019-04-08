@@ -71,3 +71,35 @@ class SolsticeHoudini(solstice_dcc.SolsticeDCC, object):
             return True
 
         return False
+
+    @staticmethod
+    def shelf_exists(shelf_name):
+        """
+        Returns whether given shelf already exists or not
+        :param shelf_name: str
+        :return: bool
+        """
+
+        return solstice_houdini_utils.shelf_exists(shelf_name=shelf_name)
+
+    @staticmethod
+    def create_shelf(shelf_name, shelf_label=None):
+        """
+        Creates a new shelf with the given name
+        :param shelf_name: str
+        :param shelf_label: str
+        """
+
+        return solstice_houdini_utils.create_shelf(shelf_name=shelf_name, shelf_label=shelf_label)
+
+    @staticmethod
+    def select_file_dialog(title, start_directory=None, pattern=None):
+        """
+        Shows select file dialog
+        :param title: str
+        :param start_directory: str
+        :param pattern: str
+        :return: str
+        """
+
+        return hou.ui.selectFile(start_directory=start_directory, title=title, pattern=pattern)

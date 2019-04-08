@@ -45,9 +45,9 @@ info_dialog = None
 
 
 class SolsticeDCC(object):
-    Maya = 'Maya'
-    Houdini = 'Houdini'
-    Nuke = 'Nuke'
+    Maya = 'maya'
+    Houdini = 'houdini'
+    Nuke = 'nuke'
 
 
 class SolsticePipeline(QObject):
@@ -357,6 +357,15 @@ def get_solstice_project_path():
             raise RuntimeError('Solstice Project not setted up properly. Is Artella running? Contact TD!')
 
     return os.environ.get('SOLSTICE_PROJECT')
+
+
+def get_solstice_icons_path():
+    """
+    Returns path where Solstice icons are stored
+    :return: str
+    """
+
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'icons')
 
 
 def get_solstice_shelf_file():

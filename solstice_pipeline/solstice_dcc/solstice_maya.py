@@ -15,9 +15,13 @@ Module that contains Maya definition
 from __future__ import print_function, division, absolute_import
 
 
+from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice_pipeline.externals.solstice_qt.QtWidgets import *
+
 import solstice_pipeline as sp
 import maya.cmds as cmds
 import maya.utils as utils
+import maya.OpenMayaUI as OpenMayaUI
 from solstice_pipeline.solstice_dcc import solstice_dcc
 from solstice_pipeline.solstice_utils import solstice_maya_utils
 
@@ -79,6 +83,16 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.objectType(node)
 
     @staticmethod
+    def node_type(node):
+        """
+        Returns node type of given object
+        :param node: str
+        :return: str
+        """
+
+        return cmds.nodeType(node)
+
+    @staticmethod
     def select_object(node):
         """
         Selects given object in the current scene
@@ -103,6 +117,16 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         """
 
         cmds.delete(node)
+
+    @staticmethod
+    def selected_nodes(full_path=True):
+        """
+        Returns a list of selected nodes
+        :param full_path: bool
+        :return: list<str>
+        """
+
+        return cmds.ls(sl=True, l=full_path)
 
     @staticmethod
     def node_short_name(node):
@@ -155,14 +179,25 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.referenceQuery(node, isLoaded=True)
 
     @staticmethod
-    def node_parent(node):
+    def node_parent(node, full_path=True):
         """
         Returns parent node of the given node
         :param node: str
+        :param full_path: bool
         :return: str
         """
 
-        return cmds.listRelatives(node, parent=True)
+        return cmds.listRelatives(node, parent=True, fullPath=full_path)
+
+    @staticmethod
+    def set_parent(node, parent):
+        """
+        Sets the node parent to the given parent
+        :param node: str
+        :param parent: str
+        """
+
+        cmds.parent(node, parent)
 
     @staticmethod
     def node_nodes(node):
@@ -300,6 +335,16 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.file(filename, importReference=True)
 
     @staticmethod
+    def list_attributes(node):
+        """
+        Returns list of attributes of given node
+        :param node: str
+        :return: list<str>
+        """
+
+        return cmds.listAttr(node)
+
+    @staticmethod
     def list_user_attributes(node):
         """
         Returns list of user defined attributes
@@ -371,6 +416,16 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         """
 
         return cmds.setAttr('{}.{}'.format(node, attribute_name), str(attribute_value), type='string')
+
+    @staticmethod
+    def delete_attribute(node, attribute_name):
+        """
+        Deletes given attribute of given node
+        :param node: str
+        :param attribute_name: str
+        """
+
+        return cmds.deleteAttr(n=node, at=attribute_name)
 
     @staticmethod
     def list_connections(node, attribute_name):
@@ -499,19 +554,20 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.file(save=True, f=force)
 
     @staticmethod
-    def confirm_dialog(title, message, button=None, cancel_button=None, dismiss_string=None):
+    def confirm_dialog(title, message, button=None, cancel_button=None, default_button=None, dismiss_string=None):
         """
         Shows DCC confirm dialog
         :param title:
         :param message:
         :param button:
         :param cancel_button:
+        :param default_button:
         :param dismiss_string:
         :return:
         """
 
-        if button and cancel_button and dismiss_string:
-            return cmds.confirmDialog(title=title, message=message, button=button, cancelButton=cancel_button, dismissString=dismiss_string)
+        if button and cancel_button and dismiss_string and default_button:
+            return cmds.confirmDialog(title=title, message=message, button=button, cancelButton=cancel_button, defaultButton=default_button, dismissString=dismiss_string)
 
         if button:
             return cmds.confirmDialog(title=title, message=message)
@@ -527,3 +583,83 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         """
 
         cmds.warning(message)
+
+    @staticmethod
+    def add_shelf_menu_item(parent, label, command='', icon=''):
+        """
+        Adds a new menu item
+        :param parent:
+        :param label:
+        :param command:
+        :param icon:
+        :return:
+        """
+
+        return cmds.menuItem(parent=parent, label=label, command=command, image=icon or '')
+
+    @staticmethod
+    def add_shelf_sub_menu_item(parent, label, icon=''):
+        """
+        Adds a new sub menu item
+        :param parent:
+        :param label:
+        :param icon:
+        :return:
+        """
+
+        return cmds.menuItem(parent=parent, label=label, icon=icon or '', subMenu=True)
+
+    @staticmethod
+    def add_shelf_separator(shelf_name):
+        """
+        Adds a new separator to the given shelf
+        :param shelf_name: str
+        """
+
+        return cmds.separator(parent=shelf_name, manage=True, visible=True, horizontal=False, style='shelf', enableBackground=False, preventOverride=False)
+
+
+    @staticmethod
+    def shelf_exists(shelf_name):
+        """
+        Returns whether given shelf already exists or not
+        :param shelf_name: str
+        :return: bool
+        """
+
+        return solstice_maya_utils.shelf_exists(shelf_name=shelf_name)
+
+    @staticmethod
+    def create_shelf(shelf_name, shelf_label=None):
+        """
+        Creates a new shelf with the given name
+        :param shelf_name: str
+        :param shelf_label: str
+        """
+
+        return solstice_maya_utils.create_shelf(name=shelf_name)
+
+    @staticmethod
+    def delete_shelf(shelf_name):
+        """
+        Deletes shelf with given name
+        :param shelf_name: str
+        """
+
+        return solstice_maya_utils.delete_shelf(shelf_name=shelf_name)
+
+    @staticmethod
+    def select_file_dialog(title, start_directory=None, pattern=None):
+        """
+        Shows select file dialog
+        :param title: str
+        :param start_directory: str
+        :param pattern: str
+        :return: str
+        """
+
+        res = cmds.fileDialog2(fm=1, dir=start_directory, cap=title, ff=pattern)
+        if res:
+            res = res[0]
+
+        return res

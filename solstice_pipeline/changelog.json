@@ -152,6 +152,9 @@
     "Alembic file is generated automatically during publish process of an asset",
     "Added Standin Manager Import/Exporter Tool into Layout and TD shelves",
     "Solstice Launcher now supports Houdini",
-    "Added Import functionality in Solstice Alembic Manager for Houdini"
+    "Added Import functionality in Solstice Alembic Manager for Houdini",
+    "Solstice Pipelinizer now supports Houdini",
+    "Added Shelf support for Houdini",
+    "Added new shelfs for FX and Groom departments"
   ]
 }

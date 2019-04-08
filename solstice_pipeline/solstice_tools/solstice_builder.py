@@ -16,9 +16,9 @@ from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows
-from solstice_gui import solstice_splitters
-from solstice_utils import solstice_image as img
+from solstice_pipeline.solstice_gui import solstice_windows
+from solstice_pipeline.solstice_gui import solstice_splitters
+from solstice_pipeline.solstice_utils import solstice_image as img
 
 
 class SolsticeBuilder(solstice_windows.Window, object):
