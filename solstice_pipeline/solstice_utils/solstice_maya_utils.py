@@ -553,7 +553,7 @@ def get_active_editor():
 
 def get_current_frame():
     """
-    Return current Maya frame set in time slier
+    Return current Maya frame set in time slider
     :return: int
     """
 

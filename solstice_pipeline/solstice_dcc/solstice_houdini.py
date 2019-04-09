@@ -103,3 +103,21 @@ class SolsticeHoudini(solstice_dcc.SolsticeDCC, object):
         """
 
         return hou.ui.selectFile(start_directory=start_directory, title=title, pattern=pattern)
+
+    @staticmethod
+    def get_current_frame():
+        """
+        Returns current frame set in time slider
+        :return: int
+        """
+
+        return solstice_houdini_utils.get_current_frame()
+
+    @staticmethod
+    def get_time_slider_range():
+        """
+        Return the time range from Maya time slider
+        :return: list<int, int>
+        """
+
+        return solstice_houdini_utils.get_time_slider_range()

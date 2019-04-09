@@ -142,6 +142,12 @@ def export(alembicFile,
     In Python: [minX, minY, minZ, maxX, maxY, maxZ]
     """
 
+    if not sp.is_maya():
+        sp.logger.warning('DCC {} does not support Alembic Export functionality yet!'.format(sp.dcc.get_name()))
+        return
+
+    import maya.cmds as cmds
+
     # Generate job add_argument
     jobArg = ""
 
@@ -242,6 +248,7 @@ def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
 
     try:
         if sp.is_maya():
+            import maya.cmds as cmds
             if nodes:
                 res = cmds.AbcImport(alembic_file, ct=' '.join(nodes))
             elif parent:
@@ -263,6 +270,13 @@ def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
     sp.logger.debug('Alembic File {} imported successfully!'.format(os.path.basename(alembic_file)))
 
 def reference_alembic(alembic_file, namespace=None):
+
+    if not sp.is_maya():
+        sp.logger.warning('DCC {} does not support Alembic Reference functionality yet!'.format(sp.dcc.get_name()))
+        return
+
+    import maya.cmds as cmds
+
     if not os.path.exists(alembic_file):
         sp.dcc.confirm_dialog(
             title='Error',

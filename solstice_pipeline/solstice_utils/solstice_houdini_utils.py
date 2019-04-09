@@ -197,3 +197,22 @@ def create_shelf_tool(tool_name, tool_label, tool_script, tool_type='python', ic
         return None
 
     return shelves.newTool(name=tool_name, label=tool_label, script=tool_script, icon=icon, help=help, language=language)
+
+
+def get_current_frame():
+    """
+    Return current Maya frame set in time slider
+    :return: int
+    """
+
+    return hou.frame()
+
+
+def get_time_slider_range():
+    """
+    Return the time range from Maya time slider
+    :return: list<float, float>, [start_frame, end_frame]
+    """
+
+    playbar_frame = hou.playbar.playbackRange()
+    return [playbar_frame.x(), playbar_frame.y()]

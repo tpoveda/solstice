@@ -90,6 +90,12 @@ class AlembicGroup(QWidget, object):
         :return: str, new alembic group created
         """
 
+        if not sp.is_maya():
+            sp.logger.warning('DCC {} does not supports the creation of Alembic groups!'.format(sp.dcc.get_name()))
+            return None
+
+        import maya.cmds as cmds
+
         sel = sp.dcc.selected_nodes(full_path=True)
         if not sel:
             sp.dcc.confirm_dialog(
@@ -119,7 +125,7 @@ class AlembicGroup(QWidget, object):
 
         sp.logger.debug('Creating Alembic Group with name: {}'.format(name))
 
-        full_sel = cmds.listRelatives(sel, ad=True, f=True) or []
+        full_sel = sp.dcc.list_relatives(node=sel, all_hierarchy=True, full_path=True) or []
         main_sel = list()
         for n in full_sel:
             p = sp.dcc.node_parent(node=n, full_path=True)
@@ -130,7 +136,7 @@ class AlembicGroup(QWidget, object):
 
         final_sel = None
         if filter_type:
-            final_sel = filter(lambda x: cmds.objectType(x, isType=filter_type), main_sel)
+            final_sel = filter(lambda x: sp.dcc.check_object_type(node=x, node_type=filter_type), main_sel)
         if final_sel is None:
             sp.dcc.confirm_dialog(
                 title='Impossible to create Alembic Group',
@@ -145,15 +151,23 @@ class AlembicGroup(QWidget, object):
         Removes all alembic groups in current scene
         """
 
+        if not sp.is_maya():
+            sp.logger.warning('DCC {} does not supports the creation of Alembic groups!'.format(sp.dcc.get_name()))
+            return None
+
+        import maya.cmds as cmds
+
         all_sets = cmds.listSets(allSets=True)
         abc_sets = [s for s in all_sets if s.endswith(ALEMBIC_GROUP_SUFFIX)]
 
-        res = cmds.confirmDialog(title='Removing Alembic Groups!',
-                                 message='Do you want to remove following Alembic Groups?\n' + '\n'.join(abc_sets),
-                                 button=['Yes', 'No'],
-                                 defaultButton='Yes',
-                                 cancelButton='No',
-                                 dismissString='No')
+        res = sp.dcc.confirm_dialog(
+            title='Removing Alembic Groups!',
+            message='Do you want to remove following Alembic Groups?\n' + '\n'.join(abc_sets),
+            button=['Yes', 'No'],
+            default_button='Yes',
+            cancel_button='No',
+            dismiss_string='No'
+        )
         if res and res == 'Yes':
             cmds.delete(abc_sets)
 
@@ -529,6 +543,12 @@ class AlembicExporter(QWidget, object):
         :return:
         """
 
+        if not sp.is_maya():
+            sp.logger.warning('DCC {} does not supports the retrieving of Alembic Group Nodes!'.format(sp.dcc.get_name()))
+            return None
+
+        import maya.cmds as cmds
+
         if abc_grp_name:
             if not sp.dcc.object_exists(abc_grp_name):
                 raise Exception('ERROR: Invalid Alembic Group: {}'.format(abc_grp_name))
@@ -538,7 +558,7 @@ class AlembicExporter(QWidget, object):
         if not abc_grp_name:
             if show_error:
                 sp.dcc.confirm_dialog(
-                    title='Error during Alembic Exportaion',
+                    title='Error during Alembic Exportation',
                     message='No Alembic Group selected. Please select an Alembic Group from the list'
                 )
             return None
@@ -547,7 +567,7 @@ class AlembicExporter(QWidget, object):
         if not set_nodes:
             if show_error:
                 sp.dcc.confirm_dialog(
-                    title='Error during Alembic Exportaion',
+                    title='Error during Alembic Exportation',
                     message='No members inside selected Alembic Group\n Alembic Group: {}'.format(abc_grp_name)
                 )
             return None
@@ -601,10 +621,9 @@ class AlembicExporter(QWidget, object):
         Internal function that updates the frame ranges values
         """
 
-        start_frame = cmds.playbackOptions(q=True, min=True)
-        end_frame=cmds.playbackOptions(q=True, max=True)
-        self.start.setValue(int(start_frame))
-        self.end.setValue(int(end_frame))
+        frame_range = sp.dcc.get_time_slider_range()
+        self.start.setValue(int(frame_range[0]))
+        self.end.setValue(int(frame_range[1]))
 
     def _refresh_shot_name(self):
         """
@@ -629,12 +648,11 @@ class AlembicExporter(QWidget, object):
         Allows the user to select a path to export Alembic group contents
         """
 
-        res = cmds.fileDialog2(fm=3, dir=sp.get_solstice_project_path(), cap='Select Alembic Export Folder')
+        res = sp.dcc.select_folder_dialog(title='Select Alembic Export Folder', start_directory=sp.get_solstice_project_path())
         if not res:
             return
 
-        export_folder = res[0]
-        self.export_path_line.setText(export_folder)
+        self.export_path_line.setText(res)
 
     def _on_update_tree(self, index, show_error=False):
         set_text = self.get_selected_alembic_group()
@@ -660,14 +678,15 @@ class AlembicExporter(QWidget, object):
                 if not attr_exists:
                     obj_meshes = [obj]
                 else:
-                    hires_grp = cmds.listConnections(tag_node+'.hires')
-                    hires_objs = cmds.listRelatives(hires_grp, ad=True, f=True, type='mesh')
+                    hires_grp = sp.dcc.list_connections(node=tag_node, attribute_name='hires')
+                    hires_objs = sp.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='mesh')
                     if not hires_objs:
                         obj_meshes = [obj]
                     else:
                         obj_meshes = hires_objs
             else:
-                obj_meshes = [obj]
+                # obj_meshes = [obj]
+                obj_meshes = sp.dcc.list_relatives(node=obj, all_hierarchy=True, full_path=True, relative_type='mesh')
 
             exports_dict[obj] = list()
             for o in obj_meshes:
@@ -726,14 +745,14 @@ class AlembicExporter(QWidget, object):
             root_grp = AlembicExporterNode(obj)
             anim_node.addChild(root_grp)
             tag_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(obj)
-            has_hires = sp.dcc.attribute_exists(node=tag_node, attribute_name='hires')
+            has_hires = sp.dcc.attribute_exists(node=tag_node, attribute_name='hires') if tag_node else None
             if tag_node and has_hires:
-                hires_grp = cmds.listConnections(tag_node + '.hires')
+                hires_grp = sp.dcc.list_connections(node=tag_node, attribute_name='hires')
                 hires_node = AlembicExporterModelHires(hires_grp)
                 root_grp.addChild(hires_node)
                 for model in geo_list:
-                    model_xform = cmds.listRelatives(model, parent=True, fullPath=True)[0]
-                    obj_is_visible = cmds.getAttr('{}.visibility'.format(model_xform))
+                    model_xform = sp.dcc.node_parent(node=model, full_path=True)
+                    obj_is_visible = sp.dcc.get_attribute_value(node=model_xform, attribute_name='visibility')
                     if not obj_is_visible:
                         continue
                     obj_node = AlembicExporterNode(model)
@@ -753,7 +772,7 @@ class AlembicExporter(QWidget, object):
         tag_info = dict()
         for attr in attrs:
             try:
-                tag_info[attr] = str(cmds.getAttr('{}.{}'.format(tag_node, attr)))
+                tag_info[attr] = str(sp.dcc.get_attribute_value(node=tag_info, attribute_name=attr))
             except Exception:
                 pass
         if not tag_info:
@@ -761,16 +780,19 @@ class AlembicExporter(QWidget, object):
             return
 
         if not sp.dcc.attribute_exists(node=attr_node, attribute_name='tag_info'):
-            cmds.addAttr(attr_node, ln='tag_info', dt='string', k=True)
-        cmds.setAttr('{}.tag_info'.format(attr_node), str(tag_info), type='string')
+            sp.dcc.add_string_attribute(node=attr_node, attribute_name='tag_info', keyable=True)
+        sp.dcc.set_string_attribute_value(node=attr_node, attribute_name='tag_info', attribute_value=str(tag_info))
 
     def _get_tag_atributes_dict(self, tag_node):
         # We add attributes to the first node in the list
-        attrs = sp.dcc.list_user_attributes(tag_node)
         tag_info = dict()
+        if not tag_node:
+            return tag_info
+
+        attrs = sp.dcc.list_user_attributes(tag_node)
         for attr in attrs:
             try:
-                tag_info[attr] = str(cmds.getAttr('{}.{}'.format(tag_node, attr)))
+                tag_info[attr] = sp.dcc.get_attribute_value(node=tag_node, attribute_name=attr)
             except Exception:
                 pass
         if not tag_info:
@@ -806,14 +828,14 @@ class AlembicExporter(QWidget, object):
                 tag_node = solstice_tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(root_node_name)
 
                 root_node_child_count = root_node.childCount()
-                if root_node_child_count > 0:
+                if root_node_child_count > 0 or len(sp.dcc.list_shapes(root_node.name)) > 0:
                     for j in range(root_node.childCount()):
                         c = root_node.child(j)
                         c_name = c.name
                         if type(c_name) in [list, tuple]:
                             c_name = c_name[0]
                         if isinstance(c, AlembicExporterModelHires):
-                            children = cmds.listRelatives(c_name, children=True, allDescendents=True, shapes=False, fullPath=True)
+                            children = sp.dcc.node_children(node=c_name, all_hierarchy=True, full_path=True)
                             export_list.extend(children)
                             export_list.append(c_name)
 
@@ -822,12 +844,13 @@ class AlembicExporter(QWidget, object):
                             # export_list.append(c_name)
                         else:
                             if 'transform' != sp.dcc.node_type(c_name):
-                                parent_xform = cmds.listRelatives(c_name, fullPath=True, parent=True)
+                                xform = sp.dcc.node_parent(node=c_name, full_path=True)
+                                parent_xform = sp.dcc.node_parent(node=xform, full_path=True)
                                 if parent_xform:
-                                    children = cmds.listRelatives(parent_xform[0], children=True, allDescendents=True, shapes=False, fullPath=True)
+                                    children = sp.dcc.node_children(node=parent_xform, all_hierarchy=True, full_path=True)
                                     export_list.extend(children)
                             else:
-                                children = cmds.listRelatives(c_name, children=True, allDescendents=True, shapes=False, fullPath=True)
+                                children = sp.dcc.node_children(node=c_name, all_hierarchy=True, full_path=True)
                                 export_list.extend(children)
                             # if tag_node:
                             #     self._add_tag_attributes(c_name, tag_node)
@@ -839,12 +862,12 @@ class AlembicExporter(QWidget, object):
                 if sp.dcc.node_type(obj) != 'transform':
                     export_list.remove(obj)
                     continue
-                is_visible = cmds.getAttr('{}.visibility'.format(obj))
+                is_visible = sp.dcc.get_attribute_value(node=obj, attribute_name='visibility')
                 if not is_visible:
                     export_list.remove(obj)
                     continue
                 if sp.dcc.attribute_exists(node=obj, attribute_name='displaySmoothMesh'):
-                    cmds.setAttr('{}.displaySmoothMesh '.format(obj), 2)
+                    sp.dcc.set_integer_attribute_value(node=obj, attribute_name='displaySmoothMesh', attribute_value=2)
 
                 is_referenced = sp.dcc.node_is_referenced(obj)
                 if is_referenced:
@@ -852,8 +875,8 @@ class AlembicExporter(QWidget, object):
 
             childs_to_remove = list()
             for obj in export_list:
-                children = cmds.listRelatives(obj, children=True, allDescendents=True, shapes=False, fullPath=True)
-                shapes = cmds.listRelatives(obj, children=True, allDescendents=True, shapes=True, fullPath=True)
+                children = sp.dcc.node_children(node=obj, all_hierarchy=True, full_path=True)
+                shapes = sp.dcc.list_children_shapes(node=obj, all_hierarchy=True, full_path=True)
                 if children and not shapes:
                     childs_to_remove.extend(children)
 
@@ -1125,27 +1148,36 @@ class AlembicImporter(QWidget, object):
             return None
 
         tag_json_file = os.path.join(os.path.dirname(alembic_path), os.path.basename(alembic_path).replace('.abc', '_abc.info'))
-        if not os.path.isfile(tag_json_file):
-            sp.logger.warning('No Alembic Info file found!')
-            return
-
-        with open(tag_json_file, 'r') as f:
-            tag_info = json.loads(f.read())
-        if not tag_info:
-            sp.logger.warning('No Alembic Info loaded!')
-            return
+        valid_tag_info = True
+        if os.path.isfile(tag_json_file):
+            with open(tag_json_file, 'r') as f:
+                tag_info = json.loads(f.read())
+            if not tag_info:
+                sp.logger.warning('No Alembic Info loaded!')
+                valid_tag_info = False
+        else:
+            sp.logger.warning('No Alembic Info file found! Take into account that imported Alembic is not supported by our current pipeline!')
+            valid_tag_info = False
 
         if sp.is_houdini():
             import hou
             n = hou.node('obj')
             parent = n.createNode('alembicarchive')
-        if parent:
+        if parent and valid_tag_info:
             cls._add_tag_info_data(tag_info=tag_info, attr_node=parent)
 
         solstice_alembic.import_alembic(alembic_path, mode='import', nodes=None, parent=parent)
 
     @staticmethod
     def reference_alembic(alembic_path):
+
+        if not sp.is_maya():
+            sp.logger.warning('DCC {} does not supports the reference of Alembic groups!'.format(sp.dcc.get_name()))
+            return None
+
+        import maya.cmds as cmds
+        from solstice_pipeline.solstice_utils import solstice_maya_utils
+
         if not alembic_path or not os.path.isfile(alembic_path):
             sp.logger.warning('Alembic file {} does not exits!'.format(alembic_path))
             return None
@@ -1183,6 +1215,12 @@ class AlembicImporter(QWidget, object):
             sp.dcc.set_parent(obj, sel[0])
 
     def _on_import_alembic(self, as_reference=False):
+
+        if sp.is_maya():
+            import maya.cmds as cmds
+        elif sp.is_houdini():
+            import hou
+
         abc_file = self.alembic_path_line.text()
         if not abc_file or not os.path.isfile(abc_file):
             sp.dcc.confirm_dialog(title='Error', message='No Alembic File is selected or file is not currently available in disk')
@@ -1193,27 +1231,38 @@ class AlembicImporter(QWidget, object):
             sp.dcc.confirm_dialog(title='Error', message='No Alembic Group selected. Please create the Alembic Group first and retry')
             return None
 
-        nodes = sorted(cmds.sets(sel_set, query=True, no=True)) if sel_set else None
+        nodes = None
+        if sp.is_maya() and sel_set:
+            nodes = sorted(cmds.sets(sel_set, query=True, no=True))
 
         abc_name = os.path.basename(abc_file).split('.')[0]
         tag_json_file = os.path.join(os.path.dirname(abc_file), os.path.basename(abc_file).replace('.abc', '_abc.info'))
-        if not os.path.isfile(tag_json_file):
+        valid_tag_info = True
+        if os.path.isfile(tag_json_file):
+            with open(tag_json_file, 'r') as f:
+                tag_info = json.loads(f.read())
+            if not tag_info:
+                sp.logger.warning('No Alembic Info loaded!')
+                valid_tag_info = False
+        else:
             sp.logger.warning('No Alembic Info file found!')
-            return
-        
+            valid_tag_info = False
+
         if self.create_radio.isChecked():
             if sp.is_maya():
                 root = cmds.group(n=abc_name, empty=True, world=True)
             elif sp.is_houdini():
                 n = hou.node('obj')
                 root = n.createNode('alembicarchive')
-            self._add_tag_info_data(tag_info, root)
+            if valid_tag_info:
+                self._add_tag_info_data(tag_info, root)
             sel = [root]
         else:
             sel = sp.dcc.selected_nodes(full_path=True)
             if not sel:
                 sel = cmds.group(n=abc_name, empty=True, world=True)
-                self._add_tag_info_data(tag_info, sel)
+                if valid_tag_info:
+                    self._add_tag_info_data(tag_info, sel)
 
         sel = sel or None
 
@@ -1258,8 +1307,8 @@ class AlembicImporter(QWidget, object):
     def _add_tag_info_data(tag_info, attr_node):
         if sp.is_maya():
             if not sp.dcc.attribute_exists(node=attr_node, attribute_name='tag_info'):
-                cmds.addAttr(attr_node, ln='tag_info', dt='string', k=True)
-            cmds.setAttr('{}.tag_info'.format(attr_node), str(tag_info), type='string')
+                sp.dcc.add_string_attribute(node=attr_node, attribute_name='tag_info', keyable=True)
+            sp.dcc.set_string_attribute_value(node=attr_node, attribute_name='tag_info', attribute_value=str(tag_info))
         elif sp.is_houdini():
             import hou
             parm_group = attr_node.parmTemplateGroup()

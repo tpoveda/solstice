@@ -163,12 +163,16 @@ def create_basic_asset_rig(main_grp=None, reduction=60):
         combine_mesh = dup_meshes[0]
         cmds.rename(combine_mesh, '{}_proxy'.format(main_grp))
         combine_mesh = '{}_proxy'.format(main_grp)
-    cmds.polyReduce(combine_mesh, ver=1, trm=0, shp=0, keepBorder=1, keepMapBorder=1, keepColorBorder=1,
-                    keepFaceGroupBorder=1, keepHardEdge=1, keepCreaseEdge=1, keepBorderWeight=0.5,
-                    keepMapBorderWeight=0.5, keepColorBorderWeight=0.5, keepFaceGroupBorderWeight=0.5,
-                    keepHardEdgeWeight=0.5, keepCreaseEdgeWeight=0.5, useVirtualSymmetry=0, symmetryTolerance=0.01,
-                    sx=0, sy=1, sz=0, sw=0, preserveTopology=1, keepQuadsWeight=1, vertexMapName="", cachingReduce=1,
-                    ch=1, p=reduction, vct=0, tct=0, replaceOriginal=1)
+
+    try:
+        cmds.polyReduce(combine_mesh, ver=1, trm=0, shp=0, keepBorder=1, keepMapBorder=1, keepColorBorder=1,
+                        keepFaceGroupBorder=1, keepHardEdge=1, keepCreaseEdge=1, keepBorderWeight=0.5,
+                        keepMapBorderWeight=0.5, keepColorBorderWeight=0.5, keepFaceGroupBorderWeight=0.5,
+                        keepHardEdgeWeight=0.5, keepCreaseEdgeWeight=0.5, useVirtualSymmetry=0, symmetryTolerance=0.01,
+                        sx=0, sy=1, sz=0, sw=0, preserveTopology=1, keepQuadsWeight=1, vertexMapName="", cachingReduce=1,
+                        ch=1, p=reduction, vct=0, tct=0, replaceOriginal=1)
+    except Exception as e:
+        sp.logger.warning('Impossible to reduce proxy mesh: {}'.format(e))
 
     # cmds.polyReduce(combine_mesh, percentage=95, ch=False)
     cmds.parent(combine_mesh, proyx_asset_grp)

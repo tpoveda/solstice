@@ -72,6 +72,17 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function object_type() not implemented!')
 
     @staticmethod
+    def check_object_type(node, node_type):
+        """
+        Returns whether give node is of the given type or not
+        :param node: str
+        :param node_type: str
+        :return: bool
+        """
+
+        raise NotImplementedError('abstract DCC function check_object_type() not implemented!')
+
+    @staticmethod
     def node_type(node):
         """
         Returns node type of given object
@@ -166,6 +177,18 @@ class SolsticeDCC(object):
         """
 
         raise NotImplementedError('abstract DCC function node_is_loaded() not implemented!')
+
+    @staticmethod
+    def node_children(node, all_hierarchy=True, full_path=True):
+        """
+        Returns a list of children of the given node
+        :param node: str
+        :param all_hierarchy: bool
+        :param full_path: bool
+        :return: list<str>
+        """
+
+        raise NotImplementedError('abstract DCC function node_children() not implemented!')
 
     @staticmethod
     def node_parent(node, full_path=True):
@@ -271,6 +294,18 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function list_shapes() not implemented!')
 
     @staticmethod
+    def list_children_shapes(node, all_hierarchy=True, full_path=True):
+        """
+        Returns a list of children shapes of the given node
+        :param node:
+        :param all_hierarchy:
+        :param full_path:
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function list_children_shapes() not implemented!')
+
+    @staticmethod
     def list_materials():
         """
         Returns a list of materials in the current scene
@@ -329,11 +364,12 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function list_user_attributes() not implemented!')
 
     @staticmethod
-    def add_string_attribute(node, attribute_name):
+    def add_string_attribute(node, attribute_name, keyable=False):
         """
         Adds a new string attribute into the given node
         :param node: str
         :param attribute_name: str
+        :param keyable: bool
         """
 
         raise NotImplementedError('abstract DCC function add_string_attribute() not implemented!')
@@ -381,9 +417,21 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function get_attribute_value() not implemented!')
 
     @staticmethod
+    def set_integer_attribute_value(node, attribute_name, attribute_value):
+        """
+        Sets the integer value of the given attribute in the given node
+        :param node: str
+        :param attribute_name: str
+        :param attribute_value: int
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function set_string_attribute_value() not implemented!')
+
+    @staticmethod
     def set_string_attribute_value(node, attribute_name, attribute_value):
         """
-        Sets the value of the given attribute in the given node
+        Sets the string value of the given attribute in the given node
         :param node: str
         :param attribute_name: str
         :param attribute_value: str
@@ -627,3 +675,32 @@ class SolsticeDCC(object):
         """
 
         raise NotImplementedError('abstract DCC function select_file_dialog() not implemented!')
+
+    @staticmethod
+    def select_folder_dialog(title, start_directory=None):
+        """
+        Shows select folder dialog
+        :param title: str
+        :param start_directory: str
+        :return: str
+        """
+
+        raise NotImplementedError('abstract DCC function select_folder_dialog() not implemented!')
+
+    @staticmethod
+    def get_current_frame():
+        """
+        Returns current frame set in time slider
+        :return: int
+        """
+
+        raise NotImplementedError('abstract DCC function get_current_frame() not implemented!')
+
+    @staticmethod
+    def get_time_slider_range():
+        """
+        Return the time range from Maya time slider
+        :return: list<int, int>
+        """
+
+        raise NotImplementedError('abstract DCC function get_time_slider_range() not implemented!')

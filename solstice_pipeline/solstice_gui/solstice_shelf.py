@@ -81,7 +81,7 @@ class SolsticeShelf(object):
             from solstice_pipeline.solstice_utils import solstice_houdini_utils
             solstice_houdini_utils.create_shelf_set(name=self.name, dock=True)
         else:
-            self.name = sp.dcc.create_shelf(name=self.name)
+            self.name = sp.dcc.create_shelf(shelf_name=self.name)
 
         # ========================================================================================================
 
@@ -240,7 +240,7 @@ class SolsticeShelf(object):
                         annotation = i.get('annotation')
                         if annotation == 'separator':
                             self.add_separator()
-                            return
+                            continue
 
                         dcc = i.get('dcc')
                         if sp.dcc.get_name() not in dcc:

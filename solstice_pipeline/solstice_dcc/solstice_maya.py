@@ -83,6 +83,17 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.objectType(node)
 
     @staticmethod
+    def check_object_type(node, node_type):
+        """
+        Returns whether give node is of the given type or not
+        :param node: str
+        :param node_type: str
+        :return: bool
+        """
+
+        return cmds.objectType(node, isType=node_type)
+
+    @staticmethod
     def node_type(node):
         """
         Returns node type of given object
@@ -179,6 +190,18 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.referenceQuery(node, isLoaded=True)
 
     @staticmethod
+    def node_children(node, all_hierarchy=True, full_path=True):
+        """
+        Returns a list of children of the given node
+        :param node: str
+        :param all_hierarchy: bool
+        :param full_path: bool
+        :return: list<str>
+        """
+
+        return cmds.listRelatives(node, children=True, allDescendents=all_hierarchy, shapes=False, fullPath=full_path)
+
+    @staticmethod
     def node_parent(node, full_path=True):
         """
         Returns parent node of the given node
@@ -187,7 +210,11 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         :return: str
         """
 
-        return cmds.listRelatives(node, parent=True, fullPath=full_path)
+        node_parent = cmds.listRelatives(node, parent=True, fullPath=full_path)
+        if node_parent:
+            node_parent = node_parent[0]
+
+        return node_parent
 
     @staticmethod
     def set_parent(node, parent):
@@ -297,6 +324,19 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.listRelatives(node, shapes=True, fullPath=full_path, children=True, noIntermediate=not intermediate_shapes)
 
     @staticmethod
+    def list_children_shapes(node, all_hierarchy=True, full_path=True, intermediate_shapes=False):
+        """
+        Returns a list of children shapes of the given node
+        :param node:
+        :param all_hierarchy:
+        :param full_path:
+        :param intermediate_shapes:
+        :return:
+        """
+
+        return cmds.listRelatives(node, shapes=True, fullPath=full_path, children=True, allDescendents=all_hierarchy, noIntermediate=not intermediate_shapes)
+
+    @staticmethod
     def list_materials():
         """
         Returns a list of materials in the current scene
@@ -355,14 +395,15 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.listAttr(node, userDefined=True)
 
     @staticmethod
-    def add_string_attribute(node, attribute_name):
+    def add_string_attribute(node, attribute_name, keyable=False):
         """
         Adds a new string attribute into the given node
         :param node: str
         :param attribute_name: str
+        :param keyable: bool
         """
 
-        return cmds.addAttr(node, ln=attribute_name, dt='string')
+        return cmds.addAttr(node, ln=attribute_name, dt='string', k=keyable)
 
     @staticmethod
     def attribute_exists(node, attribute_name):
@@ -407,9 +448,21 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.getAttr('{}.{}'.format(node, attribute_name))
 
     @staticmethod
+    def set_integer_attribute_value(node, attribute_name, attribute_value):
+        """
+        Sets the integer value of the given attribute in the given node
+        :param node: str
+        :param attribute_name: str
+        :param attribute_value: int
+        :return:
+        """
+
+        return cmds.setAttr('{}.{}'.format(node, attribute_name), int(attribute_value))
+
+    @staticmethod
     def set_string_attribute_value(node, attribute_name, attribute_value):
         """
-        Sets the value of the given attribute in the given node
+        Sets the string value of the given attribute in the given node
         :param node: str
         :param attribute_name: str
         :param attribute_value: str
@@ -664,3 +717,36 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
             res = res[0]
 
         return res
+
+    @staticmethod
+    def select_folder_dialog(title, start_directory=None):
+        """
+        Shows select folder dialog
+        :param title: str
+        :param start_directory: str
+        :return: str
+        """
+
+        res = cmds.fileDialog2(fm=3, dir=start_directory, cap=title)
+        if res:
+            res = res[0]
+
+        return res
+
+    @staticmethod
+    def get_current_frame():
+        """
+        Returns current frame set in time slider
+        :return: int
+        """
+
+        return solstice_maya_utils.get_current_frame()
+
+    @staticmethod
+    def get_time_slider_range():
+        """
+        Return the time range from Maya time slider
+        :return: list<int, int>
+        """
+
+        return solstice_maya_utils.get_time_slider_range(highlighted=False)
