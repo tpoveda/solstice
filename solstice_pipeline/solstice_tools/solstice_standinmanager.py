@@ -201,6 +201,17 @@ class StandinExporter(QWidget, object):
         else:
             self.export_btn.setEnabled(False)
 
+    def export_standin(self, export_path, standin_name, start_frame=1, end_frame=1):
+        if not export_path or not os.path.isdir(export_path):
+            sp.logger.warning('Impossible to export Standin in invalid path: {}'.format(export_path))
+            return None
+
+        self.name_line.setText(standin_name)
+        self.start.setValue(start_frame)
+        self.end.setValue(end_frame)
+        self.export_path_line.setText(export_path)
+        self._on_export()
+
     def _refresh_standin_name(self):
         """
         Internal function that updates Alembic name
@@ -339,7 +350,8 @@ class StandinExporter(QWidget, object):
 
         sel = cmds.ls(sl=True)
 
-        solstice_shaderlibrary.ShaderLibrary.load_scene_shaders()
+        if self.auto_sync_shaders.isChecked():
+            solstice_shaderlibrary.ShaderLibrary.load_scene_shaders()
 
         start_frame = self.start.value()
         end_frame = self.end.value()

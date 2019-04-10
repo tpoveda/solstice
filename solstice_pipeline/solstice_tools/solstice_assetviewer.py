@@ -19,6 +19,8 @@ from solstice_pipeline.solstice_gui import solstice_windows, solstice_assetviewe
 from solstice_pipeline.solstice_utils import solstice_qt_utils
 from solstice_pipeline.resources import solstice_resource
 
+reload(solstice_assetviewer)
+
 
 global solstice_asset_viewer_window
 

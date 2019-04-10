@@ -181,9 +181,10 @@ class LightRigManager(solstice_windows.Window, object):
         cmds.file(light_rig, i=True, f=True)
 
     @staticmethod
-    def reference_light_rig(name):
-        if cmds.file(query=True, modified=True):
-            cmds.SaveScene()
+    def reference_light_rig(name, do_save=True):
+        if do_save:
+            if cmds.file(query=True, modified=True):
+                cmds.SaveScene()
 
         light_rigs_path = LightRigManager.get_solstice_light_rigs_path(sync=False)
         light_rig = os.path.join(light_rigs_path, '__working__', name.title(),

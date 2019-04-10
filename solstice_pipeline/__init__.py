@@ -31,6 +31,7 @@ asset_types = ['Props', 'Background Elements', 'Characters']
 valid_categories = ['textures', 'model', 'shading', 'groom']  # NOTE: The order is important, textures MUST go first
 must_categories = ['textures', 'model', 'shading']            # NOTE: Categories that should be published to consider an asset published
 valid_status = ['working', 'published']
+ignored_paths = ['PIPELINE', 'lighting', 'Light Rigs', 'S_CH_02_summer_scripts']
 
 # =================================================================================
 
@@ -469,6 +470,91 @@ def get_asset_version(name):
     int_version_formatted = '{0:03}'.format(int_version)
 
     return [string_version, int_version, int_version_formatted]
+
+
+def find_asset(asset_to_search, assets_path=None, update_if_data_not_found=False, simple_mode=False, as_checkable=False):
+    """
+    Returns an asset object
+    :param asset_to_search: str
+    :return: solstice_asset
+    """
+
+    from solstice_pipeline.solstice_gui import solstice_sync_dialog, solstice_asset
+    from solstice_pipeline.solstice_utils import solstice_python_utils
+
+    if not assets_path:
+        assets_path = get_solstice_assets_path()
+
+    if not os.path.exists(assets_path):
+        return
+
+    found_assets = list()
+
+    for root, dirs, files in os.walk(assets_path):
+        if dirs and '__working__' in dirs:
+            asset_path = os.path.normpath(root)
+            asset_name = os.path.basename(root)
+
+            if asset_to_search:
+                if asset_to_search != asset_name:
+                    continue
+
+            asset_data_file = os.path.join(asset_path, '__working__', 'data.json')
+            is_ignored = False
+            for ignored in ignored_paths:
+                if ignored in asset_data_file:
+                    is_ignored = True
+                    break
+            if not is_ignored:
+                if not os.path.isfile(asset_data_file):
+                    if update_if_data_not_found:
+                        solstice_sync_dialog.SolsticeSyncFile(files=[asset_data_file]).sync()
+                        if not os.path.isfile(asset_data_file):
+                            logger.debug('Impossible to get info of asset "{0}". Aborting!'.format(asset_name))
+                            continue
+                    else:
+                        if not os.path.isfile(asset_data_file):
+                            logger.debug('Impossible to get info of asset "{0}". Aborting!'.format(asset_name))
+                        continue
+
+                asset_category = solstice_python_utils.camel_case_to_string(os.path.basename(os.path.dirname(asset_path)))
+                asset_data = solstice_python_utils.read_json(asset_data_file)
+
+                new_asset = solstice_asset.generate_asset_widget_by_category(
+                    name=asset_name,
+                    path=asset_path,
+                    category=asset_category,
+                    icon=asset_data['asset']['icon'],
+                    icon_format=asset_data['asset']['icon_format'],
+                    preview=asset_data['asset']['preview'],
+                    preview_format=asset_data['asset']['preview_format'],
+                    description=asset_data['asset']['description'],
+                    simple_mode=simple_mode,
+                    checkable=as_checkable
+                )
+
+                found_assets.append(new_asset)
+
+    if asset_to_search and len(found_assets) > 1:
+        logger.warning('Multiple assets found with name: {}'.format(asset_to_search))
+
+    if len(found_assets) > 1:
+        return found_assets
+    elif len(found_assets) == 1:
+        return found_assets[0]
+
+
+def find_all_assets(assets_path=None, update_if_data_not_found=False, simple_mode=False, as_checkable=False):
+    """
+    Return a list of all asset objects
+    :param assets_path: str
+    :param update_if_data_not_found: bool
+    :param simple_mode: bool
+    :param as_checkable: bool
+    :return: list<solstice_asset>
+    """
+
+    return find_asset(asset_to_search=None, assets_path=assets_path, update_if_data_not_found=update_if_data_not_found, simple_mode=simple_mode, as_checkable=as_checkable)
 
 
 def register_asset(asset_name):

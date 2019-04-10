@@ -21,8 +21,6 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters, solstice_buttons
 from solstice_pipeline.solstice_utils import solstice_maya_utils as utils, solstice_anim_utils as anim_utils
 
-reload(utils)
-reload(anim_utils)
 
 SPACE_CONSTRAINTS = {
     'parent': 'Parent Constraint',

@@ -13,18 +13,18 @@ from functools import partial
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
-from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
-import solstice_grid
-import solstice_asset
-from solstice_utils import solstice_python_utils as utils
-from solstice_gui import solstice_sync_dialog
+from solstice_pipeline.solstice_gui import solstice_grid, solstice_asset
+from solstice_pipeline.solstice_utils import solstice_python_utils as utils
+from solstice_pipeline.solstice_gui import solstice_sync_dialog
+
+reload(solstice_asset)
 
 
 class AssetViewer(solstice_grid.GridWidget, object):
 
-    IGNORED_PATHS = ['PIPELINE', 'lighting', 'Light Rigs', 'S_CH_02_summer_scripts']
+
 
     def __init__(self, assets_path, item_pressed_callback, simple_assets=False, checkable_assets=False, show_only_published_assets=False, parent=None, column_count=4):
         super(AssetViewer, self).__init__(parent=parent)
@@ -105,76 +105,42 @@ class AssetViewer(solstice_grid.GridWidget, object):
 
         self.clear()
 
-        # TODO: Add list of ignored paths to avoid checking for JSON on paths that never will need JSON such as PIPELINE
-
         if self._assets_paths is None or not os.path.exists(self._assets_paths):
             return
 
-        if os.path.exists(self._assets_paths):
-            for root, dirs, files in os.walk(self._assets_paths):
-                if dirs and '__working__' in dirs:
-                    asset_path = root
-                    asset_name = os.path.basename(root)
-                    asset_data_file = os.path.join(asset_path, '__working__', 'data.json')
-                    is_ignored = False
-                    for ignored in self.IGNORED_PATHS:
-                        if ignored in asset_data_file:
-                            is_ignored = True
-                            break
+        all_assets = sp.find_all_assets(
+            assets_path=self._assets_paths,
+            update_if_data_not_found=update,
+            simple_mode=self._simple_assets,
+            as_checkable=self._checkable_assets
+        )
 
-                    if not is_ignored:
-                        if not os.path.isfile(asset_data_file):
-                            if update:
-                                solstice_sync_dialog.SolsticeSyncFile(files=[asset_data_file]).sync()
-                                if not os.path.isfile(asset_data_file):
-                                    sp.logger.debug('Impossible to get info of asset "{0}". Aborting!'.format(asset_name))
-                                    continue
-                            else:
-                                if not os.path.isfile(asset_data_file):
-                                    sp.logger.debug('Impossible to get info of asset "{0}". Aborting!'.format(asset_name))
-                                continue
+        for asset in all_assets:
 
-                        asset_category = utils.camel_case_to_string(os.path.basename(os.path.dirname(asset_path)))
-                        asset_data = utils.read_json(asset_data_file)
+            if not asset:
+                continue
 
-                        new_asset = solstice_asset.generate_asset_widget_by_category(
-                            name=asset_name,
-                            path=asset_path,
-                            category=asset_category,
-                            icon=asset_data['asset']['icon'],
-                            icon_format=asset_data['asset']['icon_format'],
-                            preview=asset_data['asset']['preview'],
-                            preview_format=asset_data['asset']['preview_format'],
-                            description=asset_data['asset']['description'],
-                            simple_mode=self._simple_assets,
-                            checkable=self._checkable_assets
-                        )
+            # ===========================================================================================================
+            # TODO: Refactor this piece of awful code
+            # We connect this signal to allow Pipelinizer Tool update its asset info widget after syncronizing
+            # This is a very bad way but it works for now!
+            try:
+                asset.syncFinished.connect(partial(self.parent().update_asset_info, asset, True, False, True))
+                asset.syncFinished.connect(partial(sp.register_asset, asset.name))
+            except Exception:
+                pass
 
-                        # ===========================================================================================================
-                        # TODO: Refactor this piece of awful code
-                        # We connect this signal to allow Pipelinizer Tool update its asset info widget after syncronizing
-                        # This is a very bad way but it works for now!
-                        try:
-                            new_asset.syncFinished.connect(partial(self.parent().update_asset_info, new_asset, True, False, True))
-                            new_asset.syncFinished.connect(partial(sp.register_asset, new_asset.name))
-                        except Exception:
-                            pass
+            # if self._show_only_published_assets:
+            #     if not new_asset.is_published():
+            #         continue
+            #     else:
+            #         sp.logger.debug('Adding asset: {}'.format(new_asset.name))
 
-                        if not new_asset:
-                            sp.logger.debug('Asset Widget for "{0}" was not generated!'.format(asset_name))
-                            continue
-
-                        # if self._show_only_published_assets:
-                        #     if not new_asset.is_published():
-                        #         continue
-                        #     else:
-                        #         sp.logger.debug('Adding asset: {}'.format(new_asset.name))
-
-                        if self._item_pressed_callback:
-                            new_asset._asset_btn.clicked.connect(partial(self._item_pressed_callback, new_asset))
-                            new_asset.publishFinished.connect(partial(self._item_pressed_callback, new_asset, True, True))
-                            new_asset.newVersionFinished.connect(partial(self._item_pressed_callback, new_asset, True, True))
-                        self.add_asset(new_asset)
+            if self._item_pressed_callback:
+                asset._asset_btn.clicked.connect(partial(self._item_pressed_callback, asset))
+                asset.publishFinished.connect(partial(self._item_pressed_callback, asset, True, True))
+                asset.newVersionFinished.connect(partial(self._item_pressed_callback, asset, True, True))
+            self.add_asset(asset)
 
 
 class CategorizedAssetViewer(QWidget, object):

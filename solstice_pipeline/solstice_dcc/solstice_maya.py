@@ -533,6 +533,15 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.listConnections(node, source=False, destination=True)
 
     @staticmethod
+    def new_file(force=True):
+        """
+        Creates a new file
+        :param force: bool
+        """
+
+        cmds.file(new=True, f=force)
+
+    @staticmethod
     def open_file(file_path, force=True):
         """
         Open file in given path
@@ -750,3 +759,11 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         """
 
         return solstice_maya_utils.get_time_slider_range(highlighted=False)
+
+    @staticmethod
+    def refresh_viewport():
+        """
+        Refresh current DCC viewport
+        """
+
+        cmds.refresh()

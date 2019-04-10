@@ -695,6 +695,45 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
         if os.path.isfile(file_path):
             artella.open_file_in_maya(file_path=file_path)
 
+    def export_alembic_file(self, start_frame=1, end_frame=1):
+        from solstice_pipeline.solstice_tools import solstice_alembicmanager
+        export_path = os.path.dirname(self.get_asset_file(file_type='model', status='working'))
+        self.open_asset_file(file_type='model', status='working')
+        sp.dcc.refresh_viewport()
+        solstice_alembicmanager.AlembicExporter().export_alembic(
+            export_path=export_path,
+            object_to_export=self.name,
+            start_frame=start_frame,
+            end_frame=end_frame
+        )
+        sp.dcc.new_file()
+
+    def export_standin_file(self, start_frame=1, end_frame=1):
+        from solstice_pipeline.solstice_tools import solstice_standinmanager
+        from solstice_pipeline.solstice_tools import solstice_shaderlibrary
+        from solstice_pipeline.solstice_tools import solstice_alembicmanager
+
+        sp.dcc.new_file()
+        export_path = os.path.dirname(self.get_asset_file(file_type='model', status='working'))
+        alembic_name = self.name + '.abc'
+        abc_path = os.path.join(export_path, alembic_name)
+        if not os.path.isfile(abc_path):
+            sp.logger.warning('Impossible to export Standin file because asset {} has not a valid Alembic file exported: {}'.format(self.name, abc_path))
+            return
+
+        solstice_alembicmanager.AlembicImporter.reference_alembic(abc_path)
+        sp.dcc.refresh_viewport()
+        solstice_shaderlibrary.ShaderLibrary.load_scene_shaders()
+        sp.dcc.refresh_viewport()
+        solstice_standinmanager.StandinExporter().export_standin(
+            export_path=export_path,
+            standin_name=self.name,
+            start_frame=start_frame,
+            end_frame=end_frame
+        )
+
+        sp.dcc.new_file()
+
     def import_asset_file(self):
         asset_name = self._name + '.ma'
         local_max_versions = self.get_max_local_versions()
@@ -713,7 +752,6 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
 
     def reference_alembic_file(self):
         from solstice_pipeline.solstice_tools import solstice_alembicmanager
-        reload(solstice_alembicmanager)
         alembic_name = self._name + '.abc'
         local_max_versions = self.get_max_local_versions()
         if local_max_versions['model']:
@@ -726,7 +764,6 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
 
     def import_standin_file(self):
         from solstice_pipeline.solstice_tools import solstice_standinmanager
-        reload(solstice_standinmanager)
         standin_name = self._name + '.ass'
         local_max_versions = self.get_max_local_versions()
         if local_max_versions['model']:

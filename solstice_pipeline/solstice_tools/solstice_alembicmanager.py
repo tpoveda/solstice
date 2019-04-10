@@ -58,10 +58,11 @@ class AlembicGroup(QWidget, object):
         clean_alembic_groups_btn = QPushButton('Clean Alembic Groups')
         self.main_layout.addWidget(clean_alembic_groups_btn)
 
-        create_btn.clicked.connect(self.create_alembic_group)
+        create_btn.clicked.connect(partial(lambda: self.create_alembic_group(self.name_line.text())))
         clean_alembic_groups_btn.clicked.connect(self.clean_alembic_groups)
 
-    def get_alembic_group_name_from_node_name(self, node_name):
+    @staticmethod
+    def get_alembic_group_name_from_node_name(node_name):
         """
         Returns an alembic group name from the give node name
         :param node_name: str, long name of a Maya node
@@ -82,7 +83,8 @@ class AlembicGroup(QWidget, object):
 
         return None
 
-    def create_alembic_group(self, name=None, filter_type='transform'):
+    @staticmethod
+    def create_alembic_group(name=None, filter_type='transform'):
         """
         Creates a new alembic group (set)
         :param name: str, name of the alembic group
@@ -103,10 +105,8 @@ class AlembicGroup(QWidget, object):
                 message='No nodes selected, please select nodes first and try again!')
             return None
 
-        if name is None:
-            name = self.name_line.text()
-            if not name:
-                name = self.get_alembic_group_name_from_node_name(sel[0])
+        if not name:
+            name = AlembicGroup.get_alembic_group_name_from_node_name(sel[0])
 
         if not name.endswith(ALEMBIC_GROUP_SUFFIX):
             name += ALEMBIC_GROUP_SUFFIX
@@ -146,7 +146,8 @@ class AlembicGroup(QWidget, object):
         return cmds.sets(sel, n=name)
 
     # @solstice_maya_utils.maya_undo
-    def clean_alembic_groups(self):
+    @staticmethod
+    def clean_alembic_groups():
         """
         Removes all alembic groups in current scene
         """
@@ -577,6 +578,27 @@ class AlembicExporter(QWidget, object):
 
         return set_nodes
 
+    def export_alembic(self, export_path, object_to_export=None, start_frame=1, end_frame=1):
+
+        if not object_to_export or not sp.dcc.object_exists(object_to_export):
+            object_to_export = sp.dcc.selected_nodes(False)
+            if not object_to_export:
+                sp.logger.warning('Impossible to export Alembic from inexistent object {}'.format(object_to_export))
+                return
+            object_to_export = object_to_export[0]
+
+        sp.dcc.select_object(object_to_export)
+        AlembicGroup.create_alembic_group()
+        self.refresh()
+
+        self.alembic_groups_combo.setCurrentIndex(1)
+        self.export_path_line.setText(export_path)
+        self.start.setValue(start_frame)
+        self.end.setValue(end_frame)
+        self._on_export()
+
+        sp.dcc.new_file()
+
     def _refresh_alembic_name(self):
         """
         Internal function that updates Alembic name
@@ -597,7 +619,7 @@ class AlembicExporter(QWidget, object):
                     sel_namespace = sel_namespace[1:] + ':'
                     sel = sel.replace(sel_namespace, '')
 
-            self.name_line.setText(sel)
+            self.name_line.setText(sp.dcc.node_short_name(sel))
 
     def _refresh_alembic_groups(self):
         """

@@ -502,6 +502,15 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function list_destination_connections() not implemented!')
 
     @staticmethod
+    def new_file(force=True):
+        """
+        Creates a new file
+        :param force: bool
+        """
+
+        raise NotImplementedError('abstract DCC function new_file() not implemented!')
+
+    @staticmethod
     def open_file(file_path, force=True):
         """
         Open file in given path
@@ -704,3 +713,11 @@ class SolsticeDCC(object):
         """
 
         raise NotImplementedError('abstract DCC function get_time_slider_range() not implemented!')
+
+    @staticmethod
+    def refresh_viewport():
+        """
+        Refresh current DCC viewport
+        """
+
+        raise NotImplementedError('abstract DCC function refresh_viewport() not implemented!')
