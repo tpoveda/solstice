@@ -719,7 +719,7 @@ class ValidTagDataNode(solstice_check.SanityCheckTask, object):
             return False
 
         valid_tag_data = False
-        main_group_connections = sp.dcc.list_connections(node=valid_obj)
+        main_group_connections = sp.dcc.list_source_destination_connections(valid_obj)
         for connection in main_group_connections:
             attrs = sp.dcc.list_user_attributes(connection)
             if attrs and type(attrs) == list:
@@ -819,101 +819,6 @@ class SetupTagDataNode(solstice_check.SanityCheckTask, object):
             self.write('Unlocking model file ...')
             artella.unlock_file(model_path)
             return False
-
-        # Getting shaders info data
-        shaders_file = solstice_shaderlibrary.ShaderLibrary.get_asset_shader_file_path(asset=self._asset())
-        if not os.path.exists(shaders_file):
-            self.write_error(
-                'Shaders JSON file for asset {0} does not exists: {1}'.format(self._asset().name, shaders_file))
-            self.write('Unlocking model file ...')
-            artella.unlock_file(model_path)
-            return False
-
-        with open(shaders_file) as f:
-            shader_data = json.load(f)
-        if shader_data is None:
-            self.write_error(
-                'Shaders JSON file for asset {0} is not valid: {1}'.format(self._asset().name, shaders_file))
-            self.write('Unlocking model file ...')
-            artella.unlock_file(model_path)
-            return False
-        self.write_ok('Shaders JSON data loaded successfully!')
-
-        # Checking if shader data is valid
-        proxy_grp = None
-        hires_grp = None
-        proxy_grp_name = '{}_proxy_grp'.format(self._asset().name)
-        hires_grp_name = '{}_hires_grp'.format(self._asset().name)
-        children = sp.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True, relative_type='transform')
-        if children:
-            for child in children:
-                child_name = child.split('|')[-1]
-                if child_name == proxy_grp_name:
-                    proxy_children = sp.dcc.list_relatives(node=child_name, all_hierarchy=True, relative_type='transform')
-                    if len(proxy_children) > 0:
-                        if proxy_grp is None:
-                            proxy_grp = child
-                        else:
-                            self.write_error('Multiple Proxy groups in the file. Please check it!')
-                            return False
-                    else:
-                        self.write_error('Proxy group has no children!. Please check it!')
-                        return False
-                if child_name == hires_grp_name:
-                    hires_children = sp.dcc.list_relatives(node=child_name, all_hierarchy=True, relative_type='transform')
-                    if len(hires_children) > 0:
-                        if hires_grp is None:
-                            hires_grp = child
-                        else:
-                            self.write_error('Multiple Hires groups in the file. Please check it!')
-                            return False
-
-        hires_meshes = sp.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='transform')
-
-        self.write('Checking if shading meshes names and hires model meshes names are the same')
-        check_meshes = dict()
-        for shading_mesh, shading_group in shader_data.items():
-            shading_name = shading_mesh.split('|')[-1]
-            check_meshes[shading_mesh] = False
-            for model_mesh in hires_meshes:
-                mesh_name = model_mesh.split('|')[-1]
-                if shading_name == mesh_name:
-                    check_meshes[shading_mesh] = True
-
-        valid_meshes = True
-        for mesh_name, mesh_check in check_meshes.items():
-            if mesh_check is False:
-                self.write_error('Mesh {} not found in both model and shading file ...'.format(mesh_name))
-                valid_meshes = False
-        if not valid_meshes:
-            self.write_error('Some shading meshes and model hires meshes are missed. Please contact TD!')
-            return False
-        else:
-            self.write_ok('Shading Meshes and Model Hires meshes are valid!')
-
-        # Create if necessary shaders attribute in model tag data node
-        if not tag_data_node or not sp.dcc.object_exists(tag_data_node):
-            self.write_error('Tag data does not exists in the current scene!'.format(tag_data_node))
-            return False
-
-        attr_exists = sp.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
-        if attr_exists:
-            self.write('Unlocking shaders tag data attribute on tag data node: {}'.format(tag_data_node))
-            sp.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
-        else:
-            self.write('Creating shaders attribute on tag data node: {}'.format(tag_data_node))
-            sp.dcc.add_string_attribute(node=tag_data_node, attribute_name='shaders')
-            attr_exists = sp.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
-            if not attr_exists:
-                self.write_error('No Shaders attribute found on model tag data node: {}'.format(tag_data_node))
-                return False
-            else:
-                self.write_ok('Shaders attribute created successfully on tag data node!')
-
-        self.write('Storing shaders data into shaders tag data node attribute ...')
-        sp.dcc.set_string_attribute_value(node=shader_data, attribute_name='shaders', attribute_value=shader_data)
-        sp.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
-        self.write_ok('Shaders data added to model tag data node successfully!')
 
         return True
 

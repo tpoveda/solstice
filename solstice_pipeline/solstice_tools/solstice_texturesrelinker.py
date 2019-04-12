@@ -26,10 +26,11 @@ class TexturesRelinker(solstice_windows.Window, object):
     version = '1.0'
 
     def __init__(self):
-        super(TexturesRelinker, self).__init__()
 
         self.artella_var = os.environ.get('ART_LOCAL_ROOT')
         self.solstice_project = os.environ.get('SOLSTICE_PROJECT')
+
+        super(TexturesRelinker, self).__init__()
 
         if self.artella_var is None or self.solstice_project is None:
             msgBox = QMessageBox()
@@ -50,14 +51,17 @@ class TexturesRelinker(solstice_windows.Window, object):
         self.tabs = QTabWidget()
         self.main_layout.addWidget(self.tabs)
 
-        relinker_widget = RelinkerWidget()
+        relinker_widget = RelinkerWidget(self.solstice_project)
         checker_widget = CheckerWidget()
         self.tabs.addTab(relinker_widget, 'Relinker')
         self.tabs.addTab(checker_widget, 'Checker')
 
 
 class RelinkerWidget(QWidget, object):
-    def __init__(self, parent=None):
+    def __init__(self, project, parent=None):
+
+        self.solstice_project = project
+
         super(RelinkerWidget, self).__init__(parent)
 
         relinker_layout = QVBoxLayout()

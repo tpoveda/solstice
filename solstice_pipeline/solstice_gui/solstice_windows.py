@@ -283,7 +283,7 @@ class DockWindow(QMainWindow, object):
         docks[index].hide()
         docks[index].show()
 
-    def add_dock(self, widget, name):
+    def add_dock(self, widget, name, area=Qt.TopDockWidgetArea, tabify=True):
         docks = self._get_dock_widgets()
         for dock in docks:
             if dock.windowTitle() == name:
@@ -291,10 +291,10 @@ class DockWindow(QMainWindow, object):
                 dock.close()
         dock_widget = QDockWidget(name, self)
         dock_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        dock_widget.setAllowedAreas(Qt.TopDockWidgetArea)
+        # dock_widget.setAllowedAreas(Qt.TopDockWidgetArea)
         dock_widget.setWidget(widget)
-        self.addDockWidget(Qt.TopDockWidgetArea, dock_widget)
-        if docks:
+        self.addDockWidget(area, dock_widget)
+        if docks and tabify:
             self.tabifyDockWidget(docks[-1], dock_widget)
         dock_widget.show()
         dock_widget.raise_()

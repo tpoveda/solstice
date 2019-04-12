@@ -391,7 +391,7 @@ class PublishModelTask(solstice_task.Task, object):
                 return False
 
             valid_tag_data = False
-            main_group_connections = sp.dcc.list_connections(node=valid_obj)
+            main_group_connections = sp.dcc.list_source_destination_connections(valid_obj)
             for connection in main_group_connections:
                 attrs = sp.dcc.list_user_attributes(connection)
                 if attrs and type(attrs) == list:
@@ -527,7 +527,8 @@ class PublishModelTask(solstice_task.Task, object):
                 self.write_ok('Shaders attribute created successfully on tag data node!')
 
         self.write('Storing shaders data into shaders tag data node attribute ...')
-        sp.dcc.set_string_attribute_value(node=shader_data, attribute_name='shaders', attribute_value=shader_data)
+        sp.dcc.unlock_attribute(node=tag_data_node, attribute_name='shaders')
+        sp.dcc.set_string_attribute_value(node=tag_data_node, attribute_name='shaders', attribute_value=shader_data)
         sp.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
         self.write_ok('Shaders data added to model tag data node successfully!')
 
@@ -547,29 +548,29 @@ class PublishModelTask(solstice_task.Task, object):
                     self.write_error('After updating model path the Student License could not be fixed again!')
                     return False
 
-        # Exporting Alembic File
-        abc_paths = self._asset().get_alembic_files()
-        abc_file_path = abc_paths[0]
-        abc_info_path = abc_paths[1]
-        self.write('Check if Alembic file exists ...'.format(abc_file_path))
-        if abc_file_path and os.path.isfile(abc_file_path):
-            artella.lock_file(abc_file_path)
-        self.write('Check if Alembic Info file exists ...'.format(abc_info_path))
-        if abc_info_path and os.path.isfile(abc_info_path):
-            artella.lock_file(abc_info_path)
-
-        sp.dcc.select_object(valid_obj)
-        abc_group = solstice_alembicmanager.AlembicGroup()
-        new_abc_group = abc_group.create_alembic_group(valid_obj)
-        alembic_exporter = solstice_alembicmanager.AlembicExporter()
-        alembic_exporter.refresh()
-        alembic_exporter.alembic_groups_combo.setCurrentIndex(1)
-        alembic_exporter.export_path_line.setText(os.path.dirname(abc_file_path))
-        alembic_exporter.start.setValue(1)
-        alembic_exporter.end.setValue(1)
-        alembic_exporter.open_folder_after_export_cbx.setChecked(False)
-        alembic_exporter._on_export()
-        sp.dcc.delete_object(new_abc_group)
+        # # Exporting Alembic File
+        # abc_paths = self._asset().get_alembic_files()
+        # abc_file_path = abc_paths[0]
+        # abc_info_path = abc_paths[1]
+        # self.write('Check if Alembic file exists ...'.format(abc_file_path))
+        # if abc_file_path and os.path.isfile(abc_file_path):
+        #     artella.lock_file(abc_file_path)
+        # self.write('Check if Alembic Info file exists ...'.format(abc_info_path))
+        # if abc_info_path and os.path.isfile(abc_info_path):
+        #     artella.lock_file(abc_info_path)
+        #
+        # sp.dcc.select_object(valid_obj)
+        # abc_group = solstice_alembicmanager.AlembicGroup()
+        # new_abc_group = abc_group.create_alembic_group(valid_obj)
+        # alembic_exporter = solstice_alembicmanager.AlembicExporter()
+        # alembic_exporter.refresh()
+        # alembic_exporter.alembic_groups_combo.setCurrentIndex(1)
+        # alembic_exporter.export_path_line.setText(os.path.dirname(abc_file_path))
+        # alembic_exporter.start.setValue(1)
+        # alembic_exporter.end.setValue(1)
+        # alembic_exporter.open_folder_after_export_cbx.setChecked(False)
+        # alembic_exporter._on_export()
+        # sp.dcc.delete_object(new_abc_group)
 
         result = solstice_qt_utils.show_question(None, 'Publishing file {0}'.format(model_path), 'File validated successfully! Do you want to continue with the publish process?')
         published_done = False

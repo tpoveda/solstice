@@ -19,7 +19,6 @@ from solstice_pipeline.externals.solstice_qt.QtCore import *
 
 import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters, solstice_buttons
-from solstice_pipeline.solstice_utils import solstice_maya_utils
 from solstice_pipeline.resources import solstice_resource
 
 
