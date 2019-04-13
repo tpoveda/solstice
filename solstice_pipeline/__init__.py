@@ -702,5 +702,59 @@ def is_nuke():
     return dcc.get_name() == SolsticeDCC.Nuke
 
 
+def get_tag_data_nodes():
+    tag_nodes = list()
+    objs = dcc.all_scene_objects()
+    for obj in objs:
+        valid_tag_data = dcc.attribute_exists(node=obj, attribute_name='tag_type')
+        if valid_tag_data:
+            tag_type = dcc.get_attribute_value(node=obj, attribute_name='tag_type')
+            if tag_type and tag_type == 'SOLSTICE_TAG':
+                tag_nodes.append(obj)
+
+    return tag_nodes
+
+
+def get_tag_info_nodes(as_nodes=True):
+    tag_info_nodes = list()
+    objs = dcc.all_scene_objects()
+    for obj in objs:
+        valid_tag_info_data = dcc.attribute_exists(node=obj, attribute_name='tag_info')
+        if valid_tag_info_data:
+            tag_info_nodes.append(obj)
+
+    return tag_info_nodes
+
+
+def get_assets(as_nodes=True):
+
+    from solstice_pipeline.solstice_utils import solstice_node
+
+    asset_nodes = list()
+
+    # We find tag data nodes
+    tag_data_nodes = get_tag_data_nodes()
+    for tag_data in tag_data_nodes:
+        cns = dcc.list_connections(node=tag_data, attribute_name='node')
+        if cns:
+            asset = cns[0]
+            if as_nodes:
+                asset_nodes.append(solstice_node.SolsticeAssetNode(node=asset))
+            else:
+                asset_nodes.append(asset)
+
+    # We find nodes with tag info attribute (Alembics)
+    tag_info_nodes = get_tag_info_nodes()
+    for tag_info in tag_info_nodes:
+        tag_info_dict = dcc.get_attribute_value(node=tag_info, attribute_name='tag_info')
+        if tag_info_dict:
+            if as_nodes:
+                asset_nodes.append(solstice_node.SolsticeAssetNode(node=tag_info))
+            else:
+                asset_nodes.append(tag_info)
+
+    return asset_nodes
+
+
 def init():
     sys.dispatcher = SolsticePipeline()

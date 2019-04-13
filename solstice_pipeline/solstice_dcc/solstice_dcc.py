@@ -93,6 +93,16 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function node_type() not implemented!')
 
     @staticmethod
+    def all_scene_objects(full_path=True):
+        """
+        Returns a list with all scene nodes
+        :param full_path: bool
+        :return: list<str>
+        """
+
+        raise NotImplementedError('abstract DCC function all_scene_objects() not implemented!')
+
+    @staticmethod
     def select_object(node):
         """
         Selects given object in the current scene

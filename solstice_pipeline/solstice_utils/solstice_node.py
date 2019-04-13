@@ -12,7 +12,7 @@ import ast
 import collections
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_utils import solstice_artella_utils as artella
+from solstice_pipeline.solstice_utils import solstice_python_utils, solstice_artella_utils as artella
 
 # =================================================================================================
 
@@ -289,6 +289,14 @@ class SolsticeAssetNode(SolsticeNode, object):
             valid_asset_name = FULL_NAME_REGEX.search(self.filename)
             if not valid_asset_name:
                 sp.logger.warning('File "{0}" does not follow a correct nomenclature!'.format(self.filename))
+
+    def get_icon(self):
+        data_file = self.get_asset_data_path()
+        if data_file and os.path.isfile(data_file):
+            asset_data = solstice_python_utils.read_json(data_file)
+            return asset_data['asset']['icon'], asset_data['asset']['icon_format']
+
+        return None
 
     def get_local_versions(self, status='published', categories=None):
 

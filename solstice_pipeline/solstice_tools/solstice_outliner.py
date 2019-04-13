@@ -24,7 +24,6 @@ from solstice_pipeline.solstice_utils import solstice_node, solstice_maya_utils,
 from solstice_pipeline.solstice_gui import solstice_messagehandler
 from solstice_pipeline.resources import solstice_resource
 
-reload(solstice_node)
 
 global solstice_outliner_window
 try:

@@ -104,6 +104,16 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return cmds.nodeType(node)
 
     @staticmethod
+    def all_scene_objects(full_path=True):
+        """
+        Returns a list with all scene nodes
+        :param full_path: bool
+        :return: list<str>
+        """
+
+        return cmds.ls(l=full_path)
+
+    @staticmethod
     def select_object(node):
         """
         Selects given object in the current scene
