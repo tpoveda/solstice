@@ -16,11 +16,14 @@ from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtGui import *
 
 import solstice_pipeline as sp
-from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters, solstice_attributes
+from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters, solstice_attributes, solstice_asset
 from solstice_pipeline.solstice_utils import solstice_node, solstice_image as img
 from solstice_pipeline.resources import solstice_resource
+from solstice_pipeline.solstice_tools import solstice_shotexporter
 
 reload(solstice_node)
+reload(solstice_asset)
+reload(solstice_attributes)
 
 
 class AbstractItemWidget(QWidget, object):
@@ -163,8 +166,8 @@ class ShotAssets(QWidget, object):
 
     def all_assets(self):
         all_assets = list()
-        while self.assets_layout.count():
-            child = self.assets_layout.takeAt(0)
+        for i in range(self.assets_layout.count()):
+            child = self.assets_layout.itemAt(i)
             if child.widget() is not None:
                 all_assets.append(child.widget())
 
@@ -224,14 +227,14 @@ class NodeAsset(AbstractItemWidget, object):
     clicked = Signal(QObject, QEvent)
     contextRequested = Signal(QObject, QAction)
 
-    def __init__(self, name, params, parent=None):
+    def __init__(self, uuid, name, path, params, parent=None):
         self.name = name
-        self.params = params
+        self._uuid = uuid
+        self._params = params
 
-        asset_path = self.params.get('path', None)
         self.node = None
-        if asset_path:
-            self.node = solstice_node.SolsticeAssetNode(name=os.path.basename(asset_path))
+        if path:
+            self.node = solstice_node.SolsticeAssetNode(name=os.path.basename(path))
 
         super(NodeAsset, self).__init__(name, parent)
 
@@ -252,6 +255,23 @@ class NodeAsset(AbstractItemWidget, object):
             return
 
         return self.node.asset_path
+
+    def get_attributes(self):
+        if not self.node:
+            return {}
+        return self._params
+
+    def get_icon(self):
+        if not self.node:
+            return
+
+        return self.node.get_icon()
+
+    def reference_alembic(self):
+        if not self.node:
+            return
+
+        self.node.reference_alembic_file()
 
 
 class ShotHierarchy(QWidget, object):
@@ -300,8 +320,8 @@ class ShotHierarchy(QWidget, object):
 
     def all_hierarchy(self):
         all_hierarhcy = list()
-        while self.hierarchy_layout.count():
-            child = self.hierarchy_layout.takeAt(0)
+        for i in range(self.hierarchy_layout.count()):
+            child = self.hierarchy_layout.itemAt(i)
             if child.widget() is not None:
                 all_hierarhcy.append(child.widget())
 
@@ -314,47 +334,49 @@ class ShotHierarchy(QWidget, object):
             if child.widget() is not None:
                 child.widget().deleteLater()
 
-        self.assets_layout.setSpacing(0)
-        self.assets_layout.addStretch()
+        self.hierarchy_layout.setSpacing(0)
+        self.hierarchy_layout.addStretch()
 
     def add_asset(self, asset):
         self.widgets.append(asset)
         self.hierarchy_layout.insertWidget(0, asset)
         asset.clicked.connect(self._on_item_clicked)
 
-    def add_node(self, node_name, node_params):
+    def add_node(self, node_id, node_name, node_path, node_params):
         new_node = NodeAsset(
+            uuid=node_id,
             name=node_name,
+            path=node_path,
             params=node_params
         )
         self.add_asset(new_node)
 
     def _on_item_clicked(self, widget, event):
         if widget is None:
-            self.updateProperties(None)
+            self.updateProperties.emit(None)
             return
-        if sp.dcc.object_exists(widget.asset):
+        else:
             for asset_widget in self.widgets:
                 if asset_widget != widget:
                     asset_widget.deselect()
                 else:
                     asset_widget.select()
             self.updateProperties.emit(widget)
-            # widget.set_select(item_state)
-        else:
-            self._on_refresh_hierarchy()
-            self.updateProperties.emit(None)
-
-    def _on_refresh_hierarchy(self):
-        self.clear_hierarchy()
-        # self.init_ui()
-        self.refresh.emit()
 
 
 class AssetProperties(QWidget, object):
     def __init__(self, parent=None):
         super(AssetProperties, self).__init__(parent=parent)
 
+        self._current_asset = None
+        self.widgets = list()
+
+        self.setMouseTracking(True)
+
+        self.custom_ui()
+        self.setup_signals()
+
+    def custom_ui(self):
         self.main_layout = QVBoxLayout()
         self.main_layout.setAlignment(Qt.AlignTop)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -367,11 +389,10 @@ class AssetProperties(QWidget, object):
         img_layout.addItem(QSpacerItem(15, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
         self.prop_img = QLabel()
         self.prop_img.setPixmap(solstice_resource.pixmap('solstice_logo', category='images').scaled(QSize(125, 125), Qt.KeepAspectRatio))
+        self.prop_lbl = solstice_splitters.Splitter('Solstice')
         img_layout.addWidget(self.prop_img)
         img_layout.addItem(QSpacerItem(15, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
-
-        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
-
+        self. main_layout.addWidget(self.prop_lbl)
 
         self.grid_layout = QGridLayout()
         self.grid_layout.setSpacing(2)
@@ -391,6 +412,55 @@ class AssetProperties(QWidget, object):
         self.props_layout.addStretch()
         scroll_widget.setLayout(self.props_layout)
         self.grid_layout.addWidget(scroll_area, 1, 0, 1, 4)
+
+    def setup_signals(self):
+        pass
+
+    def all_attributes(self):
+        all_attrs = list()
+        for i in range(self.hierarchy_layout.count()):
+            child = self.hierarchy_layout.itemAt(i)
+            if child.widget() is not None:
+                all_attrs.append(child.widget())
+
+        return all_attrs
+
+    def add_attribute(self, attr_name, attr_value=None):
+        if not self._current_asset:
+            return
+
+        attr_type = None
+        if attr_value is not None:
+            attr_type = type(attr_value)
+
+        if attr_type:
+            if attr_type in [unicode, str, basestring]:
+                new_attr = solstice_attributes.StringAttribute(node=self._current_asset, attr_name=attr_name, attr_value=attr_value)
+            elif attr_type is float:
+                new_attr = solstice_attributes.FloatAttribute(node=self._current_asset, attr_name=attr_name, attr_value=attr_value)
+            else:
+                new_attr = solstice_attributes.BaseAttributeWidget(node=self._current_asset, attr_name=attr_name, attr_value=attr_value)
+        else:
+            new_attr = solstice_attributes.BaseAttributeWidget(node=self._current_asset, attr_name=attr_name)
+        new_attr.hide_check()
+        new_attr.lock()
+        self.widgets.append(new_attr)
+        self.props_layout.insertWidget(0, new_attr)
+
+        return new_attr
+
+    def update_attributes(self, asset_widget):
+        self.clear_properties()
+        self._current_asset = asset_widget
+
+    def clear_properties(self):
+        del self.widgets[:]
+        while self.props_layout.count():
+            child = self.props_layout.takeAt(0)
+            if child.widget() is not None:
+                child.widget().deleteLater()
+        self.props_layout.setSpacing(0)
+        self.props_layout.addStretch()
 
 
 class ShotOverrides(QWidget, object):
@@ -491,7 +561,9 @@ class ShotAssembler(solstice_windows.Window, object):
         menubar = QMenuBar()
         file_menu = menubar.addMenu('File')
         self.load_action = QAction('Load', menubar_widget)
+        self.save_action = QAction('Save', menubar_widget)
         file_menu.addAction(self.load_action)
+        file_menu.addAction(self.save_action)
         menubar_layout.addWidget(menubar)
         self.main_layout.addWidget(menubar_widget)
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
@@ -522,6 +594,7 @@ class ShotAssembler(solstice_windows.Window, object):
 
         self.shot_assets.updateHierarchy.connect(self._on_update_hierarchy)
         self.shot_hierarchy.updateProperties.connect(self._on_update_properties)
+        self.generate_btn.clicked.connect(self._on_generate_shot)
 
     def _on_update_hierarchy(self):
         for asset in self.shot_assets.all_assets():
@@ -549,8 +622,22 @@ class ShotAssembler(solstice_windows.Window, object):
             sp.logger.error(e)
             return
 
-        for obj, params in asset_data.items():
-            self.shot_hierarchy.add_node(node_name=obj, node_params=params)
+        layout_data_version = asset_data['data_version']
+        exporter_version = asset_data['exporter_version']
+        if layout_data_version != sp.DataVersions.LAYOUT:
+            sp.logger.warning('Layout Asset File {} is not compatible with current format. Please contact TD!'.format(asset_path))
+            return
+        if exporter_version != solstice_shotexporter.ShotExporter.version:
+            sp.logger.warning('Layout Asset File {} was exported with an older version. Please contact TD!'.format(asset_path))
+            return
+
+        for node_id, node_info in asset_data['assets'].items():
+            self.shot_hierarchy.add_node(
+                node_id=node_id,
+                node_name=node_info['name'],
+                node_path=node_info['path'],
+                node_params=node_info['attrs']
+            )
 
     def _add_animation_asset(self, asset):
         asset_path = asset.asset
@@ -564,8 +651,6 @@ class ShotAssembler(solstice_windows.Window, object):
         except Exception as e:
             sp.logger.error(e)
             return
-
-        print(asset_data)
 
     def _add_fx_asset(self, asset):
         asset_path = asset.asset
@@ -581,20 +666,44 @@ class ShotAssembler(solstice_windows.Window, object):
             sp.logger.error(e)
             return
 
-        print(asset_data)
-
     def _on_update_properties(self, asset_widget):
         if not asset_widget:
             return
+
+        self.asset_props.update_attributes(asset_widget)
 
         if isinstance(asset_widget, NodeAsset):
             self._on_update_node_properties(asset_widget)
 
     def _on_update_node_properties(self, node_asset):
-        asset_icon = node_asset.node.get_icon()
+        asset_icon = node_asset.get_icon()
         if asset_icon:
             self.asset_props.prop_img.setPixmap(QPixmap.fromImage(img.base64_to_image(asset_icon[0].encode('utf-8'), image_format=asset_icon[1])).scaled(200, 200, Qt.KeepAspectRatio))
 
+        self.asset_props.prop_lbl.set_text(node_asset.name)
+
+        for attr_name, attr_value in node_asset.get_attributes().items():
+            self.asset_props.add_attribute(attr_name=attr_name, attr_value=attr_value)
+
+    def _on_generate_shot(self):
+        if not sp.is_maya():
+            sp.logger.warning('Shoot generation is only available in Maya!')
+            return
+
+        from solstice_pipeline.solstice_utils import solstice_maya_utils
+
+        for node_asset in self.shot_hierarchy.all_hierarchy():
+            track = solstice_maya_utils.TrackNodes(full_path=True)
+            track.load()
+            node_asset.reference_alembic()
+            res = track.get_delta()
+            if node_asset.name not in res:
+                sp.logger.warning('Node {} is not loaded!'.format(node_asset.name))
+                continue
+
+            for attr, attr_value in node_asset.get_attributes().items():
+                if type(attr_value) is float:
+                    sp.dcc.set_float_attribute_value(node=node_asset.name, attribute_name=attr, attribute_value=attr_value)
 
 def run():
     win = ShotAssembler().show()

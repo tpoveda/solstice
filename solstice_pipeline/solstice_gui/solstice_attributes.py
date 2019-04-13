@@ -11,19 +11,24 @@
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 
+from solstice_pipeline.solstice_gui import solstice_splitters
+
 
 class BaseAttributeWidget(QWidget, object):
 
     toggled = Signal(str, bool)
 
-    def __init__(self, node, attr_name, parent=None):
+    def __init__(self, node, attr_name, attr_value=None, parent=None):
         super(BaseAttributeWidget, self).__init__(parent=parent)
 
         self._node = node
-        self._attribute_name = attr_name
 
         self.custom_ui()
         self.setup_signals()
+
+        self.attr_lbl.setText(attr_name)
+        if attr_value:
+            self.set_value(attr_value)
 
     def custom_ui(self):
         self.main_layout = QVBoxLayout()
@@ -34,7 +39,7 @@ class BaseAttributeWidget(QWidget, object):
         self.item_widget = QFrame()
         self.item_widget.setFrameStyle(QFrame.Raised | QFrame.StyledPanel)
         self.item_widget.setStyleSheet('QFrame { background-color: rgb(55,55,55);}')
-        self.item_layout = QGridLayout()
+        self.item_layout = QHBoxLayout()
         # self.item_layout.setColumnStretch(1, 3)
         self.item_layout.setAlignment(Qt.AlignLeft)
         self.item_layout.setContentsMargins(0, 0, 0, 0)
@@ -43,11 +48,16 @@ class BaseAttributeWidget(QWidget, object):
 
         self.attr_cbx = QCheckBox()
         self.attr_cbx.setChecked(True)
-        self.item_layout.addWidget(self.attr_cbx, 0, 1)
+        self.item_layout.addWidget(self.attr_cbx)
 
         self.attr_lbl = QLabel()
-        self.attr_lbl.setText(str(self._attribute_name))
-        self.item_layout.addWidget(self.attr_lbl, 0, 2)
+        self.item_layout.addWidget(self.attr_lbl)
+
+        self.attr_widget = self.attribute_widget()
+        if self.attr_widget:
+            self.attr_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            self.item_layout.addWidget(solstice_splitters.get_horizontal_separator_widget())
+            self.item_layout.addWidget(self.attr_widget)
 
         self.setMinimumHeight(25)
 
@@ -56,11 +66,20 @@ class BaseAttributeWidget(QWidget, object):
 
     @property
     def name(self):
-        return self._attribute_name
+        return self.attr_lbl.text()
 
     @property
     def node(self):
         return self._node
+
+    def attribute_widget(self):
+        return None
+
+    def set_value(self, value):
+        pass
+
+    def hide_check(self):
+        self.attr_cbx.hide()
 
     def check(self):
         self.attr_cbx.blockSignals(True)
@@ -77,5 +96,38 @@ class BaseAttributeWidget(QWidget, object):
         self.attr_cbx.setChecked(not self.attr_cbx.isChecked())
         self.attr_cbx.blockSignals(False)
 
+    def lock(self):
+        if self.attr_widget:
+            self.attr_widget.setEnabled(False)
+
+    def unlock(self):
+        if self.attr_widget:
+            self.attr_widget.setEnabled(True)
+
     def _on_toggle_cbx(self, flag):
         self.toggled.emit(self.name, flag)
+
+
+class FloatAttribute(BaseAttributeWidget, object):
+    def __init__(self, node, attr_name, attr_value=None, parent=None):
+        super(FloatAttribute, self).__init__(node=node, attr_name=attr_name, attr_value=attr_value, parent=parent)
+
+    def attribute_widget(self):
+        w = QDoubleSpinBox()
+        w.setDecimals(3)
+        w.setLocale(QLocale.C)
+        return w
+
+    def set_value(self, value):
+        self.attr_widget.setValue(value)
+
+
+class StringAttribute(BaseAttributeWidget, object):
+    def __init__(self, node, attr_name, attr_value=None, parent=None):
+        super(StringAttribute, self).__init__(node=node, attr_name=attr_name, attr_value=attr_value, parent=parent)
+
+    def attribute_widget(self):
+        return QLineEdit()
+
+    def set_value(self, value):
+        self.attr_widget.setText(value)

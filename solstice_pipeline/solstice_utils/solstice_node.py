@@ -9,6 +9,7 @@
 import os
 import re
 import ast
+import string
 import collections
 
 import solstice_pipeline as sp
@@ -479,6 +480,40 @@ class SolsticeAssetNode(SolsticeNode, object):
             if obj.endswith('root_ctrl'):
                 return obj
 
+    def open_asset_file(self, file_type, status):
+        file_path = self.get_asset_file(file_type=file_type, status=status)
+        if os.path.isfile(file_path):
+            artella.open_file_in_maya(file_path=file_path)
+
+    def reference_asset_file(self):
+        asset_name = self._name + '.ma'
+        local_max_versions = self.get_max_local_versions()
+        if local_max_versions['model']:
+            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', asset_name)
+            if os.path.isfile(published_path):
+                artella.reference_file_in_maya(file_path=published_path)
+
+    def reference_alembic_file(self):
+        from solstice_pipeline.solstice_tools import solstice_alembicmanager
+        alembic_name = self._name + '.abc'
+        local_max_versions = self.get_max_local_versions()
+        if local_max_versions['model']:
+            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', alembic_name)
+            if os.path.isfile(published_path):
+                if sp.is_houdini():
+                    solstice_alembicmanager.AlembicImporter.import_alembic(published_path)
+                else:
+                    solstice_alembicmanager.AlembicImporter.reference_alembic(published_path)
+
+    def import_standin_file(self):
+        from solstice_pipeline.solstice_tools import solstice_standinmanager
+        standin_name = self._name + '.ass'
+        local_max_versions = self.get_max_local_versions()
+        if local_max_versions['model']:
+            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', standin_name)
+            if os.path.isfile(published_path):
+                solstice_standinmanager.StandinImporter.import_standin(published_path)
+
     def _get_asset_path(self):
         assets_path = sp.get_solstice_assets_path()
         if assets_path is None or not os.path.exists(assets_path):
@@ -489,6 +524,11 @@ class SolsticeAssetNode(SolsticeNode, object):
             asset_name = os.path.basename(root)
             if asset_name == self.get_short_name():
                 return os.path.normpath(asset_path)
+
+            check_name = self.get_short_name().rstrip(string.digits)
+            if asset_name == check_name:
+                return os.path.normpath(asset_path)
+
 
 
 class SolsticeTagDataNode(object):

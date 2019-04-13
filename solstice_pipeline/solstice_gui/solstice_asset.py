@@ -690,11 +690,6 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
         sp.logger.debug('{0} synchronized in {1} seconds'.format(self._name, elapsed_time))
         self.syncFinished.emit()
 
-    def open_asset_file(self, file_type, status):
-        file_path = self.get_asset_file(file_type=file_type, status=status)
-        if os.path.isfile(file_path):
-            artella.open_file_in_maya(file_path=file_path)
-
     def export_alembic_file(self, start_frame=1, end_frame=1):
         from solstice_pipeline.solstice_tools import solstice_alembicmanager
         export_path = os.path.dirname(self.get_asset_file(file_type='model', status='working'))
@@ -741,35 +736,6 @@ class AssetWidget(QWidget, solstice_node.SolsticeAssetNode):
             published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', asset_name)
             if os.path.isfile(published_path):
                 artella.import_file_in_maya(file_path=published_path)
-
-    def reference_asset_file(self):
-        asset_name = self._name + '.ma'
-        local_max_versions = self.get_max_local_versions()
-        if local_max_versions['model']:
-            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', asset_name)
-            if os.path.isfile(published_path):
-                artella.reference_file_in_maya(file_path=published_path)
-
-    def reference_alembic_file(self):
-        from solstice_pipeline.solstice_tools import solstice_alembicmanager
-        alembic_name = self._name + '.abc'
-        local_max_versions = self.get_max_local_versions()
-        if local_max_versions['model']:
-            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', alembic_name)
-            if os.path.isfile(published_path):
-                if sp.is_houdini():
-                    solstice_alembicmanager.AlembicImporter.import_alembic(published_path)
-                else:
-                    solstice_alembicmanager.AlembicImporter.reference_alembic(published_path)
-
-    def import_standin_file(self):
-        from solstice_pipeline.solstice_tools import solstice_standinmanager
-        standin_name = self._name + '.ass'
-        local_max_versions = self.get_max_local_versions()
-        if local_max_versions['model']:
-            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', standin_name)
-            if os.path.isfile(published_path):
-                solstice_standinmanager.StandinImporter.import_standin(published_path)
 
     def open_textures_folder(self, status):
         if status != 'working' and status != 'published':

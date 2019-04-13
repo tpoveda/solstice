@@ -227,6 +227,27 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return node_parent
 
     @staticmethod
+    def node_root(node, full_path=True):
+        """
+        Returns hierarchy root node of the given node
+        :param node: str
+        :param full_path: bool
+        :return: str
+        """
+
+        if not node:
+            return None
+
+        n = node
+        while True:
+            parent = cmds.listRelatives(n, parent=True, fullPath=full_path)
+            if not parent:
+                break
+            n = parent[0]
+
+        return n
+
+    @staticmethod
     def set_parent(node, parent):
         """
         Sets the node parent to the given parent
@@ -468,6 +489,18 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         """
 
         return cmds.setAttr('{}.{}'.format(node, attribute_name), int(attribute_value))
+
+    @staticmethod
+    def set_float_attribute_value(node, attribute_name, attribute_value):
+        """
+        Sets the integer value of the given attribute in the given node
+        :param node: str
+        :param attribute_name: str
+        :param attribute_value: int
+        :return:
+        """
+
+        return cmds.setAttr('{}.{}'.format(node, attribute_name), float(attribute_value))
 
     @staticmethod
     def set_string_attribute_value(node, attribute_name, attribute_value):

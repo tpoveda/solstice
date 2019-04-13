@@ -155,6 +155,9 @@
     "Added Import functionality in Solstice Alembic Manager for Houdini",
     "Solstice Pipelinizer now supports Houdini",
     "Added Shelf support for Houdini",
-    "Added new shelfs for FX and Groom departments"
+    "Added new shelfs for FX and Groom departments",
+    "Added first version for Shot Exporter Tool for Layout and Animation Files",
+    "Added first version for Shot Assembler for Layout and Animation Files",
+    "Some fixes in shader reload system to support Alembic Deformed Shapes"
   ]
 }

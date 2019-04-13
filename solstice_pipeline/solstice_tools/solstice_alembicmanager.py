@@ -1309,8 +1309,8 @@ class AlembicImporter(QWidget, object):
                 sp.logger.warning('Alembic Reference is only supported in Maya!')
                 return None
         else:
-
             res = solstice_alembic.import_alembic(abc_file, mode='import', nodes=nodes, parent=sel[0])
+            res = [res]
 
         if self.auto_smooth_display.isChecked():
             for obj in res:

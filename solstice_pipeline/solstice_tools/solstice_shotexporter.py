@@ -28,8 +28,14 @@ MUST_ATTRS = [
     'rotateX', 'rotateY', 'rotateZ',
     'scaleX', 'scaleY', 'scaleZ']
 
+ABC_ATTRS = [
+    'speed', 'offset', 'abc_file', 'time', 'startFrame', 'endFrame', 'cycleType'
+]
+
 
 class AbstractExportList(QWidget, object):
+
+    EXPORT_TYPE = 'EXPORT'
 
     updateProperties = Signal(QObject)
     refresh = Signal()
@@ -48,8 +54,8 @@ class AbstractExportList(QWidget, object):
     def custom_ui(self):
         self.main_layout = QVBoxLayout()
         self.main_layout.setAlignment(Qt.AlignTop)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
+        self.main_layout.setContentsMargins(2, 2, 2, 2)
+        self.main_layout.setSpacing(2)
         self.setLayout(self.main_layout)
 
         self.refresh_btn = QPushButton('Reload')
@@ -57,7 +63,7 @@ class AbstractExportList(QWidget, object):
         self.refresh_btn.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
         self.main_layout.addWidget(self.refresh_btn)
 
-        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+        self.main_layout.addWidget(solstice_splitters.Splitter(self.EXPORT_TYPE))
 
         self.grid_layout = QGridLayout()
         self.grid_layout.setSpacing(2)
@@ -310,6 +316,8 @@ class ExporterAssetItem(AbstractExporterItemWidget, object):
 
 class LayoutExportList(AbstractExportList, object):
 
+    EXPORT_TYPE = 'LAYOUT NODES'
+
     def __init__(self, parent=None):
         super(LayoutExportList, self).__init__(parent=parent)
 
@@ -323,7 +331,7 @@ class LayoutExportList(AbstractExportList, object):
 
     def _on_item_clicked(self, widget, event):
         if widget is None:
-            self.updateProperties(None)
+            self.updateProperties.emit(None)
             return
 
         if sp.dcc.object_exists(widget.asset.name):
@@ -388,6 +396,9 @@ class LayoutExporter(QWidget, object):
     def init_ui(self):
         self.exporter_list.init_ui()
 
+    def refresh(self):
+        self.exporter_list.refresh_exporter()
+
     def _on_update_properties(self, asset_widget):
         if asset_widget and sp.dcc.object_exists(asset_widget.asset.name):
             self.props_list.update_attributes(asset_widget)
@@ -399,23 +410,43 @@ class LayoutExporter(QWidget, object):
         self.props_list.clear_properties()
 
     def _on_save(self):
+        if not sp.is_maya():
+            sp.logger.warning('Shot Export only works for Maya!')
+            return
+
+        import maya.cmds as cmds
+
         scene_name = sp.dcc.scene_name()
         if not scene_name:
             scene_name = 'undefined'
+        else:
+            scene_name = os.path.basename(scene_name)
 
-        export_path = os.path.join('D:/solstice', scene_name+'.layout')
+        export_path = sp.dcc.select_folder_dialog(title='Select Layout Export Path', start_directory=sp.get_solstice_project_path())
+        if not export_path:
+            return
+
+        export_path = os.path.join(export_path, scene_name+'.'+sp.DataExtensions.LAYOUT)
 
         layout_info = dict()
+        layout_info['data_version'] = sp.DataVersions.LAYOUT
+        layout_info['exporter_version'] = ShotExporter.version
+        layout_info['assets'] = dict()
         for w in self.exporter_list.all_widgets():
             asset_name = w.asset.name
-            layout_info[asset_name] = dict()
-            layout_info[asset_name]['path'] = os.path.relpath(w.asset.asset_path, sp.get_solstice_project_path())
-            layout_info[asset_name]['attrs'] = dict()
+            # asset_name = os.path.basename(asset_path)
+            asset_uuid = cmds.ls(asset_name, uuid=True)[0]
+            asset_path = os.path.relpath(w.asset.asset_path, sp.get_solstice_project_path())
+            layout_info['assets'][asset_uuid] = dict()
+            layout_info['assets'][asset_uuid]['name'] = asset_name
+            layout_info['assets'][asset_uuid]['path'] = asset_path
+            layout_info['assets'][asset_uuid]['attrs'] = dict()
+            layout_info['assets'][asset_uuid]['overrides'] = list()
             for attr, flag in w.attrs.items():
                 if not flag and attr not in MUST_ATTRS:
                     continue
                 attr_value = sp.dcc.get_attribute_value(node=asset_name, attribute_name=attr)
-                layout_info[asset_name]['attrs'][attr] = attr_value
+                layout_info['assets'][asset_uuid]['attrs'][attr] = attr_value
 
         try:
             with open(export_path, 'w') as f:
@@ -424,19 +455,193 @@ class LayoutExporter(QWidget, object):
             sp.logger.error(str(e))
 
 
+class AnimationAssetItem(AbstractExporterItemWidget, object):
+
+    clicked = Signal(QObject, QEvent)
+    contextRequested = Signal(QObject, QAction)
+
+    def __init__(self, asset, alembic_node, parent=None):
+
+        self.abc_node = alembic_node
+        self.abc_attrs = dict()
+
+        super(AnimationAssetItem, self).__init__(asset, parent)
+
+        self._update_attrs()
+
+    def custom_ui(self):
+        super(AnimationAssetItem, self).custom_ui()
+
+        self.item_widget.setFrameStyle(QFrame.Raised | QFrame.StyledPanel)
+        self.item_widget.setStyleSheet('QFrame { background-color: rgb(55,55,55);}')
+
+        self.asset_lbl = QLabel(self.asset.name)
+        self.item_layout.addWidget(self.asset_lbl, 0, 1, 1, 1)
+
+        self.item_layout.setColumnStretch(1, 5)
+        self.item_layout.setAlignment(Qt.AlignLeft)
+
+    def _update_attrs(self):
+        if self.attrs:
+            return
+
+        # Store transform attributes
+        xform_attrs = sp.dcc.list_attributes(self.asset.name)
+        for attr in xform_attrs:
+            if attr not in MUST_ATTRS:
+                continue
+            self.attrs[attr] = True
+
+        # Store Alembic Node attrs
+        abc_attrs = sp.dcc.list_attributes(self.abc_node)
+        for attr in abc_attrs:
+            if attr not in ABC_ATTRS:
+                continue
+            self.abc_attrs[attr] = True
+
+
+class AnimationExportList(AbstractExportList, object):
+
+    EXPORT_TYPE = 'ANIMATION NODES'
+
+    def __init__(self, parent=None):
+        super(AnimationExportList, self).__init__(parent=parent)
+
+    def init_ui(self):
+        alembics = sp.get_alembics()
+
+        for asset in alembics:
+            asset_widget = AnimationAssetItem(asset[0], alembic_node=asset[1])
+            self.append_widget(asset_widget)
+            self.widget_tree[asset_widget] = list()
+            asset_widget.clicked.connect(self._on_item_clicked)
+
+    def _on_item_clicked(self, widget, event):
+        if widget is None:
+            self.updateProperties.emit(None)
+            return
+
+        if sp.dcc.object_exists(widget.asset.name):
+            for asset_widget, file_items in self.widget_tree.items():
+                if asset_widget != widget:
+                    asset_widget.deselect()
+                else:
+                    asset_widget.select()
+            self.updateProperties.emit(widget)
+            # widget.set_select(item_state)
+        else:
+            self._on_refresh_exporter()
+            self.updateProperties.emit(None)
+
+
+class AnimationPropertiesWidget(AbstractPropertiesWidget, object):
+    def __init__(self, parent=None):
+        super(AnimationPropertiesWidget, self).__init__(parent=parent)
+
+    def update_attributes(self, asset_widget):
+        if asset_widget == self._current_asset:
+            return
+
+        self.clear_properties()
+        self._current_asset = asset_widget
+
+        xform_attrs = sp.dcc.list_attributes(asset_widget.asset.name)
+        for attr in xform_attrs:
+            if attr not in MUST_ATTRS:
+                continue
+            new_attr = self.add_attribute(attr)
+            if self._current_asset.attrs[new_attr.name] is True:
+                new_attr.check()
+            else:
+                new_attr.uncheck()
+
+        abc_attrs = sp.dcc.list_attributes(asset_widget.abc_node)
+        for attr in abc_attrs:
+            if attr not in ABC_ATTRS:
+                continue
+            new_attr = self.add_attribute(attr)
+            if self._current_asset.abc_attrs[new_attr.name] is True:
+                new_attr.check()
+            else:
+                new_attr.uncheck()
+
+    def _on_update_attribute(self, attr_name, flag):
+        if not self._current_asset:
+            return
+
+        if attr_name in self._current_asset.attrs.keys():
+            self._current_asset.attrs[attr_name] = flag
+            return
+        elif attr_name in self._current_asset.abc_attrs.keys():
+            self._current_asset.abc_attrs[attr_name] = flag
+            return
+
+        sp.logger.warning('Impossible to udpate attribute {} because node {} has no that attribute!'.format(attr_name, self._current_asset.asset))
+
+
 class AnimationExporter(QWidget, object):
     def __init__(self, parent=None):
         super(AnimationExporter, self).__init__(parent=parent)
 
+        self.custom_ui()
+        self.setup_signals()
+
+    def custom_ui(self):
         self.main_layout = QVBoxLayout()
         self.main_layout.setAlignment(Qt.AlignTop)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
         self.setLayout(self.main_layout)
 
-        self.reload_btn = QPushButton('RELOAD')
-        self.main_layout.addWidget(self.reload_btn)
+        self.exporter_list = AnimationExportList()
+        self.anims_list = AnimationPropertiesWidget()
+
+        main_splitter = QSplitter(Qt.Horizontal)
+        main_splitter.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.main_layout.addWidget(main_splitter)
+
+        main_splitter.addWidget(self.exporter_list)
+        main_splitter.addWidget(self.anims_list)
+
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+        self.save_btn = QPushButton('SAVE ANIMATIONS')
+        self.save_btn.setMinimumHeight(30)
+        self.save_btn.setMinimumWidth(80)
+        save_layout = QHBoxLayout()
+        save_layout.addItem(QSpacerItem(15, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
+        save_layout.addWidget(self.save_btn)
+        save_layout.addItem(QSpacerItem(15, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+        self.main_layout.addLayout(save_layout)
+
+    def setup_signals(self):
+        self.exporter_list.updateProperties.connect(self._on_update_properties)
+        self.exporter_list.refresh.connect(self._on_clear_properties)
+        self.save_btn.clicked.connect(self._on_save)
+
+    def init_ui(self):
+        self.exporter_list.init_ui()
+
+    def refresh(self):
+        self.exporter_list.refresh_exporter()
+
+    def _on_update_properties(self, asset_widget):
+        if asset_widget and sp.dcc.object_exists(asset_widget.asset.name):
+            self.anims_list.update_attributes(asset_widget)
+        else:
+            sp.logger.warning('Impossible to update properties because object {} does not exists!'.format(asset_widget.asset))
+            self.anims_list.clear_properties()
+
+    def _on_clear_properties(self):
+        self.anims_list.clear_properties()
+
+    def _on_save(self):
+        if not sp.is_maya():
+            sp.logger.warning('Shot Export only works for Maya!')
+            return
+
+        print('Saving Animation File ...')
 
 
 class FXExporter(QWidget, object):
@@ -452,6 +657,45 @@ class FXExporter(QWidget, object):
         self.reload_btn = QPushButton('RELOAD')
         self.main_layout.addWidget(self.reload_btn)
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+    def refresh(self):
+        pass
+
+
+class LightingExporter(QWidget, object):
+    def __init__(self, parent=None):
+        super(LightingExporter, self).__init__(parent=parent)
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setAlignment(Qt.AlignTop)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
+        self.setLayout(self.main_layout)
+
+        self.reload_btn = QPushButton('RELOAD')
+        self.main_layout.addWidget(self.reload_btn)
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+    def refresh(self):
+        pass
+
+
+class CamerasExporter(QWidget, object):
+    def __init__(self, parent=None):
+        super(CamerasExporter, self).__init__(parent=parent)
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setAlignment(Qt.AlignTop)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
+        self.setLayout(self.main_layout)
+
+        self.reload_btn = QPushButton('RELOAD')
+        self.main_layout.addWidget(self.reload_btn)
+        self.main_layout.addLayout(solstice_splitters.SplitterLayout())
+
+    def refresh(self):
+        pass
 
 
 class ShotExporter(solstice_windows.Window, object):
@@ -474,22 +718,31 @@ class ShotExporter(solstice_windows.Window, object):
 
         self.layout_exporter = LayoutExporter()
         self.anim_exporter = AnimationExporter()
-        self.fx_exporter = AnimationExporter()
+        self.fx_exporter = FXExporter()
+        self.light_exporter = LightingExporter()
+        self.cameras_exporter = CamerasExporter()
 
         self.main_tabs.addTab(self.layout_exporter, 'Layout')
         self.main_tabs.addTab(self.anim_exporter, 'Animation')
         self.main_tabs.addTab(self.fx_exporter, 'FX')
+        self.main_tabs.addTab(self.light_exporter, 'Lighting')
+        self.main_tabs.addTab(self.cameras_exporter, 'Cameras')
 
         self.layout_exporter.init_ui()
 
-    #     self.main_tabs.currentChanged.connect(self._on_change_tab)
-    #
-    # def _on_change_tab(self, tab_index):
-    #     if tab_index == 1:
-    #         self.alembic_exporter.refresh()
+        self.main_tabs.currentChanged.connect(self._on_change_tab)
 
-
-
+    def _on_change_tab(self, tab_index):
+        if tab_index == 0:
+            self.layout_exporter.refresh()
+        if tab_index == 1:
+            self.anim_exporter.refresh()
+        if tab_index == 2:
+            self.fx_exporter.refresh()
+        elif tab_index == 3:
+            self.light_exporter.refresh()
+        elif tab_index == 4:
+            self.cameras_exporter.refresh()
 
 def run():
     win = ShotExporter().show()

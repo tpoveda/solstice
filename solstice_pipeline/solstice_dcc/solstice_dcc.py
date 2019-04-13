@@ -212,6 +212,17 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function node_parent() not implemented!')
 
     @staticmethod
+    def node_root(node, full_path=True):
+        """
+        Returns hierarchy root node of the given node
+        :param node: str
+        :param full_path: bool
+        :return: str
+        """
+
+        raise NotImplementedError('abstract DCC function node_root() not implemented!')
+
+    @staticmethod
     def set_parent(node, parent):
         """
         Sets the node parent to the given parent
@@ -428,6 +439,18 @@ class SolsticeDCC(object):
 
     @staticmethod
     def set_integer_attribute_value(node, attribute_name, attribute_value):
+        """
+        Sets the integer value of the given attribute in the given node
+        :param node: str
+        :param attribute_name: str
+        :param attribute_value: int
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function set_string_attribute_value() not implemented!')
+
+    @staticmethod
+    def set_float_attribute_value(node, attribute_name, attribute_value):
         """
         Sets the integer value of the given attribute in the given node
         :param node: str

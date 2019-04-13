@@ -78,10 +78,11 @@ class TrackNodes(object):
     new_nodes = track_nodes.get_delta()
     """
 
-    def __init__(self):
+    def __init__(self, full_path=False):
         self._nodes = None
         self._node_type = None
         self._delta = None
+        self._full_path = full_path
 
     def load(self, node_type=None):
         """
@@ -91,7 +92,7 @@ class TrackNodes(object):
 
         self._node_type = node_type
         if self._node_type:
-            self._nodes = cmds.ls(type=node_type)
+            self._nodes = cmds.ls(type=node_type, l=self._full_path)
         else:
             self._nodes = cmds.ls()
 
@@ -102,9 +103,9 @@ class TrackNodes(object):
         """
 
         if self._node_type:
-            current_nodes = cmds.ls(type=self._node_type)
+            current_nodes = cmds.ls(type=self._node_type, l=self._full_path)
         else:
-            current_nodes = cmds.ls()
+            current_nodes = cmds.ls(l=self._full_path)
 
         new_set = set(current_nodes).difference(self._nodes)
 

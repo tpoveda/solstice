@@ -51,6 +51,20 @@ class SolsticeDCC(object):
     Nuke = 'nuke'
 
 
+class DataVersions(object):
+    LAYOUT = '0.0.1'
+    ANIM = '0.0.1'
+    FX = '0.0.1'
+    LIGHTING = '0.0.1'
+
+
+class DataExtensions(object):
+    LAYOUT = 'layout'
+    ANIM = 'anim'
+    FX = 'fx'
+    LIGHTING = 'light'
+
+
 class SolsticePipeline(QObject):
     def __init__(self):
         super(SolsticePipeline, self).__init__()
@@ -732,12 +746,16 @@ def get_assets(as_nodes=True):
 
     asset_nodes = list()
 
+    abc_nodes = get_alembics(as_nodes=False, only_roots=True)
+
     # We find tag data nodes
     tag_data_nodes = get_tag_data_nodes()
     for tag_data in tag_data_nodes:
         cns = dcc.list_connections(node=tag_data, attribute_name='node')
         if cns:
             asset = cns[0]
+            if asset in abc_nodes:
+                continue
             if as_nodes:
                 asset_nodes.append(solstice_node.SolsticeAssetNode(node=asset))
             else:
@@ -749,11 +767,50 @@ def get_assets(as_nodes=True):
         tag_info_dict = dcc.get_attribute_value(node=tag_info, attribute_name='tag_info')
         if tag_info_dict:
             if as_nodes:
+                if tag_info in abc_nodes:
+                    continue
                 asset_nodes.append(solstice_node.SolsticeAssetNode(node=tag_info))
             else:
                 asset_nodes.append(tag_info)
 
     return asset_nodes
+
+
+def get_alembics(as_nodes=True, only_roots=False):
+
+    from solstice_pipeline.solstice_utils import solstice_node
+
+    all_alembic_roots = list()
+    added_roots = list()
+
+    abc_nodes = list()
+    objs = dcc.all_scene_objects()
+    for obj in objs:
+        if dcc.node_type(obj) == 'AlembicNode':
+            abc_nodes.append(obj)
+
+    for abc in abc_nodes:
+        cns = dcc.list_connections(abc, 'transOp')
+        for cn in cns:
+            cn_root = dcc.node_root(cn)
+            if cn_root in added_roots:
+                continue
+            if dcc.attribute_exists(cn_root, 'tag_info'):
+                if as_nodes:
+                    if only_roots:
+                        all_alembic_roots.append(solstice_node.SolsticeAssetNode(node=cn_root))
+                    else:
+                        all_alembic_roots.append((solstice_node.SolsticeAssetNode(node=cn_root), abc))
+                else:
+                    if only_roots:
+                        all_alembic_roots.append(cn_root)
+                    else:
+                        all_alembic_roots.append((cn_root, abc))
+                added_roots.append(cn_root)
+
+    return all_alembic_roots
+
+
 
 
 def init():

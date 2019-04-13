@@ -258,7 +258,7 @@ class ShadingNetwork(object):
             try:
                 cmds.connectAttr('{0}.{1}'.format(con_node, con_attr), '{0}.{1}'.format(shader_node, attr), force=True)
             except Exception:
-                sp.logger.debug('ShaderLibrary: Attribute Connection {0} skipped!'.format(attr))
+                # sp.logger.debug('ShaderLibrary: Attribute Connection {0} skipped!'.format(attr))
                 continue
 
         if 'notes' not in attrs['attr'] and cmds.objExists(shader_node) and cmds.attributeQuery('notes', node=shader_node, exists=True):
@@ -823,7 +823,6 @@ class ShaderLibrary(solstice_windows.Window, object):
                 sp.logger.error('Last published shading file {} is not sync in your computer!'.format(shading_path))
                 return
 
-        print(shading_path)
         cmds.file(shading_path, o=True, f=True)
 
         all_shading_groups = list()
@@ -959,6 +958,8 @@ class ShaderLibrary(solstice_windows.Window, object):
                     continue
                 for shape in mesh_shapes:
                     shape_name = shape.split(':')[-1]
+                    if shape_name.endswith('Deformed'):
+                        shape_name = shape_name.replace('Deformed', '')
                     for shader_mesh, shader_data in shaders.items():
                         for shader_shape, shader_group in shader_data.items():
                             shader_shape_name = shader_shape.split('|')[-1]
