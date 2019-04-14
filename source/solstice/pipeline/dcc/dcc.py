@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_dcc.py
-# by Tomas Poveda
-# Base DCC abstract definition class
-# ______________________________________________________________________
-# ==================================================================="""
 
 """
 Module that contains abstract definition of basic DCC functions
 """
 
 from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 
 class SolsticeDCC(object):
@@ -288,7 +286,8 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function list_children() not implemented!')
 
     @staticmethod
-    def list_relatives(node, all_hierarchy=True, full_path=True, relative_type=None, shapes=False, intermediate_shapes=False):
+    def list_relatives(
+            node, all_hierarchy=True, full_path=True, relative_type=None, shapes=False, intermediate_shapes=False):
         """
         Returns a list of relative nodes of the given node
         :param node:

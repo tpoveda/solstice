@@ -17,7 +17,6 @@ import traceback
 import webbrowser
 
 from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.resources import solstice_resources
 from pipeline.dcc import dcc
 
 # =================================================================================
@@ -263,7 +262,7 @@ class SolsticePipeline(QObject):
 
         self.logger.debug('Building Solstice Tools Shelf ...')
 
-        from gui import shelf
+        from source.solstice.pipeline.utils import shelf
 
         try:
             s_shelf = shelf.SolsticeShelf()
@@ -282,7 +281,7 @@ class SolsticePipeline(QObject):
 
         self.logger.debug('Building Solstice Tools Menu ...')
 
-        from gui import menu
+        from source.solstice.pipeline.utils import menu
 
         if is_maya():
             from utils import mayautils

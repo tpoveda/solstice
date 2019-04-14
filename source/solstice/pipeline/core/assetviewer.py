@@ -1,31 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_assetviewer.py
-# by Tomas Poveda
-# Widgets that shows all the items of a specific directory
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+ Widgets that shows all the items of a specific directory
+ """
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 from functools import partial
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.gui import grid, asset
-from pipeline.utils import pythonutils as utils
-from pipeline.gui import syncdialog
-
-reload(asset)
+import solstice.pipeline as sp
+from solstice.pipeline.gui import grid
 
 
 class AssetViewer(grid.GridWidget, object):
-
-
-
     def __init__(self, assets_path, item_pressed_callback, simple_assets=False, checkable_assets=False, show_only_published_assets=False, parent=None, column_count=4):
         super(AssetViewer, self).__init__(parent=parent)
 

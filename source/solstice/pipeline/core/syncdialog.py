@@ -1,23 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_sync_dialog.py
-# by Tomas Poveda
-# Dialog used to synchronize info between Artella and Maya
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Dialog used to synchronize info between Artella and Maya
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import threading
 import traceback
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.utils import artellautils as artella
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.utils import artellautils as artella
+from solstice.pipeline.resources import resource
 
 
 class SolsticeSyncSplash(QSplashScreen, object):
