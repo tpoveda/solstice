@@ -21,6 +21,7 @@ import solstice_resources
 import solstice_launcher_utils
 import solstice_maya_utils
 import solstice_houdini_utils
+import solstice_nuke_utils
 
 from PySide.QtGui import *
 from PySide.QtCore import *
@@ -35,6 +36,7 @@ MAYA_VERSION = 2019
 class SolsticeDccs(object):
     Maya = 'Maya'
     Houdini = 'Houdini'
+    Nuke = 'Nuke'
 
 
 class SolsticeLauncher(QObject, object):
@@ -61,10 +63,13 @@ class SolsticeLauncher(QObject, object):
 
         maya_location = solstice_launcher_utils.get_maya_installation(2019)
         houdini_location = solstice_launcher_utils.get_houdini_installation()
-        if maya_location and not houdini_location:
+        nuke_location = solstice_launcher_utils.get_nuke_installation()
+        if maya_location and not houdini_location and not nuke_location:
             self.selected_dcc = SolsticeDccs.Maya
-        if houdini_location and not maya_location:
+        elif houdini_location and not maya_location and not nuke_location:
             self.selected_dcc = SolsticeDccs.Houdini
+        elif nuke_location and not maya_location and not houdini_location:
+            self.selected_dcc = SolsticeDccs.Nuke
 
         if self.selected_dcc is None:
             dcc_selector = DCCSelector()
@@ -72,7 +77,7 @@ class SolsticeLauncher(QObject, object):
             self.selected_dcc = dcc_selector.selected_dcc
 
         if self.selected_dcc is None:
-            QMessageBox.information(None, 'Maya and Houdini installations not found', 'Solstice Launcher cannot launch any supported DCC. Closing it ...!')
+            QMessageBox.information(None, 'Maya and Houdini installations not found', 'Solstice Launcher cannot launch non supported DCC. Closing it ...!')
             sys.exit()
 
         dcc_install_path = None
@@ -80,6 +85,8 @@ class SolsticeLauncher(QObject, object):
             dcc_install_path = maya_location
         elif self.selected_dcc == SolsticeDccs.Houdini:
             dcc_install_path = houdini_location
+        elif self.selected_dcc == SolsticeDccs.Nuke:
+            dcc_install_path = nuke_location
 
         self.setup_ui()
 
@@ -233,8 +240,10 @@ class SolsticeLauncher(QObject, object):
             ba = QByteArray.fromBase64(solstice_resources.maya_splash_code)
         elif self.selected_dcc == SolsticeDccs.Houdini:
             ba = QByteArray.fromBase64(solstice_resources.houdini_splash_code)
+        elif self.selected_dcc == SolsticeDccs.Nuke:
+            ba = QByteArray.fromBase64(solstice_resources.nuke_splash_code)
         else:
-            QMessageBox.information(None, 'No supported DCC found!', 'Solstice Launcher cannot launch any supported DCC. Closing it ...!')
+            QMessageBox.information(None, 'No supported DCC found!', 'Solstice Launcher cannot launch non supported DCC. Closing it ...!')
             return
 
         image = QImage.fromData(ba, 'PNG')
@@ -285,8 +294,14 @@ class SolsticeLauncher(QObject, object):
                                         'Solstice Launcher cannot launch Houdini. Init Script not found: {}!'.format(script_path))
                 return None
             solstice_houdini_utils.launch_houdini(exec_=exec_, console=console, script_path=script_path)
+        elif self.selected_dcc == SolsticeDccs.Nuke:
+            script_path = os.path.join(install_path, 'userSetup.py')
+            if not os.path.isfile(script_path):
+                QMessageBox.information(None, 'No valid init script for Nuke found!',
+                                        'Solstice Launcher cannot launch Nuke. Init Script not found: {}!'.format(script_path))
+            solstice_nuke_utils.launch_nuke(exec_=exec_, console=console, script_path=script_path)
         else:
-            QMessageBox.information(None, 'No supported DCC found!', 'Solstice Launcher cannot launch any supported DCC. Closing it ...!')
+            QMessageBox.information(None, 'No supported DCC found!', 'Solstice Launcher cannot launch non supported DCC. Closing it ...!')
 
 
 class DCCSelector(QDialog, object):
@@ -295,7 +310,8 @@ class DCCSelector(QDialog, object):
 
         self.selected_dcc = None
 
-        self.setFixedSize(QSize(100, 240))
+        self.setWindowTitle('DCC Selector')
+        self.setFixedSize(QSize(100, 360))
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
 
         self.main_layout = QVBoxLayout()
@@ -324,6 +340,16 @@ class DCCSelector(QDialog, object):
         houdini_btn.setIcon(QIcon(houdini_pixmap))
         self.main_layout.addWidget(houdini_btn)
 
+        nuke_ba = QByteArray.fromBase64(solstice_resources.nuke_code)
+        nuke_image = QImage.fromData(nuke_ba, 'PNG')
+        nuke_pixmap = QPixmap.fromImage(nuke_image)
+
+        nuke_btn = QPushButton()
+        nuke_btn.setFixedSize(QSize(100, 100))
+        nuke_btn.setIconSize(QSize(90, 90))
+        nuke_btn.setIcon(QIcon(nuke_pixmap))
+        self.main_layout.addWidget(nuke_btn)
+
         cancel_btn = QPushButton('C L O S E')
         self.main_layout.addWidget(cancel_btn)
 
@@ -335,12 +361,17 @@ class DCCSelector(QDialog, object):
         if not houdini_location:
             houdini_btn.setVisible(False)
 
-        if maya_location is None and houdini_location is None:
-            QMessageBox.information(None, 'Maya and Houdini installations not found', 'Solstice Launcher cannot launch any supported DCC. Closing it ...!')
+        nuke_location = solstice_launcher_utils.get_nuke_installation()
+        if not nuke_location:
+            nuke_btn.setVisible(False)
+
+        if maya_location is None and houdini_location is None and nuke_location is None:
+            QMessageBox.information(None, 'Maya, Houdini & Nuke installations not found', 'Solstice Launcher cannot launch non supported DCC. Closing it ...!')
             sys.exit()
 
         maya_btn.clicked.connect(self._on_maya_selected)
         houdini_btn.clicked.connect(self._on_houdini_selected)
+        nuke_btn.clicked.connect(self._on_nuke_selected)
         cancel_btn.clicked.connect(sys.exit)
 
     def _on_maya_selected(self):
@@ -349,6 +380,10 @@ class DCCSelector(QDialog, object):
 
     def _on_houdini_selected(self):
         self.selected_dcc = SolsticeDccs.Houdini
+        self.close()
+
+    def _on_nuke_selected(self):
+        self.selected_dcc = SolsticeDccs.Nuke
         self.close()
 
 

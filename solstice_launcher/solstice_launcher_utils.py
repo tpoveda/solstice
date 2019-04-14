@@ -126,6 +126,22 @@ def get_houdini_executables_from_installation_path(installation_path):
     return None
 
 
+def get_nuke_executables_from_installation_path(installation_path):
+    """
+    Returns Nuke executable from its installation path
+    :param installation_path: str
+    """
+
+    if os.path.exists(installation_path):
+        nuke_files = os.listdir(installation_path)
+        houdini_ex = os.path.basename(installation_path).split('v')[0]+'.exe'
+        if houdini_ex in nuke_files:
+            return os.path.join(installation_path, houdini_ex)
+
+    return None
+
+
+
 def get_houdini_installation():
     """
     Returns the installation folder of Houdini
@@ -149,11 +165,35 @@ def get_houdini_installation():
         houdini_executable = get_houdini_executables_from_installation_path(houdini_location)
 
         if houdini_executable is None or not os.path.isfile(houdini_executable):
-            houdini_executable = str(QFileDialog.getOpenFileName(None, 'Select Houdini 17.5.173 installation')[0])
-            if not os.path.isfile(houdini_executable):
-                return None
+            # houdini_executable = str(QFileDialog.getOpenFileName(None, 'Select Houdini 17.5.173 executable')[0])
+            # if not os.path.isfile(houdini_executable):
+            #     return None
+            return None
 
         return houdini_executable
+
+
+def get_nuke_installation():
+    """
+    Returns the installation folder of Nuke
+    :return:
+    """
+
+    if platform.system().lower() == 'windows':
+        nuke_path = os.environ.get('SOLSTICE_NUKE', None)
+        if nuke_path is None:
+            nuke_path = 'C://Program Files//Nuke11.3v3'
+
+        if not os.path.exists(nuke_path):
+            return
+
+        nuke_executable = get_nuke_executables_from_installation_path(nuke_path)
+        if nuke_executable is None or not os.path.isfile(nuke_executable):
+            # houdini_executable = str(QFileDialog.getOpenFileName(None, 'Select Nuke executable')[0])
+            # if not os.path.isfile(houdini_executable):
+            return None
+
+        return nuke_executable
 
 
 def str2bool(v):
