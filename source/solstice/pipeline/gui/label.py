@@ -1,18 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_label.py
-# by Tomas Poveda
-# Module that contains classes to create different kind of labels
-# ______________________________________________________________________
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+"""
+Module that contains classes to create different kind of labels
+"""
 
-from solstice_utils import solstice_qt_utils as utils
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
+
+from solstice.pipeline.utils import qtutils as utils
 
 
 class DragDropLine(QLineEdit, object):

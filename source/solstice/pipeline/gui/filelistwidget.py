@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_filelistwidget.py
-# by Tomas Poveda
-# Module that includes widget classes to work with files and folders
-# The browser can be based on real folder structure or JSON dict folder
-# structure
-# ______________________________________________________________________
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+"""
+Module that includes widget classes to work with files and folders
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 
 class FileListWidget(QListWidget, object):

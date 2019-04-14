@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_launcher_utils.py
-# by Tomas Poveda
-# Solstice Console that can be used as basic output log during solstice
-# launcher execution
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Console widget that can be used as basic output log
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 from io import StringIO
 
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
-
-import pipeline as sp
+import solstice.pipeline as sp
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
 
 class SolsticeConsole(QTextEdit, object):

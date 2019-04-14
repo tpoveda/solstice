@@ -1,31 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_windows.py
-# by Tomas Poveda
-# Base wrapper classes for Solstice windows
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Base wrapper classes for Solstice windows
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import webbrowser
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.utils import config
-from pipeline.gui import dragger, animations
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.gui import dragger, animations
+from solstice.pipeline.utils import config
+from solstice.pipeline.resources import resource
 
 if sp.is_maya():
     try:
         from shiboken import wrapInstance
     except ImportError:
         from shiboken2 import wrapInstance
-    from pipeline.utils import mayautils
+    from solstice.pipeline.utils import mayautils
 elif sp.is_houdini():
-    from pipeline.utils import houdiniutils
+    from solstice.pipeline.utils import houdiniutils
 
 
 class WindowStatusBar(QStatusBar, object):

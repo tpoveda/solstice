@@ -1,25 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_info_dialog.py
-# by Tomas Poveda
-# Dialog used to synchronize info between Artella and Maya
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Dialog used to synchronize info between Artella and Maya
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import threading
 
-import pipeline as sp
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+import solstice.pipeline as sp
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-from pipeline.gui import animations
-from pipeline.resources import resource
+from solstice.pipeline.gui import animations
+from solstice.pipeline.resources import resource
 
 if sp.is_maya():
     import maya.cmds as cmds
-    from pipeline.utils import mayautils
+    from solstice.pipeline.utils import mayautils
 
 
 class InfoDialog(QDialog, object):
@@ -149,5 +153,3 @@ class InfoDialog(QDialog, object):
     def _stop_timer(self):
         if self._timer:
             self._timer.stop()
-
-

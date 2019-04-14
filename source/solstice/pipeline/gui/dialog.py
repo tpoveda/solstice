@@ -1,25 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_dialog.py
-# by Tomas Poveda
-# Base wrapper classes for Solstice dialogs
-# ______________________________________________________________________
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+"""
+Base wrapper classes for Solstice dialogs
+"""
 
-import pipeline as sp
-from pipeline.utils import qtutils
-from pipeline.gui import dragger, animations
-from pipeline.resources import resource
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+
+import solstice.pipeline as sp
+from solstice.pipeline.gui import dragger, animations
+from solstice.pipeline.utils import qtutils
+from solstice.pipeline.resources import resource
 
 if sp.is_maya():
-    from pipeline.utils import mayautils
+    from solstice.pipeline.utils import mayautils
 elif sp.is_houdini():
-    from pipeline.utils import houdiniutils
+    from solstice.pipeline.utils import houdiniutils
 
 
 class Dialog(QDialog, object):

@@ -1,18 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_messagehandler.py
-# by Tomas Poveda
-# Class that can be used to show different kind of message boxes
-# ______________________________________________________________________
-# ==================================================================="""
 
-import maya.OpenMaya as OpenMaya
+"""
+Class that can be used to show different kind of message boxes
+"""
 
-from pipeline.externals.solstice_qt.QtWidgets import *
+from __future__ import print_function, division, absolute_import
 
-from pipeline.utils import mayautils
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+
+import solstice.pipeline as sp
+from solstice.pipeline.utils import mayautils
+
+if sp.is_maya():
+    import maya.OpenMaya as OpenMaya
 
 
 class MessageHandler(object):

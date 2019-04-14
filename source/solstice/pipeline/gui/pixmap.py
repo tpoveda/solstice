@@ -1,16 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_pixmap.py
-# by Tomas Poveda
-# Module that contains base class for Solstice Pixmaps
-# ______________________________________________________________________
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtGui import *
+"""
+Module that contains base class for Solstice Pixmaps
+"""
 
-from solstice_gui import solstice_color
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtGui import *
+
+from solstice.pipeline.gui import color
 
 
 class Pixmap(QPixmap, object):
@@ -26,7 +30,7 @@ class Pixmap(QPixmap, object):
         """
 
         if isinstance(new_color, str):
-            new_color = solstice_color.Color.from_string(new_color)
+            new_color = color.Color.from_string(new_color)
 
         if not self.isNull():
             painter = QPainter(self)

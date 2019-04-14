@@ -1,22 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_containerwidget.py
-# by Tomas Poveda
-# Custom QWidget used as container for other widgets
-# ______________________________________________________________________
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+"""
+Custom QWidget used as container for other widgets
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 
 class ContainerWidget(QWidget, object):
-    """
-    Basic widget used a
-    """
 
     def __init__(self, parent=None):
         super(ContainerWidget, self).__init__(parent)
@@ -28,7 +27,6 @@ class ContainerWidget(QWidget, object):
 
         self.containedWidget = None
 
-    # region Functions
     def set_contained_widget(self, widget):
         """
         Sets the current contained widget for this container
@@ -50,4 +48,3 @@ class ContainerWidget(QWidget, object):
         cloned.set_contained_widget(self.containedWidget)
         self.set_contained_widget(None)
         return cloned
-    # endregion

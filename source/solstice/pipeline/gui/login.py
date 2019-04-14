@@ -1,28 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_login.py
-# by Tomas Poveda
-# Dialog used to login to Artella
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Dialog used to login to Artella
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import sys
 import getpass
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.utils import worker
-from pipeline.utils import artellautils as artella
-from pipeline.utils import pythonutils as python
-from pipeline.gui import dialog, spinner
-from pipeline.resources import resource
-
-reload(artella)
+import solstice.pipeline as sp
+from solstice.pipeline.utils import worker
+from solstice.pipeline.utils import artellautils as artella
+from solstice.pipeline.utils import pythonutils as python
+from solstice.pipeline.gui import dialog, spinner
+from solstice.pipeline.resources import resource
 
 
 class SolsticeUserPassword(QWidget, object):
@@ -213,6 +215,3 @@ class SolsticeLogin(dialog.Dialog, object):
         self.set_Logo('solstice_login_logo')
 
         self.setMaximumHeight(50)
-
-        # self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-

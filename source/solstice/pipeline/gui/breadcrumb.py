@@ -1,19 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_breadcrumb.py
-# by Tomas Poveda
-# Module that contains classes to create breadcrubms widget
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that contains classes to create breadcrubms widget
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
 
 import os
 
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import label
-from solstice_utils import solstice_python_utils as utils
+from solstice.pipeline.gui import label
+from solstice.pipeline.utils import pythonutils as utils
 
 
 class Breadcrumb(object):

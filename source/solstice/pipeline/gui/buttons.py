@@ -1,21 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_button.py
-# by Tomas Poveda
-# Module that contains different buttons used in Solstice Tools
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that contains different buttons used in Solstice Tools
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import weakref
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-import pipeline as sp
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.resources import resource
 
 NORMAL, DOWN, DISABLED = 1, 2, 3
 INNER, OUTER = 1, 2
@@ -457,4 +461,3 @@ class CloseButton(GlowButton):
 
             painter.setPen(glow_pens[glow_index][3])
             painter.drawPath(line_path)
-

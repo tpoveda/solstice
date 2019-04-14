@@ -1,18 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_publisher.py
-# by Tomas Poveda
-# Tool that is used to publish assets and sequences
-# ______________________________________________________________________
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+"""
+Module that contains widget to create wait spinners
+"""
 
-from pipeline.gui import label
-from pipeline.resources import resource
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+
+from solstice.pipeline.gui import label
+from solstice.pipeline.resources import resource
 
 
 class SpinnerType(object):
