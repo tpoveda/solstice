@@ -1,23 +1,25 @@
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_animrotconverter.py
-# by Tomas Poveda
-# Tool to change rotation order of objects while preserving animation
-# ______________________________________________________________________
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtCore import *
+"""
+Tool to change rotation order of objects while preserving animation
+"""
 
-from pipeline.gui import windowds
-from pipeline.utils import mayautils
+from __future__ import print_function, division, absolute_import
 
-from pipeline.externals.ml_tools import ml_convertRotationOrder
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.ml_tools import ml_convertRotationOrder
+
+from solstice.pipeline.gui import window
+from solstice.pipeline.utils import mayautils
 
 
-class SolsticeRotOrder(windowds.Window, object):
+class SolsticeRotOrder(window.Window, object):
 
     name = 'SolsticeRotOrder'
     title = 'Solstice Tools - Solstice Rotation Order Converter'

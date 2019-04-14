@@ -1,27 +1,37 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_alembicmanager.py
-# by Tomas Poveda
-# Tool to export/import Alembic (.abc) files
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool to export/import Alembic (.abc) files
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import sys
 import json
 from functools import partial
 
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-import pipeline as sp
-from pipeline.gui import windowds, splitters
-from pipeline.resources import resource
-from pipeline.tools.tagger import tagger
-from pipeline.utils import browserutils, alembic, pythonutils
+import solstice.pipeline as sp
+from solstice.pipeline.gui import window, splitters
+from solstice.pipeline.resources import resource
+from solstice.pipeline.utils import browserutils, alembic, pythonutils
+
+from solstice.pipeline.tools.tagger import tagger
+
+if sp.is_maya():
+    import maya.cmds as cmds
+    from solstice.pipeline.utils import mayautils
+
 
 ALEMBIC_GROUP_SUFFIX = '_ABCGroup'
 
@@ -196,7 +206,7 @@ class AlembicExporterNode(object):
         for cls in classes:
             for k, v in cls.__dict__.iteritems():
                 if isinstance(v, property):
-                    print "Property:", k.rstrip("_"), "\n\tValue:", v.fget(self)
+                    print("Property:", k.rstrip("_"), "\n\tValue:", v.fget(self))
                     kv[k] = v.fget(self)
 
         return kv
@@ -1197,9 +1207,6 @@ class AlembicImporter(QWidget, object):
             sp.logger.warning('DCC {} does not supports the reference of Alembic groups!'.format(sp.dcc.get_name()))
             return None
 
-        import maya.cmds as cmds
-        from pipeline.utils import mayautils
-
         if not alembic_path or not os.path.isfile(alembic_path):
             sp.logger.warning('Alembic file {} does not exits!'.format(alembic_path))
             return None
@@ -1294,7 +1301,6 @@ class AlembicImporter(QWidget, object):
 
         if as_reference:
             if sp.is_maya():
-                from pipeline.utils import mayautils
                 track_nodes = mayautils.TrackNodes()
                 track_nodes.load()
                 valid_reference = alembic.reference_alembic(abc_file, namespace=abc_name)
@@ -1345,7 +1351,7 @@ class AlembicImporter(QWidget, object):
             attr_node.parm('tag_info').set(str(tag_info))
 
 
-class AlembicManager(windowds.Window, object):
+class AlembicManager(window.Window, object):
     name = 'Solstice_AlembicManager'
     title = 'Solstice Tools - Alembic Manager'
     version = '1.2'
@@ -1384,6 +1390,7 @@ class AlembicManager(windowds.Window, object):
     def _on_selection_changed(self, *args, **kwargs):
         if self.main_tabs.currentIndex() == 1:
             self.alembic_exporter._refresh_alembic_groups()
+
 
 def run():
     AlembicManager().show()

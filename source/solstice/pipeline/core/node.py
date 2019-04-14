@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Module that contains Maya node definitions to work with Solstice
-# ==================================================================="""
+
+"""
+Module that contains Maya node definitions to work with Solstice
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import re
@@ -12,8 +18,11 @@ import ast
 import string
 import collections
 
-import pipeline as sp
-from pipeline.utils import pythonutils, artellautils as artella
+import solstice.pipeline as sp
+from solstice.pipeline.utils import pythonutils, artellautils as artella
+
+from solstice.pipeline.tools import alembicmanager
+from solstice.pipeline.tools.standinmanager import standinmanager
 
 # =================================================================================================
 
@@ -494,7 +503,6 @@ class SolsticeAssetNode(SolsticeNode, object):
                 artella.reference_file_in_maya(file_path=published_path)
 
     def reference_alembic_file(self, namespace=None):
-        from pipeline.tools import alembicmanager
         alembic_name = self._name + '.abc'
         local_max_versions = self.get_max_local_versions()
         if local_max_versions['model']:
@@ -506,7 +514,6 @@ class SolsticeAssetNode(SolsticeNode, object):
                     alembicmanager.AlembicImporter.reference_alembic(published_path, namespace=namespace)
 
     def import_standin_file(self):
-        from pipeline.tools.standinmanager import standinmanager
         standin_name = self._name + '.ass'
         local_max_versions = self.get_max_local_versions()
         if local_max_versions['model']:

@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Initiailzer class for solstice_pipeline
-# ==================================================================="""
+
+"""
+Solstice Tools
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import re
@@ -16,8 +22,8 @@ import platform
 import traceback
 import webbrowser
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.dcc import dcc
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.dcc import dcc
 
 # =================================================================================
 
@@ -85,7 +91,7 @@ class SolsticePipeline(QObject):
         self.init_searcher()
 
         if is_maya():
-            from pipeline.utils import mayautils as utils
+            from solstice.pipeline.utils import mayautils as utils
             utils.viewport_message('Solstice Pipeline Tools loaded successfully!')
 
     @staticmethod
@@ -94,7 +100,7 @@ class SolsticePipeline(QObject):
         Creates and initializes solstice logger
         """
 
-        from utils import logger
+        from solstice.pipeline.utils import logger
         global logger
         logger = logger.Logger(name='solstice', level=logger.LoggerLevel.DEBUG)
         logger.debug('Initializing Solstice Tools ...')
@@ -106,7 +112,7 @@ class SolsticePipeline(QObject):
         Creates a settings file that can be accessed globally by all tools
         """
 
-        from pipeline.utils import config
+        from solstice.pipeline.utils import config
         global settings
         settings = config.create_config('solstice_pipeline')
         return settings
@@ -117,7 +123,7 @@ class SolsticePipeline(QObject):
         Creates a global window that is used to show different type of info
         """
 
-        from gui import infodialog
+        from solstice.pipeline.gui import infodialog
         global info_dialog
         info_dialog = infodialog.InfoDialog()
         return info_dialog
@@ -145,13 +151,13 @@ class SolsticePipeline(QObject):
         if is_maya():
             import maya.cmds as cmds
             if platform.system() == 'Darwin':
-                from pipeline.tools import changelog
+                from solstice.pipeline.tools import changelog
                 changelog.run()
                 cmds.evalDeferred('import solstice_pipeline; solstice_pipeline.update_tools()')
 
     @staticmethod
     def init_searcher():
-        from pipeline.tools import searcher
+        from solstice.pipeline.tools import searcher
         searcher.SolsticeSearcher.install_hotkeys()
 
     def update_paths(self):
@@ -160,7 +166,7 @@ class SolsticePipeline(QObject):
         :return:
         """
 
-        from pipeline.utils import artellautils
+        from solstice.pipeline.utils import artellautils
 
         root_path = os.path.dirname(os.path.abspath(__file__))
         extra_paths = [os.path.join(root_path, 'resources', 'icons'), os.path.join(root_path, 'externals', 'animBot')]
@@ -185,7 +191,7 @@ class SolsticePipeline(QObject):
         Initializes all necessary environment variables used in Solstice Tools
         """
 
-        from pipeline.utils import artellautils
+        from solstice.pipeline.utils import artellautils
 
         self.logger.debug('Initializing environment variables for Solstice Tools ...')
 
@@ -222,7 +228,7 @@ class SolsticePipeline(QObject):
         self.logger.debug('\n')
 
         if os.environ.get('SOLSTICE_PIPELINE_SHOW'):
-            from pipeline.tools import hello
+            from solstice.pipeline.tools import hello
             hello.run()
 
     def detect_dcc(self):
@@ -281,10 +287,10 @@ class SolsticePipeline(QObject):
 
         self.logger.debug('Building Solstice Tools Menu ...')
 
-        from source.solstice.pipeline.utils import menu
+        from solstice.pipeline.utils import menu
 
         if is_maya():
-            from utils import mayautils
+            from solstice.pipeline.utils import mayautils
             try:
                 mayautils.remove_menu('Solstice')
             except Exception:
@@ -303,7 +309,7 @@ class SolsticePipeline(QObject):
         Create Solstice Pipeline tray
         """
 
-        from pipeline.gui import traymessage
+        from solstice.pipeline.gui import traymessage
 
         global tray
         self.logger.debug('Creating Solstice Tray ...')
@@ -341,7 +347,7 @@ def update_solstice_project_path():
     :return: str
     """
 
-    from pipeline.utils import artellautils as artella
+    from solstice.pipeline.utils import artellautils as artella
 
     artella_var = os.environ.get('ART_LOCAL_ROOT', None)
     if artella_var and os.path.exists(artella_var):
@@ -358,7 +364,7 @@ def get_solstice_project_path():
     :return: str
     """
 
-    from pipeline.utils import artellautils as artella
+    from solstice.pipeline.utils import artellautils as artella
 
     env_var = os.environ.get('SOLSTICE_PROJECT', None)
     if env_var is None:
@@ -430,7 +436,7 @@ def get_solstice_assets_path():
         logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
         logger.debug('Trying to synchronize it ...')
         try:
-            from pipeline.gui import syncdialog
+            from solstice.pipeline.gui import syncdialog
             syncdialog.SolsticeSyncPath(paths=[assets_path]).sync()
             return assets_path
         except Exception as e:
@@ -451,7 +457,7 @@ def get_solstice_production_path():
         logger.debug('Production Path does not exists!: {0}'.format(production_path))
         logger.debug('Trying to synchronize it ...')
         try:
-            from pipeline.gui import syncdialog
+            from solstice.pipeline.gui import syncdialog
             syncdialog.SolsticeSyncPath(paths=[production_path]).sync()
             return production_path
         except Exception as e:
@@ -499,8 +505,8 @@ def find_asset(asset_to_search, assets_path=None, update_if_data_not_found=False
     :return: solstice_asset
     """
 
-    from pipeline.gui import syncdialog, asset
-    from pipeline.utils import pythonutils
+    from solstice.pipeline.core import syncdialog, asset
+    from solstice.pipeline.utils import pythonutils
 
     if not assets_path:
         assets_path = get_solstice_assets_path()
@@ -598,7 +604,7 @@ def register_asset(asset_name):
 
 
 def update_tools():
-    from pipeline.utils import downloadutils
+    from solstice.pipeline.utils import downloadutils
     downloadutils.update_tools()
 
 
@@ -748,7 +754,7 @@ def get_tag_info_nodes(as_nodes=True):
 
 def get_assets(as_nodes=True):
 
-    from pipeline.utils import node
+    from solstice.pipeline.core import node
 
     asset_nodes = list()
 
@@ -784,7 +790,7 @@ def get_assets(as_nodes=True):
 
 def get_alembics(as_nodes=True, only_roots=False):
 
-    from pipeline.utils import node
+    from solstice.pipeline.core import node
 
     all_alembic_roots = list()
     added_roots = list()

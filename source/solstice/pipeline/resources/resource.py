@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_resource.py
-# by Tomas Poveda
-# Module that defines a base class to load resources
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Custom QWidget that shows Solstice Assets in the Solstice Asset Viewer
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-from solstice_gui import solstice_pixmap
-from solstice_utils import solstice_qt_utils, solstice_browser_utils
+from solstice.pipeline.gui import pixmap
+from solstice.pipeline.utils import qtutils, browserutils
 
 
 def generate_resources_file(generate_qr_file=True):
@@ -29,7 +33,7 @@ def generate_resources_file(generate_qr_file=True):
     if not os.path.exists(res_folder):
         raise RuntimeError('Resources folder {0} does not exists!'.format(res_folder))
 
-    res_folders = solstice_browser_utils.get_sub_folders(res_folder)
+    res_folders = browserutils.get_sub_folders(res_folder)
     res_folders = [os.path.join(res_folder, x) for x in res_folders]
     res_folders = [x for x in res_folders if os.path.exists(x)]
 
@@ -37,11 +41,11 @@ def generate_resources_file(generate_qr_file=True):
     qrc_py_file = os.path.join(res_out_folder, res_file_name + '.py')
 
     if generate_qr_file:
-        solstice_qt_utils.create_qrc_file(res_folders, qrc_file)
+        qtutils.create_qrc_file(res_folders, qrc_file)
     if not os.path.isfile(qrc_file):
         return
 
-    solstice_qt_utils.create_python_qrc_file(qrc_file, qrc_py_file)
+    qtutils.create_python_qrc_file(qrc_file, qrc_py_file)
 
 
 def get(*args):
@@ -140,7 +144,7 @@ class Resource(object):
         """
 
         path = self.get(category, name + '.' + extension)
-        p = solstice_pixmap.Pixmap(path)
+        p = pixmap.Pixmap(path)
         if color:
             p.set_color(new_color=color)
 
@@ -153,4 +157,4 @@ class Resource(object):
         :return: QWidget
         """
 
-        return solstice_qt_utils.ui_loader(ui_file=self.get('uis', name + '.ui'))
+        return qtutils.ui_loader(ui_file=self.get('uis', name + '.ui'))

@@ -23,9 +23,9 @@ from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 from solstice.pipeline.externals.solstice_qt.QtGui import *
 
 import solstice.pipeline as sp
-from solstice.pipeline.core import syncdialog
+from solstice.pipeline.core import syncdialog, node
 from solstice.pipeline.gui import splitters, buttons
-from solstice.pipeline.utils import qtutils, pythonutils, node, image as img, artellautils as artella, namingutils as naming
+from solstice.pipeline.utils import qtutils, pythonutils, image as img, artellautils as artella, namingutils as naming
 from solstice.pipeline.resources import resource
 
 from solstice.pipeline.tools.pipelinizer import publisher
