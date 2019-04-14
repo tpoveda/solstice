@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_maya_utils.py
-# by Tomas Poveda
-# Utility module that contains useful utilities functions for Maya
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Utility module that contains useful utilities functions for Maya
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import glob
@@ -16,10 +20,11 @@ import functools
 import contextlib
 from collections import OrderedDict
 
-from pipeline.externals.solstice_qt.QtWidgets import *
-
-import pipeline as sp
-from pipeline.utils import pythonutils as python
+import maya.cmds as cmds
+import maya.mel as mel
+import maya.utils as utils
+import maya.OpenMayaUI as OpenMayaUI
+import maya.OpenMaya as OpenMaya
 
 try:
     import shiboken2 as shiboken
@@ -28,11 +33,10 @@ except ImportError:
     import shiboken as shiboken
     from shiboken import wrapInstance
 
-import maya.cmds as cmds
-import maya.mel as mel
-import maya.utils as utils
-import maya.OpenMayaUI as OpenMayaUI
-import maya.OpenMaya as OpenMaya
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+
+import solstice.pipeline as sp
+from solstice.pipeline.utils import pythonutils as python
 
 _DPI_SCALE = 1.0 if not hasattr(cmds, "mayaDpiSetting") else cmds.mayaDpiSetting(query=True, realScaleValue=True)
 

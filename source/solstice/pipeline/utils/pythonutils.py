@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_python_utils.py
-# by Tomas Poveda
-# Utilities related with Python
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Utilities related with Python
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import re
@@ -19,7 +23,6 @@ import subprocess
 import webbrowser
 from tempfile import mkstemp
 from shutil import move
-
 
 iters = [list, tuple, set, frozenset]
 class _hack(tuple): pass

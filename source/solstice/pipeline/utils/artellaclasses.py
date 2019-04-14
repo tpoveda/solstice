@@ -1,18 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_artella_classes.py
-# by Tomas Poveda
-# Utility Module that contains data classes for Artella information
-#  with Artella
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Utility Module that contains data classes for Artella information
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import collections
 
-import pipeline as sp
+import solstice.pipeline as sp
+from solstice.pipeline.utils import artellautils as artella
 
 
 class ArtellaHeaderMetaData(object):
@@ -76,8 +80,6 @@ class ArtellaAssetMetaData(object):
         for f in self._must_folders:
             self._published_folders[f] = dict()
             self._published_folders_all[f] = dict()
-
-        from solstice_utils import solstice_artella_utils as artella
 
         for name, data in status_dict['data'].items():
             if name == '_latest' or name == 'latest':

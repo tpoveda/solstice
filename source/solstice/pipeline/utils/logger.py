@@ -1,18 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_logger.py
-# by Tomas Poveda
-# Module that contains solstice logger functionality
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that contains solstice logger functionality
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import logging
 import json
 
-import pipeline
+import solstice.pipeline as sp
+from solstice.pipeline.utils import pythonutils as utils
 
 
 class LoggerLevel:
@@ -42,7 +47,7 @@ class Logger(object):
         try:
             logging_settings_file = None
             logging_file_name = 'logging.json'
-            for root, dirs, files in os.walk(pipeline.__path__[0]):
+            for root, dirs, files in os.walk(sp.__path__[0]):
                 for f in files:
                     if f == logging_file_name:
                         logging_settings_file = os.path.join(root, f)
@@ -110,8 +115,6 @@ class Logger(object):
         Returns solstice log file
         :return: str
         """
-
-        from pipeline.utils import pythonutils as utils
 
         return os.path.join(utils.get_system_config_directory(), 'solstice_pipeline', self._name+'.log')
 

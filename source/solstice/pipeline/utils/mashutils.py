@@ -1,22 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_mash_utils.py
-# by Tomas Poveda
-# Utilities functions when working with MASH nodes
-# ______________________________________________________________________
-# ==================================================================="""
 
+"""
+Utilities functions when working with Maya MASH nodes
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+import solstice.pipeline as sp
+from solstice.pipeline.utils import namingutils as naming
+from solstice.pipeline.utils import mayautils
 
 import maya.cmds as cmds
 import maya.mel as mel
-
-import pipeline as sp
-from pipeline.utils import namingutils as naming
-from pipeline.utils import mayautils
-
-
 
 if sp.dcc.get_version() <= 2017:
     import MASH.api as mapi
@@ -35,6 +36,7 @@ elif sp.dcc.get_version() >= 2018:
 def get_mash_nodes():
     return cmds.ls(type='MASH_Waiter')
 
+
 def create_mash_network(name='Solstice_Scatter', type='repro'):
     name = naming.find_available_name(name=name)
     if type == 'instancer':
@@ -45,6 +47,7 @@ def create_mash_network(name='Solstice_Scatter', type='repro'):
     waiter_node = mel.eval('MASHnewNetwork("{0}")'.format(name))[0]
     mash_network = get_mash_network(waiter_node)
     return mash_network
+
 
 def get_mash_network(node_name):
     if cmds.objExists(node_name):
@@ -64,11 +67,13 @@ def remove_mash_network(network):
         if cmds.objExists(network.waiter):
             cmds.delete(network.waiter)
 
+
 def get_mash_outliner_tree():
     if sp.dcc.get_version() <= 2017:
         return MASHoutliner.OutlinerTreeView()
     elif sp.dcc.get_version() >= 2018:
         return MASH.editor.OutlinerTreeView()
+
 
 @undo.chunk
 def add_mesh_to_repro(repro_node, meshes=None):
@@ -83,6 +88,7 @@ def add_mesh_to_repro(repro_node, meshes=None):
             mash_repro_utils.connect.mesh_group(repro_node, obj)
     cmds.undoInfo(cck=True)
 
+
 def get_repro_object_widget(repro_node):
     if not repro_node:
         return
@@ -92,6 +98,7 @@ def get_repro_object_widget(repro_node):
     if len(repro_widgets) > 0:
         return repro_widgets[0]
     return None
+
 
 def set_repro_object_widget_enabled(repro_node, flag):
     repro_widget = get_repro_object_widget(repro_node)

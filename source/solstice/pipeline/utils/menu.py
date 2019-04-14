@@ -1,22 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_menu.py
-# by Tomas Poveda
-# Module that contains base class to create Solstice Menu
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that contains base class to create Solstice Menu
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import json
 from collections import OrderedDict
 
-import pipeline as sp
+import solstice.pipeline as sp
 
 if sp.is_maya():
     import maya.cmds as cmds
-    from solstice_utils import solstice_maya_utils as utils
+    from solstice.pipeline.utils import mayautils as utils
 
 
 class SolsticeMenu(object):

@@ -1,24 +1,33 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_shelf.py
-# by Tomas Poveda
-# Module that contains base class to create Solstice Shelf
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that contains base class to create Solstice Shelf
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import json
 from collections import OrderedDict
 from functools import partial
 
-from solstice_pipeline.externals.solstice_qt.QtWidgets import *
-from solstice_pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
 
-import solstice_pipeline as sp
-from solstice_pipeline.utils import qtutils as qt
-from solstice_pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.utils import qtutils as qt
+from solstice.pipeline.resources import resource
+
+if sp.is_maya():
+    from solstice.pipeline.utils import mayautils
+elif sp.is_houdini():
+    from solstice.pipeline.utils import houdiniutils
 
 
 class SolsticeShelf(object):
@@ -64,7 +73,7 @@ class SolsticeShelf(object):
 
         if delete_if_exists:
             if sp.is_houdini():
-                from solstice_pipeline.utils import houdiniutils
+                from solstice.pipeline.utils import houdiniutils
                 if houdiniutils.shelf_set_exists(shelf_set_name=self.name):
                     houdiniutils.remove_shelf_set(name=self.name)
             else:
@@ -72,13 +81,12 @@ class SolsticeShelf(object):
                     sp.dcc.delete_shelf(shelf_name=self.name)
         else:
             if sp.is_houdini():
-                from solstice_pipeline.utils import houdiniutils
+                from solstice.pipeline.utils import houdiniutils
                 assert not houdiniutils.shelf_set_exists(shelf_set_name=self.name), 'Shelf Set with name {} already exists!'.format(self.name)
             else:
                 assert not sp.dcc.shelf_exists(self.name), 'Shelf with name {} already exists!'.format(self.name)
 
         if sp.is_houdini():
-            from solstice_pipeline.utils import houdiniutils
             houdiniutils.create_shelf_set(name=self.name, dock=True)
         else:
             self.name = sp.dcc.create_shelf(shelf_name=self.name)
@@ -129,7 +137,6 @@ class SolsticeShelf(object):
         """
 
         if sp.is_houdini():
-            from solstice_pipeline.utils import houdiniutils
             return houdiniutils.create_shelf_tool(
                 tool_name='solstice_{}'.format(label),
                 tool_label=label,
@@ -171,7 +178,6 @@ class SolsticeShelf(object):
         """
 
         if sp.is_houdini():
-            from solstice_pipeline.utils import houdiniutils
             all_shelves = list()
             for cat in categories:
                 shelf_name = 'solstice_{}'.format(cat)
@@ -210,7 +216,6 @@ class SolsticeShelf(object):
                 return
 
             if sp.is_houdini():
-                from solstice_pipeline.utils import houdiniutils
                 for item, item_data in shelf_data['solstice_shelf'].items():
                     if item != category_name:
                         continue

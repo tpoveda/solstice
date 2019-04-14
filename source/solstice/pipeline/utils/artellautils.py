@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_artella_utils.py
-# by Tomas Poveda
-# Utility module that contains useful utilities  and classes related
-#  with Artella
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Utility module that contains useful utilities  and classes related with Artella
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import re
@@ -20,10 +23,17 @@ try:
 except:
     pass
 
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.utils import artellaclasses as classes
+import solstice.pipeline as sp
+from solstice.pipeline.utils import artellaclasses as classes
+
+if sp.is_maya():
+    import maya.cmds as cmds
+    from am.artella.spigot.spigot import SpigotClient
+    from solstice.pipeline.utils import mayautils
+elif sp.is_houdini():
+    from solstice.pipeline.utils import houdiniutils
 
 # ---------------------------------------------------------------------------------------
 
@@ -229,7 +239,6 @@ def connect_artella_app_to_spigot(cli=None):
 
     if sp.is_houdini():
         def pass_msg_to_main_thread(json_msg):
-            from pipeline.utils import houdiniutils
             main_thread_fn = houdiniutils.get_houdini_pass_main_thread_function()
             main_thread_fn(get_handle_msg, json_msg)
 
@@ -284,9 +293,7 @@ def get_spigot_client():
     global spigot_client
     if spigot_client is None:
         if sp.is_maya():
-            from pipeline.utils import mayautils
             mayautils.force_stack_trace_on()
-        from am.artella.spigot.spigot import SpigotClient
         spigot_client = SpigotClient()
         connect_artella_app_to_spigot(spigot_client)
     return spigot_client
@@ -305,7 +312,6 @@ def get_artella_app_identifier():
             maya_version = cmds.about(version=True).split()[0]
             app_identifier = 'maya.{0}'.format(maya_version)
         elif sp.is_houdini():
-            from pipeline.utils import houdiniutils
             app_identifier = houdiniutils.get_houdini_version(as_string=True)
 
     return app_identifier
@@ -891,8 +897,6 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
     :param comment:
     :param skip_saving: When we publish textures we do not want to save the maya scene
     """
-
-    from pipeline.utils import mayautils
 
     if not file_path:
         file_path = sp.dcc.scene_name()

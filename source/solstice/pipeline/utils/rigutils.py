@@ -1,19 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_rig_utils.py
-# by Tomas Poveda
-# Module that contains utility functions related with rigging
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that contains utility functions related with rigging
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import maya.cmds as cmds
 
-import pipeline as sp
-from pipeline.utils import mayautils
-from pipeline.gui import traymessage
-reload(traymessage)
+import solstice.pipeline as sp
+from solstice.pipeline.utils import mayautils
 
 
 def create_circle_control(name, color_index=1, radius=5, move_y=0):

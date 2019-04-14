@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_launcher.py
-# by Tomas Poveda
-# Module that contains Solstice Config definition
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that contains Solstice Config definition
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import platform
@@ -14,7 +18,7 @@ import traceback
 import subprocess
 import ConfigParser
 
-from pipeline.utils import pythonutils as utils
+from solstice.pipeline.utils import pythonutils as utils
 
 
 class SolsticeConfig(ConfigParser.RawConfigParser, object):

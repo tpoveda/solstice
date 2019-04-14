@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_browser_utils.py
-# by Tomas Poveda
-# Module that includes utilities related with files and folders
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that includes utilities related with files and folders
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 
-# region Constants
 SEPARATOR = '/'
 BAD_SEPARATOR = '\\'
 PATH_SEPARATOR = '//'
@@ -20,7 +23,7 @@ BAD_RELATIVE_PATH_PREFIX = '../'
 
 # We use one separator depending if we are working on Windows (nt) or other operative system
 NATIVE_SEPARATOR = (SEPARATOR, BAD_SEPARATOR)[os.name=='nt']
-# endregion
+
 
 def get_sub_folders(root_folder, sort=True):
     """

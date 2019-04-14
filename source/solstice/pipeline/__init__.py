@@ -23,7 +23,7 @@ import traceback
 import webbrowser
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.dcc import dcc
+from solstice.pipeline.dcc import dcc as abstractdcc
 
 # =================================================================================
 
@@ -40,7 +40,7 @@ ignored_paths = ['PIPELINE', 'lighting', 'Light Rigs', 'S_CH_02_summer_scripts']
 
 # =================================================================================
 
-dcc = dcc.SolsticeDCC()
+dcc = abstractdcc.SolsticeDCC()
 sys.solstice_dispatcher = None
 logger = None
 tray = None

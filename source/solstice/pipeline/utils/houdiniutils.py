@@ -1,18 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_maya_utils.py
-# by Tomas Poveda
-# Utility module that contains useful utilities functions for Houdini
-# ______________________________________________________________________
-# ==================================================================="""
 
-import hou
-from hou import shelves
-import hdefereval
+"""
+Utility module that contains useful utilities functions for Houdini
+"""
 
-import pipeline as sp
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+
+import solstice.pipeline as sp
+
+if sp.is_houdini():
+    import hou
+    from hou import shelves
+    import hdefereval
 
 
 def get_houdini_version(as_string=True):

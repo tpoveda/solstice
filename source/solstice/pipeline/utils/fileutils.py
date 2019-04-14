@@ -1,14 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_shader_utils.py
-# by Tomas Poveda
-# Module that contains utility functions related with files
-# ______________________________________________________________________
-# ==================================================================="""
 
-import maya.cmds as cmds
+"""
+Module that contains utility functions related with files
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+import solstice.pipeline as sp
+
+if sp.is_maya():
+    import maya.cmds as cmds
 
 
 def get_file_paths():

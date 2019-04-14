@@ -1,21 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_qt_utils.py
-# by Tomas Poveda
-# Utility module that contains useful utilities functions for PySide
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Utility module that contains useful utilities functions for PySide
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import re
 import subprocess
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
-from pipeline.externals.solstice_qt import QtCompat
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt import QtCompat
 try:
     import shiboken
     from shiboken import wrapInstance
@@ -26,9 +30,8 @@ except ImportError:
     except Exception:
         pass
 
-import pipeline as sp
-
-from pipeline.utils import pythonutils, browserutils
+import solstice.pipeline as sp
+from solstice.pipeline.utils import pythonutils, browserutils
 
 
 def ui_loader(ui_file, widget=None):
