@@ -243,7 +243,13 @@ class SolsticePipeline(QObject):
                 from solstice_pipeline.solstice_dcc import solstice_houdini
                 dcc = solstice_houdini.SolsticeHoudini()
             except ImportError:
-                print('No valid DCC found!')
+                try:
+                    import nuke
+                    from solstice_pipeline.solstice_dcc import solstice_nuke
+                    dcc = solstice_nuke.SolsticeNuke()
+                except ImportError as e:
+                    print(e)
+                    print('No valid DCC found!')
 
         if dcc:
             self.logger.debug('Current DCC: {}'.format(dcc.get_name()))

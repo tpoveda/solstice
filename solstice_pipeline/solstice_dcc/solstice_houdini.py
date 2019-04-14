@@ -8,16 +8,14 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-"""
-Module that contains Houdini definition
-"""
+
 from __future__ import print_function, division, absolute_import
 
 
-import solstice_pipeline as sp
 import hou
 import hdefereval
 
+import solstice_pipeline as sp
 from solstice_pipeline.solstice_dcc import solstice_dcc
 from solstice_pipeline.solstice_utils import solstice_houdini_utils
 

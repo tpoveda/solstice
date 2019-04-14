@@ -29,7 +29,7 @@ def get_houdini_version(as_string=True):
 
 def get_houdini_window():
     """
-    Return the Houdini main window widget as a Python object
+    Return the Houdini Qt main window
     """
 
     return hou.ui.mainQtWindow()
