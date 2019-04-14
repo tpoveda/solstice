@@ -30,7 +30,6 @@ from solstice.pipeline.utils import artellaclasses as classes
 
 if sp.is_maya():
     import maya.cmds as cmds
-    from am.artella.spigot.spigot import SpigotClient
     from solstice.pipeline.utils import mayautils
 elif sp.is_houdini():
     from solstice.pipeline.utils import houdiniutils
@@ -294,6 +293,7 @@ def get_spigot_client():
     if spigot_client is None:
         if sp.is_maya():
             mayautils.force_stack_trace_on()
+        from am.artella.spigot.spigot import SpigotClient
         spigot_client = SpigotClient()
         connect_artella_app_to_spigot(spigot_client)
     return spigot_client

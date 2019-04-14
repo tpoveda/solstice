@@ -153,7 +153,7 @@ class SolsticePipeline(QObject):
             if platform.system() == 'Darwin':
                 from solstice.pipeline.tools import changelog
                 changelog.run()
-                cmds.evalDeferred('import solstice_pipeline; solstice_pipeline.update_tools()')
+                cmds.evalDeferred('import solstice.pipeline as sp; sp.update_tools()')
 
     @staticmethod
     def init_searcher():
@@ -240,17 +240,17 @@ class SolsticePipeline(QObject):
 
         try:
             import maya.cmds as cmds
-            from pipeline.dcc import mayadcc
+            from solstice.pipeline.dcc import mayadcc
             dcc = mayadcc.SolsticeMaya()
         except ImportError:
             try:
                 import hou
-                from pipeline.dcc import houdinidcc
+                from solstice.pipeline.dcc import houdinidcc
                 dcc = houdinidcc.SolsticeHoudini()
             except ImportError:
                 try:
                     import nuke
-                    from pipeline.dcc import nukedcc
+                    from solstice.pipeline.dcc import nukedcc
                     dcc = nukedcc.SolsticeNuke()
                 except ImportError as e:
                     print(e)
@@ -268,7 +268,7 @@ class SolsticePipeline(QObject):
 
         self.logger.debug('Building Solstice Tools Shelf ...')
 
-        from source.solstice.pipeline.utils import shelf
+        from solstice.pipeline.utils import shelf
 
         try:
             s_shelf = shelf.SolsticeShelf()

@@ -16,7 +16,6 @@ import os
 import collections
 
 import solstice.pipeline as sp
-from solstice.pipeline.utils import artellautils as artella
 
 
 class ArtellaHeaderMetaData(object):
@@ -88,6 +87,7 @@ class ArtellaAssetMetaData(object):
             # Before doing nothing, check if the published version is valid (has not been deleted from Artella manually)
             version_valid = True
             version_path = os.path.join(self._path, '__{0}__'.format(name))
+            from solstice.pipeline.utils import artellautils as artella
             version_info = artella.get_status(version_path)
             if version_info:
                 if isinstance(version_info, ArtellaHeaderMetaData):

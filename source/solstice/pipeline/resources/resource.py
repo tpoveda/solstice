@@ -16,7 +16,7 @@ import os
 
 from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-from solstice.pipeline.gui import pixmap
+from solstice.pipeline.gui import pixmap as pixmaputils
 from solstice.pipeline.utils import qtutils, browserutils
 
 
@@ -144,7 +144,7 @@ class Resource(object):
         """
 
         path = self.get(category, name + '.' + extension)
-        p = pixmap.Pixmap(path)
+        p = pixmaputils.Pixmap(path)
         if color:
             p.set_color(new_color=color)
 
