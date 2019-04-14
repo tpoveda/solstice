@@ -1,0 +1,51 @@
+// **************************************************************************
+//
+// SCRIPT NAME: vl_resetAttributes
+// 
+// VERSION: 003
+// LAST MODIFIED: 06.11.2014
+// BY: Vincenzo Leombruno - vincleombruno@gmail.com
+//
+//
+// RELEASE NOTES:
+//
+// 003 - checks for nonConnected attributes
+// 002 - Re-organized and re-named. Some functions have been taken-out to be used in other contexts
+// 001 -  
+//----------------------------------------------------OLD vlRigIt()
+// 1.0 - initial release
+// 0.9 - betatesting blablabla
+// 
+//
+// USAGE NOTES:
+// just to copy/paste header of the script. Should be always up to date
+// please follow this convention :)
+//
+// **************************************************************************
+
+global proc vl_resetAttributes(string $nodesString)
+{
+	string $nodes[] = stringToStringArray($nodesString, ",");
+
+	for ($i=0;$i<size($nodes);$i++){
+		string $attributes[] = `listAttr -s -u -k $nodes[$i]`;
+		for ($obj in $attributes){
+			if (!`getAttr -l ($nodes[$i] + "." + $obj)`){
+				string $connectionsL[] = `listConnections -s 1 -d 0 ($nodes[$i] + "." + $obj)`;
+				if (`size($connectionsL)`){
+					for ($conn in $connectionsL){
+						if ( ( `objectType -isAType "animCurve" $conn` ) || (`objectType -isAType "pairBlend" $conn`) ){
+							$defaultL = `attributeQuery -node $nodes[$i] -listDefault $obj`;
+							$default = $defaultL[0];
+							setAttr ($nodes[$i] + "." + $obj) $default;
+						}
+					}
+				}else{
+					$defaultL = `attributeQuery -node $nodes[$i] -listDefault $obj`;
+					$default = $defaultL[0];
+					setAttr ($nodes[$i] + "." + $obj) $default;					
+				}
+			}
+		}
+	}	
+}
