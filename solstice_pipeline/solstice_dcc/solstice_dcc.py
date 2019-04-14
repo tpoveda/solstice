@@ -730,6 +730,18 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function select_folder_dialog() not implemented!')
 
     @staticmethod
+    def save_file_dialog(title, start_directory=None, pattern=None):
+        """
+        Shows save file dialog
+        :param title: str
+        :param start_directory: str
+        :param pattern: str
+        :return: str
+        """
+
+        raise NotImplementedError('abstract DCC function save_file_dialog() not implemented!')
+
+    @staticmethod
     def get_current_frame():
         """
         Returns current frame set in time slider

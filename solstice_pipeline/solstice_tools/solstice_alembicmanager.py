@@ -1191,7 +1191,7 @@ class AlembicImporter(QWidget, object):
         solstice_alembic.import_alembic(alembic_path, mode='import', nodes=None, parent=parent)
 
     @staticmethod
-    def reference_alembic(alembic_path):
+    def reference_alembic(alembic_path, namespace=None):
 
         if not sp.is_maya():
             sp.logger.warning('DCC {} does not supports the reference of Alembic groups!'.format(sp.dcc.get_name()))
@@ -1223,7 +1223,11 @@ class AlembicImporter(QWidget, object):
 
         track_nodes = solstice_maya_utils.TrackNodes()
         track_nodes.load()
-        valid_reference = solstice_alembic.reference_alembic(alembic_path, namespace=abc_name)
+
+        if not namespace:
+            namespace = abc_name
+
+        valid_reference = solstice_alembic.reference_alembic(alembic_path, namespace=namespace)
         if not valid_reference:
             sp.logger.warning('Error while reference Alembic file: {}'.format(alembic_path))
             return

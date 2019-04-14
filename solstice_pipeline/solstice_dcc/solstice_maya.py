@@ -786,6 +786,22 @@ class SolsticeMaya(solstice_dcc.SolsticeDCC, object):
         return res
 
     @staticmethod
+    def save_file_dialog(title, start_directory=None, pattern=None):
+        """
+        Shows save file dialog
+        :param title: str
+        :param start_directory: str
+        :param pattern: str
+        :return: str
+        """
+
+        res = cmds.fileDialog2(fm=0, dir=start_directory, cap=title, ff=pattern)
+        if res:
+            res = res[0]
+
+        return res
+
+    @staticmethod
     def get_current_frame():
         """
         Returns current frame set in time slider

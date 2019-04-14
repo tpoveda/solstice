@@ -59,6 +59,7 @@ class DataVersions(object):
 
 
 class DataExtensions(object):
+    ABC = 'abc'
     LAYOUT = 'layout'
     ANIM = 'anim'
     FX = 'fx'

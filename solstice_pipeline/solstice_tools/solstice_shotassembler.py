@@ -10,6 +10,7 @@
 
 import os
 import json
+import  string
 
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 from solstice_pipeline.externals.solstice_qt.QtCore import *
@@ -19,7 +20,7 @@ import solstice_pipeline as sp
 from solstice_pipeline.solstice_gui import solstice_windows, solstice_splitters, solstice_attributes, solstice_asset
 from solstice_pipeline.solstice_utils import solstice_node, solstice_image as img
 from solstice_pipeline.resources import solstice_resource
-from solstice_pipeline.solstice_tools import solstice_shotexporter
+from solstice_pipeline.solstice_tools import solstice_shotexporter, solstice_alembicmanager, solstice_shaderlibrary
 
 reload(solstice_node)
 reload(solstice_asset)
@@ -115,7 +116,7 @@ class ShotAsset(AbstractItemWidget, object):
 
 class ShotAssets(QWidget, object):
 
-    updateHierarchy = Signal()
+    updateHierarchy = Signal(QObject)
 
     def __init__(self, parent=None):
         super(ShotAssets, self).__init__(parent=parent)
@@ -136,7 +137,7 @@ class ShotAssets(QWidget, object):
         self.main_layout.setSpacing(0)
         self.setLayout(self.main_layout)
 
-        self.add_btn = QPushButton('Add Asset')
+        self.add_btn = QPushButton('Add Asset File')
         self.main_layout.addWidget(self.add_btn)
         self.main_layout.addLayout(solstice_splitters.SplitterLayout())
         self.assets_menu = QMenu()
@@ -186,7 +187,7 @@ class ShotAssets(QWidget, object):
     def add_asset(self, asset):
         self.widgets.append(asset)
         self.assets_layout.insertWidget(0, asset)
-        self.updateHierarchy.emit()
+        self.updateHierarchy.emit(asset)
 
     def update_menu(self):
         add_layout_action = QAction('Layout', self.assets_menu)
@@ -214,7 +215,16 @@ class ShotAssets(QWidget, object):
         self.add_asset(new_layout_asset)
 
     def _on_add_animation(self):
-        pass
+        res = sp.dcc.select_file_dialog(
+            title='Select Animation File',
+            start_directory=sp.get_solstice_project_path(),
+            pattern='Animation Files (*.anim)'
+        )
+        if not res:
+            return
+
+        new_anim_asset = ShotAsset(asset=res)
+        self.add_asset(new_anim_asset)
 
     def _on_add_fx(self):
         pass
@@ -272,6 +282,80 @@ class NodeAsset(AbstractItemWidget, object):
             return
 
         self.node.reference_alembic_file()
+
+
+class AnimAsset(AbstractItemWidget, object):
+    clicked = Signal(QObject, QEvent)
+    contextRequested = Signal(QObject, QAction)
+
+    def __init__(self, uuid, name, path, params, abc_params, anim_file, parent=None):
+        self.name = name
+        self._path = path
+        self._uuid = uuid
+        self._params = params
+        self._abc_params = abc_params
+        self._anim_file = anim_file
+
+        print('Anim File: {}'.format(anim_file))
+
+        # In animations we try to retrieve the assets from the asset name
+        self.node = None
+        short_name = sp.dcc.node_short_name(self.name).rstrip(string.digits)
+        if short_name:
+            self.node = solstice_node.SolsticeAssetNode(name=short_name)
+            print(self.node.get_asset_data_path())
+
+        super(AnimAsset, self).__init__(name, parent)
+
+    def custom_ui(self):
+        super(AnimAsset, self).custom_ui()
+
+        self.item_widget.setFrameStyle(QFrame.Raised | QFrame.StyledPanel)
+        self.item_widget.setStyleSheet('QFrame { background-color: rgb(55,55,55);}')
+
+        self.asset_lbl = QLabel(self.name)
+        self.item_layout.addWidget(self.asset_lbl, 0, 1, 1, 1)
+
+        self.item_layout.setColumnStretch(1, 5)
+        self.item_layout.setAlignment(Qt.AlignLeft)
+
+    def get_asset_path(self):
+        if not self.node:
+            return
+
+        return self.node.asset_path
+
+    def get_attributes(self):
+        if not self.node:
+            return {}
+        return self._params
+
+    def get_icon(self):
+        if not self.node:
+            return
+
+        return self.node.get_icon()
+
+    def reference_animation(self):
+        if not self._path:
+            sp.logger.warning('Impossible to reference animation {}'.format(self._name))
+            return
+        anim_path = os.path.join(sp.get_solstice_project_path(), self._path)
+        if not os.path.isfile(anim_path) or not anim_path.endswith(sp.DataExtensions.ABC):
+            sp.logger.warning('File {} is not a valid Alembic animation file!'.format(anim_path))
+            return
+
+        if self.node:
+            local_max_versions = self.node.get_local_versions()
+            if not local_max_versions['model']:
+                sp.logger.warning('Alembic Animation File {} is pointing to a non published asset!'.format(self.name))
+        else:
+            sp.logger.warning('Alembic Animation File {} is not linked to any Solstice Asset!'.format(self.name))
+
+        if sp.is_houdini():
+            solstice_alembicmanager.AlembicImporter.import_alembic(anim_path)
+        else:
+            solstice_alembicmanager.AlembicImporter.reference_alembic(anim_path, namespace=os.path.splitext(os.path.basename(self._anim_file))[0])
 
 
 class ShotHierarchy(QWidget, object):
@@ -342,14 +426,29 @@ class ShotHierarchy(QWidget, object):
         self.hierarchy_layout.insertWidget(0, asset)
         asset.clicked.connect(self._on_item_clicked)
 
-    def add_node(self, node_id, node_name, node_path, node_params):
-        new_node = NodeAsset(
+        return asset
+
+    def add_layout(self, node_id, node_name, node_path, node_params):
+        new_layout = NodeAsset(
             uuid=node_id,
             name=node_name,
             path=node_path,
             params=node_params
         )
-        self.add_asset(new_node)
+
+        return self.add_asset(new_layout)
+
+    def add_animation(self, anim_id, anim_name, anim_path, anim_params, abc_params, anim_file):
+        new_anim = AnimAsset(
+            uuid=anim_id,
+            name=anim_name,
+            path=anim_path,
+            params=anim_params,
+            abc_params=abc_params,
+            anim_file=anim_file
+        )
+
+        return self.add_asset(new_anim)
 
     def _on_item_clicked(self, widget, event):
         if widget is None:
@@ -596,20 +695,20 @@ class ShotAssembler(solstice_windows.Window, object):
         self.shot_hierarchy.updateProperties.connect(self._on_update_properties)
         self.generate_btn.clicked.connect(self._on_generate_shot)
 
-    def _on_update_hierarchy(self):
+    def _on_update_hierarchy(self, shot_asset):
         for asset in self.shot_assets.all_assets():
             asset_path = asset.asset
             if not os.path.isfile(asset_path):
                 continue
             # TODO: Instead of using the extension we should check the asset object type
             if asset_path.endswith('.layout'):
-                self._add_layout_asset(asset)
+                self._add_layout_asset(asset, shot_asset)
             elif asset_path.endswith('.anim'):
-                self._add_animation_asset(asset)
+                self._add_animation_asset(asset, shot_asset)
             elif asset_path.endswith('.fx'):
-                self._add_fx_asset(asset)
+                self._add_fx_asset(asset, shot_asset)
 
-    def _add_layout_asset(self, asset):
+    def _add_layout_asset(self, asset, shot_asset):
         asset_path = asset.asset
         if not os.path.isfile(asset_path):
             sp.logger.warning('Impossible to add Layout asset because Layout File {} does not exists!'.format(asset_path))
@@ -632,14 +731,14 @@ class ShotAssembler(solstice_windows.Window, object):
             return
 
         for node_id, node_info in asset_data['assets'].items():
-            self.shot_hierarchy.add_node(
+            self.shot_hierarchy.add_layout(
                 node_id=node_id,
                 node_name=node_info['name'],
                 node_path=node_info['path'],
                 node_params=node_info['attrs']
             )
 
-    def _add_animation_asset(self, asset):
+    def _add_animation_asset(self, asset, shot_asset):
         asset_path = asset.asset
         if not os.path.isfile(asset_path):
             sp.logger.warning('Impossible to add Animation asset because Layout File {} does not exists!'.format(asset_path))
@@ -652,7 +751,28 @@ class ShotAssembler(solstice_windows.Window, object):
             sp.logger.error(e)
             return
 
-    def _add_fx_asset(self, asset):
+        anim_data_version = asset_data['data_version']
+        exporter_version = asset_data['exporter_version']
+        if anim_data_version != sp.DataVersions.LAYOUT:
+            sp.logger.warning(
+                'Animation Asset File {} is not compatible with current format. Please contact TD!'.format(asset_path))
+            return
+        if exporter_version != solstice_shotexporter.ShotExporter.version:
+            sp.logger.warning(
+                'Animation Asset File {} was exported with an older version. Please contact TD!'.format(asset_path))
+            return
+
+        for anim_id, anim_info in asset_data['anims'].items():
+            self.shot_hierarchy.add_animation(
+                anim_id=anim_id,
+                anim_name=anim_info['name'],
+                anim_path=anim_info['path'],
+                anim_params=anim_info['attrs'],
+                abc_params=anim_info['abc_attrs'],
+                anim_file=shot_asset.asset
+            )
+
+    def _add_fx_asset(self, asset, shot_asset):
         asset_path = asset.asset
         if not os.path.isfile(asset_path):
             sp.logger.warning(
@@ -672,7 +792,7 @@ class ShotAssembler(solstice_windows.Window, object):
 
         self.asset_props.update_attributes(asset_widget)
 
-        if isinstance(asset_widget, NodeAsset):
+        if isinstance(asset_widget, AbstractItemWidget):
             self._on_update_node_properties(asset_widget)
 
     def _on_update_node_properties(self, node_asset):
@@ -690,12 +810,21 @@ class ShotAssembler(solstice_windows.Window, object):
             sp.logger.warning('Shoot generation is only available in Maya!')
             return
 
+        import maya.cmds as cmds
+
+        sp.dcc.new_file()
+
         from solstice_pipeline.solstice_utils import solstice_maya_utils
 
         for node_asset in self.shot_hierarchy.all_hierarchy():
             track = solstice_maya_utils.TrackNodes(full_path=True)
             track.load()
-            node_asset.reference_alembic()
+
+            if isinstance(node_asset, NodeAsset):
+                node_asset.reference_alembic()
+            elif isinstance(node_asset, AnimAsset):
+                node_asset.reference_animation()
+
             res = track.get_delta()
             if node_asset.name not in res:
                 sp.logger.warning('Node {} is not loaded!'.format(node_asset.name))
@@ -704,6 +833,12 @@ class ShotAssembler(solstice_windows.Window, object):
             for attr, attr_value in node_asset.get_attributes().items():
                 if type(attr_value) is float:
                     sp.dcc.set_float_attribute_value(node=node_asset.name, attribute_name=attr, attribute_value=attr_value)
+
+            sp.dcc.clear_selection()
+
+        solstice_shaderlibrary.ShaderLibrary.load_scene_shaders()
+
+        cmds.viewFit(animate=True)
 
 def run():
     win = ShotAssembler().show()

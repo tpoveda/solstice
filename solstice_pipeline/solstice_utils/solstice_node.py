@@ -493,7 +493,7 @@ class SolsticeAssetNode(SolsticeNode, object):
             if os.path.isfile(published_path):
                 artella.reference_file_in_maya(file_path=published_path)
 
-    def reference_alembic_file(self):
+    def reference_alembic_file(self, namespace=None):
         from solstice_pipeline.solstice_tools import solstice_alembicmanager
         alembic_name = self._name + '.abc'
         local_max_versions = self.get_max_local_versions()
@@ -503,7 +503,7 @@ class SolsticeAssetNode(SolsticeNode, object):
                 if sp.is_houdini():
                     solstice_alembicmanager.AlembicImporter.import_alembic(published_path)
                 else:
-                    solstice_alembicmanager.AlembicImporter.reference_alembic(published_path)
+                    solstice_alembicmanager.AlembicImporter.reference_alembic(published_path, namespace=namespace)
 
     def import_standin_file(self):
         from solstice_pipeline.solstice_tools import solstice_standinmanager
