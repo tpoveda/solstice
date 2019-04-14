@@ -12,22 +12,28 @@
 import maya.cmds as cmds
 import maya.mel as mel
 
-try:
+import solstice_pipeline as sp
+from solstice_pipeline.solstice_utils import solstice_naming_utils as naming
+from solstice_pipeline.solstice_utils import solstice_maya_utils
+
+
+
+if sp.dcc.get_version() <= 2017:
     import MASH.api as mapi
     import MASH.undo as undo
-    import MASHoutliner
     import mash_repro_utils
     import mash_repro_aetemplate
-except:
-    pass
-
-from solstice_utils import solstice_naming_utils as naming
-from solstice_utils import solstice_maya_utils
+    import MASHoutliner
+elif sp.dcc.get_version() >= 2018:
+    import MASH.api as mapi
+    import MASH.undo as undo
+    import mash_repro_utils
+    import mash_repro_aetemplate
+    import MASH.editor
 
 
 def get_mash_nodes():
     return cmds.ls(type='MASH_Waiter')
-
 
 def create_mash_network(name='Solstice_Scatter', type='repro'):
     name = naming.find_available_name(name=name)
@@ -40,12 +46,10 @@ def create_mash_network(name='Solstice_Scatter', type='repro'):
     mash_network = get_mash_network(waiter_node)
     return mash_network
 
-
 def get_mash_network(node_name):
     if cmds.objExists(node_name):
         return mapi.Network(node_name)
     return None
-
 
 @undo.chunk('Removing MASH Network')
 def remove_mash_network(network):
@@ -60,10 +64,11 @@ def remove_mash_network(network):
         if cmds.objExists(network.waiter):
             cmds.delete(network.waiter)
 
-
 def get_mash_outliner_tree():
-    return MASHoutliner.OutlinerTreeView()
-
+    if sp.dcc.get_version() <= 2017:
+        return MASHoutliner.OutlinerTreeView()
+    elif sp.dcc.get_version() >= 2018:
+        return MASH.editor.OutlinerTreeView()
 
 @undo.chunk
 def add_mesh_to_repro(repro_node, meshes=None):
@@ -78,7 +83,6 @@ def add_mesh_to_repro(repro_node, meshes=None):
             mash_repro_utils.connect.mesh_group(repro_node, obj)
     cmds.undoInfo(cck=True)
 
-
 def get_repro_object_widget(repro_node):
     if not repro_node:
         return
@@ -88,7 +92,6 @@ def get_repro_object_widget(repro_node):
     if len(repro_widgets) > 0:
         return repro_widgets[0]
     return None
-
 
 def set_repro_object_widget_enabled(repro_node, flag):
     repro_widget = get_repro_object_widget(repro_node)

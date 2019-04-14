@@ -8,20 +8,16 @@
 # ______________________________________________________________________
 # ==================================================================="""
 
-from functools import partial
 
 from solstice_pipeline.externals.solstice_qt.QtCore import *
 from solstice_pipeline.externals.solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-import maya.OpenMayaUI as OpenMayaUI
 
 import solstice_pipeline as sp
-from solstice_gui import solstice_windows, solstice_assetviewer, solstice_splitters
-from solstice_utils import solstice_mash_utils, solstice_artella_utils
-
-from solstice_gui import solstice_asset
+from solstice_pipeline.solstice_gui import solstice_windows, solstice_assetviewer, solstice_splitters
+from solstice_pipeline.solstice_utils import solstice_mash_utils, solstice_artella_utils
 
 
 class SolsticeScatter(solstice_windows.Window, object):
@@ -314,19 +310,28 @@ class SolsticeScatter(solstice_windows.Window, object):
         else:
             self._categories_widget.setEnabled(True)
 
-        self._mash_outliner.updateModel()
+        if sp.dcc.get_version() <= 2017:
+            self._mash_outliner.updateModel()
+        else:
+            self._mash_outliner.populateItems()
 
     def _add_mash(self):
         mash_network = solstice_mash_utils.create_mash_network()
         painter = mash_network.addNode('MASH_Placer')
-        self._mash_outliner.updateModel()
+        if sp.dcc.get_version() <= 2017:
+            self._mash_outliner.updateModel()
+        else:
+            self._mash_outliner.populateItems()
         return mash_network
 
     def _remove_mash(self):
         mash_network = self.get_selected_mash_network()
         instancer = mash_network.instancer
         self._mash_outliner._deleteNode()
-        self._mash_outliner.updateModel()
+        if sp.dcc.get_version() <= 2017:
+            self._mash_outliner.updateModel()
+        else:
+            self._mash_outliner.populateItems()
         if instancer and cmds.objExists(instancer):
             cmds.delete(instancer)
 
@@ -342,3 +347,5 @@ def run():
     sp.update_solstice_project_path()
 
     win = SolsticeScatter().show()
+
+    return win
