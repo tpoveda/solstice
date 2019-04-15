@@ -1,26 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_assetviewer.py
-# by Tomas Poveda
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool that allows to reference/import Solstice Assets
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import weakref
 from functools import partial
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.gui import windowds, assetviewer, buttons
-from pipeline.utils import qtutils
-from pipeline.resources import resource
-
-reload(assetviewer)
-
+import solstice.pipeline as sp
+from solstice.pipeline.core import assetviewer
+from solstice.pipeline.gui import window, buttons
+from solstice.pipeline.utils import qtutils
+from solstice.pipeline.resources import resource
 
 global solstice_asset_viewer_window
 
@@ -181,17 +184,17 @@ class SolsticeAssetViewer(QWidget, object):
                     self._create_sync_btn(item)
 
 
-class SolsticeAssetViewerWindow(windowds.Window, object):
+class SolsticeAssetLibraryWindow(window.Window, object):
 
     name = 'SolsticeAssetBuilder'
-    title = 'Solstice Tools - Solstice Builder'
+    title = 'Solstice Tools - Solstice Asset Library'
     version = '1.1'
 
     def __init__(self):
-        super(SolsticeAssetViewerWindow, self).__init__()
+        super(SolsticeAssetLibraryWindow, self).__init__()
 
     def custom_ui(self):
-        super(SolsticeAssetViewerWindow, self).custom_ui()
+        super(SolsticeAssetLibraryWindow, self).custom_ui()
 
         self.set_logo('solstice_assetbuilder_logo')
         self.resize(150, 800)
@@ -204,6 +207,6 @@ def run():
     if sp.is_maya():
         qtutils.dock_window(SolsticeAssetViewer)
     else:
-        win = SolsticeAssetViewerWindow()
+        win = SolsticeAssetLibraryWindow()
         win.show()
         return win

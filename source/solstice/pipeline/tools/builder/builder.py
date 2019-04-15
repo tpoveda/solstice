@@ -1,27 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_builder.py
-# by Tomas Poveda
-# Custom QWidget that shows Solstice Assets in the Solstice Asset Viewer
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool to create information files for assets, shots and sequences
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import json
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-import pipeline as sp
-from pipeline.gui import windowds
-from pipeline.gui import splitters
-from pipeline.utils import image as img
+import solstice.pipeline as sp
+from solstice.pipeline.gui import window, splitters
+from solstice.pipeline.utils import image as img
 
 
-class SolsticeBuilder(windowds.Window, object):
+class SolsticeBuilder(window.Window, object):
 
     name = 'SolsticeAssetBuilder'
     title = 'Solstice Tools - Solstice Builder'
@@ -428,5 +431,3 @@ class ShotBuilder(BuilderWidget, object):
 
 def run():
     SolsticeBuilder().show()
-
-

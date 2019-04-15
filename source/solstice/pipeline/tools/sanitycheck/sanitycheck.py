@@ -1,29 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_sanitycheck.py
-# by Tomas Poveda
-# Solstice Pipeline tool to smooth the workflow between Maya and Artella
-# ______________________________________________________________________
-# ==================================================================="""
 
-import time
+"""
+Solstice Pipeline tool to smooth the workflow between Maya and Artella
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
 import weakref
 from functools import partial
 
-import maya.cmds as cmds
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-import pipeline as sp
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtGui import *
-
-from pipeline.gui import windowds, stack, spinner, splitters, assetviewer, console, asset
-from pipeline.utils import image, qtutils
-from solstice_checks import solstice_checkgroups, solstice_assetchecks
-
-reload(solstice_assetchecks)
+import solstice.pipeline as sp
+from solstice.pipeline.core import asset, assetviewer
+from solstice.pipeline.gui import window, stack, spinner, splitters, console
+from solstice.pipeline.utils import image, qtutils
+from solstice.pipeline.tools.sanitycheck.checks import checkgroups, assetchecks
 
 
 class SanityCheckWaiting(QFrame, object):
@@ -48,7 +48,7 @@ class SanityCheckWaiting(QFrame, object):
         main_layout.addItem(QSpacerItem(0, 20, QSizePolicy.Fixed, QSizePolicy.Expanding))
 
 
-class SanityCheck(windowds.Window, object):
+class SanityCheck(window.Window, object):
     name = 'Solstice_SanityCheck'
     title = 'Solstice Tools - Sanity Check'
     version = '1.1'
@@ -241,45 +241,44 @@ class SanityCheck(windowds.Window, object):
         return True
 
 
-class TexturesSanityCheck(solstice_checkgroups.SanityCheckGroup, object):
+class TexturesSanityCheck(checkgroups.SanityCheckGroup, object):
     def __init__(self, asset, log, auto_fix=False, stop_on_error=False, parent=None):
         super(TexturesSanityCheck, self).__init__(name='Textures', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
 
-        self.add_check(solstice_assetchecks.ValidTexturesPath(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.TexturesFolderIsEmpty(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.CleanModelUnknownNodes(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.TextureFileSize(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.ValidTexturesPath(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.TexturesFolderIsEmpty(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.CleanModelUnknownNodes(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.TextureFileSize(asset=asset, status='working', log=log))
     # self.add_check(solstice_assetchecks.TextureFilesLocked(asset=asset, status='working', log=log))
 
 
-class ModelSanityCheck(solstice_checkgroups.SanityCheckGroup, object):
+class ModelSanityCheck(checkgroups.SanityCheckGroup, object):
     def __init__(self, asset, log, auto_fix=False, stop_on_error=False, parent=None):
         super(ModelSanityCheck, self).__init__(name='Textures', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
 
-        self.add_check(solstice_assetchecks.ValidModelPath(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.ModelFileIsLocked(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.CleanModelUnknownNodes(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.CheckModelMainGroup(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.ModelHasNoShaders(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.ModelProxyHiresGroups(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.ValidModelPath(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.ModelFileIsLocked(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.CleanModelUnknownNodes(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.CheckModelMainGroup(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.ModelHasNoShaders(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.ModelProxyHiresGroups(asset=asset, status='working', log=log))
         # self.add_check(solstice_assetchecks.ValidTagDataNode(asset=asset, status='working', log=log))
         # self.add_check(solstice_assetchecks.SetupTagDataNode(asset=asset, status='working', log=log))
 
 
-class ShadingSanityCheck(solstice_checkgroups.SanityCheckGroup, object):
+class ShadingSanityCheck(checkgroups.SanityCheckGroup, object):
     def __init__(self, asset, log, auto_fix=False, stop_on_error=False, parent=None):
         super(ShadingSanityCheck, self).__init__(name='Textures', auto_fix=auto_fix, stop_on_error=stop_on_error, parent=parent)
 
-        self.add_check(solstice_assetchecks.ValidModelPath(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.ValidShadingPath(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.ModelFileIsLocked(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.ShadingFileIsLocked(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.CleanModelUnknownNodes(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.CleanShadingUnknownNodes(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.CheckModelMainGroup(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.CheckShadingMainGroup(asset=asset, status='working', log=log))
-        self.add_check(solstice_assetchecks.CheckShadingShaders(asset=asset, status='working', log=log))
-
+        self.add_check(assetchecks.ValidModelPath(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.ValidShadingPath(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.ModelFileIsLocked(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.ShadingFileIsLocked(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.CleanModelUnknownNodes(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.CleanShadingUnknownNodes(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.CheckModelMainGroup(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.CheckShadingMainGroup(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.CheckShadingShaders(asset=asset, status='working', log=log))
 
 
 def run():

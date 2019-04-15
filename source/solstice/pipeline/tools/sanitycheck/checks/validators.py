@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_validator.py
-# by Tomas Poveda
-# Module that contains base class to create validator dialogs
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+ Module that contains base class to create validator dialogs
+ """
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import threading
 import traceback
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.gui import dialog, splitters
-from pipeline.tools.sanitycheck.checks import checkgroups
+import solstice.pipeline as sp
+from solstice.pipeline.gui import dialog, splitters
+
+from solstice.pipeline.tools.sanitycheck.checks import checkgroups
 
 
 class SanityCheckValidator(dialog.Dialog, object):

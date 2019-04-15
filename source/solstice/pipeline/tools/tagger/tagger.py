@@ -11,13 +11,13 @@
 import os
 from functools import partial
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.gui import windowds, grid, label
-from pipeline.utils import pythonutils as utils
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.gui import window, grid, label
+from solstice.pipeline.utils import pythonutils as utils
+from solstice.pipeline.resources import resource
 
 if sp.is_maya():
     import maya.cmds as cmds
@@ -664,7 +664,7 @@ class ShadersEditor(TaggerEditor, object):
         self.dataUpdated.emit()
 
 
-class SolsticeTagger(windowds.Window, object):
+class SolsticeTagger(window.Window, object):
 
     name = 'SolsticeTagger'
     title = 'Solstice Tools - Tagger'

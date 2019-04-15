@@ -1,22 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-# ==================================================================="""
 
+"""
+Module to quickly find tools for Solstice
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import sys
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-import pipeline as sp
+import solstice.pipeline as sp
 
 if sp.is_maya():
     import maya.cmds as cmds
-    from pipeline.utils import mayautils as utils
+    from solstice.pipeline.utils import mayautils as utils
 
 
 class SolsticeSearcher():

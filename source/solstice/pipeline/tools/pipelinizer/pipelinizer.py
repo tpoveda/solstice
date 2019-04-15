@@ -1,29 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_pipelinizer.py
-# by Tomas Poveda
-# Solstice Pipeline tool to smooth the workflow between Maya and Artella
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool to smooth the workflow between Maya and Artella
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import time
 from functools import partial
 from distutils.util import strtobool
 
-import treelib
+from solstice.pipeline.externals import treelib
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.gui import windowds, user, stack, assetviewer, splitters, spinner
-from pipeline.utils import pythonutils, artellautils
-from pipeline.tools.pipelinizer import sequencer
-from pipeline.utils import artellaclasses, qtutils
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.core import asset as base_asset, assetviewer
+from solstice.pipeline.gui import window, stack, splitters, spinner
+from solstice.pipeline.utils import pythonutils, artellautils, artellaclasses, qtutils
+from solstice.pipeline.resources import resource
+
+from solstice.pipeline.tools.pipelinizer import sequencer
+from solstice.pipeline.tools.pipelinizer.widgets import user
 
 if sp.is_maya():
     import maya.cmds as cmds
@@ -128,7 +134,7 @@ class PipelinizerWaiting(QFrame, object):
         main_layout.addItem(QSpacerItem(0, 20, QSizePolicy.Fixed, QSizePolicy.Expanding))
 
 
-class Pipelinizer(windowds.Window, object):
+class Pipelinizer(window.Window, object):
 
     name = 'SolsticePipelinizer'
     title = 'Solstice Tools - Artella Pipeline'
@@ -441,7 +447,7 @@ class Pipelinizer(windowds.Window, object):
                 if len(elements_to_sync) > 0:
                     assets = list()
                     for el in elements_to_sync:
-                        assets.append(asset.AssetWidget(
+                        assets.append(base_asset.AssetWidget(
                             name=os.path.basename(el),
                             path=el
                         ))
@@ -576,6 +582,7 @@ class Pipelinizer(windowds.Window, object):
 
 # ============================================================================================================
 
+
 def run():
     # Check that Artella plugin is loaded and, if not, we loaded it
     artellautils.update_artella_paths()
@@ -597,5 +604,3 @@ def run():
     win.show()
 
     win.sequencer.init_sequencer()
-
-

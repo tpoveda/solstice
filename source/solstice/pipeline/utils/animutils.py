@@ -103,6 +103,7 @@ def bake_space_switch(node, attr_name, attr_value, frame_range=None):
             cmds.delete(temp_cons)
         cmds.delete(temp_loc)
 
+
 def get_timeline_range():
     time_range = list()
     time_range.append(cmds.playbackOptions(animationStartTime=True, query=True))
@@ -110,9 +111,12 @@ def get_timeline_range():
 
     return time_range
 
+
 def get_playback_range():
     time_range = list()
     time_range.append(cmds.playbackOptions(minTime=True, query=True))
     time_range.append(cmds.playbackOptions(maxTime=True, query=True))
 
     return time_range
+
+

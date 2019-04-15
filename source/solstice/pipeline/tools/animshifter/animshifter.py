@@ -1,27 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_animshifter.py
-# by Tomas Poveda
-# Tool to shift animation keys easily
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool to shift animation keys easily
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import sys
 
 import maya.cmds as cmds
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.gui import windowds
-from pipeline.gui import splitters
-from pipeline.utils import mayautils
+from solstice.pipeline.gui import window
+from solstice.pipeline.gui import splitters
+from solstice.pipeline.utils import mayautils
 
 
-class SolsticeAnimShifter(windowds.Window, object):
+class SolsticeAnimShifter(window.Window, object):
 
     name = 'SolsticeAnimShifter'
     title = 'Solstice Tools - Solstice Animation Shifter'

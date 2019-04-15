@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_task.py
-# by Tomas Poveda
-# Module that contains base class for creating tasks
-# ______________________________________________________________________
-# ==================================================================="""
 
+"""
+Module that contains base class for creating tasks
+"""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from __future__ import print_function, division, absolute_import
 
-from pipeline.gui import splitters
-from pipeline.resources import resource
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+
+from solstice.pipeline.gui import splitters
+from solstice.pipeline.resources import resource
 
 
 class Task(QWidget, object):

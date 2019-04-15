@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_standinmanager.py
-# by Tomas Poveda
-# Tool to export/import Arnold Standin (.ass) files
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool to export/import Arnold Standin (.ass) files
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import sys
@@ -14,12 +18,14 @@ from functools import partial
 
 import maya.cmds as cmds
 
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
 
-import pipeline as sp
-from pipeline.gui import windowds, splitters, buttons
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.gui import window, splitters, buttons
+from solstice.pipeline.resources import resource
+
+from solstice.pipeline.tools.shaderlibrary import shaderlibrary
 
 
 class StandinImporter(QWidget, object):
@@ -290,10 +296,6 @@ class StandinExporter(QWidget, object):
         self.export_path_line.setText(export_folder)
 
     def _on_export(self):
-
-        from pipeline.tools import shaderlibrary
-        reload(shaderlibrary)
-
         out_folder = self.export_path_line.text()
         if not os.path.exists(out_folder):
             cmds.confirmDialog(
@@ -403,7 +405,7 @@ class StandinExporter(QWidget, object):
             cmds.currentTime(start_frame, edit=True)
 
 
-class StandinManager(windowds.Window, object):
+class StandinManager(window.Window, object):
     name = 'SolsticeStandinManager'
     title = 'Solstice Tools - Standin Manager'
     version = '1.1'

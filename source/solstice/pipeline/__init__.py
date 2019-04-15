@@ -23,6 +23,8 @@ import traceback
 import webbrowser
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
+
+from solstice.pipeline.resources import solstice_resources
 from solstice.pipeline.dcc import dcc as abstractdcc
 
 # =================================================================================
@@ -157,7 +159,7 @@ class SolsticePipeline(QObject):
 
     @staticmethod
     def init_searcher():
-        from solstice.pipeline.tools import searcher
+        from solstice.pipeline.tools.searcher import searcher
         searcher.SolsticeSearcher.install_hotkeys()
 
     def update_paths(self):
@@ -393,6 +395,20 @@ def get_solstice_icons_path():
     """
 
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'icons')
+
+
+def get_solstice_changelog_file():
+    """
+    Returns Solstice Changelog file
+    :return: str
+    """
+
+    changelog_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'changelog.json')
+    if not os.path.isfile(changelog_file):
+        logger.warning('Changelof file: {} does not exists!'.format(changelog_file))
+        return False
+
+    return changelog_file
 
 
 def get_solstice_shelf_file():

@@ -1,24 +1,33 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_sequencer.py
-# by Tomas Poveda
-# Solstice Sequencer Widget used to manager short sequences
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Solstice Sequencer Widget used to manager short sequences
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import time
 from collections import OrderedDict
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.gui import sequencerwidget, stack, spinner, label
-from pipeline.utils import artellautils as artella
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.gui import stack, spinner, label
+from solstice.pipeline.utils import artellautils as artella
+from solstice.pipeline.resources import resource
+
+from solstice.pipeline.tools.pipelinizer.widgets import sequencerwidget
+
+if sp.is_maya():
+    import maya.cmds as cmds
 
 
 class SequencerBackground(QFrame, object):
@@ -378,7 +387,3 @@ class SolsticeSequencer(QWidget, object):
         elif status == 'published':
             pass
         return None
-
-
-
-

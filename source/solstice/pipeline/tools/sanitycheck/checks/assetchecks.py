@@ -1,19 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_assetchecks.py
-# by Tomas Poveda
-# Module that contains checks related with assets
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that contains checks related with assets
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 
-import pipeline as sp
-from pipeline.tools.sanitycheck.checks import check
-from pipeline.utils import artellautils as artella
-from pipeline.gui import syncdialog
+import solstice.pipeline as sp
+from solstice.pipeline.core import syncdialog
+from solstice.pipeline.tools.sanitycheck.checks import check
+from solstice.pipeline.utils import artellautils as artella
+
+from solstice.pipeline.tools.tagger import tagger
+
+if sp.is_maya():
+    from solstice.pipeline.utils import mayautils
 
 
 class AssetFileExists(check.SanityCheckTask, object):
@@ -204,7 +213,6 @@ class StudentLicenseCheck(check.SanityCheckTask, object):
     def check(self):
 
         if sp.is_maya():
-            from pipeline.utils import mayautils
             self._file_path = self._asset().get_asset_file(file_type=self._file_type, status=self._status)
             if self._file_path is None or not os.path.isfile(self._file_path):
                 error_msg = 'File Path {} does not exists!'.format(self._file_path)
@@ -221,7 +229,6 @@ class StudentLicenseCheck(check.SanityCheckTask, object):
             return False
 
         if sp.is_maya():
-            from pipeline.utils import mayautils
             artella.lock_file(self._file_path)
             try:
                 sp.logger.debug('Cleaning Student License from file: {}'.format(self._file_path))
@@ -730,7 +737,6 @@ class ValidTagDataNode(check.SanityCheckTask, object):
         if not valid_tag_data:
             self.write_warning('Main group has not a valid tag data node connected to. Creating it ...')
             try:
-                from pipeline.tools.tagger import tagger
                 sp.dcc.select_object(valid_obj)
                 tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(self._asset().category)
                 sp.dcc.clear_selection()
@@ -769,9 +775,6 @@ class SetupTagDataNode(check.SanityCheckTask, object):
         self.set_check_text('Connect information to TagData ... ')
 
     def check(self):
-
-        from pipeline.tools.tagger import tagger
-
         if self._status != 'working':
             return False
 

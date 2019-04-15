@@ -1,29 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_hello.py
-# by Tomas Poveda
-# Tool that that helps user to start working with Solstice Tools
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool that that helps user to start working with Solstice Tools
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import sys
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-import pipeline as sp
-from pipeline import tools
-from pipeline.gui import dialog, animations
-from pipeline.utils import pythonutils
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline import tools
+from solstice.pipeline.gui import dialog, animations
+from solstice.pipeline.utils import pythonutils
+from solstice.pipeline.resources import resource
+
+from solstice.pipeline.tools.changelog import changelog
 
 
 class SolsticeHelloDialog(dialog.Dialog, object):
 
-    name = 'SolsticeHello'
+    name = 'hello'                          # Do not change or UI load'll fail and Maya'll crash painfully
     title = 'Solstice Tools - Hello'
     version = '1.0'
     docked = False
@@ -140,7 +146,6 @@ class SolsticeHelloDialog(dialog.Dialog, object):
         self.fade_close()
 
     def open_chagelog(self):
-        from pipeline.tools import changelog
         changelog.run()
 
     def _on_fade_up_tab(self):

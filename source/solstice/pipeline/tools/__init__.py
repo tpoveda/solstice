@@ -1,7 +1,7 @@
 import os
 
-import pipeline as sp
-from pipeline.utils import qtutils
+import solstice.pipeline as sp
+from solstice.pipeline.utils import qtutils
 
 
 def get_tool_ui_file(tool_name):

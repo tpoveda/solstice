@@ -1,28 +1,33 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_outliner.py
-# by Tomas Poveda
-# Tool used to show assets related with Solstice
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+ool used to show assets related with Solstice
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import weakref
 import collections
 from functools import partial
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
-import pipeline as sp
-from pipeline.utils import node, mayautils, qtutils
-from pipeline.gui import messagehandler
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.core import node
+from solstice.pipeline.gui import messagehandler
+from solstice.pipeline.utils import mayautils, qtutils
+from solstice.pipeline.resources import resource
 
 
 global solstice_outliner_window

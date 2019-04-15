@@ -1,23 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_sequencerwidgets.py
-# by Tomas Poveda
-# This module contains widgets used in the Solstice Sequencer
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+This module contains widgets used in the Solstice Sequencer
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-from pipeline.gui import splitters, syncdialog
-from pipeline.utils import image as img
-from pipeline.utils import artellautils as artella, pythonutils as py_utils
-from pipeline.resources import resource
+from solstice.pipeline.core import syncdialog
+from solstice.pipeline.gui import splitters
+from solstice.pipeline.utils import image as img, artellautils as artella, pythonutils as py_utils
+from solstice.pipeline.resources import resource
 
 
 class SequenceFile(QFrame, object):

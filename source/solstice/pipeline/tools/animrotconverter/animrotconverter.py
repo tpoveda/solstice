@@ -42,6 +42,9 @@ class SolsticeRotOrder(window.Window, object):
     def custom_ui(self):
         super(SolsticeRotOrder, self).custom_ui()
 
+        self.resize(200, 200)
+
 
 def run():
     win = SolsticeRotOrder().show()
+    return win

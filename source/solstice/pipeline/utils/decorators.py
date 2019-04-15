@@ -12,25 +12,22 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import time
+
 import solstice.pipeline as sp
 
-if sp.is_maya():
-    import maya.cmds as cmds
 
-
-def solstice_undo(fn):
-
+def timing(fn):
     """
-    Simple undo wrapper. Use @solstice_undo above the function to wrap it.
-    @param fn: function to wrap
-    @return wrapped function
+    Simple decorator to calculates how much time an operation costs in seconds
+    :param fn:
+    :return: wrapped function
     """
 
     def wrapper(*args, **kwargs):
-        cmds.undoInfo(openChunk=True)
-        try:
-            ret = fn(*args, **kwargs)
-        finally:
-            cmds.undoInfo(closeChunk=True)
+        time1 = time.time()
+        ret = fn(*args, **kwargs)
+        time2 = time.time()
+        sp.logger.debug('%s function took %0.5f sec' % (fn.func_name, (time2 - time1)))
         return ret
     return wrapper

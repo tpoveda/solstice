@@ -1,24 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_changelog.py
-# by Tomas Poveda
-# Tool that shows the changelog for the current version of Solstice Tools
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool that shows the changelog for the current version of Solstice Tools
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import json
 from collections import OrderedDict
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+import solstice.pipeline as sp
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-from solstice_gui import solstice_dialog, solstice_accordion
+from solstice.pipeline.gui import dialog, accordion
 
 
-class SolsticeChangelog(solstice_dialog.Dialog, object):
+class SolsticeChangelog(dialog.Dialog, object):
 
     name = 'SolsticeChangelog'
     title = 'Solstice Tools - Changelog'
@@ -66,13 +71,13 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
 
         # ===========================================================================================
 
-        self.version_accordion = solstice_accordion.AccordionWidget(parent=self)
-        self.version_accordion.rollout_style = solstice_accordion.AccordionStyle.MAYA
+        self.version_accordion = accordion.AccordionWidget(parent=self)
+        self.version_accordion.rollout_style = accordion.AccordionStyle.MAYA
         self.main_layout.addWidget(self.version_accordion)
 
         # ===========================================================================================
 
-        changelog_json_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'changelog.json')
+        changelog_json_file = sp.get_solstice_changelog_file()
         if not os.path.isfile(changelog_json_file):
             return
 
@@ -81,10 +86,9 @@ class SolsticeChangelog(solstice_dialog.Dialog, object):
         if not changelog_data:
             return
 
-        changelog_data = OrderedDict(sorted(changelog_data.items(), reverse=True))
-
-        for version, elements in changelog_data.items():
-            self._create_version(version, elements)
+        changelog_versions = [float(key) for key in changelog_data.keys()]
+        for version in reversed(sorted(changelog_versions)):
+            self._create_version(str(version), changelog_data[str(version)])
 
         last_version_item = self.version_accordion.item_at(0)
         last_version_item.set_collapsed(False)

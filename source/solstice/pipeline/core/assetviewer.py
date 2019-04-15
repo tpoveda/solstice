@@ -44,7 +44,7 @@ class AssetViewer(grid.GridWidget, object):
         self.setSelectionMode(QAbstractItemView.NoSelection)
 
         self.update_items(False)
-        # self.update_items()       # Uncomment later
+        # self.update_items()       # Uncomment to sync on startup
 
     @Slot()
     def add_asset(self, asset_widget):

@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_errortracker.py
-# by Tomas Poveda
-# Tool to capture current Solstice Tools errors and trace calls
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool to capture current Solstice Tools errors and trace calls
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import sys
@@ -15,17 +19,18 @@ import time
 import getpass
 import tempfile
 import datetime
-import  urllib2
+import urllib2
 import webbrowser
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import pipeline as sp
-from pipeline.gui import dialog, splitters, syncdialog
-from pipeline.utils import pythonutils, qtutils, image
-from pipeline.utils import artellautils as artella
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.core import syncdialog
+from solstice.pipeline.gui import dialog, splitters
+from solstice.pipeline.utils import pythonutils, qtutils, image
+from solstice.pipeline.utils import artellautils as artella
+from solstice.pipeline.resources import resource
 
 
 class BugTracker(dialog.Dialog, object):
@@ -128,7 +133,7 @@ class BugTracker(dialog.Dialog, object):
 
 
 def run(traceback):
-    qtutils.show_error(None, 'Critical error', 'Something went wrong while sync. Opening Bug Tracker ...!')
+    qtutils.show_error(None, 'Critical error', 'Something went wrong :( Opening Bug Tracker ...!')
     time.sleep(1)
     bug = BugTracker()
     bug.update_capture()

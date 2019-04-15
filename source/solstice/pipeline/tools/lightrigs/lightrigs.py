@@ -1,24 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_light_rigs.py
-# by Tomas Poveda
-# Tool to manage Solstice Light Rigs
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool to manage Solstice Light Rigs
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
 
-import maya.cmds as cmds
+import solstice.pipeline as sp
+from solstice.pipeline.core import syncdialog
+from solstice.pipeline.gui import window, splitters
+from solstice.pipeline.utils import pythonutils, qtutils
+from solstice.pipeline.resources import resource
 
-import pipeline as sp
-from pipeline.gui import windowds, syncdialog, splitters
-from pipeline.utils import pythonutils, qtutils
-from pipeline.resources import resource
+if sp.is_maya():
+    import maya.cmds as cmds
 
 # ===============================================================================================
 
@@ -79,7 +85,7 @@ class LightRig(QWidget, object):
         LightRigManager.reference_light_rig(name=self.name)
 
 
-class LightRigManager(windowds.Window, object):
+class LightRigManager(window.Window, object):
 
     name = 'SolsticeLightRigManager'
     title = 'Solstice Tools - Light Rigs Manager'
@@ -169,8 +175,8 @@ class LightRigManager(windowds.Window, object):
 
     @staticmethod
     def import_light_rig(name):
-        if cmds.file(query=True, modified=True):
-            cmds.SaveScene()
+        # if cmds.file(query=True, modified=True):
+        #     cmds.SaveScene()
 
         light_rigs_path = LightRigManager.get_solstice_light_rigs_path(sync=False)
         light_rig = os.path.join(light_rigs_path, '__working__', name.title(), 'LR_{}.ma'.format(name.title()).replace(' ', '_'))
@@ -182,9 +188,9 @@ class LightRigManager(windowds.Window, object):
 
     @staticmethod
     def reference_light_rig(name, do_save=True):
-        if do_save:
-            if cmds.file(query=True, modified=True):
-                cmds.SaveScene()
+        # if do_save:
+        #     if cmds.file(query=True, modified=True):
+        #         cmds.SaveScene()
 
         light_rigs_path = LightRigManager.get_solstice_light_rigs_path(sync=False)
         light_rig = os.path.join(light_rigs_path, '__working__', name.title(),

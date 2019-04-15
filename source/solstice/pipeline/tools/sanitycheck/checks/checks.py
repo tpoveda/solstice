@@ -1,17 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_checks.py
-# by Tomas Poveda
-# Module that contains generic checks
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that contains generic checks
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 
-import pipeline as sp
-from pipeline.tools.sanitycheck.checks import check
+import solstice.pipeline as sp
+from solstice.pipeline.tools.sanitycheck.checks import check
+
+if sp.is_maya():
+    import maya.cmds as cmds
+    from solstice.pipeline.utils import mayautils
 
 
 class StudentLicenseCheck(check.SanityCheckTask, object):
@@ -25,15 +33,15 @@ class StudentLicenseCheck(check.SanityCheckTask, object):
         if scene_path is None or not os.path.exists(scene_path):
             return True
 
-        return not solstice_maya_utils.file_has_student_line(filename=scene_path)
+        return not mayautils.file_has_student_line(filename=scene_path)
 
     def fix(self):
         scene_path = cmds.file(query=True, sn=True)
         if scene_path is None or not os.path.exists(scene_path):
             return
 
-        solstice_maya_utils.clean_student_line(filename=scene_path)
-        self._valid_check = not solstice_maya_utils.file_has_student_line(filename=scene_path)
+        mayautils.clean_student_line(filename=scene_path)
+        self._valid_check = not mayautils.file_has_student_line(filename=scene_path)
         valid = super(StudentLicenseCheck, self).fix()
         if not valid:
             sp.logger.warning('Impossible to fix Maya Student License Check')

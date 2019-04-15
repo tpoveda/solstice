@@ -159,6 +159,7 @@
     "Added first version for Shot Exporter Tool for Layout and Animation Files",
     "Added first version for Shot Assembler for Layout and Animation Files",
     "Some fixes in shader reload system to support Alembic Deformed Shapes",
-    "Complete internal reorganization of Solstice Tools"
+    "Complete internal reorganization of Solstice Tools",
+    "Fixed order of versions in Changelog"
   ]
 }

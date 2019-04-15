@@ -31,9 +31,14 @@
 		<file alias="collapse">icons/collapse.png</file>
 		<file alias="config">icons/config.png</file>
 		<file alias="cube">icons/cube.png</file>
+		<file alias="cursor">icons/cursor.png</file>
+		<file alias="cursor_hover">icons/cursor_hover.png</file>
 		<file alias="daylight">icons/daylight.png</file>
 		<file alias="delete">icons/delete.png</file>
+		<file alias="delete_hover">icons/delete_hover.png</file>
 		<file alias="documentation">icons/documentation.png</file>
+		<file alias="double_left">icons/double_left.png</file>
+		<file alias="double_left_hover">icons/double_left_hover.png</file>
 		<file alias="download">icons/download.png</file>
 		<file alias="empty_file">icons/empty_file.png</file>
 		<file alias="empty_icon">icons/empty_icon.png</file>
@@ -64,6 +69,7 @@
 		<file alias="ml_convertrotationorder">icons/ml_convertRotationOrder.png</file>
 		<file alias="movies_folder">icons/movies_folder.png</file>
 		<file alias="neutral contrast">icons/neutral contrast.png</file>
+		<file alias="not_published">icons/not_published.png</file>
 		<file alias="ok">icons/ok.png</file>
 		<file alias="open">icons/open.png</file>
 		<file alias="outline">icons/outline.png</file>
@@ -71,6 +77,8 @@
 		<file alias="password">icons/password.png</file>
 		<file alias="picker">icons/picker.png</file>
 		<file alias="pipeline">icons/pipeline.png</file>
+		<file alias="plus">icons/plus.png</file>
+		<file alias="plus_hover">icons/plus_hover.png</file>
 		<file alias="production">icons/production.png</file>
 		<file alias="progress_bar_1">icons/progress_bar_1.png</file>
 		<file alias="progress_bar_2">icons/progress_bar_2.png</file>
@@ -80,6 +88,7 @@
 		<file alias="reference">icons/reference.png</file>
 		<file alias="refresh">icons/refresh.png</file>
 		<file alias="refreshvl">icons/refreshvl.png</file>
+		<file alias="refresh_hover">icons/refresh_hover.png</file>
 		<file alias="restore">icons/restore.png</file>
 		<file alias="right_arrow">icons/right_arrow.png</file>
 		<file alias="right_arrow_disabled">icons/right_arrow_disabled.png</file>
@@ -95,9 +104,11 @@
 		<file alias="settings">icons/settings.png</file>
 		<file alias="shader">icons/shader.png</file>
 		<file alias="shaders">icons/shaders.png</file>
+		<file alias="shaders_sync">icons/shaders_sync.png</file>
 		<file alias="shots">icons/shots.png</file>
 		<file alias="size_grip">icons/size_grip.png</file>
 		<file alias="solstice">icons/solstice.png</file>
+		<file alias="solsticeanimshifter">icons/solsticeanimshifter.png</file>
 		<file alias="solsticeplayblast">icons/solsticeplayblast.png</file>
 		<file alias="solsticesnow">icons/solsticesnow.png</file>
 		<file alias="solsticesnow2">icons/solsticesnow2.png</file>
@@ -109,11 +120,15 @@
 		<file alias="solstice_tools">icons/solstice_tools.png</file>
 		<file alias="solstice_tools_2">icons/solstice_tools_2.png</file>
 		<file alias="spring_icon">icons/spring_icon.png</file>
+		<file alias="stamp">icons/stamp.png</file>
+		<file alias="stamp_hover">icons/stamp_hover.png</file>
+		<file alias="standin">icons/standin.png</file>
 		<file alias="student">icons/student.png</file>
 		<file alias="studiolibrary">icons/studiolibrary.png</file>
 		<file alias="studio_library">icons/studio_library.png</file>
 		<file alias="summer_icon">icons/summer_icon.png</file>
 		<file alias="sync">icons/sync.png</file>
+		<file alias="sync_hover">icons/sync_hover.png</file>
 		<file alias="tagger">icons/tagger.png</file>
 		<file alias="thumb_loading_1">icons/thumb_loading_1.png</file>
 		<file alias="thumb_loading_2">icons/thumb_loading_2.png</file>
@@ -179,6 +194,7 @@
 		<file alias="solstice_shaders_splash">images/solstice_shaders_splash.png</file>
 		<file alias="solstice_shadingvalidator_logo">images/solstice_shadingvalidator_logo.png</file>
 		<file alias="solstice_snowgenerator_logo">images/solstice_snowgenerator_logo.png</file>
+		<file alias="solstice_space_switcher_logo">images/solstice_space_switcher_logo.png</file>
 		<file alias="solstice_standinmanager_logo">images/solstice_standinmanager_logo.png</file>
 		<file alias="solstice_sync_splash">images/solstice_sync_splash.png</file>
 		<file alias="solstice_tagger_logo">images/solstice_tagger_logo.png</file>

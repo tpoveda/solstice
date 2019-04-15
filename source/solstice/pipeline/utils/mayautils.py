@@ -141,6 +141,123 @@ def maya_undo(fn):
     return lambda *args, **kwargs: utils.executeDeferred(wrapper, *args, **kwargs)
 
 
+def undo(fn):
+
+    """
+    Simple undo wrapper. Use @solstice_undo above the function to wrap it.
+    @param fn: function to wrap
+    @return wrapped function
+    """
+
+    def wrapper(*args, **kwargs):
+        cmds.undoInfo(openChunk=True)
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            cmds.undoInfo(closeChunk=True)
+
+    wrapper.__name__ = fn.__name__
+    wrapper.__doc__ = fn.__doc__
+
+    return wrapper
+
+
+def disable_undo(fn):
+    def wrapper(*args, **kwargs):
+        initial_undo_state = cmds.undoInfo(q=True, state=True)
+        cmds.undoInfo(stateWithoutFlush=False)
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            cmds.undoInfo(stateWithoutFlush=initial_undo_state)
+
+    wrapper.__name__ = fn.__name__
+    wrapper.__doc__ = fn.__doc__
+
+    return wrapper
+
+
+def disalbe_auto_key(fn):
+    def wrapper(*args, **kwargs):
+        initial_state = cmds.autoKeyframe(query=True, state=True)
+        cmds.autoKeyframe(edit=True, state=False)
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            cmds.autoKeyframe(edit=True, state=initial_state)
+
+    wrapper.__name__ = fn.__name__
+    wrapper.__doc__ = fn.__doc__
+
+    return wrapper
+
+
+def restore_selection(fn):
+    def wrapper(*args, **kwargs):
+        selection = cmds.ls(selection=True) or []
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            if selection:
+                cmds.select(selection)
+
+    wrapper.__name__ = fn.__name__
+    wrapper.__doc__ = fn.__doc__
+
+    return wrapper
+
+
+def restore_current_time(fn):
+    def wrapper(*args, **kwargs):
+        initial_time = cmds.currentTime(query=True)
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            cmds.currentTime(initial_time, edit=True)
+
+    wrapper.__name__ = fn.__name__
+    wrapper.__doc__ = fn.__doc__
+
+    return wrapper
+
+
+def show_wait_cursor(fn):
+    def wrapper(*args, **kwargs):
+        cmds.waitCursor(state=True)
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            cmds.waitCursor(state=False)
+
+    wrapper.__name__ = fn.__name__
+    wrapper.__doc__ = fn.__doc__
+
+    return wrapper
+
+
+def disable_views(fn):
+    def wrapper(*args, **kwargs):
+        model_panels = cmds.getPanel(vis=True)
+        empty_sel_conn = cmds.selectionConnection()
+        for panel in model_panels:
+            if cmds.getPanel(to=panel) == 'modelPanel':
+                cmds.isolateSelect(panel, state=True)
+                cmds.modelEditor(panel, e=True, mlc=empty_sel_conn)
+
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            for panel in model_panels:
+                if cmds.getPanel(to=panel) == 'modelPanel':
+                    cmds.isolateSelect(panel, state=True)
+            cmds.deleteUI(empty_sel_conn)
+
+    wrapper.__name__ = fn.__name__
+    wrapper.__doc__ = fn.__doc__
+
+    return wrapper
+
+
 @contextlib.contextmanager
 def maya_no_undo():
     """

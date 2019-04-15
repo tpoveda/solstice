@@ -1,27 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_user.py
-# by Tomas Poveda
-# Module that cantains a widget to show user images
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Module that contains a widget to show Artella user info
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import sys
 import getpass
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-import pipeline as sp
-from pipeline.utils import worker
-from pipeline.utils import pythonutils as python
-from pipeline.utils import artellautils as artella
-from pipeline.gui import spinner
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.gui import spinner
+from solstice.pipeline.utils import worker, pythonutils as python, artellautils as artella
+from solstice.pipeline.resources import resource
 
 
 class UserInfoWidget(QWidget, object):
@@ -230,6 +232,3 @@ class UserWidget(QWidget, object):
 
     def _on_worker_failure(self, uid, msg):
         sp.logger.error('Worker {0} : {1}'.format(uid, msg))
-
-
-

@@ -21,9 +21,6 @@ import collections
 import solstice.pipeline as sp
 from solstice.pipeline.utils import pythonutils, artellautils as artella
 
-from solstice.pipeline.tools import alembicmanager
-from solstice.pipeline.tools.standinmanager import standinmanager
-
 # =================================================================================================
 
 FULL_NAME_REGEX = re.compile(r'(?P<env>\A.+)(?P<art>_art/production/)(?P<code>.+)(?P<category>Assets/)(?P<assettype>[^/]+)/(?P<name>[^/]+)/(?P<version>[^/]+)/(?P<type>[^/]+)/(?P<filename>.+\Z)')
@@ -503,6 +500,9 @@ class SolsticeAssetNode(SolsticeNode, object):
                 artella.reference_file_in_maya(file_path=published_path)
 
     def reference_alembic_file(self, namespace=None):
+
+        from solstice.pipeline.tools.alembicmanager import alembicmanager
+
         alembic_name = self._name + '.abc'
         local_max_versions = self.get_max_local_versions()
         if local_max_versions['model']:
@@ -514,6 +514,9 @@ class SolsticeAssetNode(SolsticeNode, object):
                     alembicmanager.AlembicImporter.reference_alembic(published_path, namespace=namespace)
 
     def import_standin_file(self):
+
+        from solstice.pipeline.tools.standinmanager import standinmanager
+
         standin_name = self._name + '.ass'
         local_max_versions = self.get_max_local_versions()
         if local_max_versions['model']:

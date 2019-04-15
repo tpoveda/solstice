@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_publisher.py
-# by Tomas Poveda
-# Tool that is used to publish assets and sequences
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool that is used to publish assets and sequences
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import re
@@ -15,20 +19,24 @@ import weakref
 import traceback
 from shutil import copyfile
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-import pipeline as sp
-from pipeline.gui import dialog, splitters, spinner, console, syncdialog
-from pipeline.utils import qtutils
-from pipeline.utils import image as img
-from pipeline.utils import pythonutils as python
-from pipeline.utils import artellautils as artella
-from pipeline.tools.sanitycheck.checks import validators
-from pipeline.tools.sanitycheck.tasks import task, taskgroups
+import solstice.pipeline as sp
+from solstice.pipeline.core import syncdialog
+from solstice.pipeline.gui import dialog, splitters, spinner, console
+from solstice.pipeline.utils import qtutils, image as img, pythonutils as python, artellautils as artella
+from solstice.pipeline.resources import resource
 
-from pipeline.resources import resource
+from solstice.pipeline.tools.shaderlibrary import shaderlibrary
+from solstice.pipeline.tools.tagger import tagger
+from solstice.pipeline.tools.sanitycheck.checks import validators
+from solstice.pipeline.tools.sanitycheck.tasks import task, taskgroups
+from solstice.pipeline.tools.bugtracker import bugtracker as bug
+
+if sp.is_maya():
+    from solstice.pipeline.utils import mayautils
 
 
 class PublishTexturesTask(task.Task, object):
@@ -180,10 +188,6 @@ class PublishModelTask(task.Task, object):
         self.set_task_text('Publishing Model ...')
 
     def run(self):
-
-        from pipeline.tools import shaderlibrary
-        from pipeline.tools.tagger import tagger
-
         self.write_ok('>>> PUBLISH MODEL LOG')
         self.write_ok('------------------------------------')
 
@@ -403,7 +407,6 @@ class PublishModelTask(task.Task, object):
             if not valid_tag_data:
                 self.write_warning('Main group has not a valid tag data node connected to. Creating it ...')
                 try:
-                    from pipeline.tools.tagger import tagger
                     sp.dcc.select_object(valid_obj)
                     tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(self._asset().category)
                     sp.dcc.clear_selection()
@@ -540,7 +543,6 @@ class PublishModelTask(task.Task, object):
 
         # If we are working in Maya, we clean Student License
         if sp.is_maya():
-            from pipeline.utils import mayautils
             self.write('Check if we need to clean Student License again ...')
             if mayautils.file_has_student_line(filename=model_path):
                 mayautils.clean_student_line(filename=model_path)
@@ -636,9 +638,6 @@ class PublishShadingTask(task.Task, object):
         self.set_task_text('Publishing Shading ...')
 
     def run(self):
-
-        from pipeline.tools import shaderlibrary
-
         self.write_ok('>>> PUBLISH SHADING LOG')
         self.write_ok('------------------------------------')
 
@@ -912,7 +911,6 @@ class PublishShadingTask(task.Task, object):
 
             # If we are working in Maya, we remove Student License
             if sp.is_maya():
-                from pipeline.utils import mayautils
                 self.write_ok('Changes to shading file stored successfully!')
                 if mayautils.file_has_student_line(filename=shading_path):
                     mayautils.clean_student_line(filename=shading_path)
@@ -1244,7 +1242,6 @@ class AssetPublisherVersionWidget(QWidget, object):
                 artella.upload_new_asset_version(file_path=asset_path, comment=comment)
                 artella.unlock_file(file_path=asset_path)
         except Exception:
-            from pipeline.tools import bugtracker as bug
             bug.run(traceback.format_exc())
 
     def _publish(self):
@@ -1270,7 +1267,6 @@ class AssetPublisherVersionWidget(QWidget, object):
 
             self.onPublish.emit(categories_to_publish)
         except Exception:
-            from pipeline.tools import bugtracker as bug
             bug.run(traceback.format_exc())
 
 

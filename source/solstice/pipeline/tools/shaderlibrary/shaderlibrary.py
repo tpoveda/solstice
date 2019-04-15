@@ -1,38 +1,67 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_shadermanager.py
-# by Tomas Poveda
-# Tool used to manage all shaders used by all the assets in the short film
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool used to manage all shaders used by all the assets in the short film
+ç"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
-import re
 import json
-import string
 import traceback
 from functools import partial
 
 import maya.cmds as cmds
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-import pipeline as sp
-from pipeline.gui import windowds, shaderviewer, syncdialog, assetviewer
-from pipeline.utils import mayautils as utils
-from pipeline.utils import image as img
-from pipeline.utils import pythonutils, shaderutils, artellautils, qtutils
-from pipeline.resources import resource
+import solstice.pipeline as sp
+from solstice.pipeline.core import syncdialog, assetviewer
+from solstice.pipeline.gui import window
+from solstice.pipeline.utils import pythonutils, shaderutils, artellautils, qtutils, image as img, mayautils as utils
+from solstice.pipeline.resources import resource
 
+from solstice.pipeline.tools.outliner import outliner
 
 IGNORE_SHADERS = ['particleCloud1', 'shaderGlow1', 'defaultColorMgtGlobals', 'lambert1']
 IGNORE_ATTRS = ['computedFileTextureNamePattern']
 SHADER_EXT = 'sshader'
 
+
+class ShaderViewer(QGridLayout, object):
+    def __init__(self, grid_size=4, parent=None):
+        super(ShaderViewer, self).__init__(parent)
+
+        self._grid_size = grid_size
+        self.setHorizontalSpacing(0)
+        self.setVerticalSpacing(0)
+
+    def add_widget(self, widget):
+        row = 0
+        col = 0
+        while self.itemAtPosition(row, col) is not None:
+            if col == self._grid_size:
+                row += 1
+                col = 0
+            else:
+                col += 1
+        self.addWidget(widget, row, col)
+
+    def clear(self):
+        for i in range(self.count(), -1, -1):
+            item = self.itemAt(i)
+            if item is None:
+                continue
+            item.widget().setParent(None)
+            self.removeItem(item)
 
 class SolsticeShaderExportSplash(QSplashScreen, object):
     def __init__(self, *args, **kwargs):
@@ -561,7 +590,7 @@ class ShaderViewerWidget(QWidget, object):
         open_in_editor.triggered.connect(self.open_shader_in_editor)
 
 
-class ShaderLibrary(windowds.Window, object):
+class ShaderLibrary(window.Window, object):
 
     name = 'SolsticeShaderLibrary'
     title = 'Solstice Tools - Shader Manager'
@@ -634,7 +663,7 @@ class ShaderLibrary(windowds.Window, object):
         shader_scroll = QScrollArea()
         shader_scroll.setWidgetResizable(True)
         shader_scroll.setWidget(shader_widget)
-        self.shader_viewer = shaderviewer.ShaderViewer(grid_size=2)
+        self.shader_viewer = ShaderViewer(grid_size=2)
         shader_scroll.setMinimumWidth(900)
         self.shader_viewer.setAlignment(Qt.AlignTop)
         shader_widget.setLayout(self.shader_viewer)
@@ -866,8 +895,6 @@ class ShaderLibrary(windowds.Window, object):
         If a specific shader is already loaded, that shader is skipeed
         :return: list<str>, list of loaded shaders
         """
-
-        from pipeline.tools import outliner
 
         tag_nodes = outliner.SolsticeOutliner.get_tag_data_nodes()
         tag_info_nodes = outliner.SolsticeOutliner.get_tag_info_nodes()

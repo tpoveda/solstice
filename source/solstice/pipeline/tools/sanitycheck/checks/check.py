@@ -1,18 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_check.py
-# by Tomas Poveda
-# Module that contains base class for creating sanity checks
-# ______________________________________________________________________
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+"""
+Module that contains base class for creating sanity checks
+"""
 
-from pipeline.gui import splitters
-from pipeline.resources import resource
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+
+from solstice.pipeline.gui import splitters
+from solstice.pipeline.resources import resource
 
 
 class SanityCheckTask(QWidget, object):
