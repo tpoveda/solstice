@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Picker View Class
-# ==================================================================="""
 
-import os
+"""
+Picker View Class
+"""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
-from pipeline.externals.solstice_qt.QtSvg import *
+from __future__ import print_function, division, absolute_import
 
-from pipeline.pickers.picker import scene
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtSvg import *
+
+from solstice.pipeline.tools.pickers.picker import scene
 
 
 class PickerView(QGraphicsView, object):

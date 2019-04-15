@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Module that contains different commands used by pickers
-# ==================================================================="""
+
+"""
+Module that contains different commands used by pickers
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import maya.cmds as cmds
 import maya.mel as mel
@@ -12,7 +18,7 @@ import maya.mel as mel
 
 def select_control(ctrl_name, replace=True):
 
-    from pipeline.pickers.picker import pickerwindow
+    from solstice.pipeline.tools.pickers.picker import pickerwindow
 
     window_picker = pickerwindow.window_picker
     if window_picker and window_picker.namespace and window_picker.namespace.count() > 0:

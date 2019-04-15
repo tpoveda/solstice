@@ -1,12 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Custom colors used in pickers and buttons
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtGui import *
+"""
+Custom colors used in pickers and buttons
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
 black = QColor(50, 50, 50, 255)
 white = QColor(255, 255, 255, 200)
@@ -16,6 +22,7 @@ blue = QColor(0, 0, 255, 255)
 yellow = QColor(255, 255, 0, 255)
 darkYellow = QColor(135, 135, 45)
 orange = QColor(255, 150, 0)
+
 
 def get_color_from_list(colors_list):
     """

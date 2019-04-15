@@ -1,22 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Custom buttons used by the pickers
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+"""
+Custom buttons used by the pickers
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
 import maya.cmds as cmds
 import maya.mel as mel
 import maya.utils as maya_utils
 
-from pipeline.pickers.picker import colors as colors
-from pipeline.pickers.picker import utils as utils
-from pipeline.pickers.picker import commands as commands
+from solstice.pipeline.tools.pickers.picker import colors as colors
+from solstice.pipeline.tools.pickers.picker import utils as utils
+from solstice.pipeline.tools.pickers.picker import commands as commands
 
 
 class ButtonShape(object):
@@ -540,7 +546,7 @@ class BasePickerButton(QPushButton, object):
         Select the hierarchy of the button
         """
 
-        from pipeline.pickers.picker import pickerwindow
+        from solstice.pipeline.tools.pickers.picker import pickerwindow
 
         if len(self._hierarchy) > 0:
             for btn in self._hierarchy:
@@ -1065,7 +1071,7 @@ class GimbalButton(ToggleStateButton, object):
 
     def update_gimbal_visibility(self, is_enabled):
 
-        from pipeline.pickers.picker import pickerwindow
+        from solstice.pipeline.tools.pickers.picker import pickerwindow
 
         self.update_state()
         ctrl = self.control.replace('_gimbalHelper', '')
@@ -1134,7 +1140,7 @@ class ModuleButton(BasePickerButton, object):
     def mousePressEvent(self, event):
         super(ModuleButton, self).mousePressEvent(event)
 
-        from pipeline.pickers.picker import pickerwindow
+        from solstice.pipeline.tools.pickers.picker import pickerwindow
 
         module_ctrls = self.scene.get_part_controls(self.get_part(), self.side)
         window_picker = pickerwindow.window_picker

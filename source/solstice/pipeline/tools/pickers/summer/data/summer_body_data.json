@@ -310,7 +310,7 @@
             "radius": "2",
             "text":"Main",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "272",
@@ -320,7 +320,7 @@
             "radius": "2",
             "text":"World",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "303",
@@ -330,7 +330,7 @@
             "radius": "2",
             "text":"Pelvis",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "242",
@@ -340,7 +340,7 @@
             "radius": "2",
             "text":"Head",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "272",
@@ -350,7 +350,7 @@
             "radius": "2",
             "text":"Object",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-307",
@@ -360,7 +360,7 @@
             "radius": "2",
             "text":"Main",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-276",
@@ -370,7 +370,7 @@
             "radius": "2",
             "text":"World",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "-246",
@@ -380,7 +380,7 @@
             "radius": "2",
             "text":"Pelvis",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "-245",
@@ -390,7 +390,7 @@
             "radius": "2",
             "text":"Head",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-308",
@@ -400,7 +400,7 @@
             "radius": "2",
             "text":"Object",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           }
         ]
       },
@@ -951,7 +951,7 @@
             "radius": "2",
             "text":"GLOBAL",
             "color":[182,255,241],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-221",
@@ -961,7 +961,7 @@
             "radius": "2",
             "text":"MAIN",
             "color":[182,255,241],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_main_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_main_control()"
           },
           {
             "x": "-165",
@@ -971,7 +971,7 @@
             "radius": "2",
             "text":"ALL",
             "color":[182,255,241],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_all_controls()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_all_controls()"
           },
           {
             "x": "-271",
@@ -981,7 +981,7 @@
             "radius": "2",
             "text":"BODY",
             "color":[182,255,241],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_body_controls()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_body_controls()"
           },
           {
             "x": "-221",
@@ -991,7 +991,7 @@
             "radius": "2",
             "text":"FACE",
             "color":[182,255,241],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_face_controls()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_face_controls()"
           },
           {
             "x": "-165",
@@ -1001,7 +1001,7 @@
             "radius": "2",
             "text":"DYNAMIC",
             "color":[182,255,241],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_dynamic_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_dynamic_control()"
           },
           {
             "x": "-270",
@@ -1011,7 +1011,7 @@
             "radius": "2",
             "text":"KEY SELECTED",
             "color":[252,0,66],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.set_keyframe()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.set_keyframe()"
           },
           {
             "x": "-165",
@@ -1021,7 +1021,7 @@
             "radius": "2",
             "text":"CLEAR SELECTION",
             "color":[0,255,182],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.clear_selection()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.clear_selection()"
           },
            {
             "x": "110",
@@ -1031,7 +1031,7 @@
             "radius": "2",
             "text":"Main",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "140",
@@ -1041,7 +1041,7 @@
             "radius": "2",
             "text":"World",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "170",
@@ -1051,7 +1051,7 @@
             "radius": "2",
             "text":"Pelvis",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "201",
@@ -1061,7 +1061,7 @@
             "radius": "2",
             "text":"Object",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-219",
@@ -1071,7 +1071,7 @@
             "radius": "2",
             "text":"Main",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
           {
             "x": "-190",
@@ -1081,7 +1081,7 @@
             "radius": "2",
             "text":"World",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "-160",
@@ -1091,7 +1091,7 @@
             "radius": "2",
             "text":"Pelvis",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           },
            {
             "x": "-128",
@@ -1101,7 +1101,7 @@
             "radius": "2",
             "text":"Object",
             "color":[100,100,100],
-            "command":"from solstice_pipeline.solstice_pickers.picker import picker_commands as cmds; cmds.select_global_control()"
+            "command":"from solstice.pipeline.tools.pickers.picker import commands as cmds; cmds.select_global_control()"
           }
         ]
       }

@@ -1,28 +1,34 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Utility functions for Solstice Pickers
-# ==================================================================="""
+
+"""
+Utility functions for Solstice Pickers
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 try:
     from shiboken2 import wrapInstance
 except ImportError:
     try:
         from shiboken import wrapInstance
-    except ImportError, e:
-        print e
+    except Exception as e:
+        pass
 
 import maya.cmds as cmds
 import maya.mel as mel
 import maya.OpenMayaUI as OpenMayaUI
 
-import pipeline as sp
+import solstice.pipeline as sp
 
 # --------------------------------------------------------------------------------------------
 scripts_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'scripts')
@@ -122,8 +128,8 @@ def load_script(name):
         sp.logger.debug('MEL script {} loaded successfully!'.format(name))
     except Exception as e:
         cmds.error('ERROR: Impossible to evaluation {} script'.format(name))
-        print '-' * 100
-        print str(e)
+        print('-' * 100)
+        print(str(e))
 
 
 def load_vl_scripts():

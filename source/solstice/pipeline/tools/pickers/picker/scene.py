@@ -1,21 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Picker View Class
-# ==================================================================="""
+
+"""
+Picker View Class
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
-import imp
 import json
 from copy import deepcopy
 
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 
-from pipeline.pickers.picker import buttons, part
+from solstice.pipeline.tools.pickers.picker import buttons, part as picker_part
 
 
 class PickerScene(QGraphicsScene, object):
@@ -173,7 +178,7 @@ class PickerScene(QGraphicsScene, object):
                 part_found = part
 
         if part_found is None:
-            part_found = part.PickerPart(name=new_button.part, side=new_button.side)
+            part_found = picker_part.PickerPart(name=new_button.part, side=new_button.side)
             self._parts.append(part_found)
 
         part_found.add_button(new_button)
@@ -218,7 +223,7 @@ class PickerScene(QGraphicsScene, object):
 
     def _create_button(self, btn_data, part, button_class, offset=0):
         btn_info = self._get_button_info(btn_data, part, offset, button_class)
-        new_btn = eval('picker_buttons.' + button_class + '()')
+        new_btn = eval('buttons.' + button_class + '()')
         new_btn.set_info(btn_info)
         self.picker_data['parts'][part][button_class].append(new_btn)
         self.add_button(new_btn)
@@ -226,7 +231,7 @@ class PickerScene(QGraphicsScene, object):
         if btn_info['mirror'] != '' and btn_info['mirror'] is not None:
             new_info = deepcopy(btn_info)
             mirror_btn_info = self._get_mirror_button_info(new_info, offset)
-            new_mirror_btn = eval('picker_buttons.' + mirror_btn_info['class']+'()')
+            new_mirror_btn = eval('buttons.' + mirror_btn_info['class']+'()')
             new_mirror_btn.set_info(mirror_btn_info)
             self.picker_data['parts'][part][button_class].append(new_mirror_btn)
             self.add_button(new_mirror_btn)

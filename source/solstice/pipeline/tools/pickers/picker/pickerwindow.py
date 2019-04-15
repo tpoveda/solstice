@@ -1,24 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Picker Window
-# ==================================================================="""
+
+"""
+Picker Window
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import weakref
 from functools import partial
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 
-import pipeline as sp
-from pipeline.pickers.picker import utils as utils
-from pipeline.gui import windowds
-from pipeline.pickers.picker import pickerwidget
+import solstice.pipeline as sp
+from solstice.pipeline.gui import window
+
+from solstice.pipeline.tools.pickers.picker import utils as utils
+from solstice.pipeline.tools.pickers.picker import pickerwidget
 
 
 global window_picker
@@ -168,7 +175,7 @@ class PickerWindow(QWidget, object):
         self.pickers_layout.setSpacing(2)
         self.main_layout.addLayout(self.pickers_layout)
 
-        self.dock_window = windowds.DockWindow()
+        self.dock_window = window.DockWindow()
         self.main_layout.addWidget(self.dock_window)
 
         self.body_picker = self.get_body_picker()

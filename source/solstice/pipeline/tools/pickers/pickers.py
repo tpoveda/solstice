@@ -1,30 +1,36 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_scatter.py
-# by Tomas Poveda
-# Tool that allows to select the picker you want to open
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool that allows to select the picker you want to open
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import sys
+import traceback
 from functools import partial
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import maya.cmds as cmds
+import solstice.pipeline as sp
+from solstice.pipeline.gui import window
+from solstice.pipeline.utils import pythonutils
+from solstice.pipeline.tools.pickers.picker import utils as utils
+from solstice.pipeline.resources import resource
 
-import pipeline as sp
-from pipeline.gui import windowds, splitters
-from pipeline.utils import pythonutils
-from pipeline.pickers.picker import utils as utils
-from pipeline.resources import resource
+if sp.is_maya():
+    import maya.cmds as cmds
 
 
-class SolsticePickers(windowds.Window, object):
+class SolsticePickers(window.Window, object):
 
     name = 'Solstice_Pickers'
     title = 'Solstice Tools - Picker Tool'
@@ -107,11 +113,11 @@ class SolsticePickers(windowds.Window, object):
         # documentation_btn.clicked.connect(self._open_pickers_documentation)
 
     def open_picker(self, character_name):
-        command = 'from solstice_pipeline.solstice_pickers.{0} import picker;reload(picker);picker.run(full_window=False);'.format(character_name)
+        command = 'from solstice.pipeline.tools.pickers.{0} import picker;reload(picker);picker.run(full_window=False);'.format(character_name)
         try:
             exec(command)
         except Exception as e:
-            print(str(e))
+            sp.logger.error('{} | {}'.format(e, traceback.format_exc()))
             QMessageBox.information(self, '{} Picker'.format(character_name.capitalize()), '{} Picker is not created yet, wait for future updates!'.format(character_name.capitalize()))
 
     def open_anim_school_picker(self):

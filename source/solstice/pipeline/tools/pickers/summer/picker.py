@@ -1,15 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Customized picker for Summer Character
-# ==================================================================="""
+
+"""
+Customized picker for Summer Character
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 
-from pipeline.pickers.picker import utils as utils
-from pipeline.pickers.picker import pickerwindow
+from solstice.pipeline.tools.pickers.picker import utils as utils
+from solstice.pipeline.tools.pickers.picker import pickerwindow
 
 
 class SummerPicker(pickerwindow.PickerWindow, object):

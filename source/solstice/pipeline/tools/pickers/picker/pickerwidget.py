@@ -1,21 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Picker Widget Class
-# ==================================================================="""
 
-import os
+"""
+Picker Widget Class
+"""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 
-from pipeline.pickers.picker import utils as utils
-from pipeline.pickers.picker import pickerview
-from pipeline.pickers.picker import commands as commands
+from solstice.pipeline.tools.pickers.picker import pickerview
+from solstice.pipeline.tools.pickers.picker import commands as commands
 
 
 class Picker(QWidget, object):
@@ -87,4 +89,3 @@ class Picker(QWidget, object):
 
     def export_picker_data(self):
         self.view.scene().get_json_file()
-
