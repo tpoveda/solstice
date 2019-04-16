@@ -1,25 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_shotexporter.py
-# by Tomas Poveda
-# Tool to export shot elements
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool to export shot elements
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import json
 import collections
 
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
 
-import pipeline as sp
-from pipeline.gui import windowds, splitters, attributes
-from pipeline.resources import resource
-
-reload(attributes)
+import solstice.pipeline as sp
+from solstice.pipeline.gui import window, splitters, attributes
+from solstice.pipeline.resources import resource
 
 
 MUST_ATTRS = [
@@ -745,7 +747,7 @@ class CamerasExporter(QWidget, object):
         pass
 
 
-class ShotExporter(windowds.Window, object):
+class ShotExporter(window.Window, object):
     name = 'SolsticeShotExporter'
     title = 'Solstice Tools - Shot Exporter'
     version = '1.0'

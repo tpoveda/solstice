@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_scatter.py
-# by Tomas Poveda
-# Tool to scatter elements in a Maya scene
-# ______________________________________________________________________
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+"""
+Collection of tools for rigging
+"""
 
-from pipeline.gui import windowds, splitters, buttons, stack, accordion
-from pipeline.utils import rigutils
+from __future__ import print_function, division, absolute_import
 
-reload(rigutils)
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+
+from solstice.pipeline.gui import window, splitters, buttons, stack, accordion
+from solstice.pipeline.utils import rigutils
 
 
 class BaseRigToolBoxWidget(QFrame, object):
@@ -175,7 +177,7 @@ class RigToolBoxWidget(QFrame, object):
         self.toolbox_menu.title_lbl.setText(self.slide_widget.current_widget.title)
 
 
-class SolsticeRigToolbox(windowds.Window, object):
+class SolsticeRigToolbox(window.Window, object):
 
     name = 'Solstice_RigToolbox'
     title = 'Solstice Tools - Rig ToolBox'

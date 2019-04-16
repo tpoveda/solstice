@@ -1,30 +1,34 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_shotassembler.py
-# by Tomas Poveda
-# Tool to load shot elements
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool to create shots on the fly
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import json
-import  string
+import string
 
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
-import pipeline as sp
-from pipeline.gui import windowds, splitters, attributes, asset
-from pipeline.utils import node, image as img
-from pipeline.resources import resource
-from pipeline.tools import shotexporter, alembicmanager, shaderlibrary
+import solstice.pipeline as sp
+from solstice.pipeline.core import asset, node
+from solstice.pipeline.gui import window, splitters, attributes
+from solstice.pipeline.utils import image as img
+from solstice.pipeline.resources import resource
 
-reload(node)
-reload(asset)
-reload(attributes)
+from solstice.pipeline.tools.shotexporter import shotexporter
+from solstice.pipeline.tools.alembicmanager import alembicmanager
+from solstice.pipeline.tools.shaderlibrary import shaderlibrary
 
 
 class AbstractItemWidget(QWidget, object):
@@ -636,7 +640,7 @@ class ShotOverrides(QWidget, object):
         pass
 
 
-class ShotAssembler(windowds.Window, object):
+class ShotAssembler(window.Window, object):
     name = 'SolsticeShotAssembler'
     title = 'Solstice Tools - Shot Assembler'
     version = '1.0'
@@ -667,7 +671,7 @@ class ShotAssembler(windowds.Window, object):
         self.main_layout.addWidget(menubar_widget)
         self.main_layout.addLayout(splitters.SplitterLayout())
 
-        self.dock_window = windowds.DockWindow(use_scroll=True)
+        self.dock_window = window.DockWindow(use_scroll=True)
         self.dock_window.centralWidget().show()
         self.main_layout.addWidget(self.dock_window)
 
@@ -814,7 +818,7 @@ class ShotAssembler(windowds.Window, object):
 
         sp.dcc.new_file()
 
-        from pipeline.utils import mayautils
+        from solstice.pipeline.utils import mayautils
 
         for node_asset in self.shot_hierarchy.all_hierarchy():
             track = mayautils.TrackNodes(full_path=True)

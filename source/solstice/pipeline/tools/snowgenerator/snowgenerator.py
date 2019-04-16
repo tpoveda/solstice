@@ -1,24 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_snowcreator.py
-# by Javi @ Tomas
-# Tool to create snow on objects easily
-# ______________________________________________________________________
-# ==================================================================="""
 
-from pipeline.externals.solstice_qt.QtWidgets import *
+"""
+Tool to create snow on objects easily
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = ["Tomas Poveda", "Javier Gonzalez"]
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 import maya.mel as mel
 import pymel.core as pm
 import maya.OpenMaya as OpenMaya
 
-from solstice_gui import solstice_windows
+from solstice.pipeline.gui import window
 
 
-class SnowGenerator(solstice_windows.Window, object):
+class SnowGenerator(window.Window, object):
     name = 'SolsticeSnowGenerator'
     title = 'Solstice Tools - Snow Generator'
     version = '1.0'

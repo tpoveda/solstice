@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# by Tomas Poveda
-#  Tool to capture Playblast for Solstice Short Film
-# ==================================================================="""
+
+"""
+Tool to capture Playblast for Solstice Short Film
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 import re
@@ -19,9 +25,9 @@ import contextlib
 from functools import partial
 from collections import OrderedDict
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
 import maya.cmds as cmds
 import maya.mel as mel
@@ -30,16 +36,13 @@ import maya.api.OpenMaya as OpenMaya
 import maya.api.OpenMayaRender as OpenMayaRender
 import maya.api.OpenMayaUI as OpenMayaUI
 
-import pipeline as sp
-from pipeline.gui import windowds, dialog, label, buttons
-from pipeline.gui import accordion, syncdialog, splitters
-from pipeline.gui import color
-from pipeline.utils import mayautils as utils
-from pipeline.utils import pythonutils as python
-from pipeline.utils import qtutils
-from pipeline.resources import resource
-
-
+import solstice.pipeline as sp
+from solstice.pipeline.core import syncdialog
+from solstice.pipeline.gui import window, dialog, label, buttons
+from solstice.pipeline.gui import accordion, splitters
+from solstice.pipeline.gui import color
+from solstice.pipeline.utils import qtutils, mayautils as utils, pythonutils as python
+from solstice.pipeline.resources import resource
 
 # ========================================================================================================
 
@@ -2748,7 +2751,7 @@ class SolsticeTemplateConfiguration(dialog.Dialog, object):
                 widget.labelChanged.connect(item.setTitle)
 
 
-class SolsticePlayBlast(windowds.Window, object):
+class SolsticePlayBlast(window.Window, object):
 
     optionsChanged = Signal(dict)
     playblastStart = Signal(dict)

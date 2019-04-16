@@ -1,25 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_spacebaker.py
-# by Tomas Poveda
-# Tool to bake animation between space changes
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool to bake animation between space changes
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import traceback
 from functools import partial
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtGui import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtGui import *
 
 import maya.cmds as cmds
 
-import pipeline as sp
-from pipeline.gui import windowds, splitters, buttons
-from pipeline.utils import mayautils as utils, animutils as anim_utils
+import solstice.pipeline as sp
+from solstice.pipeline.gui import window, splitters, buttons
+from solstice.pipeline.utils import mayautils as utils, animutils as anim_utils
 
 
 SPACE_CONSTRAINTS = {
@@ -40,7 +44,7 @@ SPACE_SWITCH_MENU_NAME = 'SS_spaceSwitchMenu'
 SPACE_DRIVER_ATTR = 'SS_spaceDriver'
 
 
-class SpaceAnimBaker(windowds.Window, object):
+class SpaceAnimBaker(window.Window, object):
     name = 'SpaceAnimBaker'
     title = 'Solstice Tools - Spacer Baker'
     version = '1.0'

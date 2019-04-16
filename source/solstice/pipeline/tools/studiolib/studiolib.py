@@ -1,29 +1,34 @@
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_animmanager.py
-# by Tomas Poveda
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Custom Studio Library for Solstice
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
 
 import os
 
 import maya.cmds as cmds
 
-from pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice_studiolibrarymaya
 solstice_studiolibrarymaya.registerItems()
 solstice_studiolibrarymaya.enableMayaClosedEvent()
 import solstice_studiolibrary.librarywidget
 
-import pipeline as sp
-from pipeline.gui import windowds, splitters
+import solstice.pipeline as sp
+from solstice.pipeline.gui import window, splitters
 
 
-class StudioLibrary(windowds.Window, object):
+class StudioLibrary(window.Window, object):
     name = 'Solstice_StudioLibrary'
     title = 'Solstice Tools - Studio Library'
     version = '2.4.0b2'

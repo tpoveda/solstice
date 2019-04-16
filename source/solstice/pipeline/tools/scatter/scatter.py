@@ -1,26 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_scatter.py
-# by Tomas Poveda
-# Tool to scatter elements in a Maya scene
-# ______________________________________________________________________
-# ==================================================================="""
 
+"""
+Tool to scatter elements in a Maya scene using MASH
+"""
 
-from pipeline.externals.solstice_qt.QtCore import *
-from pipeline.externals.solstice_qt.QtWidgets import *
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
+
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
-import pipeline as sp
-from pipeline.gui import windowds, assetviewer, splitters
-from pipeline.utils import mashutils, artellautils
+import solstice.pipeline as sp
+from solstice.pipeline.core import assetviewer
+from solstice.pipeline.gui import window, splitters
+from solstice.pipeline.utils import mashutils, artellautils
 
 
-class SolsticeScatter(windowds.Window, object):
+class SolsticeScatter(window.Window, object):
 
     name = 'Solstice_Scatter'
     title = 'Solstice Tools - Scatter Tool'
@@ -53,6 +57,7 @@ class SolsticeScatter(windowds.Window, object):
     def custom_ui(self):
         super(SolsticeScatter, self).custom_ui()
 
+        self.resize(825, 750)
         self.set_logo('solstice_scatter_logo')
 
         scatter_splitter = QSplitter(Qt.Horizontal)

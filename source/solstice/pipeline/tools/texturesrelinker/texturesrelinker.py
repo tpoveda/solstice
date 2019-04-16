@@ -1,26 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# """ ==================================================================
-# Script Name: solstice_texturesRelinker.py
-# by Tomas Poveda
-# Tool used by textures artists to relink textures path
-# ______________________________________________________________________
-# ==================================================================="""
+
+"""
+Tool used by textures artists to relink textures path
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Tomas Poveda"
+__license__ = "MIT"
+__maintainer__ = "Tomas Poveda"
+__email__ = "tpoveda@cgart3d.com"
 
 import os
 
-from pipeline.externals.solstice_qt.QtWidgets import *
-from pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from solstice.pipeline.externals.solstice_qt.QtCore import *
 
 import maya.cmds as cmds
 
-import pipeline as sp
-from pipeline.gui import windowds, splitters
-from pipeline.utils import mayautils, fileutils
+import solstice.pipeline as sp
+from solstice.pipeline.gui import window, splitters
+from solstice.pipeline.utils import mayautils, fileutils
 
 
-class TexturesRelinker(windowds.Window, object):
+class TexturesRelinker(window.Window, object):
     name = 'Solstice_TexturesRelinker'
     title = 'Solstice Tools - Textures Relinker'
     version = '1.0'
