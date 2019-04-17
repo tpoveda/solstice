@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Module that contains base definition for export list widgets
+Base class that defines mixin class for any widget that inherits from QAbstractItemView class
 """
 
 from __future__ import print_function, division, absolute_import
