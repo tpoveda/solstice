@@ -25,7 +25,7 @@ if sp.is_maya():
 
 
 class ModelPanelWidget(QWidget, object):
-    def __init__(self, name='capturedModelPanel', **kwargs):
+    def __init__(self, parent, name='capturedModelPanel', **kwargs):
         super(ModelPanelWidget, self).__init__(parent, **kwargs)
 
         unique_name = name + str(id(self))

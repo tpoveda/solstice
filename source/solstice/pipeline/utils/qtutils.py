@@ -384,3 +384,42 @@ def selection_modifiers():
         result['add'] = True
 
     return result
+
+
+def is_modifier():
+    """
+    Returns True if either the alt key or control key is down
+    :return: bool
+    """
+
+    return is_atl_modifier() or is_control_modifier()
+
+
+def is_alt_modifier():
+    """
+    Returns True if the alt key is down
+    :return: bool
+    """
+
+    modifiers = QApplication.keyboardModifiers()
+    return modifiers == Qt.AltModifier
+
+
+def is_control_modifier():
+    """
+    Returns True if the control key is down
+    :return: bool
+    """
+
+    modifiers = QApplication.keyboardModifiers()
+    return modifiers == Qt.ControlModifier
+
+
+def is_shift_modifier():
+    """
+    Returns True if the shift key is down
+    :return: bool
+    """
+
+    modifiers = QApplication.keyboardModifiers()
+    return modifiers == Qt.ShiftModifier

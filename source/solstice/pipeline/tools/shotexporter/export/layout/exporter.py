@@ -19,16 +19,15 @@ import json
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice.pipeline as sp
-from solstice.pipeline.gui import messagebox
+from solstice.pipeline.gui import messagebox, thumbnailcapture
 
-from solstice.pipeline.tools.shotexporter.core import defines, exporter as base_exporter
+from solstice.pipeline.tools.shotexporter.core import exporter as base_exporter
 from solstice.pipeline.tools.shotexporter.export.layout import exportlist, propertieswidget
 
-if sp.is_maya():
-    import maya.cmds as cmds
 
 reload(exportlist)
 reload(messagebox)
+reload(thumbnailcapture)
 
 
 class LayoutExporter(base_exporter.BaseExporter, object):
@@ -125,5 +124,8 @@ class LayoutExporter(base_exporter.BaseExporter, object):
 
     def thumbnail_capture(self):
         path = sp.temp_path('sequence', 'thumbnail.jpg')
-        print(path)
+        thumbnailcapture.thumbnail_capture(show=True, path=path, clear_cache=True, step=1, captured=self.set_thumbnail)
+
+    def set_thumbnail(self, source):
+        print('Setting Thumbnail: {}'.format(source))
 

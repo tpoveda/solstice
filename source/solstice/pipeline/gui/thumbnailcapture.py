@@ -13,16 +13,21 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import shutil
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.gui import modelpanel
-from solstice.pipeline.utils import pythonutils
+from solstice.pipeline.utils import pythonutils, qtutils
 
 if sp.is_maya():
     import maya.cmds as cmds
+
+reload(modelpanel)
+
+_instance = None
 
 
 class ThumbnailCaptureDialog(QDialog, object):
@@ -58,6 +63,7 @@ class ThumbnailCaptureDialog(QDialog, object):
         vbox = QVBoxLayout(self)
         vbox.setObjectName(self.objectName()+'Layout')
         vbox.addWidget(self._model_panel_widget)
+        vbox.addWidget(self._capture_btn)
         self.setLayout(vbox)
 
         width = self.DEFAULT_WIDTH * 1.5
@@ -66,7 +72,7 @@ class ThumbnailCaptureDialog(QDialog, object):
         self.set_width_height(width, height)
         self.center_window()
 
-        self._capture_btn.clicked.connect(self._on_capture)
+        self._capture_btn.clicked.connect(self.capture)
 
     def path(self):
         """
@@ -171,7 +177,7 @@ class ThumbnailCaptureDialog(QDialog, object):
         model_panel = self._model_panel_widget.name()
         start_frame = self.start_frame()
         end_frame = self.end_frame()
-        step = self.setp()
+        step = self.step()
         width = self.DEFAULT_WIDTH
         height = self.DEFAULT_HEIGHT
         self._capture_path = self._do_playblast(path, model_panel ,start_frame, end_frame, width, height, step=step)
@@ -245,3 +251,46 @@ class ThumbnailCaptureDialog(QDialog, object):
         sp.logger.info('Playblasted "{}"'.format(source))
 
         return source
+
+
+def thumbnail_capture(path, start_frame=None, end_frame=None, step=1, clear_cache=False, captured=None, show=False, modifier=True):
+    """
+    Captres a playblast and save it to the given path
+    :param path: str
+    :param start_frame: int | None
+    :param end_frame: int | None
+    :param step: int
+    :param clear_cache: bool
+    :param captured: fn | None
+    :param show: bool
+    :param modifier: bool
+    :return: ThumbnailCaptureDialog
+    """
+
+    global _instance
+
+    def _clear_cache():
+        dirname = os.path.dirname(path)
+        if os.path.exists(dirname):
+            shutil.rmtree(dirname)
+
+    if _instance:
+        _instance.close()
+
+    d = ThumbnailCaptureDialog(path=path, start_frame=start_frame, end_frame=end_frame, step=step)
+
+    if captured:
+        d.captured.connect(captured)
+
+    if clear_cache:
+        d.capturing.connect(_clear_cache)
+
+    d.show()
+
+    if not show and not (modifier and qtutils.is_control_modifier()):
+        d.capture()
+        d.close()
+
+    _instance = d
+
+    return _instance

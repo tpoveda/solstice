@@ -25,7 +25,7 @@ import tempfile
 import traceback
 import webbrowser
 
-import six
+from solstice.pipeline.externals import solstice_six
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 
 from solstice.pipeline.resources import solstice_resources
@@ -949,7 +949,7 @@ def format_path(format_string, path='', **kwargs):
 
     kwargs.update(labels)
 
-    resolved_string = six.u(format_string).format(**kwargs)
+    resolved_string = solstice_six.u(format_string).format(**kwargs)
 
     logger.debug('Resolved string: {}'.format(resolved_string))
 
