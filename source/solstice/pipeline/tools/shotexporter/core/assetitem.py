@@ -18,38 +18,40 @@ from solstice.pipeline.externals.solstice_qt.QtCore import *
 import solstice.pipeline as sp
 
 from solstice.pipeline.tools.shotexporter.core import defines
-from solstice.pipeline.tools.shotexporter.widgets import exporteritem
 
 
-class ExporterAssetItem(exporteritem.AbstractExporterItemWidget, object):
+class ExporterAssetItem(object):
 
     clicked = Signal(QObject, QEvent)
     contextRequested = Signal(QObject, QAction)
 
-    def __init__(self, asset, parent=None):
-        super(ExporterAssetItem, self).__init__(asset, parent)
+    def __init__(self, asset):
+        super(ExporterAssetItem, self).__init__()
+
+        self._asset = asset
+        self._attrs = dict()
 
         self._update_attrs()
 
-    def custom_ui(self):
-        super(ExporterAssetItem, self).custom_ui()
+    @property
+    def name(self):
+        return self._asset.name
 
-        self.item_widget.setFrameStyle(QFrame.Raised | QFrame.StyledPanel)
-        self.item_widget.setStyleSheet('QFrame { background-color: rgb(55,55,55);}')
+    @property
+    def path(self):
+        return self._asset.asset_path
 
-        self.asset_lbl = QLabel(self.asset.name)
-        self.item_layout.addWidget(self.asset_lbl, 0, 1, 1, 1)
-
-        self.item_layout.setColumnStretch(1, 5)
-        self.item_layout.setAlignment(Qt.AlignLeft)
+    @property
+    def attrs(self):
+        return self._attrs
 
     def _update_attrs(self):
-        if self.attrs:
+        if self._attrs:
             return
 
-        xform_attrs = sp.dcc.list_attributes(self.asset.name)
+        xform_attrs = sp.dcc.list_attributes(self._asset.name)
         for attr in xform_attrs:
             if attr in defines.MUST_ATTRS:
-                self.attrs[attr] = True
+                self._attrs[attr] = True
             else:
-                self.attrs[attr] = False
+                self._attrs[attr] = False

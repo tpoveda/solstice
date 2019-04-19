@@ -14,18 +14,16 @@ __email__ = "tpoveda@cgart3d.com"
 
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-from solstice.pipeline.gui import base, window, menubar, buttons, search
+from solstice.pipeline.gui import base, window
 
 from solstice.pipeline.tools.shotexporter.export.layout import exporter as layout_exporter
 from solstice.pipeline.tools.shotexporter.export.animation import exporter as anim_exporter
-from solstice.pipeline.tools.shotexporter.export.fx import exporter as fx_exporter
-from solstice.pipeline.tools.shotexporter.export.lighting import exporter as light_exporter
-from solstice.pipeline.tools.shotexporter.export.camera import exporter as cam_exporter
+# from solstice.pipeline.tools.shotexporter.export.fx import exporter as fx_exporter
+# from solstice.pipeline.tools.shotexporter.export.lighting import exporter as light_exporter
+# from solstice.pipeline.tools.shotexporter.export.camera import exporter as cam_exporter
 
-
-reload(base)
-reload(search)
 reload(layout_exporter)
+reload(anim_exporter)
 
 class ShotExporter(window.Window, object):
     name = 'SolsticeShotExporter'
@@ -55,35 +53,27 @@ class ShotExportWidget(base.BaseWidget, object):
         self.main_tabs = QTabWidget()
         self.main_layout.addWidget(self.main_tabs)
 
-
-        #
-        # self._new_item_btn = buttons.IconButton(icon_name='plus', icon_hover='plus_hover')
-        # self._menubar_widget.addWidget(self._new_item_btn)
-        # self._menubar_widget.addWidget(self._search_widget)
-
-
-    #
         self.layout_exporter = layout_exporter.LayoutExporter()
-    #     self.anim_exporter = anim_exporter.AnimationExporter()
+        self.anim_exporter = anim_exporter.AnimationExporter()
     #     self.fx_exporter = fx_exporter.FXExporter()
     #     self.light_exporter = light_exporter.LightingExporter()
     #     self.cameras_exporter = cam_exporter.CamerasExporter()
     #
         self.main_tabs.addTab(self.layout_exporter, 'Layout')
-    #     self.main_tabs.addTab(self.anim_exporter, 'Animation')
+        self.main_tabs.addTab(self.anim_exporter, 'Animation')
     #     self.main_tabs.addTab(self.fx_exporter, 'FX')
     #     self.main_tabs.addTab(self.light_exporter, 'Lighting')
     #     self.main_tabs.addTab(self.cameras_exporter, 'Cameras')
     #
     #     self.layout_exporter.init_ui()
     #
-    #     self.main_tabs.currentChanged.connect(self._on_change_tab)
+        self.main_tabs.currentChanged.connect(self._on_change_tab)
     #
-    # def _on_change_tab(self, tab_index):
-    #     if tab_index == 0:
-    #         self.layout_exporter.refresh()
-    #     if tab_index == 1:
-    #         self.anim_exporter.refresh()
+    def _on_change_tab(self, tab_index):
+        if tab_index == 0:
+            self.layout_exporter.refresh()
+        if tab_index == 1:
+            self.anim_exporter.refresh()
     #     if tab_index == 2:
     #         self.fx_exporter.refresh()
     #     elif tab_index == 3:

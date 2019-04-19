@@ -12,11 +12,14 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+
 import solstice.pipeline as sp
 from solstice.pipeline.tools.shotexporter.core import assetitem
 from solstice.pipeline.tools.shotexporter.widgets import exportlist
 
 reload(exportlist)
+reload(assetitem)
 
 
 class LayoutExportList(exportlist.BaseExportList, object):
@@ -25,27 +28,16 @@ class LayoutExportList(exportlist.BaseExportList, object):
     def __init__(self, parent=None):
         super(LayoutExportList, self).__init__(parent=parent)
 
-    # def init_ui(self):
-    #     assets = sp.get_assets()
-    #     for asset in assets:
-    #         asset_widget = assetitem.ExporterAssetItem(asset)
-    #         self.append_widget(asset_widget)
-    #         self.widget_tree[asset_widget] = list()
-    #         asset_widget.clicked.connect(self._on_item_clicked)
-    #
-    # def _on_item_clicked(self, widget, event):
-    #     if widget is None:
-    #         self.updateProperties.emit(None)
-    #         return
-    #
-    #     if sp.dcc.object_exists(widget.asset.name):
-    #         for asset_widget, file_items in self.widget_tree.items():
-    #             if asset_widget != widget:
-    #                 asset_widget.deselect()
-    #             else:
-    #                 asset_widget.select()
-    #         self.updateProperties.emit(widget)
-    #         # widget.set_select(item_state)
-    #     else:
-    #         self._on_refresh_exporter()
-    #         self.updateProperties.emit(None)
+    def init_ui(self):
+        assets = sp.get_assets()
+        for asset in assets:
+            tag_data_node = asset.get_tag_data_node()
+            if not tag_data_node:
+                continue
+            tag_types = tag_data_node.get_types()
+            print(tag_types)
+            exporter_asset = assetitem.ExporterAssetItem(asset)
+            asset_item = QTreeWidgetItem(self.assets_list, [asset.name])
+            asset_item.asset = exporter_asset
+            self.assets_list.addTopLevelItem(asset_item)
+

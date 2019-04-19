@@ -101,7 +101,7 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function all_scene_objects() not implemented!')
 
     @staticmethod
-    def select_object(node):
+    def select_object(node, **kwargs):
         """
         Selects given object in the current scene
         :param node: str
@@ -364,7 +364,7 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function import_reference() not implemented!')
 
     @staticmethod
-    def list_attributes(node):
+    def list_attributes(node, **kwargs):
         """
         Returns list of attributes of given node
         :param node: str
@@ -395,6 +395,18 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function add_string_attribute() not implemented!')
 
     @staticmethod
+    def attribute_query(node, attribute_name, **kwargs):
+        """
+        Returns attribute qyer
+        :param node: str
+        :param attribute_name: str
+        :param kwargs:
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function attribute_query() not implemented!')
+
+    @staticmethod
     def attribute_exists(node, attribute_name):
         """
         Returns whether given attribute exists in given node
@@ -404,6 +416,17 @@ class SolsticeDCC(object):
         """
 
         raise NotImplementedError('abstract DCC function attribute_exists() not implemented!')
+
+    @staticmethod
+    def is_attribute_locked(node, attribute_name):
+        """
+        Returns whether atribute is locked or not
+        :param node: str
+        :param attribute_name: str
+        :return: bool
+        """
+
+        raise NotImplementedError('abstract DCC function is_attribute_locked() not implemented!')
 
     @staticmethod
     def lock_attribute(node, attribute_name):
@@ -437,24 +460,62 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function get_attribute_value() not implemented!')
 
     @staticmethod
-    def set_integer_attribute_value(node, attribute_name, attribute_value):
+    def get_attribute_type(node, attribut_name):
+        """
+        Returns the type of the given attribute in the given node
+        :param node: str
+        :param attribute_name: str
+        :return: variant
+        """
+
+        raise NotImplementedError('abstract DCC function get_attribute_type() not implemented!')
+
+    @staticmethod
+    def set_attribute_by_type(node, attribute_name, attribute_value, attribute_type):
+        """
+        Sets the value of the given attribute in the given node
+        :param node: str
+        :param attribute_name: str
+        :param attribute_value: variant
+        :param attribute_type: str
+        """
+
+        raise NotImplementedError('abstract DCC function set_attribute_by_type() not implemented!')
+
+    @staticmethod
+    def set_numeric_attribute_value(node, attribute_name, attribute_value, clamp=False):
+        """
+        Sets the integer value of the given attribute in the given node
+       :param node: str
+        :param attribute_name: str
+        :param attribute_value: int
+        :param clamp: bool
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function set_numeric_attribute_value() not implemented!')
+
+    @staticmethod
+    def set_integer_attribute_value(node, attribute_name, attribute_value, clamp=False):
         """
         Sets the integer value of the given attribute in the given node
         :param node: str
         :param attribute_name: str
         :param attribute_value: int
+        :param clamp: bool
         :return:
         """
 
         raise NotImplementedError('abstract DCC function set_string_attribute_value() not implemented!')
 
     @staticmethod
-    def set_float_attribute_value(node, attribute_name, attribute_value):
+    def set_float_attribute_value(node, attribute_name, attribute_value, clamp=False):
         """
         Sets the integer value of the given attribute in the given node
         :param node: str
         :param attribute_name: str
         :param attribute_value: int
+        :param clamp: bool
         :return:
         """
 
@@ -765,3 +826,130 @@ class SolsticeDCC(object):
         """
 
         raise NotImplementedError('abstract DCC function refresh_viewport() not implemented!')
+
+    @staticmethod
+    def set_key_frame(node, attribute_name, **kwargs):
+        """
+        Sets keyframe in given attribute in given node
+        :param node: str
+        :param attribute_name: str
+        :param kwargs:
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function set_key_frame() not implemented!')
+
+    @staticmethod
+    def copy_key(node, attribute_name, time=None):
+        """
+        Copy key frame of given node
+        :param node: str
+        :param attribute_name: str
+        :param time: bool
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function copy_key() not implemented!')
+
+    @staticmethod
+    def cut_key(node, attribute_name, time=None):
+        """
+        Cuts key frame of given node
+        :param node: str
+        :param attribute_name: str
+        :param time: bool
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function cut_key() not implemented!')
+
+    @staticmethod
+    def paste_key(node, attribute_name, option, time, connect):
+        """
+        Paste copied key frame
+        :param node: str
+        :param attribute_name: str
+        :param option: str
+        :param time: (int, int)
+        :param connect: bool
+        :return:
+        """
+
+        raise NotImplementedError('abstract DCC function paste_key() not implemented!')
+
+    @staticmethod
+    def offset_keyframes(node, attribute_name, start_time, end_time, duration):
+        """
+        Offset given node keyframes
+        :param node: str
+        :param attribute_name: str
+        :param start_time: int
+        :param end_time: int
+        :param duration: float
+        """
+
+        raise NotImplementedError('abstract DCC function offset_keyframes() not implemented!')
+
+    @staticmethod
+    def find_next_key_frame(node, attribute_name, start_time, end_time):
+        """
+        Returns next keyframe of the given one
+        :param node: str
+        :param attribute_name: str
+        :param start_time: int
+        :param end_time: int
+        """
+
+        raise NotImplementedError('abstract DCC function offset_keyframes() not implemented!')
+
+    @staticmethod
+    def set_flat_key_frame(self, node, attribute_name, start_time, end_time):
+        """
+        Sets flat tangent in given keyframe
+        :param node: str
+        :param attribute_name: str
+        :param start_time: int
+        :param end_time: int
+        """
+
+        raise NotImplementedError('abstract DCC function set_flat_key_frame() not implemented!')
+
+    @staticmethod
+    def find_first_key_in_anim_curve(curve):
+        """
+        Returns first key frame of the given curve
+        :param curve: str
+        :return: int
+        """
+
+        raise NotImplementedError('abstract DCC function find_first_key_in_curve() not implemented!')
+
+    @staticmethod
+    def find_last_key_in_anim_curve(curve):
+        """
+        Returns last key frame of the given curve
+        :param curve: str
+        :return: int
+        """
+
+        raise NotImplementedError('abstract DCC function find_last_key_in_curve() not implemented!')
+
+    @staticmethod
+    def copy_anim_curve(curve, start_time, end_time):
+        """
+        Copies given anim curve
+        :param curve: str
+        :param start_time: int
+        :param end_time: int
+        """
+
+        raise NotImplementedError('abstract DCC function copy_anim_curve() not implemented!')
+
+    @staticmethod
+    def get_current_model_panel():
+        """
+        Returns the current model panel name
+        :return: str | None
+        """
+
+        raise NotImplementedError('abstract DCC function current_model_panel() not implemented!')

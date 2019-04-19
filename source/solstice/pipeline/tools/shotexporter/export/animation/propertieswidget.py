@@ -17,7 +17,7 @@ from solstice.pipeline.tools.shotexporter.core import defines
 from solstice.pipeline.tools.shotexporter.widgets import propertieslist
 
 
-class AnimationPropertiesWidget(propertieslist.AbstractPropertiesListWidget, object):
+class AnimationPropertiesWidget(propertieslist.BasePropertiesListWidget, object):
     def __init__(self, parent=None):
         super(AnimationPropertiesWidget, self).__init__(parent=parent)
 

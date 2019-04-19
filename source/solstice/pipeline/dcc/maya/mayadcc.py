@@ -16,7 +16,7 @@ import maya.cmds as cmds
 import maya.utils as utils
 
 import solstice.pipeline as sp
-from solstice.pipeline.dcc import dcc
+from solstice.pipeline.dcc.core import dcc
 from solstice.pipeline.utils import mayautils
 
 
@@ -108,13 +108,13 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         return cmds.ls(l=full_path)
 
     @staticmethod
-    def select_object(node):
+    def select_object(node, **kwargs):
         """
         Selects given object in the current scene
         :param node: str
         """
 
-        cmds.select(node)
+        cmds.select(node, **kwargs)
 
     @staticmethod
     def clear_selection():
@@ -400,14 +400,14 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         return cmds.file(filename, importReference=True)
 
     @staticmethod
-    def list_attributes(node):
+    def list_attributes(node, **kwargs):
         """
         Returns list of attributes of given node
         :param node: str
         :return: list<str>
         """
 
-        return cmds.listAttr(node)
+        return cmds.listAttr(node, **kwargs)
 
     @staticmethod
     def list_user_attributes(node):
@@ -431,6 +431,18 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         return cmds.addAttr(node, ln=attribute_name, dt='string', k=keyable)
 
     @staticmethod
+    def attribute_query(node, attribute_name, **kwargs):
+        """
+        Returns attribute qyer
+        :param node: str
+        :param attribute_name: str
+        :param kwargs:
+        :return:
+        """
+
+        return cmds.attributeQuery(attribute_name, node=node, **kwargs)
+
+    @staticmethod
     def attribute_exists(node, attribute_name):
         """
         Returns whether given attribute exists in given node
@@ -440,6 +452,17 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         """
 
         return cmds.attributeQuery(attribute_name, node=node, exists=True)
+
+    @staticmethod
+    def is_attribute_locked(node, attribute_name):
+        """
+        Returns whether atribute is locked or not
+        :param node: str
+        :param attribute_name: str
+        :return: bool
+        """
+
+        return cmds.getAttr('{}.{}'.format(node, attribute_name, lock=True))
 
     @staticmethod
     def lock_attribute(node, attribute_name):
@@ -473,28 +496,66 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         return cmds.getAttr('{}.{}'.format(node, attribute_name))
 
     @staticmethod
-    def set_integer_attribute_value(node, attribute_name, attribute_value):
+    def get_attribute_type(node, attribut_name):
         """
-        Sets the integer value of the given attribute in the given node
+        Returns the type of the given attribute in the given node
         :param node: str
         :param attribute_name: str
-        :param attribute_value: int
-        :return:
+        :return: variant
         """
 
-        return cmds.setAttr('{}.{}'.format(node, attribute_name), int(attribute_value))
+        return cmds.getAttr('{}.{}'.format(node, attribut_name), type=True)
 
     @staticmethod
-    def set_float_attribute_value(node, attribute_name, attribute_value):
+    def set_attribute_by_type(node, attribute_name, attribute_value, attribute_type):
+        """
+        Sets the value of the given attribute in the given node
+        :param node: str
+        :param attribute_name: str
+        :param attribute_value: variant
+        :param attribute_type: str
+        """
+
+        return cmds.setAttr('{}.{}'.format(node, attribute_name), attribute_value, type=attribute_type)
+
+    @staticmethod
+    def set_numeric_attribute_value(node, attribute_name, attribute_value, clamp=False):
+        """
+        Sets the integer value of the given attribute in the given node
+       :param node: str
+        :param attribute_name: str
+        :param attribute_value: int
+        :param clamp: bool
+        :return:
+        """
+
+        return cmds.setAttr('{}.{}'.format(node, attribute_name), attribute_value, clamp=clamp)
+
+    @staticmethod
+    def set_integer_attribute_value(node, attribute_name, attribute_value, clamp=False):
         """
         Sets the integer value of the given attribute in the given node
         :param node: str
         :param attribute_name: str
         :param attribute_value: int
+        :param clamp: bool
         :return:
         """
 
-        return cmds.setAttr('{}.{}'.format(node, attribute_name), float(attribute_value))
+        return cmds.setAttr('{}.{}'.format(node, attribute_name), int(attribute_value), clamp=clamp)
+
+    @staticmethod
+    def set_float_attribute_value(node, attribute_name, attribute_value, clamp=False):
+        """
+        Sets the integer value of the given attribute in the given node
+        :param node: str
+        :param attribute_name: str
+        :param attribute_value: int
+        :param clamp: bool
+        :return:
+        """
+
+        return cmds.setAttr('{}.{}'.format(node, attribute_name), float(attribute_value), clamp=clamp)
 
     @staticmethod
     def set_string_attribute_value(node, attribute_name, attribute_value):
@@ -820,3 +881,142 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         """
 
         cmds.refresh()
+
+    @staticmethod
+    def set_key_frame(node, attribute_name, **kwargs):
+        """
+        Sets keyframe in given attribute in given node
+        :param node: str
+        :param attribute_name: str
+        :param kwargs:
+        :return:
+        """
+
+        return cmds.setKeyframe('{}.{}'.format(node, attribute_name), **kwargs)
+
+    @staticmethod
+    def copy_key(node, attribute_name, time=None):
+        """
+        Copy key frame of given node
+        :param node: str
+        :param attribute_name: str
+        :param time: bool
+        :return:
+        """
+
+        if time:
+            return cmds.copyKey('{}.{}'.format(node, attribute_name), time=time)
+        else:
+            return cmds.copyKey('{}.{}'.format(node, attribute_name))
+
+    @staticmethod
+    def cut_key(node, attribute_name, time=None):
+        """
+        Cuts key frame of given node
+        :param node: str
+        :param attribute_name: str
+        :param time: str
+        :return:
+        """
+
+        if time:
+            return cmds.cutKey('{}.{}'.format(node, attribute_name), time=time)
+        else:
+            return cmds.cutKey('{}.{}'.format(node, attribute_name))
+
+    @staticmethod
+    def paste_key(node, attribute_name, option, time, connect):
+        """
+        Paste copied key frame
+        :param node: str
+        :param attribute_name: str
+        :param option: str
+        :param time: (int, int)
+        :param connect: bool
+        :return:
+        """
+
+        return cmds.pasteKey('{}.{}'.format(node, attribute_name), option=option, time=time, connect=connect)
+
+    @staticmethod
+    def offset_keyframes(node, attribute_name, start_time, end_time, duration):
+        """
+        Offset given node keyframes
+        :param node: str
+        :param attribute_name: str
+        :param start_time: int
+        :param end_time: int
+        :param duration: float
+        """
+
+        return cmds.keyframe('{}.{}'.format(node, attribute_name), relative=True, time=(start_time, end_time), timeChange=duration)
+
+    @staticmethod
+    def find_next_key_frame(node, attribute_name, start_time, end_time):
+        """
+        Returns next keyframe of the given one
+        :param node: str
+        :param attribute_name: str
+        :param start_time: int
+        :param end_time: int
+        """
+
+        return cmds.findKeyframe('{}.{}'.format(node, attribute_name), time=(start_time, end_time), which='next')
+
+    @staticmethod
+    def set_flat_key_frame(self, node, attribute_name, start_time, end_time):
+        """
+        Sets flat tangent in given keyframe
+        :param node: str
+        :param attribute_name: str
+        :param start_time: int
+        :param end_time: int
+        """
+
+        return cmds.keyTangent('{}.{}'.format(node, attribute_name), time=(start_time, end_time), itt='flat')
+
+    @staticmethod
+    def find_first_key_in_anim_curve(curve):
+        """
+        Returns first key frame of the given curve
+        :param curve: str
+        :return: int
+        """
+
+        return cmds.findKeyframe(curve, which='first')
+
+    @staticmethod
+    def find_last_key_in_anim_curve(curve):
+        """
+        Returns last key frame of the given curve
+        :param curve: str
+        :return: int
+        """
+
+        return cmds.findKeyframe(curve, which='last')
+
+    @staticmethod
+    def copy_anim_curve(curve, start_time, end_time):
+        """
+        Copies given anim curve
+        :param curve: str
+        :param start_time: int
+        :param end_time: int
+        """
+
+        return cmds.copyKey(curve, time=(start_time, end_time))
+
+    @staticmethod
+    def get_current_model_panel():
+        """
+        Returns the current model panel name
+        :return: str | None
+        """
+
+        current_panel = cmds.getPanel(withFocus=True)
+        current_panel_type = cmds.getPanel(typeOf=current_panel)
+
+        if current_panel_type not in ['modelPanel']:
+            return None
+
+        return current_panel

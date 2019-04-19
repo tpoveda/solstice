@@ -85,3 +85,151 @@ def format_path(path):
     """
 
     return os.path.normpath(path).replace('\\', '/').replace('\t', '/t').replace('\n', '/n').replace('\a', '/a')
+
+
+def rotate_sequence(seq, current):
+    """
+    Returns proper rotate sequence naming
+    :param seq: str
+    :param current: str
+    :return: str
+    """
+
+    n = len(seq)
+    for i in range(n):
+        yield seq[(i + current) % n]
+
+
+def group_objects(objects):
+    """
+    Returns objects as SolsticeNodes
+    :param objects: list(str)
+    :return: dict
+    """
+
+    results = dict()
+    for name in objects:
+        node = sp.Node(name)
+        results.setdefault(node.namespace(), [])
+        results[node.namespace()].append(name)
+
+    return results
+
+
+def index_objects(objects):
+    """
+    Returns objects indices
+    :param objects: list(str)
+    :return: dict
+    """
+
+    result = dict()
+    if objects:
+        for name in objects:
+            node = sp.Node(name)
+            result.setdefault(node.short_name(), [])
+            result[node.short_name()].append(node)
+
+    return result
+
+
+def match_in_index(node, index):
+    """
+    Match objects index
+    :param node: SolsticeNodeDCC
+    :param index: int
+    :return: list
+    """
+
+    result = None
+    if node.short_name() in index:
+        nodes = index[node.short_name()]
+        if nodes:
+            for n in nodes:
+                if node.name().endswith(n.name()) or n.name().endswith(node.name()):
+                    result = n
+                    break
+        if result is not None:
+            index[node.short_name()].remove(result)
+
+    return result
+
+
+def match_names(source_objects, target_objects=None, target_namespaces=None, search=None, replace=None):
+    """
+    Checks if source and target objects matches
+    :param source_objects: list(str)
+    :param target_objects: list(str)
+    :param target_namespaces: list(str)
+    :param search: bool
+    :param replace: bool
+    :return: list(SolsticeNodeDCC, SolsticeNodeDCC)
+    """
+
+    results = list()
+    if target_objects is None:
+        target_objects = list()
+
+    source_group = group_objects(source_objects)
+    source_namespaces = source_group.keys()
+
+    if not target_objects and not target_namespaces:
+        target_namespaces = source_namespaces
+    if not target_namespaces and target_objects:
+        target_group = group_objects(target_objects)
+        target_namespaces = target_group.keys()
+
+    target_index = index_objects(target_objects)
+    target_namespaces2 = list(set(target_namespaces) - set(source_namespaces))
+    target_namespaces1 = list(set(target_namespaces) - set(target_namespaces2))
+
+    used_namespaces = list()
+    not_used_namespaces = list()
+
+    for source_namespace in source_namespaces:
+        if source_namespace in target_namespaces1:
+            used_namespaces.append(source_namespace)
+            for name in source_group[source_namespace]:
+                source_node = sp.Node(name)
+                if search is not None and replace is not None:
+                    name = name.replace(search, replace)
+                target_node = sp.Node(name)
+                if target_objects:
+                    target_node = match_in_index(target_node, target_index)
+                if target_node:
+                    results.append((source_node, target_node))
+                    yield (source_node, target_node)
+                else:
+                    sp.logger.warning('Cannot find matching target object for {}'.format(source_node.name()))
+        else:
+            not_used_namespaces.append(source_namespace)
+
+    source_namespaces = not_used_namespaces
+    source_namespaces.extend(used_namespaces)
+    _index = 0
+    for target_namespace in target_namespaces2:
+        match = False
+        i = _index
+        for source_namespace in rotate_sequence(source_namespaces, _index):
+            if match:
+                _index = i
+                break
+            i += 1
+            for name in source_group[source_namespace]:
+                source_node = sp.Node(name)
+                target_node = sp.Node(name)
+                target_node.set_namespace(target_namespace)
+                if target_objects:
+                    target_node = match_in_index(target_node, target_index)
+                elif target_namespaces:
+                    pass
+                if target_node:
+                    match = True
+                    results.append((source_node, target_node))
+                    yield (source_node, target_node)
+                else:
+                    sp.logger.warning('Cannot find matching target object for {}'.format(source_node.name()))
+
+    for target_nodes in target_index.values():
+        for target_node in target_nodes:
+            sp.logger.debug('Cannot find matching ')

@@ -19,7 +19,7 @@ from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.gui import dragger, animations
-from solstice.pipeline.utils import config
+from solstice.pipeline.utils import settings
 from solstice.pipeline.resources import resource
 
 if sp.is_maya():
@@ -111,7 +111,7 @@ class Window(QMainWindow, object):
         self.setParent(parent)
 
         self.callbacks = list()
-        self.settings = config.create_config(self.__class__.name)
+        self.settings = settings.create_settings(self.__class__.name)
 
         self.setObjectName(self.name)
         self.setAttribute(Qt.WA_TranslucentBackground)

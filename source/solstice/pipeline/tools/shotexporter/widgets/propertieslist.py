@@ -19,9 +19,9 @@ import solstice.pipeline as sp
 from solstice.pipeline.gui import attributes
 
 
-class AbstractPropertiesListWidget(QWidget, object):
+class BasePropertiesListWidget(QWidget, object):
     def __init__(self, parent=None):
-        super(AbstractPropertiesListWidget, self).__init__(parent=parent)
+        super(BasePropertiesListWidget, self).__init__(parent=parent)
 
         self._current_asset = None
         self.widgets = list()
@@ -80,11 +80,11 @@ class AbstractPropertiesListWidget(QWidget, object):
         return new_attr
 
     def update_attributes(self, asset_widget):
-        if asset_widget == self._current_asset:
+        if asset_widget.asset == self._current_asset:
             return
 
         self.clear_properties()
-        self._current_asset = asset_widget
+        self._current_asset = asset_widget.asset
 
         xform_attrs = sp.dcc.list_attributes(asset_widget.asset.name)
         for attr in xform_attrs:

@@ -14,7 +14,9 @@ __email__ = "tpoveda@cgart3d.com"
 
 from solstice.pipeline.tools.shotexporter.widgets import propertieslist
 
+reload(propertieslist)
 
-class LayoutPropertiesWidget(propertieslist.AbstractPropertiesListWidget, object):
+
+class LayoutPropertiesWidget(propertieslist.BasePropertiesListWidget, object):
     def __init__(self, parent=None):
         super(LayoutPropertiesWidget, self).__init__(parent=parent)

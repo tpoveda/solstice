@@ -16,16 +16,20 @@ import os
 import re
 import sys
 import json
+import locale
+import shutil
 import urllib2
 import datetime
 import platform
+import tempfile
 import traceback
 import webbrowser
 
+import six
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 
 from solstice.pipeline.resources import solstice_resources
-from solstice.pipeline.dcc import dcc as abstractdcc
+from solstice.pipeline.dcc.core import dcc as abstractdcc, node as dccnode
 
 # =================================================================================
 
@@ -43,11 +47,14 @@ ignored_paths = ['PIPELINE', 'lighting', 'Light Rigs', 'S_CH_02_summer_scripts']
 # =================================================================================
 
 dcc = abstractdcc.SolsticeDCC()
+Node = dccnode.SolsticeNodeDCC
 sys.solstice_dispatcher = None
 logger = None
 tray = None
 settings = None
+config = None
 info_dialog = None
+
 
 # =================================================================================
 
@@ -73,11 +80,57 @@ class DataExtensions(object):
     LIGHTING = 'light'
 
 
+class SolsticeConfig(dict):
+    """
+    Configuration parser for passing JSON files
+    """
+
+    @staticmethod
+    def paths():
+        """
+        Returns all possible configuration paths
+        :return: list(str)
+        """
+
+        cwd = os.path.dirname(__file__)
+        paths = [os.path.join(cwd, 'config.json')]
+        path = os.environ.get('SOLSTICE_CONFIG_PATH')
+        path = path or os.path.join(cwd, 'custom_config.json')
+        if not os.path.exists(path):
+            cwd = os.path.dirname(os.path.dirname(cwd))
+            path = os.path.join(cwd, 'custom_config.json')
+        if os.path.exists(path):
+            paths.append(path)
+
+        return paths
+
+    def read(self):
+        """
+        Reeds all paths and overwrite the keys with each successive file
+        """
+
+        self.clear()
+
+        for p in self.paths():
+            lines = list()
+
+            # Don't read comments (//)
+            with open(p) as f:
+                for l in f.readlines():
+                    if not l.strip().startswith('//'):
+                        lines.append(l)
+
+            data = '\n'.join(lines)
+            if data:
+                self.update(json.loads(data))
+
+
 class SolsticePipeline(QObject):
     def __init__(self):
         super(SolsticePipeline, self).__init__()
 
         self.logger = self.create_solstice_logger()
+        self.config = self.init_config()
         self.settings = self.create_solstice_settings()
         self.detect_dcc()
         self.update_paths()
@@ -109,14 +162,28 @@ class SolsticePipeline(QObject):
         return logger
 
     @staticmethod
+    def init_config():
+        """
+        Read and initializes Solstice settings
+        """
+
+        global config
+
+        if not config:
+            config = SolsticeConfig()
+            config.read()
+
+        return config
+
+    @staticmethod
     def create_solstice_settings():
         """
         Creates a settings file that can be accessed globally by all tools
         """
 
-        from solstice.pipeline.utils import config
+        from solstice.pipeline.utils import settings
         global settings
-        settings = config.create_config('solstice_pipeline')
+        settings = settings.create_settings('solstice_pipeline')
         return settings
 
     @staticmethod
@@ -242,17 +309,17 @@ class SolsticePipeline(QObject):
 
         try:
             import maya.cmds as cmds
-            from solstice.pipeline.dcc import mayadcc
+            from solstice.pipeline.dcc.maya import mayadcc
             dcc = mayadcc.SolsticeMaya()
         except ImportError:
             try:
                 import hou
-                from solstice.pipeline.dcc import houdinidcc
+                from solstice.pipeline.dcc.houdini import houdinidcc
                 dcc = houdinidcc.SolsticeHoudini()
             except ImportError:
                 try:
                     import nuke
-                    from solstice.pipeline.dcc import nukedcc
+                    from solstice.pipeline.dcc.nuke import nukedcc
                     dcc = nukedcc.SolsticeNuke()
                 except ImportError as e:
                     print(e)
@@ -839,6 +906,86 @@ def get_alembics(as_nodes=True, only_roots=False):
     return all_alembic_roots
 
 
+def format_path(format_string, path='', **kwargs):
+    """
+    Resolves the given string with the given path and keyword arguments
+    :param format_string: str
+    :param path: str
+    :param kwargs: dict
+    :return: str
+    """
+
+    from solstice.pipeline.utils import pythonutils
+
+    logger.debug('Format String: {}'.format(format_string))
+
+    dirname, name, extension = pythonutils.split_path(path)
+    encoding = locale.getpreferredencoding()
+    temp = tempfile.gettempdir()
+    if temp:
+        temp = temp.decode(encoding)
+
+    username = pythonutils.user()
+    if username:
+        username = username.decode(encoding)
+
+    local = os.getenv('APPDATA') or os.getenv('HOME')
+    if local:
+        local = local.decode(encoding)
+
+    kwargs.update(os.environ)
+
+    labels = {
+        "name": name,
+        "path": path,
+        "root": path,  # legacy
+        "user": username,
+        "temp": temp,
+        "home": local,  # legacy
+        "local": local,
+        "dirname": dirname,
+        "extension": extension,
+    }
+
+    kwargs.update(labels)
+
+    resolved_string = six.u(format_string).format(**kwargs)
+
+    logger.debug('Resolved string: {}'.format(resolved_string))
+
+    return pythonutils.norm_path(resolved_string)
+
+
+def temp_path(*args):
+    """
+    Returns the temp directory set in the config
+    :param args:
+    :return: str
+    """
+
+    from solstice.pipeline.utils import pythonutils
+
+    temp = config.get('tempPath')
+    return pythonutils.norm_path(os.path.join(format_path(temp), *args))
+
+
+def create_temp_path(name, clean=True, make_dirs=True):
+    """
+    Creates new temp directory with the given name
+    :param name: str
+    :param clean: bool
+    :param make_dirs: bool
+    :return: str
+    """
+
+    path = temp_path(name)
+    if clean and os.path.exists(path):
+        shutil.rmtree(path)
+
+    if make_dirs and not os.path.exists(path):
+        os.makedirs(path)
+
+    return path
 
 
 def init():

@@ -18,6 +18,7 @@ import ast
 import sys
 import json
 import stat
+import getpass
 import platform
 import subprocess
 import webbrowser
@@ -434,3 +435,149 @@ def force_list(var):
             var = [var]
 
     return var
+
+
+def user():
+    """
+    Returns the current user name in lowercase
+    :return: str
+    """
+
+    return getpass.getuser().lower()
+
+
+def system():
+    """
+    Returns the current platform in lowercase
+    :return: str
+    """
+
+    return platform.system().lower()
+
+
+def is_mac():
+    """
+    Returns whether current OS is MAC or not
+    :return: bool
+    """
+
+    return system().startswith('os') or system().startswith('mac') or system().startswith('darwin')
+
+
+def is_linux():
+    """
+    Returns whether current OS is Linux or not
+    :return: bool
+    """
+
+    return system().lower().startswith('lin')
+
+
+def is_windows():
+    """
+    Returns whether current OS is Windows or not
+    :return: bool
+    """
+
+    return system().lower().startswith('win')
+
+
+def norm_path(path):
+    """
+    Returns a normalized path containing only forward slashes
+    :param path: str
+    :return: str
+    """
+
+    path = path.replace("\\", "/")
+    # path = six.u(path)
+    return path.rstrip("/")
+
+
+def norm_paths(paths):
+    """
+    Normalize all the given paths to a consitent format
+    :param paths: list(str)
+    :return: list(str)
+    """
+
+    return [norm_path(p) for p in paths]
+
+
+def rel_path(data, start):
+    """
+    Returns a relative version of all the pats in data from the start path
+    :param data: str
+    :param start: str
+    :return: str
+    """
+
+    rpath = start
+
+    for i in range(0, 3):
+
+        rpath = os.path.dirname(rpath)
+        token = os.path.relpath(rpath, start)
+
+        rpath = norm_path(rpath)
+        token = norm_path(token)
+
+        if rpath.endswith("/"):
+            rpath = rpath[:-1]
+
+        data = data.replace(rpath, token)
+
+    return data
+
+
+def abs_path(data, start):
+    """
+    Returns an absolute version of all the pats in data using the start path
+    :param data: str
+    :param start: str
+    :return: str
+    """
+
+    rel_path1 = norm_path(os.path.dirname(start))
+    rel_path2 = norm_path(os.path.dirname(rel_path1))
+    rel_path3 = norm_path(os.path.dirname(rel_path2))
+
+    if not rel_path1.endswith("/"):
+        rel_path1 += "/"
+
+    if not rel_path2.endswith("/"):
+        rel_path2 += "/"
+
+    if not rel_path3.endswith("/"):
+        rel_path3 += "/"
+
+    data = data.replace('../../../', rel_path3)
+    data = data.replace('../../', rel_path2)
+    data = data.replace('../', rel_path1)
+
+    return data
+
+
+def real_path(path):
+    """
+    Returns the given path eliminating any symbolic link
+    :param path: str
+    :return: str
+    """
+
+    path = os.path.realpath(path)
+    path = os.path.expanduser(path)
+
+    return norm_path(path)
+
+
+def split_path(path):
+    """
+    Slit the given path into directory, basename and extension
+    :param path: str
+    :return: list(str)
+    """
+
+    path = norm_path(path)
+    filename, extension = os.path.splitext(path)
+    return os.path.dirname(filename), os.path.basename(filename), extension

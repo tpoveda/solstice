@@ -1161,3 +1161,40 @@ def get_locked_attributes(node, mode='rotate'):
             locked_attrs.append(attr.replace(mode, '').lower())
 
     return locked_attrs
+
+
+def get_reference_paths(objects, without_copy_number=False):
+    """
+    Get the reference paths for the given objects
+    :param objects: list(str)
+    :param without_copy_number: bool
+    :return: list(str)
+    """
+
+    paths = list()
+    for obj in objects:
+        if cmds.referenceQuery(obj, isNodeReferenced=True):
+            paths.append(cmds.referenceQuery(obj, f=True, wcn=without_copy_number))
+
+    return list(set(paths))
+
+
+def get_reference_data(objects):
+    """
+    Get the reference paths for the given objects
+    :param objects: list(str)
+    :return: list(dict)
+    """
+
+    data = list()
+    paths = get_reference_paths(objects)
+
+    for path in paths:
+        data.append({
+            'filename': path,
+            'unresolved': cmds.referenceQuery(path, filename=True, withoutCopyNumber=True),
+            'namespace': cmds.referenceQuery(path, namespace=True),
+            'node': cmds.referenceQuery(path, referenceNode=True)
+        })
+
+    return data

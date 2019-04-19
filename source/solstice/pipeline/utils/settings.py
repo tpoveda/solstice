@@ -21,7 +21,7 @@ import ConfigParser
 from solstice.pipeline.utils import pythonutils as utils
 
 
-class SolsticeConfig(ConfigParser.RawConfigParser, object):
+class SoslticeSettings(ConfigParser.RawConfigParser, object):
     """
     Configuration file for Solstice Short Film
     """
@@ -30,21 +30,21 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
     ICON_EXTENSIONS = ['xpm', 'png', 'bmp', 'jpeg']
 
     def __init__(self, app_name, *args, **kwargs):
-        super(SolsticeConfig, self).__init__(*args, **kwargs)
+        super(SoslticeSettings, self).__init__(*args, **kwargs)
 
         self._app_name = app_name.replace(' ', '_').lower()
         self.config_file = os.path.join(utils.get_system_config_directory(), 'solstice_pipeline', self._app_name, 'config.ini')
 
-        print('{0}: Solstice Configuration File: {1}'.format(self._app_name, self.config_file))
+        print('{0}: Solstice Settings File: {1}'.format(self._app_name, self.config_file))
         try:
             self.readfp(open(self.config_file, 'r'))
-            print('{0}: Solstice Configuration File read successfully!'.format(self._app_name))
+            print('{0}: Solstice Settings File read successfully!'.format(self._app_name))
         except Exception:
             try:
-                print('{0}: Solstice Configuration file not found! Creating it...'.format(self._app_name))
+                print('{0}: Solstice Settings file not found! Creating it...'.format(self._app_name))
                 self._create()
             except Exception as e:
-                print('{0}: Error reading Solstice Configuration file: {} | {}'.format(e, traceback.format_exc()))
+                print('{0}: Error reading Solstice Settings file: {} | {}'.format(e, traceback.format_exc()))
 
     @property
     def app_name(self):
@@ -55,7 +55,7 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
         If Solstice configuration file is not already created we create it
         """
 
-        print('Initializing {0} Settings, creating configuration file: {1}\n'.format(self._app_name, self.config_file))
+        print('Initializing {0} Settings, creating settings file: {1}\n'.format(self._app_name, self.config_file))
 
         self.add_section(self._app_name)
 
@@ -70,7 +70,7 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
         f.close()
         self.update()
 
-        print('{0} has successfully created a new configuration file at: {1}\n'.format(self._app_name, str(self.config_file)))
+        print('{0} has successfully created a new settings file at: {1}\n'.format(self._app_name, str(self.config_file)))
 
     def update(self):
         with open(self.config_file, 'wb') as f:
@@ -114,11 +114,11 @@ class SolsticeConfig(ConfigParser.RawConfigParser, object):
             subprocess.call(call, self.config_file)
 
 
-def create_config(app_name):
+def create_settings(app_name):
     """
     Construct the Solstice configuration object from necessary elements
     """
 
-    config = SolsticeConfig(app_name, allow_no_value=True)
+    settings = SoslticeSettings(app_name, allow_no_value=True)
 
-    return config
+    return settings

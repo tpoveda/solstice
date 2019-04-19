@@ -16,7 +16,7 @@ import hou
 import hdefereval
 
 import solstice.pipeline as sp
-from solstice.pipeline.dcc import dcc
+from solstice.pipeline.dcc.core import dcc
 from solstice.pipeline.utils import houdiniutils
 
 

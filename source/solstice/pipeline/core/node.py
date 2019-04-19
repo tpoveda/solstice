@@ -21,6 +21,7 @@ import collections
 import solstice.pipeline as sp
 from solstice.pipeline.utils import pythonutils, artellautils as artella
 
+
 # =================================================================================================
 
 FULL_NAME_REGEX = re.compile(r'(?P<env>\A.+)(?P<art>_art/production/)(?P<code>.+)(?P<category>Assets/)(?P<assettype>[^/]+)/(?P<name>[^/]+)/(?P<version>[^/]+)/(?P<type>[^/]+)/(?P<filename>.+\Z)')
@@ -288,6 +289,27 @@ class SolsticeAssetNode(SolsticeNode, object):
         print('\t          Path: {0}'.format(self._asset_path))
         print('\t      Category: {0}'.format(self._category))
         print('\t   Description: {0}'.format(self._category))
+
+    def get_tag_data_node(self):
+        if not sp.is_maya():
+            return None
+
+        import maya.cmds as cmds
+
+        if sp.dcc.attribute_exists(node=self.name, attribute_name='tag_data'):
+            tag_data_node = cmds.listConnections(self.name+'.tag_data')
+            if tag_data_node:
+                tag_data_node = tag_data_node[0]
+                tag_type = sp.dcc.get_attribute_value(node=tag_data_node, attribute_name='tag_type')
+                if tag_type and tag_type == 'SOLSTICE_TAG':
+                    tag_node = SolsticeTagDataNode(node=tag_data_node)
+                    return tag_node
+        elif sp.dcc.attribute_exists(node=self.name, attribute_name='tag_info'):
+            tag_info = sp.dcc.get_attribute_value(node=self.name, attribute_name='tag_info')
+            tag_node = SolsticeTagDataNode(node=self.name, tag_info=tag_info)
+            return tag_node
+
+        return None
 
     def update_info(self):
         super(SolsticeAssetNode, self).update_info()

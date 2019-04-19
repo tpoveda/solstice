@@ -17,6 +17,18 @@ import time
 import solstice.pipeline as sp
 
 
+def empty(fn):
+    """
+    Empty decorator
+    :param fn:
+    :return: wrapped function
+    """
+
+    def wrapper(*args, **kwargs):
+        return fn(*args, **kwargs)
+    return wrapper
+
+
 def timing(fn):
     """
     Simple decorator to calculates how much time an operation costs in seconds

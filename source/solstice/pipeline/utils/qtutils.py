@@ -368,3 +368,19 @@ def center_widget_on_screen(widget):
     center_point = QApplication.desktop().screenGeometry(screen).center()
     frame_geo.moveCenter(center_point)
     widget.move(frame_geo.topLeft())
+
+
+def selection_modifiers():
+    """
+    Returns a dictionary of the current key modifiers
+    :return: dict
+    """
+
+    result = {'add': False, 'deselect': False}
+    modifiers = QApplication.keyboardModifiers()
+    if modifiers == Qt.ShiftModifier:
+        result['deselect'] = True
+    elif modifiers == Qt.ControlModifier:
+        result['add'] = True
+
+    return result
