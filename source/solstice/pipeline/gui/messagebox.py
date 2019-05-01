@@ -154,6 +154,47 @@ class MessageBox(QDialog, object):
 
         return clicked_btn
 
+    @staticmethod
+    def warning(parent, title, text, width=None, height=None, buttons=None, header_icon=None, header_color='rgb(250, 160, 0)', enable_dont_show_checkbox=False, force=False):
+        """
+        Open a warning message box with the given options
+        :param parent: QWidget
+        :param title: str
+        :param text: str
+        :param width: int
+        :param height: int
+        :param buttons: list(QMessage.StandardButtons)
+        :param header_icon: str
+        :param header_color: str
+        :param enable_dont_show_checkbox: bool
+        :param force: bool
+        """
+
+        buttons = buttons or QDialogButtonBox.Yes | QDialogButtonBox.No
+        clicked_btn = show_message_box(parent, title, text, width=width, height=height, buttons=buttons, header_icon=header_icon, header_color=header_color, enable_dont_show_checkbox=enable_dont_show_checkbox, force=force)
+
+        return clicked_btn
+
+    @staticmethod
+    def critical(parent, title, text, width=None, height=None, buttons=None, header_icon=None, header_color='rgb(250, 160, 0)'):
+        """
+        Open a critical message box with the given options
+        :param parent: QWidget
+        :param title: str
+        :param text: str
+        :param width: int
+        :param height: int
+        :param buttons: list(QMessage.StandardButtons)
+        :param header_icon: str
+        :param header_color: str
+        """
+
+        buttons = buttons or QDialogButtonBox.Ok
+        clicked_btn = show_message_box(parent, title, text, width=width, height=height, buttons=buttons, header_icon=header_icon, header_color=header_color)
+
+        return clicked_btn
+
+
     def updateGeometry(self):
         """
         Updates the geometry to be in the center of its parent

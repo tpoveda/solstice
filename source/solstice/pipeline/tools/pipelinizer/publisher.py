@@ -29,7 +29,6 @@ from solstice.pipeline.gui import dialog, splitters, spinner, console
 from solstice.pipeline.utils import qtutils, image as img, pythonutils as python, artellautils as artella
 from solstice.pipeline.resources import resource
 
-from solstice.pipeline.tools.shaderlibrary import shaderlibrary
 from solstice.pipeline.tools.tagger import tagger
 from solstice.pipeline.tools.sanitycheck.checks import validators
 from solstice.pipeline.tools.sanitycheck.tasks import task, taskgroups
@@ -37,6 +36,7 @@ from solstice.pipeline.tools.bugtracker import bugtracker as bug
 
 if sp.is_maya():
     from solstice.pipeline.utils import mayautils
+    from solstice.pipeline.tools.shaderlibrary import shaderlibrary
 
 
 class PublishTexturesTask(task.Task, object):
@@ -405,7 +405,7 @@ class PublishModelTask(task.Task, object):
                             break
 
             if not valid_tag_data:
-                self.write_warning('Main group has not a valid tag data node connected to. Creating it ...')
+                self.write_warning('Main group has not a valid tag data node connected to it. Creating it ...')
                 try:
                     sp.dcc.select_object(valid_obj)
                     tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(self._asset().category)
@@ -756,7 +756,7 @@ class PublishShadingTask(task.Task, object):
                     os.remove(shading_path)
                     os.rename(backup_file, shading_path)
                 except Exception as e:
-                    self.write_error('Errow while recovering original shading file. Please sync shading file again!!')
+                    self.write_error('Error while recovering original shading file. Please sync shading file again!!')
                 return False
             self.write_ok('Textures of Shading File have been updated successfully!\n')
 
@@ -1233,7 +1233,7 @@ class AssetPublisherVersionWidget(QWidget, object):
                 else:
                     asset_path = os.path.join(asset_path, self._asset().name + '.ma')
 
-                if self._ui['textures']['check']:
+                if self._ui['textures']['check'].isChecked():
                     result = qtutils.show_question(None, 'New Textures Version', 'Are you sure you want to create new version of textures? All of them will be versioned and this can take a lof of memory in Artella server. To publish single textures files do it directly thorugh Artella')
                     if result == QMessageBox.No:
                         continue

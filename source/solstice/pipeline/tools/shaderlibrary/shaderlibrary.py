@@ -25,7 +25,7 @@ from solstice.pipeline.externals.solstice_qt.QtGui import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.core import syncdialog, assetviewer
-from solstice.pipeline.gui import window
+from solstice.pipeline.gui import window, messagehandler
 from solstice.pipeline.utils import pythonutils, shaderutils, artellautils, qtutils, image as img, mayautils as utils
 from solstice.pipeline.resources import resource
 
@@ -753,7 +753,7 @@ class ShaderLibrary(window.Window, object):
         return True
 
     @staticmethod
-    def export_asset(asset=None, shading_meshes=None, comment='New Shaders version'):
+    def export_asset(asset=None, shading_meshes=None, comment='New Shaders version', publish=True):
         """
         Export all shaders info for the given asset
         Generates 2 files:
@@ -811,15 +811,21 @@ class ShaderLibrary(window.Window, object):
         asset_shading_file = ShaderLibrary.get_asset_shader_file_path(asset=asset)
         artellautils.lock_file(asset_shading_file, force=True)
 
+        if os.path.isfile(asset_shading_file):
+            do_continue = messagehandler.MessageHandler().show_confirm_dialog('Shading file {} already exists! Do you want overwrite it?'.format(asset_shading_file))
+            if not do_continue:
+                return ''
+
         try:
             with open(asset_shading_file, 'w') as fp:
                 json.dump(json_data, fp)
 
             # Upload new version of JSON shading file
-            valid_version = artellautils.upload_new_asset_version(asset_shading_file, comment=comment)
-            if not valid_version:
-                qtutils.show_info(None, 'New Shaders JSON file version', 'Error while creating new version of JSON shaders version: {} Create it manaully later through Artella!'.format(asset_shading_file))
-            artellautils.unlock_file(asset_shading_file)
+            if publish:
+                valid_version = artellautils.upload_new_asset_version(asset_shading_file, comment=comment)
+                if not valid_version:
+                    qtutils.show_info(None, 'New Shaders JSON file version', 'Error while creating new version of JSON shaders version: {} Create it manaully later through Artella!'.format(asset_shading_file))
+                artellautils.unlock_file(asset_shading_file)
         except Exception as e:
             sp.logger.error(str(e))
             artellautils.unlock_file(asset_shading_file)
@@ -834,7 +840,15 @@ class ShaderLibrary(window.Window, object):
 
         return ''
 
-    def export_asset_shaders(self, asset, status='published'):
+    def _on_export_asset_shaders(self, asset, status='published'):
+        exporter = self.export_asset_shaders(asset=asset, status=status, publish=False, do_exec=True)
+        if not exporter:
+            return
+        exporter.exportFinished.connect(self.update_shader_library)
+        exporter.exec_()
+
+    @staticmethod
+    def export_asset_shaders(asset, status='published', publish=True, do_exec=False):
         if asset is None:
             sp.logger.debug('Given Asset to export is not valid! Aborting operation ...')
             return
@@ -884,8 +898,10 @@ class ShaderLibrary(window.Window, object):
 
         asset_materials = list(set(cmds.ls(cmds.listConnections(all_shading_groups), materials=True)))
         exporter = ShaderExporter(shaders=asset_materials)
-        exporter.exportFinished.connect(self.update_shader_library)
-        exporter.exec_()
+        if do_exec:
+            return exporter
+        else:
+            return exporter.export_shaders(publish=publish)
 
     @staticmethod
     @utils.maya_undo
@@ -1056,7 +1072,7 @@ class ShaderLibrary(window.Window, object):
 
     def _on_asset_click(self, asset):
         sp.logger.debug('Generating Shading info for asset: {}'.format(asset.name))
-        self.export_asset_shaders(asset=asset, status='published')
+        self._on_export_asset_shaders(asset=asset, status='published')
 
 
 def run():

@@ -663,6 +663,9 @@ def find_all_assets(assets_path=None, update_if_data_not_found=False, simple_mod
     :return: list<solstice_asset>
     """
 
+    if assets_path is None:
+        assets_path = get_solstice_assets_path()
+
     return find_asset(asset_to_search=None, assets_path=assets_path, update_if_data_not_found=update_if_data_not_found, simple_mode=simple_mode, as_checkable=as_checkable)
 
 

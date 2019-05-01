@@ -30,8 +30,10 @@ from solstice.pipeline.resources import resource
 
 from solstice.pipeline.tools.pipelinizer import publisher
 from solstice.pipeline.tools.alembicmanager import alembicmanager
-from solstice.pipeline.tools.standinmanager import standinmanager
-from solstice.pipeline.tools.shaderlibrary import shaderlibrary
+
+if sp.is_maya():
+    from solstice.pipeline.tools.standinmanager import standinmanager
+    from solstice.pipeline.tools.shaderlibrary import shaderlibrary
 
 
 def generate_asset_widget_by_category(**kwargs):
@@ -536,7 +538,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
             thread_result.append(rst)
         return rst
 
-    def get_asset_textures(self, status='working'):
+    def get_asset_textures(self, status='working', force_sync=False):
         """
         Returns a dict of textures with the given status
         :param status: str
@@ -559,6 +561,8 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
         else:
             textures_version = '{0:03}'.format(published_textures_info['textures'])
             textures_path = os.path.join(self.asset_path, '__textures_v{0}__'.format(textures_version))
+            if not os.path.exists(textures_path) or force_sync:
+                syncdialog.SolsticeSyncFile(files=[textures_path]).sync()
             if os.path.exists(textures_path):
                 textures_path = os.path.join(textures_path, 'textures')
                 if os.path.exists(textures_path):
@@ -567,6 +571,8 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
                         fixed_txt = artella.fix_path_by_project(txt, fullpath=True)
                         format_txt = naming.format_path(fixed_txt)
                         current_textures.append(format_txt)
+            else:
+                sp.logger.warning('Published textures path {} does not exists! Impossible to update texture paths ...'.format(textures_path))
 
         return current_textures
 

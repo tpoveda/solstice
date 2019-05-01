@@ -13,9 +13,12 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import re
+import json
 
 import solstice.pipeline as sp
 from solstice.pipeline.core import syncdialog
+from solstice.pipeline.gui import messagehandler
 from solstice.pipeline.tools.sanitycheck.checks import check
 from solstice.pipeline.utils import artellautils as artella
 
@@ -23,6 +26,10 @@ from solstice.pipeline.tools.tagger import tagger
 
 if sp.is_maya():
     from solstice.pipeline.utils import mayautils
+    from solstice.pipeline.tools.shaderlibrary import shaderlibrary
+
+
+reload(shaderlibrary)
 
 
 class AssetFileExists(check.SanityCheckTask, object):
@@ -269,7 +276,7 @@ class ValidTexturesPath(check.SanityCheckTask, object):
                 self.write_error('Textures Path {} does not exists after sync!'.format(textures_path))
                 return False
 
-        self.write('Textures Path | {} | is valid!\n\n'.format(status))
+        self.write_ok('Textures Path | {} | is valid!\n\n'.format(status))
 
         return True
 
@@ -303,7 +310,7 @@ class TexturesFolderIsEmpty(check.SanityCheckTask, object):
             self.write_error('Textures Folder {} has not textures.'.format(textures_path))
             return False
 
-        self.write('Textures Folder has textures inside it:')
+        self.write_ok('Textures Folder has textures inside it:')
         for i, txt in enumerate(textures):
             self.write('{}. {}'.format(i, os.path.basename(txt)))
         self.write('\n')
@@ -346,7 +353,7 @@ class TextureFileSize(check.SanityCheckTask, object):
                 self.write_error('Texture {} has is invalid (size of 0).'.format(txt))
                 return False
 
-        self.write('All Textures have valid size!')
+        self.write_ok('All Textures have valid size!')
 
         return True
 
@@ -1040,3 +1047,495 @@ class CheckShadingShaders(check.SanityCheckTask, object):
         self.write('Shading groups checked successfully!')
 
         return True
+
+
+class UpdateTexturesPath(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='published', auto_fix=False, parent=None):
+        super(UpdateTexturesPath, self).__init__(name='Updating textures path in shading file', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self.set_check_text('Updating textures paths validity')
+
+    def check(self):
+        if self._status != 'published':
+            return False
+
+        shading_path = self._asset().get_asset_file(file_type='shading', status='working')
+        if not os.path.isfile(shading_path):
+            return False
+
+        current_textures_path = self._asset().get_asset_textures()
+        with open(shading_path, 'r') as f:
+            data = f.read()
+            data_lines = data.split(';')
+        new_lines = list()
+        self.write('Updating textures paths ...')
+        textures_updated = False
+        for line in data_lines:
+            line = str(line)
+            if 'setAttr ".ftn" -type "string"' in line:
+                if line.endswith('.tx"') or line.endswith('.tiff"'):
+                    subs = re.findall(r'"(.*?)"', line)
+                    current_texture_path = subs[2]
+                    for txt in current_textures_path:
+                        texture_name = os.path.basename(current_texture_path)
+                        if texture_name in os.path.basename(txt):
+                            if not os.path.normpath(txt) == os.path.normpath(current_texture_path):
+                                line = line.replace(current_texture_path, txt).replace('/', '\\\\')
+                                self.write('>>>\n\t{0}'.format(os.path.normpath(current_texture_path)))
+                                self.write_ok('\t{0}\n'.format(os.path.normpath(txt)))
+                                textures_updated = True
+            new_lines.append(line + ';')
+
+        if textures_updated:
+            # Create shading file with paths fixed
+            self.write('Writing new textures paths info into shading file: {}'.format(shading_path))
+            with open(shading_path, 'w') as f:
+                f.writelines(new_lines)
+            self.write_ok('Textures Path updated successfully!')
+            messagehandler.MessageHandler().show_warning_dialog('Textures updated. Make sure to submit shading file: {}'.format(shading_path))
+        else:
+            self.write('Textures paths are up-to-date')
+
+        return True
+
+
+class ExportShaderJSON(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None, publish=True):
+        super(ExportShaderJSON, self).__init__(name='Exporting Shader JSON', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self._publish = publish
+        self.set_check_text('Updating textures paths validity')
+
+    def check(self):
+        if self._status != 'working':
+            return False
+
+        shading_path = self._asset().get_asset_file(file_type='shading', status='working')
+        if not os.path.isfile(shading_path):
+            return False
+
+        sp.dcc.open_file(shading_path, force=True)
+
+        # Check that shading file has a main group with valid name
+        self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
+        valid_obj = None
+        if sp.dcc.object_exists(self._asset().name):
+            objs = sp.dcc.list_nodes(node_name=self._asset().name)
+            for obj in objs:
+                parent = sp.dcc.node_parent(obj)
+                if parent is None:
+                    valid_obj = obj
+            if not valid_obj:
+                self.write_error(
+                    'Main group is not valid. Please change it manually to {}\n'.format(self._asset().name))
+                return False
+        else:
+            self.write_error(
+                'Main group is not valid. Please change it manually to {}\n'.format(self._asset().name))
+            return False
+        self.write_ok('Asset main group is valid: {}\n'.format(self._asset().name))
+
+        # Check model file proxy and hires meshes
+        if not valid_obj:
+            self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
+            return False
+
+        shading_meshes = list()
+        self.write('Getting meshes of shading file ...')
+        xform_relatives = sp.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True,
+                                                relative_type='transform', shapes=False, intermediate_shapes=False)
+        if xform_relatives:
+            for obj in xform_relatives:
+                if sp.dcc.object_exists(obj):
+                    shapes = sp.dcc.list_shapes(node=obj, full_path=True, intermediate_shapes=False)
+                    if shapes:
+                        self.write('Found mesh on shading file: {}'.format(obj))
+                        shading_meshes.append(obj)
+        self.write_ok('Found {} meshes on shading file!'.format(len(shading_meshes)))
+
+        self.write('Exporting Shaders JSON info file ...')
+        info = shaderlibrary.ShaderLibrary.export_asset(asset=self._asset(), shading_meshes=shading_meshes, publish=self._publish)
+        if info is None or not os.path.exists(info):
+            self.write_error('Model Shader JSON file was not generated successfully. Please contact TD!')
+            self.write('Unlocking shading file ...')
+            return False
+        self.write_ok('Asset shaders exported successfully!')
+        self.write_ok('Model Shader JSON file: {}'.format(info))
+
+
+class RenameShaders(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None):
+        super(RenameShaders, self).__init__(name='Renaming shaders ...', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self.set_check_text('Updating textures paths validity')
+
+    def check(self):
+        if self._status != 'working':
+            return False
+
+        if not sp.is_maya():
+            sp.logger.warning('Rename shaders check is only available in Maya')
+            return
+
+        import maya.cmds as cmds
+
+        shading_path = self._asset().get_asset_file(file_type='shading', status='working')
+        if not os.path.isfile(shading_path):
+            return False
+
+        sp.dcc.open_file(shading_path, force=True)
+
+        self.write('Retrieve scene shaders ...')
+
+        def_mats = ['lambert1', 'particleCloud1']
+        def_sgs = ['initialParticleSE', 'initialShadingGroup']
+
+        mats = cmds.ls(mat=True)
+        for mat in mats:
+            if mat in def_mats:
+                continue
+
+            if not mat.startswith(self._asset().name):
+                new_mat_name = '{}_{}'.format(self._asset().name, mat)
+                if cmds.objExists(new_mat_name):
+                    self.write_warning('Material {} already exists in scene. Rename it manually ...'.format(new_mat_name))
+                    continue
+                self.write_ok('Renaming material {} > {}'.format(mat, new_mat_name))
+                cmds.rename(mat, new_mat_name)
+
+        shaders = cmds.ls(type='shadingEngine')
+        for sg in shaders:
+            shd_mat = cmds.listConnections('{}.surfaceShader'.format(sg))
+            if len(shd_mat) > 1:
+                self.write_warning('Multiple materials: {} conntected to surface shader: {}!'.format(shd_mat, sg))
+                continue
+            if len(shd_mat) <= 0:
+                self.write_warning('No material connected to surface shader: {}!'.format(sg))
+                continue
+            shd_mat = shd_mat[0]
+            if shd_mat in def_mats:
+                continue
+            new_sg_name = '{}SG'.format(shd_mat)
+            if sg != new_sg_name:
+                self.write_ok('Renaming surface shader {} > {}'.format(sg, new_sg_name))
+                cmds.rename(sg, new_sg_name)
+
+        mats = cmds.ls(mat=True)
+        shaders = cmds.ls(type='shadingEngine')
+
+        all_valid = True
+        for mat in mats:
+            if mat in def_mats:
+                continue
+            if not mat.startswith(self._asset().name):
+                self.write_error('Material {} has not a valid nomenclature! It must starts with {}!'.format(mat, self._asset().name))
+                all_valid = False
+                continue
+
+        for sg in shaders:
+            if sg in def_sgs:
+                continue
+            if not sg.startswith(self._asset().name):
+                self.write_error('Shader {} has not a valid nomenclature! It must starts with {}!'.format(sg, self._asset().name))
+                all_valid = False
+                continue
+            if not sg.endswith('SG'):
+                self.write_error('Shader {} has not a valid nomenclature! It must ends with SG!')
+                all_valid = False
+                continue
+
+        if all_valid:
+            self.write_ok('All materials and shaders have a valid nomenclature!')
+
+        return all_valid
+
+
+class ExportShaders(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None, publish=True):
+        super(ExportShaders, self).__init__(name='Exporting shaders ...', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self._publish = publish
+        self.set_check_text('Exporting shaders ...')
+
+    def check(self):
+        if self._status != 'working':
+            return False
+
+        if not sp.is_maya():
+            sp.logger.warning('Rename shaders check is only available in Maya')
+            return
+
+        shading_path = self._asset().get_asset_file(file_type='shading', status='working')
+        if not os.path.isfile(shading_path):
+            return False
+
+        self.write('Exporting Shaders files ...')
+        exported_shaders = shaderlibrary.ShaderLibrary.export_asset_shaders(self._asset(), status=self._status, publish=self._publish)
+        if exported_shaders:
+            self.write_ok('Exported following shaders:')
+            for sh in exported_shaders:
+                self.write_ok(sh)
+            return True
+
+        return False
+
+
+class CheckModelTag(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None, publish=True):
+        super(CheckModelTag, self).__init__(name='Check model tag', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self._publish = publish
+        self.set_check_text('Checking model tag ...')
+
+    def check(self):
+        if self._status != 'working':
+            return False
+
+        if not sp.is_maya():
+            sp.logger.warning('Rename shaders check is only available in Maya')
+            return
+
+        model_path = self._asset().get_asset_file(file_type='model', status=self._status)
+        if model_path is None or not os.path.isfile(model_path):
+            return False
+        sp.dcc.open_file(model_path)
+
+        # Check that model file has a main group with valid name
+        self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
+        valid_obj = None
+        if sp.dcc.object_exists(self._asset().name):
+            objs = sp.dcc.list_nodes(node_name=self._asset().name)
+            for obj in objs:
+                parent = sp.dcc.node_parent(obj)
+                if parent is None:
+                    valid_obj = obj
+            if not valid_obj:
+                self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
+                return False
+
+        # Check if main group has a valid tag node connected
+        valid_tag_data = False
+        main_group_connections = sp.dcc.list_source_destination_connections(valid_obj)
+        for connection in main_group_connections:
+            attrs = sp.dcc.list_user_attributes(connection)
+            if attrs and type(attrs) == list:
+                for attr in attrs:
+                    if attr == 'tag_type':
+                        valid_tag_data = True
+                        break
+
+        if not valid_tag_data:
+            self.write_error('Main group has not a valid tag data node connected to it!')
+            return False
+        else:
+            self.write_ok('Valid Tag Data node found for {}'.format(self._asset().name))
+
+        return True
+
+
+class UpdateModelTag(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None, publish=True):
+        super(UpdateModelTag, self).__init__(name='Update model tag', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self._publish = publish
+        self.set_check_text('Updating model tag ...')
+
+    def check(self):
+        if self._status != 'working':
+            return False
+
+        if not sp.is_maya():
+            sp.logger.warning('Rename shaders check is only available in Maya')
+            return
+
+        model_path = self._asset().get_asset_file(file_type='model', status=self._status)
+        if model_path is None or not os.path.isfile(model_path):
+            return False
+        sp.dcc.open_file(model_path)
+
+        # Check that model file has a main group with valid name
+        self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
+        valid_obj = None
+        if sp.dcc.object_exists(self._asset().name):
+            objs = sp.dcc.list_nodes(node_name=self._asset().name)
+            for obj in objs:
+                parent = sp.dcc.node_parent(obj)
+                if parent is None:
+                    valid_obj = obj
+            if not valid_obj:
+                self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
+                return False
+
+        # Check if main group has a valid tag node connected
+        valid_tag_data = False
+        main_group_connections = sp.dcc.list_source_destination_connections(valid_obj)
+        for connection in main_group_connections:
+            attrs = sp.dcc.list_user_attributes(connection)
+            if attrs and type(attrs) == list:
+                for attr in attrs:
+                    if attr == 'tag_type':
+                        valid_tag_data = True
+                        break
+
+        if not valid_tag_data:
+            self.write_warning('Main group has not a valid tag data node connected to it. Creating it ...')
+            try:
+                sp.dcc.select_object(valid_obj)
+                tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(self._asset().category)
+                sp.dcc.clear_selection()
+                self.write_ok('Tag Data Node created successfully!')
+                self.write('Checking if Tag Data Node was created successfully ...')
+                valid_tag_data = False
+                main_group_connections = sp.dcc.list_source_destination_connections(valid_obj)
+                for connection in main_group_connections:
+                    attrs = sp.dcc.list_user_attributes(connection)
+                    if attrs and type(attrs) == list:
+                        for attr in attrs:
+                            if attr == 'tag_type':
+                                valid_tag_data = True
+                if not valid_tag_data:
+                    self.write_error('Impossible to create tag data node. Please contact TD team to fix this ...')
+                    self.write('Unlocking model file ...')
+                    artella.unlock_file(model_path)
+                    return False
+            except Exception as e:
+                self.write_error('Impossible to create tag data node. Please contact TD team to fix this ...')
+                self.write_error(str(e))
+                return False
+
+        tag_data_node = tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(new_selection=valid_obj)
+        if not tag_data_node or not sp.dcc.object_exists(tag_data_node):
+            self.write_error('Impossible to get tag data of current selection: {}!'.format(tag_data_node))
+            return False
+
+        # Connect proxy group to tag data node
+        self.write('Connecting proxy group to tag data node')
+        valid_connection = tagger.HighProxyEditor.update_proxy_group(tag_data=tag_data_node)
+        if valid_connection:
+            self.write_ok('Proxy group connected to tag data node successfully!')
+        else:
+            self.write_error(
+                'Error while connecting Proxy Group to tag data node!  Check Maya editor for more info about the error!')
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
+            return False
+
+        # Connect hires group to tag data node
+        self.write('Connection hires group to tag data node')
+        valid_connection = tagger.HighProxyEditor.update_hires_group(tag_data=tag_data_node)
+        if valid_connection:
+            self.write_ok('Hires group connected to tag data node successfully!')
+        else:
+            self.write_error(
+                'Error while connecting hires group to tag data node! Check Maya editor for more info about the error!')
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
+            return False
+
+        # Getting shaders info data
+        shaders_file = shaderlibrary.ShaderLibrary.get_asset_shader_file_path(asset=self._asset())
+        if not os.path.exists(shaders_file):
+            self.write_error(
+                'Shaders JSON file for asset {0} does not exists: {1}'.format(self._asset().name, shaders_file))
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
+            return False
+
+        with open(shaders_file) as f:
+            shader_data = json.load(f)
+        if shader_data is None:
+            self.write_error(
+                'Shaders JSON file for asset {0} is not valid: {1}'.format(self._asset().name, shaders_file))
+            self.write('Unlocking model file ...')
+            artella.unlock_file(model_path)
+            return False
+        self.write_ok('Shaders JSON data loaded successfully!')
+
+        self.write('Retrieving hires meshes ...')
+        hires_grp = None
+        hires_grp_name = '{}_hires_grp'.format(self._asset().name)
+        children = sp.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True, relative_type='transform')
+        if children:
+            for child in children:
+                child_name = child.split('|')[-1]
+                if child_name == hires_grp_name:
+                    hires_children = sp.dcc.list_relatives(node=child_name, all_hierarchy=True,
+                                                           relative_type='transform')
+                    if len(hires_children) > 0:
+                        if hires_grp is None:
+                            hires_grp = child
+                        else:
+                            self.write_error('Multiple Hires groups in the file. Please check it!')
+                            return False
+        if not hires_grp:
+            self.write_error('No hires group found ...')
+            return False
+        hires_meshes = sp.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='transform')
+
+        # Checking if shader data is valid
+        self.write('Checking if shading meshes names and hires model meshes names are the same')
+        check_meshes = dict()
+        for shading_mesh, shading_group in shader_data.items():
+            shading_name = shading_mesh.split('|')[-1]
+            check_meshes[shading_mesh] = False
+            for model_mesh in hires_meshes:
+                mesh_name = model_mesh.split('|')[-1]
+                if shading_name == mesh_name:
+                    check_meshes[shading_mesh] = True
+
+        valid_meshes = True
+        for mesh_name, mesh_check in check_meshes.items():
+            if mesh_check is False:
+                self.write_error('Mesh {} not found in both model and shading file ...'.format(mesh_name))
+                valid_meshes = False
+        if not valid_meshes:
+            self.write_error('Some shading meshes and model hires meshes are missed. Please contact TD!')
+            return False
+        else:
+            self.write_ok('Shading Meshes and Model Hires meshes are valid!')
+
+        # Create if necessary shaders attribute in model tag data node
+        if not tag_data_node or not sp.dcc.object_exists(tag_data_node):
+            self.write_error('Tag data does not exists in the current scene!'.format(tag_data_node))
+            return False
+
+        attr_exists = sp.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
+        if attr_exists:
+            self.write('Unlocking shaders tag data attribute on tag data node: {}'.format(tag_data_node))
+            sp.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
+        else:
+            self.write('Creating shaders attribute on tag data node: {}'.format(tag_data_node))
+            sp.dcc.add_string_attribute(node=tag_data_node, attribute_name='shaders')
+            attr_exists = sp.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
+            if not attr_exists:
+                self.write_error('No Shaders attribute found on model tag data node: {}'.format(tag_data_node))
+                return False
+            else:
+                self.write_ok('Shaders attribute created successfully on tag data node!')
+
+        self.write('Storing shaders data into shaders tag data node attribute ...')
+        sp.dcc.unlock_attribute(node=tag_data_node, attribute_name='shaders')
+        sp.dcc.set_string_attribute_value(node=tag_data_node, attribute_name='shaders', attribute_value=shader_data)
+        sp.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
+        self.write_ok('Shaders data added to model tag data node successfully!')
+
+        return True
+
+
+
+
+
+
+

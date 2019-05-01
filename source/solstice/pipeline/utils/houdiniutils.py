@@ -15,10 +15,9 @@ __email__ = "tpoveda@cgart3d.com"
 
 import solstice.pipeline as sp
 
-if sp.is_houdini():
-    import hou
-    from hou import shelves
-    import hdefereval
+import hou
+from hou import shelves
+import hdefereval
 
 
 def get_houdini_version(as_string=True):

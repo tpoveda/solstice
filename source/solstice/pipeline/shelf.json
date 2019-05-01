@@ -5,7 +5,7 @@
         [
             {
                 "icon": "setproject.png",
-                "command": "import solstice_pipeline; import sys; sys.dispatcher.update_solstice_project();",
+                "command": "import solstice.pipeline; import sys; sys.dispatcher.update_solstice_project();",
                 "annotation": "Auto Setup Solstice Project",
                 "label": "Set Project",
                 "dcc": ["maya", "houdini"]
@@ -18,9 +18,9 @@
             },
             {
                 "icon": "assetviewer.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_assetviewer; solstice_assetviewer.run();",
-                "annotation": "Solstice Asset Viewer",
-                "label": "Asset Viewer",
+                "command": "from solstice.pipeline.tools.assetlibrary import assetlibrary; assetlibrary.run();",
+                "annotation": "Solstice Asset Library",
+                "label": "Asset Library",
                 "dcc": ["maya", "houdini"]
             },
             {
@@ -31,14 +31,14 @@
             },
             {
                 "icon": "pipeline.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_pipelinizer; solstice_pipelinizer.run();",
+                "command": "from solstice.pipeline.tools.pipelinizer import pipelinizer; pipelinizer.run();",
                 "annotation": "Solstice Pipelinizer Tool",
                 "label": "Pipelinizer",
                 "dcc": ["maya", "houdini"]
             },
             {
                 "icon": "outline.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_outliner; solstice_outliner.run();",
+                "command": "from solstice.pipeline.tools.outliner import outliner; outliner.run();",
                 "annotation": "Solstice Outliner Tool",
                 "label": "Outliner",
                 "dcc": ["maya"]
@@ -51,7 +51,7 @@
             },
            {
                 "icon": "changelog.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_changelog; solstice_changelog.run();",
+                "command": "from solstice.pipeline.tools.changelog import changelog; changelog.run();",
                 "annotation": "Solstice Changelog",
                 "label": "Changelog",
                 "dcc": ["maya", "houdini"]
@@ -61,14 +61,14 @@
         [
           {
               "icon": "alembic.png",
-              "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
+              "command": "from solstice.pipeline.tools.alembicmanager import alembicmanager; alembicmanager.run();",
               "annotation": "Solstice Alembic Manager",
               "label": "Alembic Manager",
               "dcc": ["maya", "houdini"]
           },
           {
               "icon": "standin.png",
-              "command": "from solstice_pipeline.solstice_tools import solstice_standinmanager; reload(solstice_standinmanager); solstice_standinmanager.run();",
+              "command": "from solstice.pipeline.tools.standinmanager import standinmanager; standinmanager.run();",
               "annotation": "Solstice Alembic Manager",
               "label": "Standin Manager",
               "dcc": ["maya"]
@@ -80,15 +80,22 @@
                 "label": ""
           },
           {
+                "icon": "scatter.png",
+                "command": "from solstice.pipeline.tools.scatter import scatter; scatter.run();",
+                "annotation": "Solstice Scatter Tool",
+                "label": "MASH Scatter",
+                "dcc": ["maya"]
+            },
+          {
               "icon": "solsticeplayblast.png",
-              "command": "from solstice_pipeline.solstice_tools import solstice_playblast; solstice_playblast.run();",
+              "command": "from solstice.pipeline.tools.playblast import playblast; playblast.run();",
               "annotation": "Solstice Playblast",
               "label": "Playblast",
               "dcc": ["maya"]
           },
          {
               "icon": "solsticeanimshifter.png",
-              "command": "from solstice_pipeline.solstice_tools import solstice_animshifter; reload(solstice_animshifter); solstice_animshifter.run();",
+              "command": "from solstice.pipeline.tools.animshifter import animshifter; animshifter.run();",
               "annotation": "Solstice Animation Shifter",
               "label": "Anim Shifter",
               "dcc": ["maya"]
@@ -97,15 +104,8 @@
         "anim":
         [
             {
-                "icon": "aTools.png",
-                "command": "from solstice_pipeline.externals.aTools.animTools.animBar import animBarUI; reload(animBarUI); animBarUI.show('refresh');",
-                "annotation": "aTools",
-                "label": "aTools",
-                "dcc": ["maya"]
-            },
-            {
                 "icon": "ml_convertRotationOrder.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_animrotconverter; reload(solstice_animrotconverter); solstice_animrotconverter.run()",
+                "command": "from solstice.pipeline.tools.animrotconverter import animrotconverter; animrotconverter.run()",
                 "annotation": "ml_tools - Convert Rotation Order",
                 "label": "ml_convertRotationOrder",
                 "dcc": ["maya"]
@@ -118,7 +118,7 @@
             },
             {
                 "icon": "studiolibrary.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_studiolib; reload(solstice_studiolib); solstice_studiolib.run()",
+                "command": "from solstice.pipeline.tools.studiolib import studiolib; studiolib.run()",
                 "annotation": "Solstice Studio Library",
                 "label": "Studio Library",
                 "dcc": ["maya"]
@@ -131,14 +131,14 @@
             },
             {
                 "icon": "refreshvl.png",
-                "command": "from solstice_pipeline.solstice_pickers.picker import picker_utils; picker_utils.load_vl_scripts();",
+                "command": "from solstice.pipeline.pickers.picker import picker_utils; picker_utils.load_vl_scripts();",
                 "annotation": "Load Picker Scripts",
                 "label": "Refresh Picker Scripts",
                 "dcc": ["maya"]
             },
             {
                 "icon": "picker.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_pickers; reload(solstice_pickers); solstice_pickers.run();",
+                "command": "from solstice.pipeline.tools.pickers import pickers; pickers.run();",
                 "annotation": "Solstice Pickers",
                 "label": "Pickers",
                 "dcc": ["maya"]
@@ -149,12 +149,12 @@
                 "annotation": "separator",
                 "label": ""
             },
-            {
-                "icon": "alembic.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
-                "annotation": "Solstice Alembic Manager",
-                "label": "Alembic Manager",
-                "dcc": ["maya", "houdini"]
+             {
+              "icon": "alembic.png",
+              "command": "from solstice.pipeline.tools.alembicmanager import alembicmanager; alembicmanager.run();",
+              "annotation": "Solstice Alembic Manager",
+              "label": "Alembic Manager",
+              "dcc": ["maya", "houdini"]
             },
             {
                 "icon": "",
@@ -164,14 +164,14 @@
             },
             {
                 "icon": "solsticeplayblast.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_playblast; solstice_playblast.run();",
+                "command": "from solstice.pipeline.tools.playblast import playblast; playblast.run();",
                 "annotation": "Solstice Playblast",
                 "label": "Playbalst",
                 "dcc": ["maya"]
             },
              {
                 "icon": "solsticeanimshifter.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_animshifter; reload(solstice_animshifter); solstice_animshifter.run();",
+                "command": "from solstice.pipeline.tools.animshifter import animshifter; animshifter.run();",
                 "annotation": "Solstice Animation Shifter",
                 "label": "Anim Shifter",
                  "dcc": ["maya"]
@@ -181,7 +181,7 @@
         [
             {
                 "icon": "lightrigs.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_lightrigs; reload(solstice_lightrigs); solstice_lightrigs.run();",
+                "command": "from solstice.pipeline.tools.lightrigs import lightrigs; lightrigs.run();",
                 "annotation": "Solstice Light Rigs Tool",
                 "label": "Light Rigs",
                 "dcc": ["maya"]
@@ -191,7 +191,7 @@
         [
             {
                 "icon": "alembic.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
+                "command": "from solstice.pipeline.tools.alembicmanager import alembicmanager; alembicmanager.run();",
                 "annotation": "Solstice Alembic Manager",
                 "label": "Alembic Manager",
                 "dcc": ["maya", "houdini"]
@@ -201,7 +201,7 @@
         [
             {
                 "icon": "alembic.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
+                "command": "from solstice.pipeline.tools.alembicmanager import alembicmanager; alembicmanager.run();",
                 "annotation": "Solstice Alembic Manager",
                 "label": "Alembic Manager",
                 "dcc": ["maya", "houdini"]
@@ -210,56 +210,46 @@
         "utils":
         [
             {
-                "icon": "scatter.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_scatter; reload(solstice_scatter); solstice_scatter.run();",
-                "annotation": "Solstice Scatter Tool",
-                "label": "MASH Scatter",
-                "dcc": ["maya"]
-            },
-            {
                 "icon": "solsticesnow.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_snowgenerator; reload(solstice_snowgenerator); solstice_snowgenerator.run();",
+                "command": "from solstice.pipeline.tools.snowgenerator import snowgenerator; snowgenerator.run();",
                 "annotation": "Solstice Snow Creator Tool",
                 "label": "Snow It",
-                "dcc": ["maya"]
-            }
-        ],
-        "rig":
-        [
-            {
-                "icon": "tool.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_rigtoolbox; reload(solstice_rigtoolbox); solstice_rigtoolbox.run();",
-                "annotation": "Solstice Rig Toolbox",
-                "label": "Rig Toolbox",
                 "dcc": ["maya"]
             }
         ],
         "td":
         [
             {
+                "icon": "tool.png",
+                "command": "from solstice.pipeline.tools.tdtoolbox import tdtoolbox; tdtoolbox.run();",
+                "annotation": "Solstice TD Toolbox",
+                "label": "TD Toolbox",
+                "dcc": ["maya", "houdini"]
+            },
+            {
                 "icon": "tagger.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_tagger; reload(solstice_tagger); solstice_tagger.run();",
+                "command": "from solstice.pipeline.tools.tagger import tagger; tagger.run();",
                 "annotation": "Solstice Tagger Tool",
                 "label": "Tagger",
                 "dcc": ["maya"]
             },
             {
                 "icon": "sanitycheck.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_sanitycheck; reload(solstice_sanitycheck); solstice_sanitycheck.run();",
+                "command": "from solstice.pipeline.tools.sanitycheck import sanitycheck; sanitycheck.run();",
                 "annotation": "Solstice Sanity Check Tool",
                 "label": "Sanity Checker",
                 "dcc": ["maya"]
             },
             {
                 "icon": "shaders.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_shaderlibrary; reload(solstice_shaderlibrary); solstice_shaderlibrary.run();",
+                "command": "from solstice.pipeline.tools.shaderlibrary import shaderlibrary; shaderlibrary.run();",
                 "annotation": "Solstice Shader Library Tool",
                 "label": "Shader Library",
                 "dcc": ["maya"]
             },
             {
                 "icon": "txtrelinker.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_texturesrelinker; reload(solstice_texturesrelinker); solstice_texturesrelinker.run();",
+                "command": "from solstice.pipeline.tools.texturesrelinker import texturesrelinker; texturesrelinker.run();",
                 "annotation": "Solstice Textures Relinker Tool",
                 "label": "Textures Relinker",
                 "dcc": ["maya"]
@@ -272,7 +262,7 @@
             },
             {
                 "icon": "solstice_builder.png",
-                "command": "from solstice_pipeline.solstice_tools import solstice_builder; reload(solstice_builder); solstice_builder.run();",
+                "command": "from solstice.pipeline.tools.builder import builder; builder.run();",
                 "annotation": "Solstice Builder Tool",
                 "label": "Builder",
                 "dcc": ["maya", "houdini"]
@@ -285,18 +275,18 @@
             },
             {
               "icon": "alembic.png",
-              "command": "from solstice_pipeline.solstice_tools import solstice_alembicmanager; reload(solstice_alembicmanager); solstice_alembicmanager.run();",
+              "command": "from solstice.pipeline.tools.alembicmanager import alembicmanager; alembicmanager.run();",
               "annotation": "Solstice Alembic Manager",
               "label": "Alembic Manager",
-                "dcc": ["maya", "houdini"]
-            },
-            {
+              "dcc": ["maya", "houdini"]
+          },
+          {
               "icon": "standin.png",
-              "command": "from solstice_pipeline.solstice_tools import solstice_standinmanager; reload(solstice_standinmanager); solstice_standinmanager.run();",
+              "command": "from solstice.pipeline.tools.standinmanager import standinmanager; standinmanager.run();",
               "annotation": "Solstice Alembic Manager",
               "label": "Standin Manager",
-                "dcc": ["maya"]
-            },
+              "dcc": ["maya"]
+          },
             {
                 "icon": "",
                 "command": "",
@@ -305,7 +295,7 @@
             },
             {
                 "icon": "shaders_sync",
-                "command": "from solstice_pipeline.solstice_tools import solstice_shaderlibrary; reload(solstice_shaderlibrary); solstice_shaderlibrary.ShaderLibrary.load_scene_shaders();",
+                "command": "from solstice.pipeline.tools.shaderlibrary import shaderlibrary; shaderlibrary.ShaderLibrary.load_scene_shaders();",
                 "annotation": "Solstice Shaders Sync",
                 "label": "Shaders Sync",
                 "dcc": ["maya"]
@@ -318,14 +308,14 @@
             },
             {
                 "icon": "clean",
-                "command": "from solstice_pipeline.solstice_utils import solstice_maya_utils; reload(solstice_maya_utils); solstice_maya_utils.clean_scene();",
+                "command": "from solstice.pipeline.utils import mayautils; mayautils.clean_scene();",
                 "annotation": "Clean Scene",
                 "label": "Clean Scene",
                 "dcc": ["maya"]
             },
             {
                 "icon": "student",
-                "command": "from solstice_pipeline.solstice_utils import solstice_maya_utils; reload(solstice_maya_utils); solstice_maya_utils.clean_student_line();",
+                "command": "from solstice.pipeline.utils import mayautils; mayautils.clean_student_line();",
                 "annotation": "Clean Student License",
                 "label": "Clean Student License",
                 "dcc": ["maya"]

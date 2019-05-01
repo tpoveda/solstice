@@ -101,7 +101,7 @@ import maya.mel as mm
 from maya import OpenMaya
 
 try:
-    from pipeline.externals.ml_tools import ml_utilities as utl
+    from solstice.pipeline.externals.ml_tools import ml_utilities as utl
     utl.upToDateCheck(32)
 except ImportError:
     result = mc.confirmDialog( title='Module Not Found', 

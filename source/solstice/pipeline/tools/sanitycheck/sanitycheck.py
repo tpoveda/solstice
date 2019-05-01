@@ -182,21 +182,21 @@ class SanityCheck(window.Window, object):
         self.check_shading_btn.clicked.connect(partial(self._do_check, 'shading'))
         self.check_grooming_btn.clicked.connect(partial(self._do_check, 'grooming'))
 
-    def show_check_menu(self, asset=None, *args, **kwargs):
+    def show_check_menu(self, asset_to_show=None, *args, **kwargs):
         self._current_asset = None
-        if not asset:
+        if not asset_to_show:
             self._check_asset_widget.setVisible(False)
             return
 
-        if isinstance(asset, asset.CharacterAsset):
+        if isinstance(asset_to_show, asset.CharacterAsset):
             self.check_grooming_btn.setVisible(True)
         else:
             self.check_grooming_btn.setVisible(False)
 
-        self._current_asset = weakref.ref(asset)
+        self._current_asset = weakref.ref(asset_to_show)
 
-        self.asset_name.set_text(asset.name)
-        self.asset_icon.setPixmap(QPixmap.fromImage(image.base64_to_image(asset._icon, image_format=asset._icon_format)).scaled(200, 200, Qt.KeepAspectRatio))
+        self.asset_name.set_text(asset_to_show.name)
+        self.asset_icon.setPixmap(QPixmap.fromImage(image.base64_to_image(asset_to_show._icon, image_format=asset_to_show._icon_format)).scaled(200, 200, Qt.KeepAspectRatio))
         self._check_asset_widget.setVisible(True)
 
     def _change_category(self, category, flag):

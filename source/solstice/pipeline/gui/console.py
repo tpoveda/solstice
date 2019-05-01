@@ -15,6 +15,7 @@ __email__ = "tpoveda@cgart3d.com"
 from io import StringIO
 
 import solstice.pipeline as sp
+from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 from solstice.pipeline.externals.solstice_qt.QtGui import *
 
@@ -25,12 +26,22 @@ class SolsticeConsole(QTextEdit, object):
 
         self._buffer = StringIO()
         self.setReadOnly(True)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
 
         self.setStyleSheet(
             """
             QTextEdit { background-color : rgba(0, 0, 0, 180); color : white; }
             """
         )
+
+        self.customContextMenuRequested.connect(self._generate_context_menu)
+
+    def __getattr__(self, attr):
+        """
+        Fall back to the buffer object if an attribute cannot be found
+        """
+
+        return getattr(self._buffer, attr)
 
     def write(self, msg):
         """
@@ -80,12 +91,24 @@ class SolsticeConsole(QTextEdit, object):
         self._buffer.write(unicode(msg))
         sp.logger.warning('{}\n'.format(msg))
 
-    def __getattr__(self, attr):
-        """
-        Fall back to the buffer object if an attribute cannot be found
-        """
-
-        return getattr(self._buffer, attr)
+    def clear(self):
+        self.setText('')
 
     def output_buffer_to_file(self, filepath):
         pass
+
+    def _generate_context_menu(self, pos):
+        """
+        Internal function that generates context menu of the console
+        :param pos: QPos
+        :return: QMneu
+        """
+
+        menu = self.createStandardContextMenu()
+        clear_action = QAction('Clear', menu)
+        clear_action.triggered.connect(self.clear)
+        menu.addSeparator()
+        menu.addAction(clear_action)
+        menu.popup(self.mapToGlobal(pos))
+
+

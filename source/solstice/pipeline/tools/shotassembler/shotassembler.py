@@ -23,7 +23,7 @@ from solstice.pipeline.externals.solstice_qt.QtGui import *
 import solstice.pipeline as sp
 from solstice.pipeline.core import asset, node
 from solstice.pipeline.gui import window, splitters, attributes
-from solstice.pipeline.utils import image as img
+from solstice.pipeline.utils import pythonutils, image as img
 from solstice.pipeline.resources import resource
 
 from solstice.pipeline.tools.shotexporter import shotexporter
@@ -640,6 +640,54 @@ class ShotOverrides(QWidget, object):
         pass
 
 
+class ShotImage(QWidget, object):
+    def __init__(self, parent=None):
+        super(ShotImage, self).__init__(parent=parent)
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(2, 2, 2, 2)
+        self.main_layout.setSpacing(2)
+        self.setLayout(self.main_layout)
+
+        self._icon_btn = QPushButton('Icon')
+        self._icon_btn.setMinimumSize(QSize(80, 80))
+        self._icon_btn.setMaximumSize(QSize(80, 80))
+        self._icon_btn.setIconSize(QSize(80, 80))
+
+        self.main_layout.addWidget(self._icon_btn)
+
+    def save(self):
+        pass
+
+    def load(self):
+        pass
+
+
+class ShotProps(QFrame, object):
+    def __init__(self, parent=None):
+        super(ShotProps, self).__init__(parent=parent)
+
+        self.setMinimumHeight(80)
+
+        self.main_layout = QHBoxLayout()
+        self.main_layout.setContentsMargins(2, 2, 2, 2)
+        self.main_layout.setSpacing(2)
+        self.setLayout(self.main_layout)
+
+        self.shot_img = ShotImage()
+        # self.shot_img.setPixmap(resource.pixmap('solstice_logo', category='images').scaled(QSize(125, 125), Qt.KeepAspectRatio))
+        self.prop_lbl = splitters.Splitter('Solstice')
+        self.user_lbl = QLabel(pythonutils.user())
+
+        self.main_layout.addWidget(self.shot_img)
+        self.main_layout.addWidget(splitters.get_horizontal_separator_widget())
+        self.main_layout.addWidget(self.user_lbl)
+        self.main_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+
+
+
+
+
 class ShotAssembler(window.Window, object):
     name = 'SolsticeShotAssembler'
     title = 'Solstice Tools - Shot Assembler'
@@ -669,6 +717,10 @@ class ShotAssembler(window.Window, object):
         file_menu.addAction(self.save_action)
         menubar_layout.addWidget(menubar)
         self.main_layout.addWidget(menubar_widget)
+
+        self.shots_props = ShotProps()
+        self.main_layout.addWidget(self.shots_props)
+
         self.main_layout.addLayout(splitters.SplitterLayout())
 
         self.dock_window = window.DockWindow(use_scroll=True)

@@ -98,6 +98,8 @@ class Window(QMainWindow, object):
     title = 'Solstice Tools'
     version = '1.0'
 
+    windowClosed = Signal()
+
     def __init__(self, parent=None):
 
         if parent is None:
@@ -218,6 +220,7 @@ class Window(QMainWindow, object):
 
     def closeEvent(self, event):
         self.cleanup()
+        self.windowClosed.emit()
         event.accept()
 
     # def deleteLater(self):
