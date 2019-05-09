@@ -20,7 +20,7 @@ from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 from solstice.pipeline.gui import base, window, splitters, buttons, stack, accordion, console, messagehandler
-from solstice.pipeline.utils import pipelineutils, rigutils
+from solstice.pipeline.utils import pipelineutils, rigutils, artellautils as artella
 
 from solstice.pipeline.tools.sanitycheck.checks import assetchecks
 
@@ -83,10 +83,21 @@ class PropsPipelineWidget(base.BaseWidget, object):
     def custom_ui(self):
         super(PropsPipelineWidget, self).custom_ui()
 
-        asset_name_completer = QCompleter([asset.name for asset in sp.find_all_assets(assets_path=sp.get_solstice_assets_path())], self)
+        all_assets = sp.find_all_assets(assets_path=sp.get_solstice_assets_path())
+        asset_name_completer = QCompleter([asset.name for asset in all_assets], self)
         asset_lbl = QLabel('Asset Name: ')
         self.asset_name_line = AutoCompleterLine()
         self.asset_name_line.setCompleter(asset_name_completer)
+        if sp.is_maya():
+            import maya.cmds as cmds
+            objs = cmds.ls(type='transform')
+            if objs:
+                for obj in objs:
+                    for asset in all_assets:
+                        if asset.name == obj:
+                            self.asset_name_line.setText(obj)
+                            break
+
         name_layout = QHBoxLayout()
         self.main_layout.addLayout(name_layout)
         name_layout.addWidget(asset_lbl)
@@ -126,15 +137,18 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_proxy_hires_groups_btn = QPushButton('Setup Model Proxy/Hires Groups')
         check_tag_btn = QPushButton('Check Model Tag')
         update_tag_btn = QPushButton('Update Model Tag')
-        all_model_checks_btn = QPushButton('All Checks')
+        delete_scene_shaders_btn = QPushButton('Delete Scene Shaders')
+        import_shading_file_btn = QPushButton('Import Shading File')
+        transfer_uvs_btn = QPushButton('Transfer UVs')
         model_check_lyt.addWidget(valid_model_path_btn, 0, 0)
         model_check_lyt.addWidget(check_model_main_group_btn, 0, 1)
         model_check_lyt.addWidget(model_has_no_shaders_btn, 1, 0)
         model_check_lyt.addWidget(model_proxy_hires_groups_btn, 1, 1)
         model_check_lyt.addWidget(check_tag_btn, 2, 0)
         model_check_lyt.addWidget(update_tag_btn, 2, 1)
-        model_check_lyt.addLayout(splitters.SplitterLayout(), 3, 0, 1, 2)
-        model_check_lyt.addWidget(all_model_checks_btn, 4, 0, 1, 2)
+        model_check_lyt.addWidget(delete_scene_shaders_btn, 3, 0)
+        model_check_lyt.addWidget(import_shading_file_btn, 3, 1)
+        model_check_lyt.addWidget(transfer_uvs_btn, 4, 0)
 
         shading_utils = QWidget()
         shading_check_lyt = QGridLayout()
@@ -142,20 +156,17 @@ class PropsPipelineWidget(base.BaseWidget, object):
         valid_shading_path_btn = QPushButton('Valid Shading Path')
         check_shading_main_group_btn = QPushButton('Check Shading Main Group')
         check_shading_shaders = QPushButton('Check Shaders')
+        rename_shaders_btn = QPushButton('Rename Shaders')
         update_textures_paths_btn = QPushButton('Update Textures Paths')
         export_shading_file_btn = QPushButton('Export Shading JSON File')
-        rename_shaders_btn = QPushButton('Rename Shaders')
         export_shaders_btn = QPushButton('Export Shaders')
-        all_shading_checks_btn = QPushButton('All Checks')
         shading_check_lyt.addWidget(valid_shading_path_btn, 0, 0)
         shading_check_lyt.addWidget(check_shading_main_group_btn, 0, 1)
         shading_check_lyt.addWidget(check_shading_shaders, 1, 0)
-        shading_check_lyt.addWidget(update_textures_paths_btn, 1, 1)
+        shading_check_lyt.addWidget(rename_shaders_btn, 1, 1)
         shading_check_lyt.addWidget(export_shading_file_btn, 2, 0)
-        shading_check_lyt.addWidget(rename_shaders_btn, 2, 1)
+        shading_check_lyt.addWidget(update_textures_paths_btn, 2, 1)
         shading_check_lyt.addWidget(export_shaders_btn, 3, 0)
-        shading_check_lyt.addLayout(splitters.SplitterLayout(), 4, 0, 1, 2)
-        shading_check_lyt.addWidget(all_shading_checks_btn, 5, 0, 1, 2)
 
         test_utils = QWidget()
         test_check_lyt = QGridLayout()
@@ -224,17 +235,18 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_has_no_shaders_btn.clicked.connect(self._on_model_has_no_shaders)
         model_proxy_hires_groups_btn.clicked.connect(self._on_model_proxy_hires_groups)
         valid_shading_path_btn.clicked.connect(self._on_valid_shading_path)
+        import_shading_file_btn.clicked.connect(self._on_import_shading_file)
         check_shading_main_group_btn.clicked.connect(self._on_check_shading_main_group)
         check_shading_shaders.clicked.connect(self._on_check_shaders)
         all_textures_checks_btn.clicked.connect(self._on_all_textures_checks)
         check_tag_btn.clicked.connect(self._on_check_tag)
         update_tag_btn.clicked.connect(self._on_update_tag)
-        all_model_checks_btn.clicked.connect(self._on_all_model_checks)
+        transfer_uvs_btn.clicked.connect(self._on_transfer_uvs)
         update_textures_paths_btn.clicked.connect(self._on_update_textures_path)
         export_shading_file_btn.clicked.connect(self._on_export_shading_file)
         rename_shaders_btn.clicked.connect(self._on_rename_shaders)
         export_shaders_btn.clicked.connect(self._on_export_shaders)
-        all_shading_checks_btn.clicked.connect(self._on_all_shading_checks)
+        delete_scene_shaders_btn.clicked.connect(self._on_delete_scene_shaders)
         ref_neutral_light_rig_btn.clicked.connect(self._on_reference_neutral_light_rig)
         sync_shaders_btn.clicked.connect(self._on_sync_shaders)
         render_low_res_btn.clicked.connect(self._on_render_low_res)
@@ -343,6 +355,24 @@ class PropsPipelineWidget(base.BaseWidget, object):
         check = assetchecks.UpdateModelTag(asset=weakref.ref(asset), log=log)
         check.check()
 
+    def _on_transfer_uvs(self):
+        sel = cmds.ls(sl=True)
+        first = sel.pop(0)
+        for obj in sel:
+            cmds.select([first, obj])
+            cmds.transferAttributes(sampleSpace=4, transferUVs=2, transferColors=2)
+
+    def _on_import_shading_file(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+        shading_path = asset.get_asset_file(file_type='shading', status='working')
+        if shading_path is None or not os.path.isfile(shading_path):
+            return False
+        log.write('Importing shading file {} ...'.format(shading_path))
+        artella.import_file_in_maya(shading_path)
+
     def _on_valid_shading_path(self):
         asset = self._get_asset()
         if not asset:
@@ -350,6 +380,11 @@ class PropsPipelineWidget(base.BaseWidget, object):
         log = run_console()
         check = assetchecks.ValidShadingPath(asset=weakref.ref(asset), log=log)
         check.check()
+        shading_path = asset.get_asset_file(file_type='shading', status='working')
+        if shading_path is None or not os.path.isfile(shading_path):
+            return False
+        log.write('Opening shading file in Maya ...')
+        sp.dcc.open_file(shading_path, force=True)
 
     def _on_check_shading_main_group(self):
         asset = self._get_asset()
@@ -430,6 +465,23 @@ class PropsPipelineWidget(base.BaseWidget, object):
             publish = False
         check = assetchecks.ExportShaders(asset=weakref.ref(asset), log=log, publish=publish)
         check.check()
+
+    def _on_delete_scene_shaders(self):
+        if not sp.is_maya():
+            return
+
+        mats = cmds.ls(mat=True)
+        for m in mats:
+            if m not in ['lambert1', 'particleCloud1']:
+                cmds.delete(m)
+        shading_groups = cmds.ls(type='shadingEngine')
+        for sg in shading_groups:
+            if sg not in ['initialShadingGroup', 'initialParticleSE']:
+                cmds.delete(sg)
+
+        shapes = cmds.ls(type=['mesh', 'nurbsSurface'])
+        for shp in shapes:
+            cmds.sets(shp, edit=True, forceElement='initialShadingGroup')
 
     def _on_prepare_standin(self):
         valid_prepare = pipelineutils.setup_standin_export(self.asset_name_line.text())

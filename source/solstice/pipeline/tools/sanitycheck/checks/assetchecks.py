@@ -1065,7 +1065,7 @@ class UpdateTexturesPath(check.SanityCheckTask, object):
         if not os.path.isfile(shading_path):
             return False
 
-        current_textures_path = self._asset().get_asset_textures()
+        current_textures_path = self._asset().get_asset_textures(force_sync=True)
         with open(shading_path, 'r') as f:
             data = f.read()
             data_lines = data.split(';')
@@ -1094,7 +1094,7 @@ class UpdateTexturesPath(check.SanityCheckTask, object):
             with open(shading_path, 'w') as f:
                 f.writelines(new_lines)
             self.write_ok('Textures Path updated successfully!')
-            messagehandler.MessageHandler().show_warning_dialog('Textures updated. Make sure to submit shading file: {}'.format(shading_path))
+            messagehandler.MessageHandler().show_info_dialog('Textures updated. Make sure to submit shading file: {}'.format(shading_path))
         else:
             self.write('Textures paths are up-to-date')
 
@@ -1212,11 +1212,11 @@ class RenameShaders(check.SanityCheckTask, object):
         shaders = cmds.ls(type='shadingEngine')
         for sg in shaders:
             shd_mat = cmds.listConnections('{}.surfaceShader'.format(sg))
+            if not shd_mat or len(shd_mat) <= 0:
+                self.write_warning('No material connected to surface shader: {}!'.format(sg))
+                continue
             if len(shd_mat) > 1:
                 self.write_warning('Multiple materials: {} conntected to surface shader: {}!'.format(shd_mat, sg))
-                continue
-            if len(shd_mat) <= 0:
-                self.write_warning('No material connected to surface shader: {}!'.format(sg))
                 continue
             shd_mat = shd_mat[0]
             if shd_mat in def_mats:

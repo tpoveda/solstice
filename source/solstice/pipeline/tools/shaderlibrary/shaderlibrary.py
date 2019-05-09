@@ -904,13 +904,21 @@ class ShaderLibrary(window.Window, object):
             return exporter.export_shaders(publish=publish)
 
     @staticmethod
-    @utils.maya_undo
-    def load_scene_shaders():
+    @utils.undo
+    def load_scene_shaders(load=True, apply=True):
         """
         Loops through all tag data scene nodes and loads all necessary shaders into the current scene
         If a specific shader is already loaded, that shader is skipeed
         :return: list<str>, list of loaded shaders
         """
+
+        if apply:
+            all_panels = cmds.getPanel(type='modelPanel')
+            for p in all_panels:
+                cmds.modelEditor(p, edit=True, displayTextures=False)
+
+        applied_data = list()
+        updated_textures = list()
 
         tag_nodes = outliner.SolsticeOutliner.get_tag_data_nodes()
         tag_info_nodes = outliner.SolsticeOutliner.get_tag_info_nodes()
@@ -1029,10 +1037,11 @@ class ShaderLibrary(window.Window, object):
                             continue
                         added_mats.append(mat)
 
-                        sp.logger.debug('Loading Shader: {}'.format(mat))
-                        valid_shader = ShaderLibrary.load_shader(mat)
-                        if not valid_shader:
-                            sp.logger.error('Error while loading shader {}'.format(mat))
+                        if load:
+                            sp.logger.debug('Loading Shader: {}'.format(mat))
+                            valid_shader = ShaderLibrary.load_shader(mat)
+                            if not valid_shader:
+                                sp.logger.error('Error while loading shader {}'.format(mat))
 
                 # After materials are created we try to apply to the meshes
                 try:
@@ -1049,11 +1058,23 @@ class ShaderLibrary(window.Window, object):
                                     sp.logger.error(
                                         'Impossible to set shading group {0} to mesh {1}'.format(shading_grp, mesh))
                                     break
-                        cmds.sets(mesh, edit=True, forceElement=shading_grp)
-                        sp.logger.debug('Shading set {0} applied to mesh {1}'.format(shading_grp, mesh))
+
+                        if apply:
+                            cmds.sets(mesh, edit=True, forceElement=shading_grp)
+                            cmds.ogs(reset=True)
+                            file_nodes = cmds.ls(type='file')
+                            for f in file_nodes:
+                                if f not in updated_textures:
+                                    updated_textures.append(f)
+                                    cmds.ogs(regenerateUVTilePreview=f)
+                            sp.logger.debug('Shading set {0} applied to mesh {1}'.format(shading_grp, mesh))
+                        applied_data.append([mesh, shading_grp])
+
                 except Exception as e:
                     sp.logger.error('Impossible to set shading group {0} to mesh {1}'.format(shading_grp, mesh))
                     sp.logger.error(str(e))
+
+        return applied_data
 
     def _export_selected_shaders(self):
         shaders = cmds.ls(sl=True, materials=True)

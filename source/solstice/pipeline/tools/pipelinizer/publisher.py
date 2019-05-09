@@ -590,9 +590,10 @@ class PublishModelTask(task.Task, object):
                 self.write_error('Impossible to sync the new published model. Do it manually later please!')
 
             # Publish new version and sync it
+            model_folder = os.path.dirname(model_path)
             self.write('Getting model file version to publish ...')
             selected_versions = dict()
-            status = artella.get_status(model_path)
+            status = artella.get_status(model_folder)
             if status and hasattr(status, 'references'):
                 if status.references:
                     for ref, ref_data in status.references.items():
