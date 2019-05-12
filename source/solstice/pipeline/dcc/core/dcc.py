@@ -231,6 +231,17 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function set_parent() not implemented!')
 
     @staticmethod
+    def rename_node(node, new_name):
+        """
+        Renames the given node
+        :param node: str
+        :param new_name: str
+        :return: str
+        """
+
+        raise NotImplementedError('abstract DCC function rename_node() not implemented!')
+
+    @staticmethod
     def node_nodes(node):
         """
         Returns referenced nodes of the given node

@@ -13,7 +13,9 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import time
+import importlib
 import webbrowser
 from functools import partial
 from collections import OrderedDict
@@ -650,7 +652,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
         sync_model_action.triggered.connect(partial(self.sync, 'model', 'all', False))
         sync_textures_action.triggered.connect(partial(self.sync, 'textures', 'all', False))
         sync_shading_action.triggered.connect(partial(self.sync, 'shading', 'all', False))
-        import_asset_action.triggered.connect(self.import_asset_file)
+        import_asset_action.triggered.connect(self.import_model_file)
         reference_asset_action.triggered.connect(self.reference_asset_file)
 
         if self.category == 'Characters':
@@ -734,13 +736,27 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
 
         sp.dcc.new_file()
 
-    def import_asset_file(self):
+    def import_model_file(self, status='published'):
         asset_name = self._name + '.ma'
-        local_max_versions = self.get_max_local_versions()
-        if local_max_versions['model']:
-            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', asset_name)
-            if os.path.isfile(published_path):
-                artella.import_file_in_maya(file_path=published_path)
+
+        if status == 'published':
+            local_max_versions = self.get_max_local_versions()
+            if local_max_versions['model']:
+                published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', asset_name)
+                if os.path.isfile(published_path):
+                    artella.import_file_in_maya(file_path=published_path)
+        else:
+            working_path = os.path.join(self._asset_path, '__working__', 'model')
+            if os.path.exists(working_path):
+                model_path = os.path.join(working_path, asset_name)
+                artella.import_file_in_maya(file_path=model_path)
+
+    def import_proxy_file(self):
+        asset_name = self._name+'_PROXY.ma'
+        working_path = os.path.join(self._asset_path, '__working__', 'model')
+        if os.path.exists(working_path):
+            proxy_path = os.path.join(working_path, asset_name)
+            artella.import_file_in_maya(file_path=proxy_path)
 
     def open_textures_folder(self, status):
         if status != 'working' and status != 'published':
@@ -785,11 +801,27 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
         self._artella_btn.clicked.connect(self.open_asset_artella_url)
         self._check_btn.clicked.connect(self.syncFinished.emit)
 
-    def open_asset_artella_url(self):
-
+    def get_asset_artella_url(self):
         file_path = os.path.relpath(self._asset_path, sp.get_solstice_assets_path())
         asset_url = 'https://www.artella.com/project/{0}/files/Assets/{1}'.format(sp.solstice_project_id_raw, file_path)
+
+        return asset_url
+
+    def open_asset_artella_url(self):
+        asset_url = self.get_asset_artella_url()
         webbrowser.open(asset_url)
+
+    def get_artella_render_image(self):
+        asset_path = self.asset_path
+        if asset_path is None or not os.path.exists(asset_path):
+            raise RuntimeError('Asset Path {} does not exists!'.format(asset_path))
+
+        asset_data_file = os.path.join(asset_path, '__working__', 'art', self.name+'_render.png')
+        if not os.path.isfile(asset_data_file):
+            sp.logger.warning('Asset {} has not a render file available!'.format(self.name))
+            return None
+
+        return asset_data_file
 
     def get_asset_info_widget(self, check_published_info=False, check_working_info=False, check_lock_info=False):
         self.generate_asset_info_widget(check_published_info=check_published_info, check_working_info=check_working_info, check_lock_info=check_lock_info)
@@ -803,6 +835,47 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
         if self._icon is not None and self._icon != '':
             self._asset_info._asset_icon.setPixmap(QPixmap.fromImage(img.base64_to_image(self._icon, image_format=self._icon_format)).scaled(300, 300, Qt.KeepAspectRatio))
         self._asset_info._asset_published_info._asset_description.setText(self._description)
+
+    def import_builder_file(self):
+        asset_name = self._name + '_BUILDER.ma'
+        working_path = os.path.join(self._asset_path, '__working__', 'rig')
+        if os.path.exists(working_path):
+            builder_path = os.path.join(working_path, 'builder')
+            if not os.path.isdir(builder_path):
+                sp.logger.warning('Builder Folder for Asset {} does not exists!'.format(self.name))
+                return
+            builder_path = os.path.join(builder_path, asset_name)
+            artella.import_file_in_maya(file_path=builder_path)
+
+    def build_rig(self):
+        rig_path = os.path.join(self.asset_path, '__working__', 'rig')
+        if not os.path.isdir(rig_path):
+            sp.logger.warning('Asset has no valid rig setup available!'.format(self.name))
+            return
+
+        scripts_path = os.path.join(rig_path, 'scripts')
+        if not os.path.isdir(scripts_path):
+            sp.logger.warning('Asset has no vlaid rig scripts foler available!'.format(self.name))
+            return
+
+        build_script = os.path.join(scripts_path, '{}.py'.format(self.name))
+        if not os.path.isfile(build_script):
+            sp.logger.warning('Building Script for Asset {} is not available!'.format(self.name))
+            return
+
+        if scripts_path not in sys.path:
+            sys.path.append(scripts_path)
+
+        rig_mod = importlib.import_module(self.name)
+        if not rig_mod:
+            sp.logger.error('Impossible to import Rig Python Module for {}'.format(self.name))
+
+        if not hasattr(rig_mod, 'build'):
+            sp.logger.warning('Rig Module {} does not implements build function!'.format(rig_mod))
+            return
+
+        reload(rig_mod)
+        rig_mod.build()
 
     def has_model(self):
         return True

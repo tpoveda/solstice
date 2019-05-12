@@ -718,32 +718,40 @@ class PublishShadingTask(task.Task, object):
             return False
 
         try:
-            current_textures_path = self._asset().get_asset_textures()
-            with open(shading_path, 'r') as f:
-                data = f.read()
-                data_lines = data.split(';')
-            new_lines = list()
+            import maya.cmds as cmds
+            sp.dcc.open_file(shading_path, force=True)
+            solstice_var = os.environ['SOLSTICE_PROJECT']
             self.write('Updating textures paths ...')
-            for line in data_lines:
-                line = str(line)
-                if 'setAttr ".ftn" -type "string"' in line:
-                    if line.endswith('.tx"') or line.endswith('.tiff"'):
-                        subs = re.findall(r'"(.*?)"', line)
-                        current_texture_path = subs[2]
-                        for txt in current_textures_path:
-                            texture_name = os.path.basename(current_texture_path)
-                            if texture_name in os.path.basename(txt):
-                                if not os.path.normpath(txt) == os.path.normpath(current_texture_path):
-                                    line = line.replace(current_texture_path, txt).replace('/', '\\\\')
-                                    self.write('>>>\n\t{0}'.format(os.path.normpath(current_texture_path)))
-                                    self.write_ok('\t{0}\n'.format(os.path.normpath(txt)))
-                new_lines.append(line+';')
+            textures_updated = False
+            current_textures_path = self._asset().get_asset_textures(force_sync=True)
+            all_file_nodes = cmds.ls(et="file")
+            for f in all_file_nodes:
+                orig_texture_name = cmds.getAttr("%s.fileTextureName" % f)
+                current_texture_path = orig_texture_name
+                for txt in current_textures_path:
+                    texture_name = os.path.basename(current_texture_path)
+                    if texture_name in os.path.basename(txt):
+                        if not os.path.normpath(txt) == os.path.normpath(current_texture_path):
+                            current_texture_path = current_texture_path.replace(current_texture_path, txt)
+
+                if current_texture_path.startswith(solstice_var):
+                    current_texture_path = current_texture_path.replace(solstice_var, '$SOLSTICE_PROJECT\\\\')
+                if current_texture_path.startswith('$ART_LOCAL_ROOT'):
+                    current_texture_path = current_texture_path.replace('$ART_LOCAL_ROOT', solstice_var)
+                current_texture_path = current_texture_path.replace('/', '\\\\')
+
+                if orig_texture_name != current_texture_path:
+                    textures_updated = True
+                if textures_updated:
+                    self.write('>>>\n\t{0}'.format(os.path.normpath(cmds.getAttr("%s.fileTextureName" % f))))
+                    self.write_ok('\t{0}\n'.format(os.path.normpath(current_texture_path)))
+                    cmds.setAttr('{}.fileTextureName'.format(f), current_texture_path, type='string')
 
             # Create shading file with paths fixed
-            self.write('Writing new textures paths info into shading file: {}'.format(shading_path))
-            with open(shading_path, 'w') as f:
-                f.writelines(new_lines)
-            self.write_ok('Textures Path updated successfully!')
+            if textures_updated:
+                self.write_ok('Textures Path updated successfully!')
+            else:
+                self.write('Textures paths are up-to-date')
 
             # Check that new shading file has a similar/close size in comparison with the original one
             orig_size = python.get_size(backup_file)

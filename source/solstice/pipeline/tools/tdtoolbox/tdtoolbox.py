@@ -20,7 +20,7 @@ from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 from solstice.pipeline.gui import base, window, splitters, buttons, stack, accordion, console, messagehandler
-from solstice.pipeline.utils import pipelineutils, rigutils, artellautils as artella
+from solstice.pipeline.utils import pipelineutils, rigutils, artellautils as artella, slackutils as slack
 
 from solstice.pipeline.tools.sanitycheck.checks import assetchecks
 
@@ -33,6 +33,7 @@ if sp.is_maya():
 reload(pipelineutils)
 reload(console)
 reload(assetchecks)
+reload(slack)
 
 
 console_win = None
@@ -132,6 +133,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_check_lyt = QGridLayout()
         model_utils.setLayout(model_check_lyt)
         valid_model_path_btn = QPushButton('Valid Model Path')
+        valid_proxy_path_btn = QPushButton('Valid Proxy Path')
         check_model_main_group_btn = QPushButton('Check Model Main Group')
         model_has_no_shaders_btn = QPushButton('Model Has No Shaders')
         model_proxy_hires_groups_btn = QPushButton('Setup Model Proxy/Hires Groups')
@@ -141,14 +143,19 @@ class PropsPipelineWidget(base.BaseWidget, object):
         import_shading_file_btn = QPushButton('Import Shading File')
         transfer_uvs_btn = QPushButton('Transfer UVs')
         model_check_lyt.addWidget(valid_model_path_btn, 0, 0)
-        model_check_lyt.addWidget(check_model_main_group_btn, 0, 1)
-        model_check_lyt.addWidget(model_has_no_shaders_btn, 1, 0)
-        model_check_lyt.addWidget(model_proxy_hires_groups_btn, 1, 1)
-        model_check_lyt.addWidget(check_tag_btn, 2, 0)
-        model_check_lyt.addWidget(update_tag_btn, 2, 1)
-        model_check_lyt.addWidget(delete_scene_shaders_btn, 3, 0)
-        model_check_lyt.addWidget(import_shading_file_btn, 3, 1)
-        model_check_lyt.addWidget(transfer_uvs_btn, 4, 0)
+        model_check_lyt.addWidget(valid_proxy_path_btn, 0, 1)
+        model_check_lyt.addWidget(check_model_main_group_btn, 1, 0)
+        model_check_lyt.addWidget(model_has_no_shaders_btn, 1, 1)
+        model_check_lyt.addWidget(model_proxy_hires_groups_btn, 2, 0)
+        model_check_lyt.addWidget(check_tag_btn, 2, 1)
+        model_check_lyt.addWidget(update_tag_btn, 3, 0)
+        model_check_lyt.addWidget(delete_scene_shaders_btn, 3, 1)
+        model_check_lyt.addWidget(import_shading_file_btn, 4, 0)
+        model_check_lyt.addWidget(transfer_uvs_btn, 4, 1)
+
+        rig_utils = QWidget()
+        rig_utils_lyt = QGridLayout()
+        rig_utils.setLayout(rig_utils_lyt)
 
         shading_utils = QWidget()
         shading_check_lyt = QGridLayout()
@@ -172,10 +179,16 @@ class PropsPipelineWidget(base.BaseWidget, object):
         test_check_lyt = QGridLayout()
         test_utils.setLayout(test_check_lyt)
 
+        slack_utils = QWidget()
+        slack_utils_lyt = QGridLayout()
+        slack_utils.setLayout(slack_utils_lyt)
+
         utils_tab.addTab(textures_utils, 'Textures')
         utils_tab.addTab(model_utils, 'Model')
+        utils_tab.addTab(rig_utils, 'Rig')
         utils_tab.addTab(shading_utils, 'Shading')
         utils_tab.addTab(test_utils, 'Tests')
+        utils_tab.addTab(slack_utils, 'Slack')
         ref_neutral_light_rig_btn = QPushButton('Reference Neutral Light Rig')
         sync_shaders_btn = QPushButton('Sync Shaders')
         render_low_res_btn = QPushButton('Render Low Res')
@@ -188,6 +201,9 @@ class PropsPipelineWidget(base.BaseWidget, object):
         test_check_lyt.addWidget(render_mid_res_btn, 1, 1)
         test_check_lyt.addWidget(render_high_res_btn, 2, 0)
         test_check_lyt.addWidget(render_full_hd_btn, 2, 1)
+
+        asset_published_btn = QPushButton('Asset Published')
+        slack_utils_lyt.addWidget(asset_published_btn, 0, 0)
 
         self.accordion.add_item('Utils', check_widget)
 
@@ -231,6 +247,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         textures_folder_empty_btn.clicked.connect(self._on_textures_folder_empty)
         textures_file_size_btn.clicked.connect(self._on_textures_file_size)
         valid_model_path_btn.clicked.connect(self._on_valid_model_path)
+        valid_proxy_path_btn.clicked.connect(self._on_valid_proxy_path)
         check_model_main_group_btn.clicked.connect(self._on_check_model_main_group)
         model_has_no_shaders_btn.clicked.connect(self._on_model_has_no_shaders)
         model_proxy_hires_groups_btn.clicked.connect(self._on_model_proxy_hires_groups)
@@ -253,6 +270,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         render_mid_res_btn.clicked.connect(self._on_render_mid_res)
         render_high_res_btn.clicked.connect(self._on_render_high_res)
         render_full_hd_btn.clicked.connect(self._on_render_full_hd)
+        asset_published_btn.clicked.connect(self._on_asset_published)
         gen_abc_btn.clicked.connect(lambda: pipelineutils.generate_alembic_file(self.asset_name_line.text()))
         self.prepare_standin_btn.clicked.connect(self._on_prepare_standin)
         self.gen_standin_btn.clicked.connect(self._on_generate_standin)
@@ -295,6 +313,19 @@ class PropsPipelineWidget(base.BaseWidget, object):
         log.write('Opening model file in Maya ...')
         sp.dcc.open_file(model_path, force=True)
 
+    def _on_valid_proxy_path(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+        check = assetchecks.ValidProxyPath(asset=weakref.ref(asset), log=log)
+        check.check()
+        proxy_path = asset.get_asset_file(file_type='proxy', status='working')
+        if proxy_path is None or not os.path.isfile(proxy_path):
+            return False
+        log.write('Opening proxy model file in Maya ...')
+        sp.dcc.open_file(proxy_path, force=True)
+
     def _on_check_model_main_group(self):
         asset = self._get_asset()
         if not asset:
@@ -303,8 +334,9 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_path = asset.get_asset_file(file_type='model', status='working')
         if model_path is None or not os.path.isfile(model_path):
             return False
-        log.write('Opening model file in Maya ...')
-        sp.dcc.open_file(model_path, force=True)
+        if sp.dcc.scene_name() != model_path:
+            log.write('Opening model file in Maya ...')
+            sp.dcc.open_file(model_path, force=True)
         check = assetchecks.CheckModelMainGroup(asset=weakref.ref(asset), log=log)
         check.check()
 
@@ -559,6 +591,13 @@ class PropsPipelineWidget(base.BaseWidget, object):
             return
         cmds.RenderViewWindow()
         arnoldRender(1920, 1080, True, True, 'persp', '-layer defaultRenderLayer')
+
+    def _on_asset_published(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+
+        slack.asset_published(asset.name)
 
     def _get_asset(self, asset_name=None):
         if asset_name is None:

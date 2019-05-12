@@ -19,7 +19,7 @@ import string
 import collections
 
 import solstice.pipeline as sp
-from solstice.pipeline.utils import pythonutils, artellautils as artella
+from solstice.pipeline.utils import pythonutils, browserutils, artellautils as artella
 
 
 # =================================================================================================
@@ -473,7 +473,11 @@ class SolsticeAssetNode(SolsticeNode, object):
             asset_name = self.get_short_name() + '_SHD'
         elif file_type == 'groom':
             asset_name = self.get_short_name() + '_GROOMING'
-        asset_name = asset_name + '.ma'
+        elif file_type == 'rig':
+            asset_name = self.get_short_name() + '_RIG'
+        elif file_type == 'proxy':
+            asset_name = self.get_short_name() + '_PROXY'
+        asset_name += '.ma'
 
         file_path = None
         if status == 'working':
@@ -483,7 +487,7 @@ class SolsticeAssetNode(SolsticeNode, object):
             if local_max_versions[file_type]:
                 file_path = os.path.join(self._asset_path, local_max_versions[file_type][1], file_type, asset_name)
 
-        return file_path
+        return browserutils.clean_path(file_path)
 
     def get_asset_files(self, status='published'):
         asset_files = dict()

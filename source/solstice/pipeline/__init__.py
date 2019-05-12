@@ -35,14 +35,19 @@ from solstice.pipeline.dcc.core import dcc as abstractdcc, node as dccnode
 
 numbers = re.compile('\d+')
 
+separator = '_'
 solstice_project_id = '2/2252d6c8-407d-4419-a186-cf90760c9967/'
 solstice_project_id_raw = '2252d6c8-407d-4419-a186-cf90760c9967'
 solstice_project_id_full = '_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'
 asset_types = ['Props', 'Background Elements', 'Characters']
-valid_categories = ['textures', 'model', 'shading', 'groom']  # NOTE: The order is important, textures MUST go first
+asset_files = ['textures', 'model', 'proxy', 'rig', 'builder', 'shading', 'groom']
+valid_categories = ['textures', 'model', 'shading', 'rig', 'groom']  # NOTE: The order is important, textures MUST go first
 must_categories = ['textures', 'model', 'shading']            # NOTE: Categories that should be published to consider an asset published
 valid_status = ['working', 'published']
 ignored_paths = ['PIPELINE', 'lighting', 'Light Rigs', 'S_CH_02_summer_scripts']
+model_suffix = 'MODEL'
+proxy_suffix = 'PROXY'
+rig_suffix = 'RIG'
 
 # =================================================================================
 
@@ -199,7 +204,6 @@ class SolsticePipeline(QObject):
 
     @staticmethod
     def reload_all():
-        # if os.environ.get('SOLSTICE_DEV_MODE', '0') == '1':
         import inspect
         scripts_dir = os.path.dirname(__file__)
         for key, module in sys.modules.items():
@@ -238,7 +242,7 @@ class SolsticePipeline(QObject):
         from solstice.pipeline.utils import artellautils
 
         root_path = os.path.dirname(os.path.abspath(__file__))
-        extra_paths = [os.path.join(root_path, 'resources', 'icons'), os.path.join(root_path, 'externals', 'animBot')]
+        extra_paths = [os.path.join(root_path, 'resources', 'icons'), get_externals_path()]
         for path in extra_paths:
             if os.path.exists(path) and path not in sys.path:
                 self.logger.debug('Adding Path {} to SYS_PATH ...'.format(path))
@@ -251,9 +255,15 @@ class SolsticePipeline(QObject):
         if scripts_folder not in sys.path:
             sys.path.append(scripts_folder)
 
-        for subdir, dirs, files in os.walk(root_path):
-            if subdir not in sys.path:
-                sys.path.append(subdir)
+        externals_paths = [os.path.join(get_externals_path(), name) for name in os.listdir(get_externals_path()) if os.path.isdir(os.path.join(get_externals_path(), name)) ]
+
+        for d in externals_paths:
+            if d not in sys.path:
+                sys.path.append(d)
+
+        # for subdir, dirs, files in os.walk(root_path):
+        #     if subdir not in sys.path:
+        #         sys.path.append(subdir)
 
     def set_environment_variables(self):
         """
@@ -269,7 +279,7 @@ class SolsticePipeline(QObject):
             artella_var = os.environ.get('ART_LOCAL_ROOT')
             self.logger.debug('Artella environment variable is set to: {}'.format(artella_var))
             if artella_var and os.path.exists(artella_var):
-                os.environ['SOLSTICE_PROJECT'] = '{}/_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'.format(artella_var)
+                os.environ['SOLSTICE_PROJECT'] = '{}_art/production/2/2252d6c8-407d-4419-a186-cf90760c9967/'.format(artella_var)
             else:
                 self.logger.debug('Impossible to set Artella environment variables! Solstice Tools wont work correctly! Please contact TD!')
         except Exception as e:
@@ -831,7 +841,7 @@ def get_tag_info_nodes(as_nodes=True):
     tag_info_nodes = list()
     objs = dcc.all_scene_objects()
     for obj in objs:
-        valid_tag_info_data = dcc.attribute_exists(node=obj, attribute_name='tag_info')
+        d
         if valid_tag_info_data:
             tag_info_nodes.append(obj)
 

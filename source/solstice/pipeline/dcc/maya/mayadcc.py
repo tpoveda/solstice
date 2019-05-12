@@ -252,6 +252,17 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         cmds.parent(node, parent)
 
     @staticmethod
+    def rename_node(node, new_name):
+        """
+        Renames the given node
+        :param node: str
+        :param new_name: str
+        :return: str
+        """
+
+        return cmds.rename(node, new_name)
+
+    @staticmethod
     def node_nodes(node):
         """
         Returns referenced nodes of the given node
@@ -636,6 +647,9 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         Creates a new file
         :param force: bool
         """
+
+        if not force and cmds.file(q=True, modified=True):
+            cmds.SaveScene()
 
         cmds.file(new=True, f=force)
 

@@ -433,6 +433,32 @@ class ValidModelPath(check.SanityCheckTask, object):
         return
 
 
+class ValidProxyPath(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None):
+        super(ValidProxyPath, self).__init__(name='Valid Proxy Model Path', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self.set_check_text('Check if asset has valid proxy model path')
+
+    def check(self):
+        if self._status != 'working':
+            return False
+
+        proxy_path = self._asset().get_asset_file(file_type='proxy', status=self._status)
+        self.write('Check if proxy model path {} is valid ...'.format(proxy_path))
+        if proxy_path is None or not os.path.isfile(proxy_path):
+            self.write_error('Proxy Model Path {} is not valid!'.format(proxy_path))
+            return False
+
+        self.write('Proxy Model Path | {} | is valid!\n\n'.format(proxy_path))
+
+        return True
+
+    def fix(self):
+        return
+
+
 class ModelFileIsLocked(check.SanityCheckTask, object):
     def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None):
         super(ModelFileIsLocked, self).__init__(name='Model File is Locked', auto_fix=auto_fix, log=log, parent=parent)
@@ -533,19 +559,55 @@ class CheckModelMainGroup(check.SanityCheckTask, object):
 
         self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
         valid_obj = None
-        if sp.dcc.object_exists(self._asset().name):
-            objs = sp.dcc.list_nodes(node_name=self._asset().name)
+        model_main_group = '{}{}{}'.format(self._asset().name, sp.separator, sp.model_suffix)
+        if sp.dcc.object_exists(model_main_group):
+            objs = sp.dcc.list_nodes(node_name=model_main_group)
             for obj in objs:
                 parent = sp.dcc.node_parent(obj)
                 if parent is None:
                     valid_obj = obj
             if not valid_obj:
-                self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
+                self.write_error('Main group is not valid. Please change it manually to {}'.format(model_main_group))
                 return False
         else:
-            self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
+            self.write_error('Main group is not valid. Please change it manually to {}'.format(model_main_group))
             return False
-        self.write_ok('Asset main group is valid: {}'.format(self._asset().name))
+        self.write_ok('Asset main group is valid: {}'.format(model_main_group))
+
+        return True
+
+class CheckModelProxyMainGroup(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None):
+        super(CheckModelProxyMainGroup, self).__init__(name='Check Proxy Model main group', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self.set_check_text('Checking if proxy model scene has a valid main group')
+
+    def check(self):
+        if self._status != 'working':
+            return False
+
+        proxy_path = self._asset().get_asset_file(file_type='proxy', status=self._status)
+        if proxy_path is None or not os.path.isfile(proxy_path):
+            return False
+
+        self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
+        valid_obj = None
+        proxy_main_group = '{}{}{}'.format(self._asset().name, sp.separator, sp.proxy_suffix)
+        if sp.dcc.object_exists(proxy_main_group):
+            objs = sp.dcc.list_nodes(node_name=proxy_main_group)
+            for obj in objs:
+                parent = sp.dcc.node_parent(obj)
+                if parent is None:
+                    valid_obj = obj
+            if not valid_obj:
+                self.write_error('Main group is not valid. Please change it manually to {}'.format(proxy_main_group))
+                return False
+        else:
+            self.write_error('Main group is not valid. Please change it manually to {}'.format(proxy_main_group))
+            return False
+        self.write_ok('Asset main group is valid: {}'.format(proxy_main_group))
 
         return True
 
@@ -1058,6 +1120,9 @@ class UpdateTexturesPath(check.SanityCheckTask, object):
         self.set_check_text('Updating textures paths validity')
 
     def check(self):
+
+        import maya.cmds as cmds
+
         if self._status != 'published':
             return False
 
@@ -1065,34 +1130,34 @@ class UpdateTexturesPath(check.SanityCheckTask, object):
         if not os.path.isfile(shading_path):
             return False
 
-        current_textures_path = self._asset().get_asset_textures(force_sync=True)
-        with open(shading_path, 'r') as f:
-            data = f.read()
-            data_lines = data.split(';')
-        new_lines = list()
+        solstice_var = os.environ['SOLSTICE_PROJECT']
         self.write('Updating textures paths ...')
         textures_updated = False
-        for line in data_lines:
-            line = str(line)
-            if 'setAttr ".ftn" -type "string"' in line:
-                if line.endswith('.tx"') or line.endswith('.tiff"'):
-                    subs = re.findall(r'"(.*?)"', line)
-                    current_texture_path = subs[2]
-                    for txt in current_textures_path:
-                        texture_name = os.path.basename(current_texture_path)
-                        if texture_name in os.path.basename(txt):
-                            if not os.path.normpath(txt) == os.path.normpath(current_texture_path):
-                                line = line.replace(current_texture_path, txt).replace('/', '\\\\')
-                                self.write('>>>\n\t{0}'.format(os.path.normpath(current_texture_path)))
-                                self.write_ok('\t{0}\n'.format(os.path.normpath(txt)))
-                                textures_updated = True
-            new_lines.append(line + ';')
+        current_textures_path = self._asset().get_asset_textures(force_sync=True)
+        all_file_nodes = cmds.ls(et="file")
+        for f in all_file_nodes:
+            orig_texture_name = cmds.getAttr("%s.fileTextureName" % f)
+            current_texture_path = orig_texture_name
+            for txt in current_textures_path:
+                texture_name = os.path.basename(current_texture_path)
+                if texture_name in os.path.basename(txt):
+                    if not os.path.normpath(txt) == os.path.normpath(current_texture_path):
+                        current_texture_path = current_texture_path.replace(current_texture_path, txt)
+
+            if current_texture_path.startswith(solstice_var):
+                current_texture_path = current_texture_path.replace(solstice_var, '$SOLSTICE_PROJECT\\\\')
+            if current_texture_path.startswith('$ART_LOCAL_ROOT'):
+                current_texture_path = current_texture_path.replace('$ART_LOCAL_ROOT', solstice_var)
+            current_texture_path = current_texture_path.replace('/', '\\\\')
+
+            if orig_texture_name != current_texture_path:
+                textures_updated = True
+            if textures_updated:
+                self.write('>>>\n\t{0}'.format(os.path.normpath(cmds.getAttr("%s.fileTextureName" % f))))
+                self.write_ok('\t{0}\n'.format(os.path.normpath(current_texture_path)))
+                cmds.setAttr('{}.fileTextureName'.format(f), current_texture_path, type='string')
 
         if textures_updated:
-            # Create shading file with paths fixed
-            self.write('Writing new textures paths info into shading file: {}'.format(shading_path))
-            with open(shading_path, 'w') as f:
-                f.writelines(new_lines)
             self.write_ok('Textures Path updated successfully!')
             messagehandler.MessageHandler().show_info_dialog('Textures updated. Make sure to submit shading file: {}'.format(shading_path))
         else:
