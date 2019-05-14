@@ -14,6 +14,8 @@ __email__ = "tpoveda@cgart3d.com"
 
 import os
 import weakref
+import urllib2
+import tempfile
 
 import solstice.pipeline as sp
 from solstice.pipeline.externals.solstice_qt.QtCore import *
@@ -29,12 +31,13 @@ if sp.is_maya():
     from mtoa.cmds.arnoldRender import arnoldRender
     from solstice.pipeline.tools.lightrigs import lightrigs
     from solstice.pipeline.tools.shaderlibrary import shaderlibrary
+    from solstice.pipeline.utils import mayautils
 
 reload(pipelineutils)
 reload(console)
 reload(assetchecks)
 reload(slack)
-
+reload(mayautils)
 
 console_win = None
 
@@ -135,27 +138,49 @@ class PropsPipelineWidget(base.BaseWidget, object):
         valid_model_path_btn = QPushButton('Valid Model Path')
         valid_proxy_path_btn = QPushButton('Valid Proxy Path')
         check_model_main_group_btn = QPushButton('Check Model Main Group')
+        check_proxy_main_group_btn = QPushButton('Check Proxy Model Main Group')
         model_has_no_shaders_btn = QPushButton('Model Has No Shaders')
-        model_proxy_hires_groups_btn = QPushButton('Setup Model Proxy/Hires Groups')
-        check_tag_btn = QPushButton('Check Model Tag')
-        update_tag_btn = QPushButton('Update Model Tag')
+        proxy_has_no_shaders_btn = QPushButton('Proxy Has No Shaders')
         delete_scene_shaders_btn = QPushButton('Delete Scene Shaders')
         import_shading_file_btn = QPushButton('Import Shading File')
         transfer_uvs_btn = QPushButton('Transfer UVs')
+        remove_type_tag_data_attrs_btn = QPushButton('Remove Type and Tag Data Attributes')
+        clean_model_file_btn = QPushButton('Clean Model File')
+        clean_proxy_file_btn = QPushButton('Clean Proxy File')
         model_check_lyt.addWidget(valid_model_path_btn, 0, 0)
         model_check_lyt.addWidget(valid_proxy_path_btn, 0, 1)
         model_check_lyt.addWidget(check_model_main_group_btn, 1, 0)
-        model_check_lyt.addWidget(model_has_no_shaders_btn, 1, 1)
-        model_check_lyt.addWidget(model_proxy_hires_groups_btn, 2, 0)
-        model_check_lyt.addWidget(check_tag_btn, 2, 1)
-        model_check_lyt.addWidget(update_tag_btn, 3, 0)
-        model_check_lyt.addWidget(delete_scene_shaders_btn, 3, 1)
-        model_check_lyt.addWidget(import_shading_file_btn, 4, 0)
-        model_check_lyt.addWidget(transfer_uvs_btn, 4, 1)
+        model_check_lyt.addWidget(check_proxy_main_group_btn, 1, 1)
+        model_check_lyt.addWidget(model_has_no_shaders_btn, 2, 0)
+        model_check_lyt.addWidget(proxy_has_no_shaders_btn, 2, 1)
+        model_check_lyt.addWidget(delete_scene_shaders_btn, 3, 0)
+        model_check_lyt.addWidget(import_shading_file_btn, 3, 1)
+        model_check_lyt.addWidget(transfer_uvs_btn, 4, 0)
+        model_check_lyt.addWidget(remove_type_tag_data_attrs_btn, 4, 1)
+        model_check_lyt.addWidget(clean_model_file_btn, 5, 0)
+        model_check_lyt.addWidget(clean_proxy_file_btn, 5, 1)
 
         rig_utils = QWidget()
         rig_utils_lyt = QGridLayout()
         rig_utils.setLayout(rig_utils_lyt)
+        valid_rig_path_btn = QPushButton('Valid Rig Path')
+        valid_builder_path_btn = QPushButton('Valid Builder Path')
+        build_rig_btn = QPushButton('Build Rig')
+        lock_rig_btn = QPushButton('Lock Rig File')
+        save_rig_btn = QPushButton('Save Rig')
+        new_rig_version_btn = QPushButton('New Rig Version')
+        model_proxy_hires_groups_btn = QPushButton('Setup Model Proxy/Hires Groups')
+        check_tag_btn = QPushButton('Check Tag')
+        update_tag_btn = QPushButton('Update Tag')
+        rig_utils_lyt.addWidget(valid_rig_path_btn, 0, 0)
+        rig_utils_lyt.addWidget(valid_builder_path_btn, 0, 1)
+        rig_utils_lyt.addWidget(lock_rig_btn, 1, 0)
+        rig_utils_lyt.addWidget(save_rig_btn, 1, 1)
+        rig_utils_lyt.addWidget(new_rig_version_btn, 2, 0)
+        rig_utils_lyt.addWidget(model_proxy_hires_groups_btn, 2, 1)
+        rig_utils_lyt.addWidget(check_tag_btn, 3, 0)
+        rig_utils_lyt.addWidget(update_tag_btn, 3, 1)
+        rig_utils_lyt.addWidget(build_rig_btn, 4, 0, 1, 2)
 
         shading_utils = QWidget()
         shading_check_lyt = QGridLayout()
@@ -165,6 +190,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         check_shading_shaders = QPushButton('Check Shaders')
         rename_shaders_btn = QPushButton('Rename Shaders')
         update_textures_paths_btn = QPushButton('Update Textures Paths')
+        clean_textures_paths_btn = QPushButton('Clean Textures Paths')
         export_shading_file_btn = QPushButton('Export Shading JSON File')
         export_shaders_btn = QPushButton('Export Shaders')
         shading_check_lyt.addWidget(valid_shading_path_btn, 0, 0)
@@ -173,7 +199,8 @@ class PropsPipelineWidget(base.BaseWidget, object):
         shading_check_lyt.addWidget(rename_shaders_btn, 1, 1)
         shading_check_lyt.addWidget(export_shading_file_btn, 2, 0)
         shading_check_lyt.addWidget(update_textures_paths_btn, 2, 1)
-        shading_check_lyt.addWidget(export_shaders_btn, 3, 0)
+        shading_check_lyt.addWidget(clean_textures_paths_btn, 3, 0)
+        shading_check_lyt.addWidget(export_shaders_btn, 3, 1)
 
         test_utils = QWidget()
         test_check_lyt = QGridLayout()
@@ -183,12 +210,23 @@ class PropsPipelineWidget(base.BaseWidget, object):
         slack_utils_lyt = QGridLayout()
         slack_utils.setLayout(slack_utils_lyt)
 
+        artella_utils = QWidget()
+        artella_utils_lyt = QGridLayout()
+        artella_utils.setLayout(artella_utils_lyt)
+        sync_asset_btn = QPushButton('Sync Asset')
+        lock_file_btn = QPushButton('Lock Current File')
+        new_version_btn = QPushButton('New File Version')
+        artella_utils_lyt.addWidget(sync_asset_btn, 0, 0)
+        artella_utils_lyt.addWidget(lock_file_btn, 0, 1)
+        artella_utils_lyt.addWidget(new_version_btn, 1, 0)
+
         utils_tab.addTab(textures_utils, 'Textures')
         utils_tab.addTab(model_utils, 'Model')
         utils_tab.addTab(rig_utils, 'Rig')
         utils_tab.addTab(shading_utils, 'Shading')
         utils_tab.addTab(test_utils, 'Tests')
         utils_tab.addTab(slack_utils, 'Slack')
+        utils_tab.addTab(artella_utils, 'Artella')
         ref_neutral_light_rig_btn = QPushButton('Reference Neutral Light Rig')
         sync_shaders_btn = QPushButton('Sync Shaders')
         render_low_res_btn = QPushButton('Render Low Res')
@@ -203,7 +241,9 @@ class PropsPipelineWidget(base.BaseWidget, object):
         test_check_lyt.addWidget(render_full_hd_btn, 2, 1)
 
         asset_published_btn = QPushButton('Asset Published')
+        grab_viewport_image_btn = QPushButton('Grab Viewport Image')
         slack_utils_lyt.addWidget(asset_published_btn, 0, 0)
+        slack_utils_lyt.addWidget(grab_viewport_image_btn, 0, 1)
 
         self.accordion.add_item('Utils', check_widget)
 
@@ -249,17 +289,29 @@ class PropsPipelineWidget(base.BaseWidget, object):
         valid_model_path_btn.clicked.connect(self._on_valid_model_path)
         valid_proxy_path_btn.clicked.connect(self._on_valid_proxy_path)
         check_model_main_group_btn.clicked.connect(self._on_check_model_main_group)
+        check_proxy_main_group_btn.clicked.connect(self._on_check_proxy_main_group)
         model_has_no_shaders_btn.clicked.connect(self._on_model_has_no_shaders)
-        model_proxy_hires_groups_btn.clicked.connect(self._on_model_proxy_hires_groups)
+        proxy_has_no_shaders_btn.clicked.connect(self._on_proxy_has_no_shaders)
         valid_shading_path_btn.clicked.connect(self._on_valid_shading_path)
         import_shading_file_btn.clicked.connect(self._on_import_shading_file)
         check_shading_main_group_btn.clicked.connect(self._on_check_shading_main_group)
         check_shading_shaders.clicked.connect(self._on_check_shaders)
         all_textures_checks_btn.clicked.connect(self._on_all_textures_checks)
+        transfer_uvs_btn.clicked.connect(self._on_transfer_uvs)
+        remove_type_tag_data_attrs_btn.clicked.connect(self._on_remove_type_tag_data_attrs)
+        clean_model_file_btn.clicked.connect(self._on_clean_model_file)
+        clean_proxy_file_btn.clicked.connect(self._on_clean_proxy_file)
+        valid_rig_path_btn.clicked.connect(self._on_valid_rig_path)
+        valid_builder_path_btn.clicked.connect(self._on_valid_builder_path)
+        build_rig_btn.clicked.connect(self._on_build_rig)
+        lock_rig_btn.clicked.connect(self._on_lock_rig)
+        save_rig_btn.clicked.connect(self._on_save_rig)
+        new_rig_version_btn.clicked.connect(self._on_new_rig_version)
+        model_proxy_hires_groups_btn.clicked.connect(self._on_model_proxy_hires_groups)
         check_tag_btn.clicked.connect(self._on_check_tag)
         update_tag_btn.clicked.connect(self._on_update_tag)
-        transfer_uvs_btn.clicked.connect(self._on_transfer_uvs)
         update_textures_paths_btn.clicked.connect(self._on_update_textures_path)
+        clean_textures_paths_btn.clicked.connect(self._on_clean_textures_path)
         export_shading_file_btn.clicked.connect(self._on_export_shading_file)
         rename_shaders_btn.clicked.connect(self._on_rename_shaders)
         export_shaders_btn.clicked.connect(self._on_export_shaders)
@@ -270,7 +322,11 @@ class PropsPipelineWidget(base.BaseWidget, object):
         render_mid_res_btn.clicked.connect(self._on_render_mid_res)
         render_high_res_btn.clicked.connect(self._on_render_high_res)
         render_full_hd_btn.clicked.connect(self._on_render_full_hd)
+        sync_asset_btn.clicked.connect(self._on_sync_asset)
+        lock_file_btn.clicked.connect(self._on_lock_file)
+        new_version_btn.clicked.connect(self._on_new_file_version)
         asset_published_btn.clicked.connect(self._on_asset_published)
+        grab_viewport_image_btn.clicked.connect(self._on_grab_viewport_image)
         gen_abc_btn.clicked.connect(lambda: pipelineutils.generate_alembic_file(self.asset_name_line.text()))
         self.prepare_standin_btn.clicked.connect(self._on_prepare_standin)
         self.gen_standin_btn.clicked.connect(self._on_generate_standin)
@@ -340,6 +396,20 @@ class PropsPipelineWidget(base.BaseWidget, object):
         check = assetchecks.CheckModelMainGroup(asset=weakref.ref(asset), log=log)
         check.check()
 
+    def _on_check_proxy_main_group(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+        proxy_path = asset.get_asset_file(file_type='proxy', status='working')
+        if proxy_path is None or not os.path.isfile(proxy_path):
+            return False
+        if sp.dcc.scene_name() != proxy_path:
+            log.write('Opening proxy file in Maya ...')
+            sp.dcc.open_file(proxy_path, force=True)
+        check = assetchecks.CheckModelProxyMainGroup(asset=weakref.ref(asset), log=log)
+        check.check()
+
     def _on_model_has_no_shaders(self):
         asset = self._get_asset()
         if not asset:
@@ -348,9 +418,24 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_path = asset.get_asset_file(file_type='model', status='working')
         if model_path is None or not os.path.isfile(model_path):
             return False
-        log.write('Opening model file in Maya ...')
-        sp.dcc.open_file(model_path, force=True)
+        if sp.dcc.scene_name() != model_path:
+            log.write('Opening model file in Maya ...')
+            sp.dcc.open_file(model_path, force=True)
         check = assetchecks.ModelHasNoShaders(asset=weakref.ref(asset), log=log)
+        check.check()
+
+    def _on_proxy_has_no_shaders(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+        proxy_path = asset.get_asset_file(file_type='proxy', status='working')
+        if proxy_path is None or not os.path.isfile(proxy_path):
+            return False
+        if sp.dcc.scene_name() != proxy_path:
+            log.write('Opening proxy file in Maya ...')
+            sp.dcc.open_file(proxy_path, force=True)
+        check = assetchecks.ProxyHasNoShaders(asset=weakref.ref(asset), log=log)
         check.check()
 
     def _on_model_proxy_hires_groups(self):
@@ -358,7 +443,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if not asset:
             return
         log = run_console()
-        check = assetchecks.ModelProxyHiresGroups(asset=weakref.ref(asset), log=log)
+        check = assetchecks.RigProxyHiresGroups(asset=weakref.ref(asset), log=log)
         check.check()
 
     def _on_check_tag(self):
@@ -366,12 +451,12 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if not asset:
             return
         log = run_console()
-        model_path = asset.get_asset_file(file_type='model', status='working')
-        if model_path is None or not os.path.isfile(model_path):
+        rig_path = asset.get_asset_file(file_type='rig', status='working')
+        if rig_path is None or not os.path.isfile(rig_path):
             return False
-        log.write('Opening model file in Maya ...')
-        sp.dcc.open_file(model_path, force=True)
-        check = assetchecks.CheckModelTag(asset=weakref.ref(asset), log=log)
+        log.write('Opening rig file in Maya ...')
+        sp.dcc.open_file(rig_path, force=True)
+        check = assetchecks.CheckRigTag(asset=weakref.ref(asset), log=log)
         check.check()
 
     def _on_update_tag(self):
@@ -379,13 +464,94 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if not asset:
             return
         log = run_console()
-        model_path = asset.get_asset_file(file_type='model', status='working')
-        if model_path is None or not os.path.isfile(model_path):
+        rig_path = asset.get_asset_file(file_type='rig', status='working')
+        if rig_path is None or not os.path.isfile(rig_path):
             return False
-        log.write('Opening model file in Maya ...')
-        sp.dcc.open_file(model_path, force=True)
-        check = assetchecks.UpdateModelTag(asset=weakref.ref(asset), log=log)
+        log.write('Opening rig file in Maya ...')
+        sp.dcc.open_file(rig_path, force=True)
+        check = assetchecks.UpdateTag(asset=weakref.ref(asset), file_type='rig', log=log)
         check.check()
+
+    def _on_valid_rig_path(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+        check = assetchecks.ValidRigPath(asset=weakref.ref(asset), log=log)
+        check.check()
+        rig_path = asset.get_asset_file(file_type='rig', status='working')
+        if rig_path is None or not os.path.isfile(rig_path):
+            return False
+        log.write('Opening rig file in Maya ...')
+        sp.dcc.open_file(rig_path, force=True)
+
+    def _on_valid_builder_path(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+        check = assetchecks.ValidBuilderPath(asset=weakref.ref(asset), log=log)
+        check.check()
+        builder_path = asset.get_asset_file(file_type='builder', status='working')
+        if builder_path is None or not os.path.isfile(builder_path):
+            return False
+        log.write('Opening builder file in Maya ...')
+        sp.dcc.open_file(builder_path, force=True)
+
+    def _on_build_rig(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        asset.build_rig()
+
+    def _on_lock_rig(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+
+        log = run_console()
+        rig_path = asset.get_asset_file(file_type='rig', status='working')
+        if os.path.isfile(rig_path):
+            log.write('Locking Rig File: {}'.format(rig_path))
+            artella.lock_file(rig_path, force=True)
+
+    def _on_save_rig(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+
+        log = run_console()
+        rig_path = asset.get_asset_file(file_type='rig', status='working')
+        log.write('Saving Rig File: {}'.format(rig_path))
+        if os.path.isfile(rig_path):
+            artella.lock_file(rig_path, force=True)
+
+        try:
+            sp.dcc.save_current_scene(file_path=rig_path)
+            mayautils.clean_student_line(rig_path)
+            log.write_ok('Rig File saved successfully!')
+        finally:
+            if os.path.isfile(rig_path):
+                artella.unlock_file(rig_path)
+
+    def _on_new_rig_version(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+
+        log = run_console()
+        rig_path = asset.get_asset_file(file_type='rig', status='working')
+        if not rig_path or not os.path.isfile(rig_path):
+            log.write_error('No Rig Path found: {}!'.format(rig_path))
+            return
+
+        new_version = messagehandler.MessageHandler().show_confirm_dialog(
+            'Do you want to create new version of rig file in Artella?')
+        if new_version:
+            log.write('Creating new rig version in Artella: {}'.format(asset.name))
+            artella.upload_new_asset_version(rig_path, comment='New Rig {} version'.format(asset.name),
+                                             skip_saving=True)
+            log.write_ok('New version for rig submitted into Artella server')
 
     def _on_transfer_uvs(self):
         sel = cmds.ls(sl=True)
@@ -393,6 +559,63 @@ class PropsPipelineWidget(base.BaseWidget, object):
         for obj in sel:
             cmds.select([first, obj])
             cmds.transferAttributes(sampleSpace=4, transferUVs=2, transferColors=2)
+
+    def _on_remove_type_tag_data_attrs(self, group_type='model'):
+        asset = self._get_asset()
+        if not asset:
+            return
+
+        cmds.setAttr('{}_{}.tag_data'.format(asset.name, group_type.upper()), lock=False)
+        cmds.deleteAttr('{}_{}.type'.format(asset.name, group_type.upper()))
+        cmds.deleteAttr('{}_{}.tag_data'.format(asset.name, group_type.upper()))
+
+    def _on_clean_model_file(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+
+        tag_data = asset.get_tag_data_node()
+        if tag_data:
+            proxy_grp = cmds.listConnections('{}.hires'.format(tag_data.get_node()))
+            if not proxy_grp:
+                return
+            proxy_grp = proxy_grp[0]
+            unparent_children = [child for child in sp.dcc.list_children(proxy_grp, all_hierarchy=False, children_type='transform', full_path=False) if 'Constraint' not in child]
+            for child in unparent_children:
+                sp.dcc.set_parent(child, None)
+            children = [child for child in sp.dcc.list_children(asset.name, all_hierarchy=False, children_type='transform', full_path=False)]
+            for child in children:
+                sp.dcc.delete_object(child)
+            for obj in unparent_children:
+                sp.dcc.set_parent(obj, asset.name)
+            sp.dcc.rename_node(asset.name, '{}_MODEL'.format(asset.name))
+            sp.dcc.clear_selection()
+
+            self._on_remove_type_tag_data_attrs('model')
+
+    def _on_clean_proxy_file(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+
+        tag_data = asset.get_tag_data_node()
+        if tag_data:
+            proxy_grp = cmds.listConnections('{}.proxy'.format(tag_data.get_node()))
+            if not proxy_grp:
+                return
+            proxy_grp = proxy_grp[0]
+            unparent_children = [child for child in sp.dcc.list_children(proxy_grp, all_hierarchy=False, children_type='transform', full_path=False) if 'Constraint' not in child]
+            for child in unparent_children:
+                sp.dcc.set_parent(child, None)
+            children = [child for child in sp.dcc.list_children(asset.name, all_hierarchy=False, children_type='transform', full_path=False)]
+            for child in children:
+                sp.dcc.delete_object(child)
+            for obj in unparent_children:
+                sp.dcc.set_parent(obj, asset.name)
+            sp.dcc.rename_node(asset.name, '{}_PROXY'.format(asset.name))
+            sp.dcc.clear_selection()
+
+            self._on_remove_type_tag_data_attrs('proxy')
 
     def _on_import_shading_file(self):
         asset = self._get_asset()
@@ -451,6 +674,12 @@ class PropsPipelineWidget(base.BaseWidget, object):
         log = run_console()
         check = assetchecks.UpdateTexturesPath(asset=weakref.ref(asset), log=log)
         check.check()
+
+    def _on_clean_textures_path(self):
+        all_file_nodes = cmds.ls(et="file")
+        for each_file in all_file_nodes:
+            current_file = os.path.normpath(cmds.getAttr("%s.fileTextureName" % each_file))
+            cmds.setAttr('{}.fileTextureName'.format(each_file), current_file.replace('\\', '/'), type='string')
 
     def _on_export_shading_file(self):
         asset = self._get_asset()
@@ -598,6 +827,65 @@ class PropsPipelineWidget(base.BaseWidget, object):
             return
 
         slack.asset_published(asset.name)
+
+    def _on_grab_viewport_image(self):
+        view_image = mayautils.grab_viewport_image()
+        fd, path = tempfile.mkstemp()
+        try:
+            with os.fdopen(fd, 'w') as tmp:
+                view_image.writeToFile(path, 'png')
+                slack.new_viewport_image(os.path.normpath(path), os.path.basename(sp.dcc.scene_name()), channel_name='pipeline')
+        finally:
+            os.remove(path)
+
+
+    def _on_sync_asset(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+
+        asset.sync()
+
+    def _on_lock_file(self):
+        current_file = sp.dcc.scene_name()
+        if os.path.isfile(current_file):
+            artella.lock_file(current_file, force=True)
+
+    def _on_new_file_version(self):
+        current_file = sp.dcc.scene_name()
+        if not os.path.isfile(current_file):
+            return
+
+        log = run_console()
+
+        new_version = messagehandler.MessageHandler().show_confirm_dialog(
+            'Do you want to create new version of file {} in Artella?'.format(current_file))
+        if new_version:
+            result = cmds.promptDialog(
+                title='Comment',
+                message='Enter Comment:',
+                button=['OK', 'Cancel'],
+                defaultButton='OK',
+                cancelButton='Cancel',
+                dismissString='Cancel')
+            if result != 'OK':
+                return
+
+            comment = cmds.promptDialog(query=True, text=True)
+            if not comment:
+                return
+
+        rel_path = os.path.relpath(current_file, sp.get_solstice_project_path())
+        url_path = os.path.join(sp.get_artella_project_url(), os.path.dirname(rel_path)).replace('\\', '/')
+        ret = urllib2.urlopen(url_path)
+        if ret.code != 200:
+            log.write_error('Artella URL {} does not exists! Impossible to submit new version of the file!'.format(url_path))
+            return
+
+        artella.upload_new_asset_version(current_file, comment=comment, skip_saving=True)
+        slack.new_version(current_file, url_path, comment=comment)
+
+        log.write_ok('New version for file {} submitted into Artella server'.format(os.path.basename(current_file)))
 
     def _get_asset(self, asset_name=None):
         if asset_name is None:
@@ -792,7 +1080,7 @@ class SolsticeTDToolbox(window.Window, object):
     def custom_ui(self):
         super(SolsticeTDToolbox, self).custom_ui()
 
-        self.resize(400, 550)
+        self.resize(480, 550)
 
         self.toolbow_widget = TDToolBoxWidget(parent=self)
         self.main_layout.addWidget(self.toolbow_widget)

@@ -24,7 +24,7 @@ from solstice.pipeline.externals.solstice_qt.QtGui import *
 import solstice.pipeline as sp
 from solstice.pipeline.gui import window, splitters
 from solstice.pipeline.resources import resource
-from solstice.pipeline.utils import browserutils, alembic, pythonutils
+from solstice.pipeline.utils import browserutils, alembic, pythonutils, artellautils
 
 from solstice.pipeline.tools.tagger import tagger
 
@@ -708,10 +708,17 @@ class AlembicExporter(QWidget, object):
             if tag_node:
                 attr_exists = sp.dcc.attribute_exists(node=tag_node, attribute_name='hires')
                 if not attr_exists:
-                    obj_meshes = [obj]
+                    hires_objs = sp.dcc.list_relatives(node=obj, all_hierarchy=True, full_path=True, relative_type='mesh')
+                    if not hires_objs:
+                        obj_meshes = [obj]
+                    else:
+                        obj_meshes = hires_objs
                 else:
                     hires_grp = sp.dcc.list_connections(node=tag_node, attribute_name='hires')
-                    hires_objs = sp.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='mesh')
+                    if hires_grp and sp.dcc.object_exists(hires_grp):
+                        hires_objs = sp.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='mesh')
+                    else:
+                        hires_objs = sp.dcc.list_relatives(node=obj, all_hierarchy=True, full_path=True, relative_type='mesh')
                     if not hires_objs:
                         obj_meshes = [obj]
                     else:
@@ -780,15 +787,20 @@ class AlembicExporter(QWidget, object):
             has_hires = sp.dcc.attribute_exists(node=tag_node, attribute_name='hires') if tag_node else None
             if tag_node and has_hires:
                 hires_grp = sp.dcc.list_connections(node=tag_node, attribute_name='hires')
-                hires_node = AlembicExporterModelHires(hires_grp)
-                root_grp.addChild(hires_node)
-                for model in geo_list:
-                    model_xform = sp.dcc.node_parent(node=model, full_path=True)
-                    obj_is_visible = sp.dcc.get_attribute_value(node=model_xform, attribute_name='visibility')
-                    if not obj_is_visible:
-                        continue
-                    obj_node = AlembicExporterNode(model)
-                    hires_node.addChild(obj_node)
+                if hires_grp and sp.dcc.object_exists(hires_grp):
+                    hires_node = AlembicExporterModelHires(hires_grp)
+                    root_grp.addChild(hires_node)
+                    for model in geo_list:
+                        model_xform = sp.dcc.node_parent(node=model, full_path=True)
+                        obj_is_visible = sp.dcc.get_attribute_value(node=model_xform, attribute_name='visibility')
+                        if not obj_is_visible:
+                            continue
+                        obj_node = AlembicExporterNode(model)
+                        hires_node.addChild(obj_node)
+                else:
+                    for geo in geo_list:
+                        geo_node = AlembicExporterNode(geo)
+                        root_grp.addChild(geo_node)
             else:
                 for geo in geo_list:
                     geo_node = AlembicExporterNode(geo)
@@ -940,6 +952,8 @@ class AlembicExporter(QWidget, object):
 
             arnold_attrs = [attr for attr in sp.dcc.list_attributes(geo_shape) if attr.startswith('ai')]
 
+            artellautils.lock_file(export_path, True)
+
             valid_alembic = alembic.export(
                 root=export_list,
                 alembicFile=export_path,
@@ -1034,6 +1048,8 @@ class AlembicImporter(QWidget, object):
         self.shot_line = QLineEdit()
         buttons_layout.addWidget(shot_name_lbl, 1, 0, 1, 1, Qt.AlignRight)
         buttons_layout.addWidget(self.shot_line, 1, 1)
+        shot_name_lbl.setVisible(False)
+        self.shot_line.setVisible(False)
 
         folder_icon = resource.icon('open')
         alembic_path_layout = QHBoxLayout()
@@ -1069,6 +1085,8 @@ class AlembicImporter(QWidget, object):
         import_mode_layout.addWidget(self.merge_radio)
         buttons_layout.addWidget(import_mode_lbl, 3, 0, 1, 1, Qt.AlignRight)
         buttons_layout.addWidget(import_mode_widget, 3, 1)
+        import_mode_lbl.setVisible(False)
+        import_mode_widget.setVisible(False)
 
         auto_display_lbl = QLabel('Auto Display Smooth?: ')
         self.auto_smooth_display = QCheckBox()
@@ -1324,14 +1342,15 @@ class AlembicImporter(QWidget, object):
 
         if self.auto_smooth_display.isChecked():
             for obj in res:
-                if sp.dcc.node_type(obj) == 'shape':
-                    if sp.dcc.attribute_exists(node=obj, attribute_name='aiSubdivType'):
-                        cmds.setAttr('{}.aiSubdivType '.format(obj), 1)
-                elif sp.dcc.node_type(obj) == 'transform':
-                    shapes = sp.dcc.list_shapes(node=obj, full_path=True)
-                    for s in shapes:
-                        if sp.dcc.attribute_exists(node=s, attribute_name='aiSubdivType'):
-                            cmds.setAttr('{}.aiSubdivType '.format(s), 1)
+                if obj and sp.dcc.object_exists(obj):
+                    if sp.dcc.node_type(obj) == 'shape':
+                        if sp.dcc.attribute_exists(node=obj, attribute_name='aiSubdivType'):
+                            cmds.setAttr('{}.aiSubdivType '.format(obj), 1)
+                    elif sp.dcc.node_type(obj) == 'transform':
+                        shapes = sp.dcc.list_shapes(node=obj, full_path=True)
+                        for s in shapes:
+                            if sp.dcc.attribute_exists(node=s, attribute_name='aiSubdivType'):
+                                cmds.setAttr('{}.aiSubdivType '.format(s), 1)
 
         return res
 

@@ -681,10 +681,11 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function scene_is_modified() not implemented!')
 
     @staticmethod
-    def save_current_scene(force=True):
+    def save_current_scene(force=True, file_path=None):
         """
         Saves current scene
         :param force: bool
+        :param file_path: str
         """
 
         raise NotImplementedError('abstract DCC function save_current_scene() not implemented!')

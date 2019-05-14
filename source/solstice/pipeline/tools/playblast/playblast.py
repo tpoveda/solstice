@@ -1673,7 +1673,7 @@ class SolsticeSave(SolsticePlayblastWidget, object):
 
 class SolsticeMaskObject(object):
 
-    mask_plugin = 'solstice_playblast.py'
+    mask_plugin = 'playblast.py'
     mask_node = 'SolsticeMask'
     mask_transform = 'solsticemask'
     mask_shape = 'solsticemask_shape'
@@ -1683,12 +1683,12 @@ class SolsticeMaskObject(object):
 
     @classmethod
     def create_mask(cls):
-        if not cmds.pluginInfo('solstice_playblast.py', query=True, loaded=True):
+        if not cmds.pluginInfo(cls.mask_plugin, query=True, loaded=True):
             try:
                 cmds.loadPlugin(os.path.realpath(__file__).replace('.pyc', '.py'))
             except Exception as e:
                 sp.logger.error('Failed to load SolsticeMask plugin! | {}'.format(str(e)))
-                sp.logger.debug('Please import solstice_playblast.py plugin manually!')
+                sp.logger.debug('Please import {} plugin manually!'.format(cls.mask_plugin))
                 return
 
         if not cls.get_mask():

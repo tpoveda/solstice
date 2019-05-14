@@ -311,7 +311,7 @@ class DCCSelector(QDialog, object):
         self.selected_dcc = None
 
         self.setWindowTitle('DCC Selector')
-        self.setFixedSize(QSize(100, 360))
+        self.setFixedSize(QSize(310, 130))
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
 
         self.main_layout = QVBoxLayout()
@@ -319,6 +319,9 @@ class DCCSelector(QDialog, object):
         self.main_layout.setSpacing(2)
         self.setLayout(self.main_layout)
         self.setStyleSheet('background-color: rgb(80, 80, 80)')
+
+        dccs_layout = QHBoxLayout()
+        self.main_layout.addLayout(dccs_layout)
 
         maya_ba = QByteArray.fromBase64(solstice_resources.maya_code)
         maya_image = QImage.fromData(maya_ba, 'PNG')
@@ -328,7 +331,7 @@ class DCCSelector(QDialog, object):
         maya_btn.setFixedSize(QSize(100, 100))
         maya_btn.setIconSize(QSize(110, 110))
         maya_btn.setIcon(QIcon(maya_pixmap))
-        self.main_layout.addWidget(maya_btn)
+        dccs_layout.addWidget(maya_btn)
 
         houdini_ba = QByteArray.fromBase64(solstice_resources.houdini_code)
         houdini_image = QImage.fromData(houdini_ba, 'PNG')
@@ -338,7 +341,7 @@ class DCCSelector(QDialog, object):
         houdini_btn.setFixedSize(QSize(100, 100))
         houdini_btn.setIconSize(QSize(110, 110))
         houdini_btn.setIcon(QIcon(houdini_pixmap))
-        self.main_layout.addWidget(houdini_btn)
+        dccs_layout.addWidget(houdini_btn)
 
         nuke_ba = QByteArray.fromBase64(solstice_resources.nuke_code)
         nuke_image = QImage.fromData(nuke_ba, 'PNG')
@@ -348,7 +351,7 @@ class DCCSelector(QDialog, object):
         nuke_btn.setFixedSize(QSize(100, 100))
         nuke_btn.setIconSize(QSize(90, 90))
         nuke_btn.setIcon(QIcon(nuke_pixmap))
-        self.main_layout.addWidget(nuke_btn)
+        dccs_layout.addWidget(nuke_btn)
 
         cancel_btn = QPushButton('C L O S E')
         self.main_layout.addWidget(cancel_btn)

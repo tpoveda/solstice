@@ -714,12 +714,21 @@ def message(msg, title='Solstice Tools'):
         logger.debug(str(msg))
 
 
+def get_artella_project_url():
+    """
+    Returns URL of Artella project
+    :return: str
+    """
+
+    return 'https://www.artella.com/project/{0}/files'.format(solstice_project_id_raw)
+
+
 def open_artella_project():
     """
     Opens Solstice Artella web page
     """
 
-    project_url = 'https://www.artella.com/project/{0}/files'.format(solstice_project_id_raw)
+    project_url = get_artella_project_url()
     webbrowser.open(project_url)
 
 

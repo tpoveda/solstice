@@ -17,8 +17,10 @@ from solstice.pipeline.tools.autorigger.core import naming
 
 if sp.is_maya():
     import maya.cmds as cmds
+    from solstice.pipeline.utils import mayautils
 
 reload(naming)
+reload(mayautils)
 
 
 class RigControl(object):
@@ -171,6 +173,45 @@ class RigControl(object):
                 cmds.move(x, y, z, self._offset)
             else:
                 cmds.move(x, y, z, self._node)
+
+    def get_shapes(self, full_path=True):
+        """
+        Return all the shapes of a given node where the last parent is the top of hierarchy
+        :param full_path: bool
+        """
+
+        return sp.dcc.list_shapes(node=self._node, full_path=full_path)
+
+    def get_shapes_components(self):
+        """
+        Returns shapes components of the MetaNode shapes
+        :return: list<str>
+        """
+
+        shapes = self.get_shapes(full_path=True)
+        return mayautils.get_components_from_shapes(shapes)
+
+    def translate_control_shapes(self, x, y, z):
+        """
+        Translates the shape curve CVs in object space
+        :param x: float
+        :param y: float
+        :param z: float
+        """
+
+        comps = self.get_shapes_components()
+        if comps:
+            cmds.move(x, y, z, comps, relative=True, os=True)
+
+    def scale_control_shapes(self, scale_value):
+        """
+        Scales shape curve CVs in object space
+        :param scale_value: float
+        """
+
+        comps = self.get_shapes_components()
+        if comps:
+            cmds.scale(scale_value, scale_value, scale_value, comps, relative=True, os=True)
 
 
 class Circle(RigControl, object):

@@ -152,6 +152,7 @@
     "Alembic file is generated automatically during publish process of an asset",
     "Added Standin Manager Import/Exporter Tool into Layout and TD shelves",
     "Solstice Launcher now supports Houdini",
+    "Solstice Launcher now supports Nuke",
     "Added Import functionality in Solstice Alembic Manager for Houdini",
     "Solstice Pipelinizer now supports Houdini",
     "Added Shelf support for Houdini",
@@ -162,6 +163,9 @@
     "Complete internal reorganization of Solstice Tools",
     "Fixed order of versions in Changelog",
     "Removed aTools from Solstice Pipeline. If you want to use, download it and install it manually.",
-    "Updated Solstice Shelf with new commands"
+    "Updated Solstice Shelf with new commands",
+    "Added lot of tools to TD ToolBox to manage all pipeline in a centric way",
+    "Fixed Playbalst Mask Plugin creation function",
+    "Added Solstice Slack App"
   ]
 }

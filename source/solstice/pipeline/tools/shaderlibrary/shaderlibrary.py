@@ -939,7 +939,12 @@ class ShaderLibrary(window.Window, object):
                 sp.logger.error('No shaders found for asset: {}'.format(tag.get_asset().node))
                 continue
 
+            asset = tag.get_asset()
+
             hires_group = tag.get_hires_group()
+            if not hires_group or not cmds.objExists(hires_group):
+                hires_group = tag.get_asset().node
+
             if not hires_group or not cmds.objExists(hires_group):
                 sp.logger.error('No Hires group found for asset: {}'.format(tag.get_asset().node))
                 continue
@@ -952,7 +957,6 @@ class ShaderLibrary(window.Window, object):
                 sp.logger.error('No Hires meshes found for asset: {}'.format(tag.get_asset().node))
                 continue
 
-            asset = tag.get_asset()
             if asset.node != hires_group:
                 is_referenced = cmds.referenceQuery(asset.node, isNodeReferenced=True)
                 if is_referenced:

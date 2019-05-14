@@ -261,7 +261,7 @@ class ModelSanityCheck(checkgroups.SanityCheckGroup, object):
         self.add_check(assetchecks.CleanModelUnknownNodes(asset=asset, status='working', log=log))
         self.add_check(assetchecks.CheckModelMainGroup(asset=asset, status='working', log=log))
         self.add_check(assetchecks.ModelHasNoShaders(asset=asset, status='working', log=log))
-        self.add_check(assetchecks.ModelProxyHiresGroups(asset=asset, status='working', log=log))
+        self.add_check(assetchecks.RigProxyHiresGroups(asset=asset, status='working', log=log))
         # self.add_check(solstice_assetchecks.ValidTagDataNode(asset=asset, status='working', log=log))
         # self.add_check(solstice_assetchecks.SetupTagDataNode(asset=asset, status='working', log=log))
 

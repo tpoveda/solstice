@@ -1198,3 +1198,46 @@ def get_reference_data(objects):
         })
 
     return data
+
+
+def grab_viewport_image(file_path=None):
+    view = OpenMayaUI.M3dView.active3dView()
+    image = OpenMaya.MImage()
+    if view.getRendererName() == view.kViewport2Renderer:
+        image.create(view.portWidth(), view.portHeight(), 4, OpenMaya.MImage.kFloat)
+        view.readColorBuffer(image)
+        image.convertPixelFormat(OpenMaya.MImage.kByte)
+    else:
+        view.readColorBuffer(image)
+
+    if file_path:
+        image.writeToFile(file_path, 'png')
+
+    return image
+
+
+def get_components_from_shapes(shapes=None):
+    """
+    Get the components from a list of shapes
+    NOTE: Only supports CV and Vertex Components
+    :param shapes: list<str>, list of shapes to retrieve components from
+    :return: list<str>, components of the given shapes
+    """
+
+    comps = list()
+    if shapes:
+        for shape in shapes:
+            found_comps = None
+            if cmds.nodeType(shape) == 'nurbsSurface':
+                found_comps = '%s.cv[*]' % shape
+
+            if cmds.nodeType(shape) == 'nurbsCurve':
+                found_comps = '%s.cv[*]' % shape
+
+            if cmds.nodeType(shape) == 'mesh':
+                found_comps = '%s.vtx[*]' % shape
+
+            if found_comps:
+                comps.append(found_comps)
+
+    return comps

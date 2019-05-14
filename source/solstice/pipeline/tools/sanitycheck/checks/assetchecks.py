@@ -459,6 +459,58 @@ class ValidProxyPath(check.SanityCheckTask, object):
         return
 
 
+class ValidRigPath(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None):
+        super(ValidRigPath, self).__init__(name='Valid Rig Path', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self.set_check_text('Check if asset has valid rig path')
+
+    def check(self):
+        if self._status != 'working':
+            return False
+
+        rig_path = self._asset().get_asset_file(file_type='rig', status=self._status)
+        self.write('Check if rig path {} is valid ...'.format(rig_path))
+        if rig_path is None or not os.path.isfile(rig_path):
+            self.write_error('Rig Path {} is not valid!'.format(rig_path))
+            return False
+
+        self.write('Rig Path | {} | is valid!\n\n'.format(rig_path))
+
+        return True
+
+    def fix(self):
+        return
+
+
+class ValidBuilderPath(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None):
+        super(ValidBuilderPath, self).__init__(name='Valid Builder Path', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self.set_check_text('Check if asset has valid builder path')
+
+    def check(self):
+        if self._status != 'working':
+            return False
+
+        builder_path = self._asset().get_asset_file(file_type='builder', status=self._status)
+        self.write('Check if builder path {} is valid ...'.format(builder_path))
+        if builder_path is None or not os.path.isfile(builder_path):
+            self.write_error('Builder Path {} is not valid!'.format(builder_path))
+            return False
+
+        self.write('Rig Path | {} | is valid!\n\n'.format(builder_path))
+
+        return True
+
+    def fix(self):
+        return
+
+
 class ModelFileIsLocked(check.SanityCheckTask, object):
     def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None):
         super(ModelFileIsLocked, self).__init__(name='Model File is Locked', auto_fix=auto_fix, log=log, parent=parent)
@@ -644,21 +696,53 @@ class ModelHasNoShaders(check.SanityCheckTask, object):
         return True
 
 
-class ModelProxyHiresGroups(check.SanityCheckTask, object):
+class ProxyHasNoShaders(check.SanityCheckTask, object):
     def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None):
-        super(ModelProxyHiresGroups, self).__init__(name='Check model has valid proxy and hires groups', auto_fix=auto_fix, log=log, parent=parent)
+        super(ProxyHasNoShaders, self).__init__(name='Check proxy model has no shaders', auto_fix=auto_fix, log=log, parent=parent)
 
         self._asset = asset
         self._status = status
-        self.set_check_text('Checking model hires and proxy groups ... ')
+        self.set_check_text('Checking proxy model has no shaders')
 
     def check(self):
         if self._status != 'working':
             return False
 
-        model_path = self._asset().get_asset_file(file_type='model', status=self._status)
-        if model_path is None or not os.path.isfile(model_path):
+        proxy_path = self._asset().get_asset_file(file_type='proxy', status=self._status)
+        if proxy_path is None or not os.path.isfile(proxy_path):
             return False
+
+        # Check that model file has no shaders stored inside it
+        shaders = sp.dcc.list_materials()
+        invalid_shaders = list()
+        for shader in shaders:
+            if shader not in ['lambert1', 'particleCloud1']:
+                invalid_shaders.append(shader)
+        if len(invalid_shaders) > 0:
+            self.write_error(
+                'Proxy Model file has shaders stored in it: {}. Remove them before publishing the model file ...'.format(
+                    invalid_shaders))
+            return False
+        self.write_ok('Proxy Model file has no shaders stored in it!')
+
+        return True
+
+
+class RigProxyHiresGroups(check.SanityCheckTask, object):
+    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None):
+        super(RigProxyHiresGroups, self).__init__(name='Check rig has valid proxy and hires groups', auto_fix=auto_fix, log=log, parent=parent)
+
+        self._asset = asset
+        self._status = status
+        self.set_check_text('Checking rig hires and proxy groups ... ')
+
+    def check(self):
+        if self._status != 'working':
+            return False
+
+        # rig_path = self._asset().get_asset_file(file_type='rig', status=self._status)
+        # if rig_path is None or not os.path.isfile(rig_path):
+        #     return False
 
         valid_obj = None
         if sp.dcc.object_exists(self._asset().name):
@@ -675,8 +759,8 @@ class ModelProxyHiresGroups(check.SanityCheckTask, object):
         self.write('Checking if asset has valid proxy and hires groups')
         if not valid_obj:
             self.write_error('Main group is not valid. Please change it manually to {}'.format(self._asset().name))
-            self.write('Unlocking model file ...')
-            artella.unlock_file(model_path)
+            # self.write('Unlocking model file ...')
+            # artella.unlock_file(rig_path)
             return False
         valid_proxy = False
         valid_hires = False
@@ -1130,13 +1214,14 @@ class UpdateTexturesPath(check.SanityCheckTask, object):
         if not os.path.isfile(shading_path):
             return False
 
-        solstice_var = os.environ['SOLSTICE_PROJECT']
+        solstice_var = os.path.normpath(os.environ['SOLSTICE_PROJECT'])
+        solstice_full_id = os.path.normpath(sp.solstice_project_id_full)
         self.write('Updating textures paths ...')
         textures_updated = False
         current_textures_path = self._asset().get_asset_textures(force_sync=True)
         all_file_nodes = cmds.ls(et="file")
         for f in all_file_nodes:
-            orig_texture_name = cmds.getAttr("%s.fileTextureName" % f)
+            orig_texture_name = os.path.normpath(cmds.getAttr("%s.fileTextureName" % f))
             current_texture_path = orig_texture_name
             for txt in current_textures_path:
                 texture_name = os.path.basename(current_texture_path)
@@ -1148,11 +1233,17 @@ class UpdateTexturesPath(check.SanityCheckTask, object):
                 current_texture_path = current_texture_path.replace(solstice_var, '$SOLSTICE_PROJECT\\\\')
             if current_texture_path.startswith('$ART_LOCAL_ROOT'):
                 current_texture_path = current_texture_path.replace('$ART_LOCAL_ROOT', solstice_var)
-            current_texture_path = current_texture_path.replace('/', '\\\\')
+            else:
+                if solstice_full_id in current_texture_path:
+                    rep_str = current_texture_path.split(solstice_full_id)[0]+solstice_full_id
+                    current_texture_path = current_texture_path.replace(rep_str, '$SOLSTICE_PROJECT')
+
+            # current_texture_path = current_texture_path.replace('/', '\\')
 
             if orig_texture_name != current_texture_path:
                 textures_updated = True
             if textures_updated:
+                current_texture_path = current_texture_path.replace('\\', '/')
                 self.write('>>>\n\t{0}'.format(os.path.normpath(cmds.getAttr("%s.fileTextureName" % f))))
                 self.write_ok('\t{0}\n'.format(os.path.normpath(current_texture_path)))
                 cmds.setAttr('{}.fileTextureName'.format(f), current_texture_path, type='string')
@@ -1353,9 +1444,9 @@ class ExportShaders(check.SanityCheckTask, object):
         return False
 
 
-class CheckModelTag(check.SanityCheckTask, object):
+class CheckRigTag(check.SanityCheckTask, object):
     def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None, publish=True):
-        super(CheckModelTag, self).__init__(name='Check model tag', auto_fix=auto_fix, log=log, parent=parent)
+        super(CheckRigTag, self).__init__(name='Check model tag', auto_fix=auto_fix, log=log, parent=parent)
 
         self._asset = asset
         self._status = status
@@ -1367,13 +1458,14 @@ class CheckModelTag(check.SanityCheckTask, object):
             return False
 
         if not sp.is_maya():
-            sp.logger.warning('Rename shaders check is only available in Maya')
+            sp.logger.warning('Check Tag is only available in Maya')
             return
 
-        model_path = self._asset().get_asset_file(file_type='model', status=self._status)
-        if model_path is None or not os.path.isfile(model_path):
+        rig_path = self._asset().get_asset_file(file_type='rig', status=self._status)
+        if rig_path is None or not os.path.isfile(rig_path):
             return False
-        sp.dcc.open_file(model_path)
+        if sp.dcc.scene_name() != rig_path:
+            sp.dcc.open_file(rig_path)
 
         # Check that model file has a main group with valid name
         self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
@@ -1408,13 +1500,14 @@ class CheckModelTag(check.SanityCheckTask, object):
         return True
 
 
-class UpdateModelTag(check.SanityCheckTask, object):
-    def __init__(self, asset, log=None, status='working', auto_fix=False, parent=None, publish=True):
-        super(UpdateModelTag, self).__init__(name='Update model tag', auto_fix=auto_fix, log=log, parent=parent)
+class UpdateTag(check.SanityCheckTask, object):
+    def __init__(self, asset, file_type=None, log=None, status='working', auto_fix=False, parent=None, publish=True):
+        super(UpdateTag, self).__init__(name='Update model tag', auto_fix=auto_fix, log=log, parent=parent)
 
         self._asset = asset
         self._status = status
         self._publish = publish
+        self._file_type = file_type
         self.set_check_text('Updating model tag ...')
 
     def check(self):
@@ -1422,13 +1515,17 @@ class UpdateModelTag(check.SanityCheckTask, object):
             return False
 
         if not sp.is_maya():
-            sp.logger.warning('Rename shaders check is only available in Maya')
+            sp.logger.warning('Update Tag is only available in Maya')
             return
 
-        model_path = self._asset().get_asset_file(file_type='model', status=self._status)
-        if model_path is None or not os.path.isfile(model_path):
-            return False
-        sp.dcc.open_file(model_path)
+        if self._file_type:
+            file_path = self._asset().get_asset_file(file_type=self._file_type, status=self._status)
+            if file_path is None or not os.path.isfile(file_path):
+                return False
+            if sp.dcc.scene_name() != file_path:
+                sp.dcc.open_file(file_path)
+        else:
+            file_path = sp.dcc.scene_name()
 
         # Check that model file has a main group with valid name
         self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
@@ -1446,13 +1543,14 @@ class UpdateModelTag(check.SanityCheckTask, object):
         # Check if main group has a valid tag node connected
         valid_tag_data = False
         main_group_connections = sp.dcc.list_source_destination_connections(valid_obj)
-        for connection in main_group_connections:
-            attrs = sp.dcc.list_user_attributes(connection)
-            if attrs and type(attrs) == list:
-                for attr in attrs:
-                    if attr == 'tag_type':
-                        valid_tag_data = True
-                        break
+        if main_group_connections:
+            for connection in main_group_connections:
+                attrs = sp.dcc.list_user_attributes(connection)
+                if attrs and type(attrs) == list:
+                    for attr in attrs:
+                        if attr == 'tag_type':
+                            valid_tag_data = True
+                            break
 
         if not valid_tag_data:
             self.write_warning('Main group has not a valid tag data node connected to it. Creating it ...')
@@ -1473,7 +1571,7 @@ class UpdateModelTag(check.SanityCheckTask, object):
                 if not valid_tag_data:
                     self.write_error('Impossible to create tag data node. Please contact TD team to fix this ...')
                     self.write('Unlocking model file ...')
-                    artella.unlock_file(model_path)
+                    artella.unlock_file(file_path)
                     return False
             except Exception as e:
                 self.write_error('Impossible to create tag data node. Please contact TD team to fix this ...')
@@ -1491,11 +1589,8 @@ class UpdateModelTag(check.SanityCheckTask, object):
         if valid_connection:
             self.write_ok('Proxy group connected to tag data node successfully!')
         else:
-            self.write_error(
-                'Error while connecting Proxy Group to tag data node!  Check Maya editor for more info about the error!')
-            self.write('Unlocking model file ...')
-            artella.unlock_file(model_path)
-            return False
+            self.write_warning(
+                'Error while connecting Proxy Group to tag data node! Check Maya editor for more info about the error!')
 
         # Connect hires group to tag data node
         self.write('Connection hires group to tag data node')
@@ -1503,11 +1598,9 @@ class UpdateModelTag(check.SanityCheckTask, object):
         if valid_connection:
             self.write_ok('Hires group connected to tag data node successfully!')
         else:
-            self.write_error(
+            self.write_warning(
                 'Error while connecting hires group to tag data node! Check Maya editor for more info about the error!')
             self.write('Unlocking model file ...')
-            artella.unlock_file(model_path)
-            return False
 
         # Getting shaders info data
         shaders_file = shaderlibrary.ShaderLibrary.get_asset_shader_file_path(asset=self._asset())
@@ -1515,7 +1608,7 @@ class UpdateModelTag(check.SanityCheckTask, object):
             self.write_error(
                 'Shaders JSON file for asset {0} does not exists: {1}'.format(self._asset().name, shaders_file))
             self.write('Unlocking model file ...')
-            artella.unlock_file(model_path)
+            artella.unlock_file(file_path)
             return False
 
         with open(shaders_file) as f:
@@ -1524,13 +1617,16 @@ class UpdateModelTag(check.SanityCheckTask, object):
             self.write_error(
                 'Shaders JSON file for asset {0} is not valid: {1}'.format(self._asset().name, shaders_file))
             self.write('Unlocking model file ...')
-            artella.unlock_file(model_path)
+            artella.unlock_file(file_path)
             return False
         self.write_ok('Shaders JSON data loaded successfully!')
 
         self.write('Retrieving hires meshes ...')
         hires_grp = None
         hires_grp_name = '{}_hires_grp'.format(self._asset().name)
+        if not sp.dcc.object_exists(hires_grp_name):
+            hires_grp = self._asset().name
+
         children = sp.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True, relative_type='transform')
         if children:
             for child in children:

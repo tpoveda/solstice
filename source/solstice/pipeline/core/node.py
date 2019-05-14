@@ -463,7 +463,7 @@ class SolsticeAssetNode(SolsticeNode, object):
         :return: str
         """
 
-        if file_type not in sp.valid_categories:
+        if file_type not in sp.asset_files:
             return None
         if status not in sp.valid_status:
             return None
@@ -477,11 +477,18 @@ class SolsticeAssetNode(SolsticeNode, object):
             asset_name = self.get_short_name() + '_RIG'
         elif file_type == 'proxy':
             asset_name = self.get_short_name() + '_PROXY'
+        elif file_type == 'builder':
+            asset_name = self.get_short_name() + '_BUILDER'
         asset_name += '.ma'
 
         file_path = None
         if status == 'working':
-            file_path = os.path.join(self._asset_path, '__working__', file_type, asset_name)
+            if file_type == 'proxy':
+                file_path = os.path.join(self._asset_path, '__working__', 'model', asset_name)
+            elif file_type == 'builder':
+                file_path = os.path.join(self._asset_path, '__working__', 'rig', 'builder', asset_name)
+            else:
+                file_path = os.path.join(self._asset_path, '__working__', file_type, asset_name)
         elif status == 'published':
             local_max_versions = self.get_max_local_versions()
             if local_max_versions[file_type]:
@@ -517,11 +524,16 @@ class SolsticeAssetNode(SolsticeNode, object):
         if os.path.isfile(file_path):
             artella.open_file_in_maya(file_path=file_path)
 
-    def reference_asset_file(self):
+    def import_asset_file(self, file_type, status='working'):
+        file_path = self.get_asset_file(file_type=file_type, status=status)
+        if os.path.isfile(file_path):
+            artella.import_file_in_maya(file_path)
+
+    def reference_asset_file(self, file_type='rig'):
         asset_name = self._name + '.ma'
         local_max_versions = self.get_max_local_versions()
-        if local_max_versions['model']:
-            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', asset_name)
+        if local_max_versions[file_type]:
+            published_path = os.path.join(self._asset_path, local_max_versions['rig'][1], 'rig', asset_name)
             if os.path.isfile(published_path):
                 artella.reference_file_in_maya(file_path=published_path)
 

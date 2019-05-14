@@ -126,7 +126,7 @@ class AssetRig(object):
 
         self._root_ctrl = control.Circle('root', normal=[0, 1, 0], radius=radius, color_index=29)
         self._main_ctrl = control.Circle('main', normal=[0, 1, 0], radius=radius-6, color_index=16)
-        self._main_ctrl.move(0, 2, 0)
+        self._main_ctrl.translate_control_shapes(0, 1, 0)
 
     def create_main_attributes(self):
         """
@@ -153,7 +153,7 @@ class AssetRig(object):
         cmds.setAttr('{}.visibility'.format(self._hires_grp), True)
         cmds.setDrivenKeyframe(self._proxy_grp + '.visibility', currentDriver='{}.type'.format(self._main_grp))
         cmds.setDrivenKeyframe(self._hires_grp + '.visibility', currentDriver='{}.type'.format(self._main_grp))
-        cmds.setAttr('{}.type'.format(self._main_grp), 1)
+        cmds.setAttr('{}.type'.format(self._main_grp), 0)
 
     def connect_main_controls(self):
         """

@@ -15,6 +15,7 @@ __email__ = "tpoveda@cgart3d.com"
 import os
 import sys
 import time
+import weakref
 import importlib
 import webbrowser
 from functools import partial
@@ -702,10 +703,23 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
         sp.logger.debug('{0} synchronized in {1} seconds'.format(self._name, elapsed_time))
         self.syncFinished.emit()
 
-    def export_alembic_file(self, start_frame=1, end_frame=1):
+    def export_alembic_file(self, file_type='model', start_frame=1, end_frame=1):
+
+        from solstice.pipeline.tools.sanitycheck.checks import assetchecks
+
         export_path = os.path.dirname(self.get_asset_file(file_type='model', status='working'))
-        self.open_asset_file(file_type='model', status='working')
+        self.open_asset_file(file_type=file_type, status='working')
         sp.dcc.refresh_viewport()
+        if file_type == 'model':
+            object_to_export = '{}_MODEL'.format(self.name)
+            if not sp.dcc.object_exists(object_to_export):
+                sp.logger.error('Model Group {} does not exists!'.format(object_to_export))
+                return
+            sp.dcc.rename_node(object_to_export, self.name)
+
+        check = assetchecks.UpdateTag(asset=weakref.ref(self), log=None)
+        check.check()
+
         alembicmanager.AlembicExporter().export_alembic(
             export_path=export_path,
             object_to_export=self.name,
@@ -782,16 +796,18 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
 
         # Create buttons for assets files
         self._working_model_btn = buttons.CategoryButtonWidget(category_name='Model', status='working', asset=self, check_lock_info=self._asset_info._check_lock_info)
+        self._working_rig_btn = buttons.CategoryButtonWidget(category_name='Rig', status='working', asset=self, check_lock_info=self._asset_info._check_lock_info)
         self._working_shading_btn = buttons.CategoryButtonWidget(category_name='Shading', status='working', asset=self, check_lock_info=self._asset_info._check_lock_info)
         self._working_textures_btn = buttons.CategoryButtonWidget(category_name='Textures', status='working', asset=self, check_lock_info=self._asset_info._check_lock_info)
         self._published_model_btn = buttons.CategoryButtonWidget(category_name='Model', status='published', asset=self, check_lock_info=self._asset_info._check_lock_info)
+        self._published_rig_btn = buttons.CategoryButtonWidget(category_name='Rig', status='published', asset=self, check_lock_info=self._asset_info._check_lock_info)
         self._published_shading_btn = buttons.CategoryButtonWidget(category_name='Shading', status='published', asset=self, check_lock_info=self._asset_info._check_lock_info)
         self._published_textures_btn = buttons.CategoryButtonWidget(category_name='Textures', status='published', asset=self, check_lock_info=self._asset_info._check_lock_info)
 
-        for btn in [self._working_model_btn, self._working_shading_btn, self._working_textures_btn]:
+        for btn in [self._working_model_btn, self._working_rig_btn, self._working_shading_btn, self._working_textures_btn]:
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             self._asset_info._working_asset_layout.addWidget(btn)
-        for btn in [self._published_model_btn, self._published_shading_btn, self._published_textures_btn]:
+        for btn in [self._published_model_btn, self._published_rig_btn, self._published_shading_btn, self._published_textures_btn]:
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             self._asset_info._published_asset_layout.addWidget(btn)
 
@@ -855,7 +871,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
 
         scripts_path = os.path.join(rig_path, 'scripts')
         if not os.path.isdir(scripts_path):
-            sp.logger.warning('Asset has no vlaid rig scripts foler available!'.format(self.name))
+            sp.logger.warning('Asset has no vlaid rig scripts folder available!'.format(self.name))
             return
 
         build_script = os.path.join(scripts_path, '{}.py'.format(self.name))

@@ -249,7 +249,10 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         :param parent: str
         """
 
-        cmds.parent(node, parent)
+        if not parent:
+            cmds.parent(node, world=True)
+        else:
+            cmds.parent(node, parent)
 
     @staticmethod
     def rename_node(node, new_name):
@@ -720,13 +723,17 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         return cmds.file(query=True, modified=True)
 
     @staticmethod
-    def save_current_scene(force=True):
+    def save_current_scene(force=True, file_path=None):
         """
         Saves current scene
         :param force: bool
+        :param file_path: str
         """
 
-        return cmds.file(save=True, f=force)
+        if file_path:
+            cmds.file(rename=file_path)
+
+        return cmds.file(save=True, f=force, type='mayaAscii')
 
     @staticmethod
     def confirm_dialog(title, message, button=None, cancel_button=None, default_button=None, dismiss_string=None):

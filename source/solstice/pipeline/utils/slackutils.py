@@ -73,3 +73,66 @@ def asset_published(asset_name):
             file=f,
             title=asset.name
         )
+
+
+def new_version(file_name, url, comment, channel_name='general'):
+    """
+    Creates a new version of the current file with given info
+    :param url: str
+    :param comment: str
+    :param channel_name: str
+    """
+
+    slack_token = get_solstice_slack_api()
+    if not slack_token:
+        sp.logger.warning('Solstice Slack App is not available because you are not a developer. Please contact TD!')
+        return
+
+    msg = 'New version of file {} has been uploaded into Artella server!'.format(os.path.relpath(file_name, sp.get_solstice_project_path()))
+    comment_msg = 'Comment: {}'.format(comment) if comment else None
+
+    sc = SlackClient(slack_token)
+
+    sc.api_call(
+        "chat.postMessage",
+        channel="#{}".format(channel_name),
+        text=msg
+    )
+
+    sc.api_call(
+        "chat.postMessage",
+        channel="#{}".format(channel_name),
+        text=comment_msg
+    )
+
+    sc.api_call(
+        "chat.postMessage",
+        channel="#{}".format(channel_name),
+        text=url
+    )
+
+
+def new_viewport_image(image_path, file_name, channel_name='general'):
+    """
+    Grabs viewport image and submits to given channel
+    :param image_path: str
+    :param file_name: str
+    :param channel_name: str
+    :return:
+    """
+
+    slack_token = get_solstice_slack_api()
+    if not slack_token:
+        sp.logger.warning('Solstice Slack App is not available because you are not a developer. Please contact TD!')
+        return
+
+    sc = SlackClient(slack_token)
+
+    with open(image_path) as f:
+        print(f)
+        sc.api_call(
+            'files.upload',
+            channels=["#{}".format(channel_name)],
+            file=f,
+            title=os.path.basename(file_name)
+        )

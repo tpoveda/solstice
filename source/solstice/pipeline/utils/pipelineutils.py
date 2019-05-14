@@ -153,11 +153,8 @@ def test_asset_pipeline_files(asset_name, export_path=None, axis_to_move='x'):
         sp.logger.error('Export Path {} does not exists! Aborting operation ...'.format(export_path))
         return
 
-    asset_name = asset.name + '.ma'
-    asset_path = os.path.join(export_path, asset_name)
-    if os.path.isfile(asset_path):
-        artella.import_file_in_maya(file_path=asset_path)
-        sp.dcc.refresh_viewport()
+    asset.import_asset_file('rig', status='working')
+    sp.dcc.refresh_viewport()
 
     abc_name = asset.name + '.abc'
     abc_path = os.path.join(export_path, abc_name)
