@@ -160,7 +160,7 @@ class SolsticeLauncher(QObject, object):
 
         install_path = config.value('solstice_pipeline_install')
         if install_path:
-            install_path = os.path.join(install_path, 'solstice_pipeline')
+            install_path = os.path.join(install_path)
         if install_path is None or not os.path.exists(install_path):
             console.write('Current installation path does not exists: {}. Reinstalling Solstice Tools ...'.format(install_path))
             config.setValue('solstice_pipeline_install', os.path.abspath(solstice_updater.SolsticeTools.set_installation_path(console=console)))
@@ -174,12 +174,12 @@ class SolsticeLauncher(QObject, object):
         console.write('Added environment variable: solstice_install_path --> {}'.format(install_path))
         if os.environ.get('PYTHONPATH'):
             os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ';' + config.value('solstice_pipeline_install')
-            os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ';' + os.path.join(config.value('solstice_pipeline_install'), 'solstice_pipeline')
-            os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ';' + os.path.join(os.path.join(config.value('solstice_pipeline_install'), 'solstice_pipeline'), 'externals')
+            os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ';' + os.path.join(config.value('solstice_pipeline_install'), 'solstice', 'pipeline')
+            os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ';' + os.path.join(os.path.join(config.value('solstice_pipeline_install'), 'solstice', 'pipeline'), 'externals')
         else:
             os.environ['PYTHONPATH'] = config.value('solstice_pipeline_install')
-            os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ';' + os.path.join(config.value('solstice_pipeline_install'), 'solstice_pipeline')
-            os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ';' + os.path.join(os.path.join(config.value('solstice_pipeline_install'), 'solstice_pipeline'), 'externals')
+            os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ';' + os.path.join(config.value('solstice_pipeline_install'), 'solstice', 'pipeline')
+            os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ';' + os.path.join(os.path.join(config.value('solstice_pipeline_install'), 'solstice', 'pipeline'), 'externals')
 
         # Check Solstice Tools version ...
         self._progress_text.setText('Checking Solstice Tools Version ...')
@@ -229,7 +229,7 @@ class SolsticeLauncher(QObject, object):
 
         time.sleep(1)
 
-        self.launch(exec_=exec_, console=console, install_path=os.path.join(config.value('solstice_pipeline_install'), 'solstice_pipeline'))
+        self.launch(exec_=exec_, console=console, install_path=os.path.join(config.value('solstice_pipeline_install'), 'solstice', 'pipeline'))
 
     def setup_ui(self):
         """

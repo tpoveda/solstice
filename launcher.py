@@ -3,7 +3,7 @@ import shutil
 import subprocess
 
 # Get installer path
-solstice_launcher_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), 'solstice_launcher')
+solstice_launcher_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), 'launcher')
 installer_bat = os.path.join(solstice_launcher_path, 'generate_executable.bat')
 
 # PyInstaller will generate spec fild, build folder and dst folder in the current working directory

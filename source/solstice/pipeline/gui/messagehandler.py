@@ -15,14 +15,13 @@ __email__ = "tpoveda@cgart3d.com"
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice.pipeline as sp
-from solstice.pipeline.utils import mayautils
 
 if sp.is_maya():
     import maya.OpenMaya as OpenMaya
 
 
 class MessageHandler(object):
-    parent_window = mayautils.get_maya_window()
+    parent_window = sp.dcc.get_main_window()
 
     def set_message(self, msg, level=0):
         """

@@ -10,9 +10,10 @@
 
 import os
 import re
-import tempfile
 import json
 import time
+import tempfile
+import traceback
 
 from PySide.QtGui import *
 from PySide.QtCore import *
@@ -128,7 +129,7 @@ def check_current_solstice_tools_version(config, console):
     """
 
     install_path = SolsticeTools.get_installation_path(config=config)
-    solstice_tools_path = os.path.join(install_path, 'solstice_pipeline', 'settings.json')
+    solstice_tools_path = os.path.join(install_path, 'solstice', 'pipeline', 'settings.json')
     if os.path.isfile(solstice_tools_path):
         with open(solstice_tools_path, 'r') as fl:
             install_info = json.loads(fl.read())
@@ -185,7 +186,7 @@ def check_solstice_tools_version(console, updater, get_versions=False):
         return
     last_version_value = get_version(last_version)
     console.write_ok('Last Solstice Tools deployed version is {0}'.format(last_version))
-    solstice_tools_path = os.path.join(install_path, 'solstice_pipeline', 'settings.json')
+    solstice_tools_path = os.path.join(install_path, 'solstice', 'pipeline', 'settings.json')
     console.write('Checking current Solstice Tools installed version on {0}'.format(solstice_tools_path))
 
     try:
@@ -265,13 +266,15 @@ def update_solstice_tools(console, updater):
 
             updater._progress_text.setText('Installing Solstice Pipeline ...')
             QCoreApplication.processEvents()
-            utils.unzip_file(filename=solstice_tools_install_path, destination=install_path, console=console, removeSubfolders=['solstice_pipeline'])
+            utils.unzip_file(filename=solstice_tools_install_path, destination=install_path, console=console, removeSubfolders=['solstice_pipeline', 'solstice'])
 
             console.write('=' * 15)
-            console.write_ok('Soltice Pipeline {0} installed successfully!'.format(last_version))
+            console.write_ok('Solstice Pipeline {0} installed successfully!'.format(last_version))
             console.write('=' * 15)
             QCoreApplication.processEvents()
 
             return True
     except Exception:
+        console.write_error('Something went wrong during Solstice Tools updating process. Please contact TD!')
+        console.write_error(str(traceback.format_exc()))
         return False

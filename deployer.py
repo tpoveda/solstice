@@ -23,11 +23,11 @@ from string import zfill
 from distutils.dir_util import copy_tree
 from win32com.shell import shell, shellcon
 
-pipeline_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'solstice_pipeline')
+pipeline_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'source',)
 if pipeline_path not in sys.path:
     sys.path.append(pipeline_path)
 
-from solstice_utils import solstice_download_utils
+from solstice.pipeline.utils import downloadutils
 
 numbers = re.compile('\d+')
 
@@ -45,7 +45,7 @@ def deploy_solstice_pipeline():
         print 'ERROR: Error when creating temp folder {}. Aborting deployment ...!'.format(temp_path)
         return
 
-    solstice_pipeline_temp_path = os.path.join(temp_path, 'solstice_pipeline')
+    solstice_pipeline_temp_path = os.path.join(temp_path)
     if not os.path.exists(solstice_pipeline_temp_path):
         os.makedirs(solstice_pipeline_temp_path)
 
@@ -76,19 +76,12 @@ def deploy_solstice_pipeline():
         os.makedirs(version_folder_path)
 
     mac_folder = os.path.join(version_folder_path, 'mac')
-    if not os.path.exists(mac_folder):
-        os.makedirs(mac_folder)
     win_folder = os.path.join(version_folder_path, 'win')
-    if not os.path.exists(win_folder):
-        os.makedirs(win_folder)
 
     # MAC Version
-    mac_pipeline_path = os.path.join(mac_folder, 'solstice_pipeline')
-    if not os.path.exists(mac_pipeline_path):
-        os.makedirs(mac_pipeline_path)
-    shutil.copytree(solstice_pipeline_temp_path, os.path.join(mac_pipeline_path, 'solstice_pipeline'))
+    shutil.copytree(solstice_pipeline_temp_path, mac_folder)
 
-    user_setup_file = os.path.join(mac_pipeline_path, 'solstice_pipeline', 'userSetup.py')
+    user_setup_file = os.path.join(mac_folder, 'solstice', 'pipeline', 'userSetup.py')
     if os.path.isfile(user_setup_file):
         shutil.copy2(user_setup_file, os.path.join(os.path.dirname(os.path.dirname(user_setup_file)), 'userSetup.py'))
     os.remove(user_setup_file)
@@ -96,14 +89,14 @@ def deploy_solstice_pipeline():
 
     modules_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'modules')
     if os.path.exists(modules_folder):
-        shutil.copytree(modules_folder, os.path.join(os.path.dirname(mac_pipeline_path), 'modules'))
+        shutil.copytree(modules_folder, os.path.join(os.path.dirname(mac_folder), 'modules'))
 
-    mac_zip_file = zip_dir('solstice_pipeline_mac', os.path.dirname(mac_pipeline_path))
+    mac_zip_file = zip_dir('solstice_pipeline_mac', os.path.dirname(mac_folder))
     with open(os.path.join(os.path.dirname(mac_zip_file), 'setup.json'), 'wb') as f:
         f.write(json.dumps({'lastVersion': new_version}, ensure_ascii=False))
 
     # Windows Version
-    shutil.copytree(solstice_pipeline_temp_path, os.path.join(win_folder, 'solstice_pipeline'))
+    shutil.copytree(solstice_pipeline_temp_path, win_folder)
 
     win_zip_file = zip_dir('solstice_pipeline', win_folder)
     with open(os.path.join(os.path.dirname(win_zip_file), 'setup.json'), 'wb') as f:
@@ -112,7 +105,7 @@ def deploy_solstice_pipeline():
     # Create settings.json file
     last_version_dict = dict()
     last_version_dict['version'] = new_version
-    setup_file = os.path.join(folder_path, 'settings.json')
+    setup_file = os.path.join(folder_path, 'solstice', 'pipeline', 'settings.json')
     with open(setup_file, 'w') as fl:
         json.dump(last_version_dict, fl)
     fl.close()
@@ -138,7 +131,7 @@ def deploy_solstice_pipeline():
 
 
 def get_solstice_pipeline_folder():
-    solstice_pipeline_default_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'solstice_pipeline')
+    solstice_pipeline_default_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'source')
     solstice_pipeline_pidl, flags = shell.SHILCreateFromPath(solstice_pipeline_default_dir, 0)
 
     try:
@@ -175,7 +168,7 @@ def get_last_solstice_pipeline_version(as_int=False):
     setup_json = 'setup.json'
     setup_file = '{}{}'.format(repo_url, setup_json)
     setup_path = os.path.join(temp_path, 'setup.json')
-    if not solstice_download_utils.download_file(filename=setup_file, destination=setup_path):
+    if not downloadutils.download_file(filename=setup_file, destination=setup_path):
         raise Exception('ERROR: setup.json is not accessible. It was not possible to check last version of solstice tools!')
 
     with open(setup_path, 'r') as f:
@@ -222,7 +215,7 @@ def clean_python_files(path):
     if os.path.exists(path):
         for parent, dirnames, filenames in os.walk(path):
             for fn in filenames:
-                if 'solstice_playblast' in fn.lower():
+                if 'playblast' in fn.lower():
                     continue
                 if fn.lower().endswith('.py') and 'userSetup' not in fn:
                     print('Removing file: {}'.format(fn))

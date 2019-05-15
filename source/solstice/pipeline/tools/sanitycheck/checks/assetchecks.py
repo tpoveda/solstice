@@ -13,7 +13,6 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
-import re
 import json
 
 import solstice.pipeline as sp
@@ -27,9 +26,6 @@ from solstice.pipeline.tools.tagger import tagger
 if sp.is_maya():
     from solstice.pipeline.utils import mayautils
     from solstice.pipeline.tools.shaderlibrary import shaderlibrary
-
-
-reload(shaderlibrary)
 
 
 class AssetFileExists(check.SanityCheckTask, object):

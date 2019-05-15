@@ -307,7 +307,7 @@ class SolsticePipeline(QObject):
         self.logger.debug('\n')
 
         if os.environ.get('SOLSTICE_PIPELINE_SHOW'):
-            from solstice.pipeline.tools import hello
+            from solstice.pipeline.tools.hello import hello
             hello.run()
 
     def detect_dcc(self):

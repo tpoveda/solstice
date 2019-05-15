@@ -180,7 +180,7 @@ def update_tools(get_versions=False):
         raise Exception('ERROR: Impossible to access solstice_tools.zip. It was nos possible to install solstice_tools. Check your internet connection and retry')
     print('Installing solstice_tools on: {}'.format(maya_path))
     time.sleep(1)
-    unzip_file(filename=solstice_tools_install_path, destination=maya_path, removeSubfolders=['solstice_pipeline'])
+    unzip_file(filename=solstice_tools_install_path, destination=maya_path, removeSubfolders=['solstice_pipeline', 'solstice'])
 
     # Remove original solstice_tools module
     orig_module_file = os.path.join(maya_path, 'modules', 'solstice_tools.mod')
