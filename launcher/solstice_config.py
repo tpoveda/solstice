@@ -57,7 +57,7 @@ def create_config(console, window, dcc_install_path, config_file=None):
 
     if not dcc_install_path:
         console.write('Dcc Location not found: Solstice Launcher will not launch DCC!')
-        return None
+        return config
 
     # for item in application_versions.items():
     config.setValue('executable', os.path.abspath(dcc_install_path))

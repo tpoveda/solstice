@@ -203,15 +203,24 @@ class RigControl(object):
         if comps:
             cmds.move(x, y, z, comps, relative=True, os=True)
 
-    def scale_control_shapes(self, scale_value):
+    def scale_control_shapes(self, x, y=None, z=None):
         """
         Scales shape curve CVs in object space
         :param scale_value: float
         """
 
+        x = x if x != 0 else 1
+        y = y if y != 0 else 1
+        z = z if z != 0 else 1
+
+        if y is None:
+            y = x
+        if z is None:
+            z = x
+
         comps = self.get_shapes_components()
         if comps:
-            cmds.scale(scale_value, scale_value, scale_value, comps, relative=True, os=True)
+            cmds.scale(x, y, z, comps, relative=True, os=True)
 
 
 class Circle(RigControl, object):

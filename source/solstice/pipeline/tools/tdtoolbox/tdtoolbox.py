@@ -32,6 +32,7 @@ if sp.is_maya():
     from solstice.pipeline.tools.lightrigs import lightrigs
     from solstice.pipeline.tools.shaderlibrary import shaderlibrary
     from solstice.pipeline.utils import mayautils
+    reload(shaderlibrary)
 
 reload(pipelineutils)
 reload(console)
@@ -189,6 +190,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         check_shading_main_group_btn = QPushButton('Check Shading Main Group')
         check_shading_shaders = QPushButton('Check Shaders')
         rename_shaders_btn = QPushButton('Rename Shaders')
+        print_texture_files = QPushButton('Print Texture Files')
         update_textures_paths_btn = QPushButton('Update Textures Paths')
         clean_textures_paths_btn = QPushButton('Clean Textures Paths')
         export_shading_file_btn = QPushButton('Export Shading JSON File')
@@ -197,10 +199,11 @@ class PropsPipelineWidget(base.BaseWidget, object):
         shading_check_lyt.addWidget(check_shading_main_group_btn, 0, 1)
         shading_check_lyt.addWidget(check_shading_shaders, 1, 0)
         shading_check_lyt.addWidget(rename_shaders_btn, 1, 1)
-        shading_check_lyt.addWidget(export_shading_file_btn, 2, 0)
-        shading_check_lyt.addWidget(update_textures_paths_btn, 2, 1)
-        shading_check_lyt.addWidget(clean_textures_paths_btn, 3, 0)
-        shading_check_lyt.addWidget(export_shaders_btn, 3, 1)
+        shading_check_lyt.addWidget(print_texture_files, 2, 0)
+        shading_check_lyt.addWidget(export_shading_file_btn, 2, 1)
+        shading_check_lyt.addWidget(update_textures_paths_btn, 3, 0)
+        shading_check_lyt.addWidget(clean_textures_paths_btn, 3, 1)
+        shading_check_lyt.addWidget(export_shaders_btn, 4, 0)
 
         test_utils = QWidget()
         test_check_lyt = QGridLayout()
@@ -310,6 +313,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_proxy_hires_groups_btn.clicked.connect(self._on_model_proxy_hires_groups)
         check_tag_btn.clicked.connect(self._on_check_tag)
         update_tag_btn.clicked.connect(self._on_update_tag)
+        print_texture_files.clicked.connect(self._on_print_texture_files)
         update_textures_paths_btn.clicked.connect(self._on_update_textures_path)
         clean_textures_paths_btn.clicked.connect(self._on_clean_textures_path)
         export_shading_file_btn.clicked.connect(self._on_export_shading_file)
@@ -471,6 +475,12 @@ class PropsPipelineWidget(base.BaseWidget, object):
         sp.dcc.open_file(rig_path, force=True)
         check = assetchecks.UpdateTag(asset=weakref.ref(asset), file_type='rig', log=log)
         check.check()
+
+    def _on_print_texture_files(self):
+        all_file_nodes = cmds.ls(et="file")
+        for eachFile in all_file_nodes:
+            current_file = cmds.getAttr("%s.fileTextureName" % eachFile)
+            print(current_file)
 
     def _on_valid_rig_path(self):
         asset = self._get_asset()

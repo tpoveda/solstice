@@ -71,6 +71,16 @@ class SolsticeHoudini(dcc.SolsticeDCC, object):
         return False
 
     @staticmethod
+    def node_short_name(node):
+        """
+        Returns short name of the given node
+        :param node: str
+        :return: str
+        """
+
+        return node
+
+    @staticmethod
     def shelf_exists(shelf_name):
         """
         Returns whether given shelf already exists or not

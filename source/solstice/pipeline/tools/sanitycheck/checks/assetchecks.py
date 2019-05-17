@@ -1225,10 +1225,10 @@ class UpdateTexturesPath(check.SanityCheckTask, object):
                     if not os.path.normpath(txt) == os.path.normpath(current_texture_path):
                         current_texture_path = current_texture_path.replace(current_texture_path, txt)
 
-            if current_texture_path.startswith(solstice_var):
-                current_texture_path = current_texture_path.replace(solstice_var, '$SOLSTICE_PROJECT\\\\')
             if current_texture_path.startswith('$ART_LOCAL_ROOT'):
                 current_texture_path = current_texture_path.replace('$ART_LOCAL_ROOT', solstice_var)
+            if current_texture_path.startswith(solstice_var):
+                current_texture_path = current_texture_path.replace(solstice_var, '$SOLSTICE_PROJECT\\\\')
             else:
                 if solstice_full_id in current_texture_path:
                     rep_str = current_texture_path.split(solstice_full_id)[0]+solstice_full_id

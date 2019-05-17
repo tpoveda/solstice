@@ -167,5 +167,11 @@
     "Added lot of tools to TD ToolBox to manage all pipeline in a centric way",
     "Fixed Playbalst Mask Plugin creation function",
     "Added Solstice Slack App"
+  ],
+  "13.0":
+  [
+    "Alembic Workflow now support proper rig/model pipeline",
+    "Fixed Alembic Import when importing multiple Alembic Assets in one unique Alembic file",
+    "Shader Sync now supports list of shader dicts"
   ]
 }

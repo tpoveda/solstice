@@ -587,6 +587,12 @@ class SolsticeTagDataNode(object):
         self._tag_info_dict = None
         if tag_info:
             self._tag_info_dict = ast.literal_eval(tag_info)
+            short_node = sp.dcc.node_short_name(self._node)
+            if short_node in self._tag_info_dict.keys():
+                self._tag_info_dict = self._tag_info_dict[short_node]
+            else:
+                short_node_strip = short_node.rstrip(string.digits)
+                self._tag_info_dict = self._tag_info_dict[short_node_strip]
 
     def get_node(self):
         return self._node

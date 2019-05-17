@@ -10,8 +10,12 @@
 
 import os
 import sys
-import argparse
 import time
+import shutil
+import argparse
+import platform
+import traceback
+import subprocess
 
 import solstice_artella_utils as artella
 import solstice_config as cfg
@@ -71,8 +75,12 @@ class SolsticeLauncher(QObject, object):
         elif nuke_location and not maya_location and not houdini_location:
             self.selected_dcc = SolsticeDccs.Nuke
 
+        console = solstice_console.SolsticeConsole()
+        console.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+        dcc_config = cfg.create_config(window=self, dcc_install_path=None, console=console)
+
         if self.selected_dcc is None:
-            dcc_selector = DCCSelector()
+            dcc_selector = DCCSelector(dcc_config)
             dcc_selector.exec_()
             self.selected_dcc = dcc_selector.selected_dcc
 
@@ -90,8 +98,6 @@ class SolsticeLauncher(QObject, object):
 
         self.setup_ui()
 
-        console = solstice_console.SolsticeConsole()
-        console.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
         console.move(self._splash.geometry().center())
         console.move(300, 405)
         console.show()
@@ -305,13 +311,14 @@ class SolsticeLauncher(QObject, object):
 
 
 class DCCSelector(QDialog, object):
-    def __init__(self, parent=None):
+    def __init__(self, config, parent=None):
         super(DCCSelector, self).__init__(parent)
 
+        self._config = config
         self.selected_dcc = None
 
         self.setWindowTitle('DCC Selector')
-        self.setFixedSize(QSize(310, 130))
+        self.setFixedSize(QSize(310, 160))
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
 
         self.main_layout = QVBoxLayout()
@@ -353,8 +360,18 @@ class DCCSelector(QDialog, object):
         nuke_btn.setIcon(QIcon(nuke_pixmap))
         dccs_layout.addWidget(nuke_btn)
 
-        cancel_btn = QPushButton('C L O S E')
-        self.main_layout.addWidget(cancel_btn)
+        extra_buttons_lyt = QHBoxLayout()
+        self.main_layout.addLayout(extra_buttons_lyt)
+        self.open_folder_btn = QPushButton('Open Solstice Tools folder')
+        self.uninstall_btn = QPushButton('Uninstall Solstice Tools')
+        self.force_uninstall_btn = QPushButton('Force')
+        self.force_uninstall_btn.setMaximumWidth(35)
+        extra_buttons_lyt.addWidget(self.open_folder_btn)
+        extra_buttons_lyt.addWidget(self.uninstall_btn)
+        extra_buttons_lyt.addWidget(self.force_uninstall_btn)
+
+        close_btn = QPushButton('C L O S E')
+        self.main_layout.addWidget(close_btn)
 
         maya_location = solstice_launcher_utils.get_maya_installation(2019)
         if not maya_location:
@@ -375,7 +392,10 @@ class DCCSelector(QDialog, object):
         maya_btn.clicked.connect(self._on_maya_selected)
         houdini_btn.clicked.connect(self._on_houdini_selected)
         nuke_btn.clicked.connect(self._on_nuke_selected)
-        cancel_btn.clicked.connect(sys.exit)
+        self.open_folder_btn.clicked.connect(self._on_open_installation_folder)
+        self.uninstall_btn.clicked.connect(self._on_uninstall)
+        self.force_uninstall_btn.clicked.connect(self._on_force_uninstall)
+        close_btn.clicked.connect(sys.exit)
 
     def _on_maya_selected(self):
         self.selected_dcc = SolsticeDccs.Maya
@@ -388,6 +408,60 @@ class DCCSelector(QDialog, object):
     def _on_nuke_selected(self):
         self.selected_dcc = SolsticeDccs.Nuke
         self.close()
+
+    def _on_open_installation_folder(self):
+
+        def _open_folder(path):
+            """
+            Open folder using OS default settings
+            :param path: str, folder path we want to open
+            """
+
+            if platform.system() == "Windows":
+                os.startfile(path)
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", path])
+            else:
+                subprocess.Popen(["xdg-open", path])
+
+        install_path = solstice_updater.SolsticeTools.get_installation_path(config=self._config)
+        if install_path and os.path.isdir(install_path) and len(os.listdir(install_path)) != 0:
+            _open_folder(install_path)
+        else:
+            QMessageBox.information(self, 'Solstice Tools are not installed!', 'Solstice Tools Installation folder not found!')
+
+    def _on_uninstall(self):
+        install_path = solstice_updater.SolsticeTools.get_installation_path(config=self._config)
+        if install_path and os.path.isdir(install_path):
+            dirs_to_remove = list()
+            if os.path.isdir(os.path.join(install_path, 'solstice_pipeline')):
+                dirs_to_remove.append(os.path.join(install_path, 'solstice_pipeline'))
+            elif os.path.isdir(os.path.join(install_path, 'solstice')) and os.path.isfile(os.path.join(install_path, '__init__.pyc')):
+                dirs_to_remove.append(os.path.join(install_path, 'solstice'))
+                dirs_to_remove.append(os.path.join(install_path, '__init__.pyc'))
+
+            QMessageBox.information(self, 'Close DCCs', 'Please close any opened DCC (Maya, Houdini or Nuke) before continuing')
+            res = QMessageBox.question(self, 'Uninstalling Solstice Tools', 'Are you sure you want to uninstall Solstice Tools?\nFolder/s that will be removed \n\t{}'.format('\n\t'.join(dirs_to_remove)), QMessageBox.Yes | QMessageBox.No)
+            if res == QMessageBox.Yes:
+                try:
+                    for f in dirs_to_remove:
+                        if os.path.isdir(f):
+                            shutil.rmtree(f, ignore_errors=True)
+                        elif os.path.isfile(f):
+                            os.remove(f)
+                    self._config.setValue('solstice_pipeline_install', None)
+                    QMessageBox.information(self, 'Solstice Tools uninstalled!', 'Solstice Tools uninstalled successfully!')
+                except Exception:
+                    QMessageBox.critical(self, 'Error during Solstice Tools uninstall', traceback.format_exc())
+        else:
+            QMessageBox.information(self, 'Solstice Tools are not installed!', 'Impossible to uninstall Solstice Tools!')
+
+
+    def _on_force_uninstall(self):
+        res = QMessageBox.question(self, 'Uninstalling Solstice Tools', 'Are you sure you want to uninstall Solstice Tools?', QMessageBox.Yes | QMessageBox.No)
+        if res == QMessageBox.Yes:
+            self._config.setValue('solstice_pipeline_install', None)
+            QMessageBox.information(self, 'Solstice Tools uninstalled!', 'Solstice Tools uninstalled successfully!')
 
 
 if __name__ == '__main__':

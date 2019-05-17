@@ -715,7 +715,7 @@ class AlembicExporter(QWidget, object):
                         obj_meshes = hires_objs
                 else:
                     hires_grp = sp.dcc.list_connections(node=tag_node, attribute_name='hires')
-                    if hires_grp and sp.dcc.object_exists(hires_grp):
+                    if hires_grp and sp.dcc.object_exists(hires_grp[0]):
                         hires_objs = sp.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='mesh')
                     else:
                         hires_objs = sp.dcc.list_relatives(node=obj, all_hierarchy=True, full_path=True, relative_type='mesh')
@@ -787,7 +787,7 @@ class AlembicExporter(QWidget, object):
             has_hires = sp.dcc.attribute_exists(node=tag_node, attribute_name='hires') if tag_node else None
             if tag_node and has_hires:
                 hires_grp = sp.dcc.list_connections(node=tag_node, attribute_name='hires')
-                if hires_grp and sp.dcc.object_exists(hires_grp):
+                if hires_grp and sp.dcc.object_exists(hires_grp[0]):
                     hires_node = AlembicExporterModelHires(hires_grp)
                     root_grp.addChild(hires_node)
                     for model in geo_list:
@@ -845,7 +845,73 @@ class AlembicExporter(QWidget, object):
 
         return tag_info
 
+    def _get_alembic_rig_export_list(self, root_node):
+        export_list = list()
+        root_node_child_count = root_node.childCount()
+        if root_node_child_count > 0 or len(sp.dcc.list_shapes(root_node.name)) > 0:
+            for j in range(root_node.childCount()):
+                c = root_node.child(j)
+                c_name = c.name
+                if type(c_name) in [list, tuple]:
+                    c_name = c_name[0]
+                if isinstance(c, AlembicExporterModelHires):
+                    children = sp.dcc.node_children(node=c_name, all_hierarchy=True, full_path=True)
+                    export_list.extend(children)
+                    export_list.append(c_name)
+
+                    # if tag_node:
+                    #     self._add_tag_attributes(c_name, tag_node)
+                    # export_list.append(c_name)
+                else:
+                    if 'transform' != sp.dcc.node_type(c_name):
+                        xform = sp.dcc.node_parent(node=c_name, full_path=True)
+                        parent_xform = sp.dcc.node_parent(node=xform, full_path=True)
+                        if parent_xform:
+                            children = sp.dcc.node_children(node=parent_xform, all_hierarchy=True, full_path=True)
+                            export_list.extend(children)
+                    else:
+                        children = sp.dcc.node_children(node=c_name, all_hierarchy=True, full_path=True)
+                        export_list.extend(children)
+
+        for obj in reversed(export_list):
+            if sp.dcc.node_type(obj) != 'transform':
+                export_list.remove(obj)
+                continue
+            is_visible = sp.dcc.get_attribute_value(node=obj, attribute_name='visibility')
+            if not is_visible:
+                export_list.remove(obj)
+                continue
+            if sp.dcc.attribute_exists(node=obj, attribute_name='displaySmoothMesh'):
+                sp.dcc.set_integer_attribute_value(node=obj, attribute_name='displaySmoothMesh', attribute_value=2)
+
+        childs_to_remove = list()
+        for obj in export_list:
+            children = sp.dcc.node_children(node=obj, all_hierarchy=True, full_path=True)
+            shapes = sp.dcc.list_children_shapes(node=obj, all_hierarchy=True, full_path=True)
+            if children and not shapes:
+                childs_to_remove.extend(children)
+
+        if childs_to_remove:
+            for obj in childs_to_remove:
+                if obj in export_list:
+                    export_list.remove(obj)
+
+        return export_list
+
     def _export_alembics(self, alembic_nodes):
+
+        def _recursive_hierarchy(transform):
+            child_nodes = list()
+            if not transform:
+                return child_nodes
+            transforms = cmds.listRelatives(transform, f=True)
+            if not transforms:
+                return child_nodes
+            for eachTransform in transforms:
+                if cmds.nodeType(eachTransform) == "transform":
+                    child_nodes.append(eachTransform)
+                    child_nodes.extend(_recursive_hierarchy(eachTransform))
+            return child_nodes
 
         for n in alembic_nodes:
             export_path = n.get('path')
@@ -865,73 +931,35 @@ class AlembicExporter(QWidget, object):
                     return
 
             export_list = list()
+            all_nodes = list()
+            tag_info = dict()
+
+            child_count = abc_node.childCount()
+            if not child_count:
+                return
 
             for i in range(abc_node.childCount()):
                 root_node = abc_node.child(i)
                 root_node_name = root_node.name
-                tag_node = tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(root_node_name)
+                root_tag = tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(root_node_name)
+                root_tag_info = self._get_tag_atributes_dict(root_tag)
+                if not root_tag_info:
+                    sp.logger.warning('Impossible to retrieve tag info for {} ...'.format(root_node_name))
+                    return
+                tag_info[sp.dcc.node_short_name(root_node_name)] = root_tag_info
+                hires_grp = sp.dcc.list_connections(node=root_tag, attribute_name='hires')
+                if hires_grp and sp.dcc.object_exists(hires_grp[0]):
+                    all_nodes.extend(_recursive_hierarchy(root_node_name))
+                    export_list.extend(self._get_alembic_rig_export_list(root_node))
+                else:
+                    all_nodes.extend(_recursive_hierarchy(root_node_name))
+                    export_list.extend(sp.dcc.list_children(root_node_name, all_hierarchy=False, full_path=True))
 
-                root_node_child_count = root_node.childCount()
-                if root_node_child_count > 0 or len(sp.dcc.list_shapes(root_node.name)) > 0:
-                    for j in range(root_node.childCount()):
-                        c = root_node.child(j)
-                        c_name = c.name
-                        if type(c_name) in [list, tuple]:
-                            c_name = c_name[0]
-                        if isinstance(c, AlembicExporterModelHires):
-                            children = sp.dcc.node_children(node=c_name, all_hierarchy=True, full_path=True)
-                            export_list.extend(children)
-                            export_list.append(c_name)
-
-                            # if tag_node:
-                            #     self._add_tag_attributes(c_name, tag_node)
-                            # export_list.append(c_name)
-                        else:
-                            if 'transform' != sp.dcc.node_type(c_name):
-                                xform = sp.dcc.node_parent(node=c_name, full_path=True)
-                                parent_xform = sp.dcc.node_parent(node=xform, full_path=True)
-                                if parent_xform:
-                                    children = sp.dcc.node_children(node=parent_xform, all_hierarchy=True, full_path=True)
-                                    export_list.extend(children)
-                            else:
-                                children = sp.dcc.node_children(node=c_name, all_hierarchy=True, full_path=True)
-                                export_list.extend(children)
-                            # if tag_node:
-                            #     self._add_tag_attributes(c_name, tag_node)
-                # else:
-                #     export_list.append(root_node_name)
-
-            ref_objs = list()
-            for obj in reversed(export_list):
-                if sp.dcc.node_type(obj) != 'transform':
-                    export_list.remove(obj)
-                    continue
-                is_visible = sp.dcc.get_attribute_value(node=obj, attribute_name='visibility')
-                if not is_visible:
-                    export_list.remove(obj)
-                    continue
-                if sp.dcc.attribute_exists(node=obj, attribute_name='displaySmoothMesh'):
-                    sp.dcc.set_integer_attribute_value(node=obj, attribute_name='displaySmoothMesh', attribute_value=2)
-
-                is_referenced = sp.dcc.node_is_referenced(obj)
-                if is_referenced:
-                    ref_objs.append(obj)
-
-            childs_to_remove = list()
-            for obj in export_list:
-                children = sp.dcc.node_children(node=obj, all_hierarchy=True, full_path=True)
-                shapes = sp.dcc.list_children_shapes(node=obj, all_hierarchy=True, full_path=True)
-                if children and not shapes:
-                    childs_to_remove.extend(children)
-
-            if childs_to_remove:
-                for obj in childs_to_remove:
-                    if obj in export_list:
-                        export_list.remove(obj)
-
-            # if ref_objs:
-            #     sp.logger.warning('Alembic Manager does not support references: {}'.format(ref_objs))
-            #     return
+            for node in all_nodes:
+                # if sp.dcc.node_is_referenced(node):
+                #     raise RuntimeError('Alembic Exporter does not support references!')
+                if sp.dcc.attribute_exists(node=node, attribute_name='displaySmoothMesh'):
+                    sp.dcc.set_integer_attribute_value(node=node, attribute_name='displaySmoothMesh', attribute_value=2)
 
             if not export_list:
                 sp.logger.debug('No geometry to export! Aborting Alembic Export operation ...')
@@ -967,10 +995,6 @@ class AlembicExporter(QWidget, object):
                 sp.logger.warning('Error while exporting Alembic file: {}'.format(export_path))
                 return
 
-            tag_info = self._get_tag_atributes_dict(tag_node)
-            if not tag_info:
-                sp.logger.warning('Impossible to retrieve tag info ...')
-                return
             tag_json_file = os.path.join(os.path.dirname(export_path), abc_node.name.replace('.abc', '_abc.info')[1:])
             with open(tag_json_file, 'w') as f:
                 json.dump(tag_info, f)
@@ -1298,29 +1322,37 @@ class AlembicImporter(QWidget, object):
         else:
             sp.logger.warning('No Alembic Info file found!')
             valid_tag_info = False
+        if not valid_tag_info:
+            return
 
+        root_to_add = None
         if self.create_radio.isChecked():
             if sp.is_maya():
                 root = cmds.group(n=abc_name, empty=True, world=True)
+                root_to_add = root
             elif sp.is_houdini():
                 n = hou.node('obj')
                 root = n.createNode('alembicarchive')
-            if valid_tag_info:
-                self._add_tag_info_data(tag_info, root)
+                root_to_add = root
+            # if valid_tag_info:
+            #     self._add_tag_info_data(tag_info, root)
             sel = [root]
         else:
             sel = sp.dcc.selected_nodes(full_path=True)
             if not sel:
                 sel = cmds.group(n=abc_name, empty=True, world=True)
-                if valid_tag_info:
-                    self._add_tag_info_data(tag_info, sel)
+                root_to_add = sel
+                # if valid_tag_info:
+                #     self._add_tag_info_data(tag_info, sel)
 
         sel = sel or None
 
+        if sp.is_maya():
+            track_nodes = mayautils.TrackNodes()
+            track_nodes.load()
+
         if as_reference:
             if sp.is_maya():
-                track_nodes = mayautils.TrackNodes()
-                track_nodes.load()
                 valid_reference = alembic.reference_alembic(abc_file, namespace=abc_name)
                 if not valid_reference:
                     sp.logger.warning('Error while reference Alembic file: {}'.format(abc_file))
@@ -1339,6 +1371,22 @@ class AlembicImporter(QWidget, object):
         else:
             res = alembic.import_alembic(abc_file, mode='import', nodes=nodes, parent=sel[0])
             res = [res]
+            if sp.is_maya():
+                res = track_nodes.get_delta()
+
+        added_tag = False
+        for key in tag_info.keys():
+            for obj in res:
+                short_obj = sp.dcc.node_short_name(obj)
+                if key == short_obj:
+                    self._add_tag_info_data(tag_info[key], obj)
+                    added_tag = True
+                elif '{}_hires_grp'.format(key) == short_obj:
+                    self._add_tag_info_data(tag_info[key], obj)
+                    added_tag = True
+
+        if not added_tag and root_to_add:
+            self._add_tag_info_data(tag_info, root_to_add)
 
         if self.auto_smooth_display.isChecked():
             for obj in res:
@@ -1348,6 +1396,8 @@ class AlembicImporter(QWidget, object):
                             cmds.setAttr('{}.aiSubdivType '.format(obj), 1)
                     elif sp.dcc.node_type(obj) == 'transform':
                         shapes = sp.dcc.list_shapes(node=obj, full_path=True)
+                        if not shapes:
+                            continue
                         for s in shapes:
                             if sp.dcc.attribute_exists(node=s, attribute_name='aiSubdivType'):
                                 cmds.setAttr('{}.aiSubdivType '.format(s), 1)
