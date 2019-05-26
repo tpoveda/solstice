@@ -27,8 +27,14 @@ import maya.OpenMaya as OpenMaya
 import solstice.pipeline as sp
 from solstice.pipeline.core import node
 from solstice.pipeline.gui import messagehandler, stack
-from solstice.pipeline.utils import mayautils, qtutils
+from solstice.pipeline.utils import decorators, qtutils
 from solstice.pipeline.resources import resource
+
+if sp.is_maya():
+    from solstice.pipeline.utils import mayautils
+    undo_decorator = mayautils.undo
+else:
+    undo_decorator = decorators.empty
 
 
 global solstice_outliner_window
@@ -239,7 +245,7 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
                         valid_tag_data = True
                         break
 
-        print(valid_tag_data)
+        return valid_tag_data
 
     def is_alembic(self):
         """
@@ -253,11 +259,11 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
             attrs = cmds.listAttr(connection, userDefined=True)
             if attrs and type(attrs) == list:
                 for attr in attrs:
-                    if attr == 'tag_type':
+                    if attr == 'tag_info':
                         valid_tag_data = True
                         break
 
-        print(valid_tag_data)
+        return valid_tag_data
 
     def is_standin(self):
         """
@@ -271,10 +277,32 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
         state = self.expand_btn.isChecked()
         self.child_widget.setVisible(state)
 
+    @undo_decorator
     def _on_replace_alembic(self):
         abc_file = self.asset.get_alembic_files()
         is_referenced = sys.solstice.dcc.node_is_referenced(self.asset.node)
-        self.is_rig()
+        if is_referenced:
+            if self.is_rig():
+                main_group_connections = cmds.listConnections(self.asset.node, source=True)
+                for connection in main_group_connections:
+                    attrs = cmds.listAttr(connection, userDefined=True)
+                    if attrs and type(attrs) == list:
+                        if not 'root_ctrl' in attrs:
+                            sys.solstice.logger.warning('Asset Rig is not ready for replace functionality yet!')
+                            return
+                        print('come onnnn')
+
+                # ref_node = sys.solstice.dcc.reference_node(self.asset.node)
+                # if not ref_node:
+                #     return
+                # sys.solstice.dcc.unload_reference(ref_node)
+            elif self.is_standin():
+                pass
+            else:
+                sys.solstice.logger.warning('Impossible to replace {} by Alembic!'.format(self.name))
+        else:
+            sys.solstice.logger.warning('Imported asset cannot be replaced!')
+
         # if self.asset.node != hires_group:
         #     is_referenced = cmds.referenceQuery(asset.node, isNodeReferenced=True)
         #     if is_referenced:
@@ -477,44 +505,6 @@ class SolsticeAbstractOutliner(QWidget, object):
 
         return file_widget
 
-    @staticmethod
-    def get_assets(allowed_types='all'):
-
-        asset_nodes = list()
-
-        if not allowed_types:
-            return asset_nodes
-
-        # We find tag data nodes
-        tag_data_nodes = SolsticeOutliner.get_tag_data_nodes()
-        for tag_data in tag_data_nodes:
-            asset = tag_data.get_asset()
-            if asset is None:
-                continue
-            if allowed_types and allowed_types != 'all':
-                asset_type = tag_data.get_types()
-                if asset_type not in allowed_types:
-                    continue
-                asset_nodes.append(asset)
-            else:
-                asset_nodes.append(asset)
-
-        # We find nodes with tag info attribute (alembics)
-        tag_info_nodes = SolsticeOutliner.get_tag_info_nodes()
-        for tag_data in tag_info_nodes:
-            asset = tag_data.get_asset()
-            if asset is None:
-                continue
-            if allowed_types and allowed_types != 'all':
-                asset_type = tag_data.get_types()
-                if asset_type not in allowed_types:
-                    continue
-                asset_nodes.append(asset)
-            else:
-                asset_nodes.append(asset)
-
-        return asset_nodes
-
     def custom_ui(self):
         self.main_layout = QGridLayout()
         self.main_layout.setSpacing(2)
@@ -557,7 +547,7 @@ class SolsticeAbstractOutliner(QWidget, object):
 
     def init_ui(self):
         allowed_types = self.allowed_types()
-        assets = self.get_assets(allowed_types=allowed_types)
+        assets = sp.get_assets(allowed_types=allowed_types)
         for asset in assets:
             asset_widget = OutlinerAssetItem(asset)
             self.append_widget(asset_widget)
@@ -843,52 +833,6 @@ class SolsticeOutliner(QWidget, object):
             SolsticeOutliner.instances.remove(ins)
             del ins
 
-    @staticmethod
-    def get_tag_data_nodes():
-        tag_nodes = list()
-        objs = cmds.ls(l=True)
-        for obj in objs:
-            valid_tag_data = cmds.attributeQuery('tag_type', node=obj, exists=True)
-            if valid_tag_data:
-                tag_type = cmds.getAttr(obj + '.tag_type')
-                if tag_type and tag_type == 'SOLSTICE_TAG':
-                    tag_node = node.SolsticeTagDataNode(node=obj)
-                    tag_nodes.append(tag_node)
-
-        return tag_nodes
-
-    @staticmethod
-    def get_tag_info_nodes():
-        tag_info_nodes = list()
-        objs = cmds.ls(l=True)
-        for obj in objs:
-            valid_tag_info_data = cmds.attributeQuery('tag_info', node=obj, exists=True)
-            if valid_tag_info_data:
-                tag_info = cmds.getAttr(obj+'.tag_info')
-                tag_node = node.SolsticeTagDataNode(node=obj, tag_info=tag_info)
-                tag_info_nodes.append(tag_node)
-
-        return tag_info_nodes
-
-    @staticmethod
-    def load_shaders():
-        if not sp.is_maya():
-            return
-
-        from solstice.pipeline.tools.shaderlibrary import shaderlibrary
-        reload(shaderlibrary)
-
-        shaderlibrary.ShaderLibrary.load_all_scene_shaders()
-
-    def unload_shaders(self):
-        if not sp.is_maya():
-            return
-
-        from solstice.pipeline.tools.shaderlibrary import shaderlibrary
-        reload(shaderlibrary)
-
-        shaderlibrary.ShaderLibrary.unload_shaders()
-
     def custom_ui(self):
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -917,29 +861,38 @@ class SolsticeOutliner(QWidget, object):
         load_scene_shaders_action.setToolTip('Load and Apply All Scene Shaders')
         load_scene_shaders_action.setStatusTip('Load and Apply All Scene Shaders')
         load_scene_shaders_action.setIcon(resource.icon('apply_shaders'))
-        load_scene_shaders_action.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        load_scene_shaders_action.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
         unload_scene_shaders_action = QToolButton(self)
         unload_scene_shaders_action.setText('Unload Shaders')
         unload_scene_shaders_action.setToolTip('Unload All Scene Shaders')
         unload_scene_shaders_action.setStatusTip('Unload All Scene Shaders')
         unload_scene_shaders_action.setIcon(resource.icon('unload_shaders'))
-        unload_scene_shaders_action.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        unload_scene_shaders_action.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+
+        update_refs_action = QToolButton(self)
+        update_refs_action.setText('Sync Assets')
+        update_refs_action.setToolTip('Updates all asset references to the latest published version')
+        update_refs_action.setStatusTip('Updates all asset references to the latest published version')
+        update_refs_action.setIcon(resource.icon('download'))
+        update_refs_action.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
         settings_action = QToolButton(self)
         settings_action.setText('Settings')
         settings_action.setToolTip('Outliner Settings')
         settings_action.setStatusTip('Outliner Settings')
         settings_action.setIcon(resource.icon('settings'))
-        settings_action.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        settings_action.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
         self.toolbar.addWidget(load_scene_shaders_action)
         self.toolbar.addWidget(unload_scene_shaders_action)
         self.toolbar.addSeparator()
+        self.toolbar.addWidget(update_refs_action)
+        self.toolbar.addSeparator()
         self.toolbar.addWidget(settings_action)
 
-        load_scene_shaders_action.clicked.connect(self.load_shaders)
-        unload_scene_shaders_action.clicked.connect(self.unload_shaders)
+        load_scene_shaders_action.clicked.connect(sp.load_shaders)
+        unload_scene_shaders_action.clicked.connect(sp.unload_shaders)
         settings_action.clicked.connect(self.open_settings)
 
     def init_ui(self):
@@ -989,4 +942,4 @@ class SolsticeOutliner(QWidget, object):
 
 
 def run():
-    qtutils.dock_window(SolsticeOutliner)
+    qtutils.dock_window(SolsticeOutliner, min_width=400)

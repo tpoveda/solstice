@@ -149,6 +149,8 @@ class PropsPipelineWidget(base.BaseWidget, object):
         import_shading_file_btn = QPushButton('Import Shading File')
         transfer_uvs_btn = QPushButton('Transfer UVs')
         remove_type_tag_data_attrs_btn = QPushButton('Remove Type and Tag Data Attributes')
+        clean_render_layer_nodes_btn = QPushButton('Clean Render Layer Nodes')
+        clean_file_nodes = QPushButton('Clean File Nodes')
         clean_model_file_btn = QPushButton('Clean Model File')
         clean_proxy_file_btn = QPushButton('Clean Proxy File')
         model_check_lyt.addWidget(valid_model_path_btn, 0, 0)
@@ -161,8 +163,10 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_check_lyt.addWidget(import_shading_file_btn, 3, 1)
         model_check_lyt.addWidget(transfer_uvs_btn, 4, 0)
         model_check_lyt.addWidget(remove_type_tag_data_attrs_btn, 4, 1)
-        model_check_lyt.addWidget(clean_model_file_btn, 5, 0)
-        model_check_lyt.addWidget(clean_proxy_file_btn, 5, 1)
+        model_check_lyt.addWidget(clean_render_layer_nodes_btn, 5, 0)
+        model_check_lyt.addWidget(clean_file_nodes, 5, 1)
+        model_check_lyt.addWidget(clean_model_file_btn, 6, 0)
+        model_check_lyt.addWidget(clean_proxy_file_btn, 6, 1)
 
         rig_utils = QWidget()
         rig_utils_lyt = QGridLayout()
@@ -206,6 +210,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         clean_textures_paths_btn = QPushButton('Clean Textures Paths')
         export_shading_file_btn = QPushButton('Export Shading JSON File')
         export_shaders_btn = QPushButton('Export Shaders')
+        clean_render_layer_nodes2_btn = QPushButton('Clean Render Layer Nodes')
         shading_check_lyt.addWidget(valid_shading_path_btn, 0, 0)
         shading_check_lyt.addWidget(check_shading_main_group_btn, 0, 1)
         shading_check_lyt.addWidget(check_shading_shaders, 1, 0)
@@ -215,6 +220,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         shading_check_lyt.addWidget(update_textures_paths_btn, 3, 0)
         shading_check_lyt.addWidget(clean_textures_paths_btn, 3, 1)
         shading_check_lyt.addWidget(export_shaders_btn, 4, 0)
+        shading_check_lyt.addWidget(clean_render_layer_nodes2_btn, 4, 1)
 
         test_utils = QWidget()
         test_check_lyt = QGridLayout()
@@ -306,6 +312,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         check_proxy_main_group_btn.clicked.connect(self._on_check_proxy_main_group)
         model_has_no_shaders_btn.clicked.connect(self._on_model_has_no_shaders)
         proxy_has_no_shaders_btn.clicked.connect(self._on_proxy_has_no_shaders)
+        clean_render_layer_nodes_btn.clicked.connect(self._on_clean_render_layer_nodes)
         valid_shading_path_btn.clicked.connect(self._on_valid_shading_path)
         import_shading_file_btn.clicked.connect(self._on_import_shading_file)
         check_shading_main_group_btn.clicked.connect(self._on_check_shading_main_group)
@@ -313,6 +320,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         all_textures_checks_btn.clicked.connect(self._on_all_textures_checks)
         transfer_uvs_btn.clicked.connect(self._on_transfer_uvs)
         remove_type_tag_data_attrs_btn.clicked.connect(self._on_remove_type_tag_data_attrs)
+        clean_file_nodes.clicked.connect(self._on_clean_file_nodes)
         clean_model_file_btn.clicked.connect(self._on_clean_model_file)
         clean_proxy_file_btn.clicked.connect(self._on_clean_proxy_file)
         valid_rig_path_btn.clicked.connect(self._on_valid_rig_path)
@@ -334,6 +342,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         export_shading_file_btn.clicked.connect(self._on_export_shading_file)
         rename_shaders_btn.clicked.connect(self._on_rename_shaders)
         export_shaders_btn.clicked.connect(self._on_export_shaders)
+        clean_render_layer_nodes2_btn.clicked.connect(self._on_clean_render_layer_nodes)
         delete_scene_shaders_btn.clicked.connect(self._on_delete_scene_shaders)
         ref_neutral_light_rig_btn.clicked.connect(self._on_reference_neutral_light_rig)
         sync_shaders_btn.clicked.connect(self._on_sync_shaders)
@@ -456,6 +465,23 @@ class PropsPipelineWidget(base.BaseWidget, object):
             sys.solstice.dcc.open_file(proxy_path, force=True)
         check = assetchecks.ProxyHasNoShaders(asset=weakref.ref(asset), log=log)
         check.check()
+
+    def _on_clean_render_layer_nodes(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+        render_layer_found = False
+        for render_layer in sys.solstice.dcc.list_nodes(node_type='renderLayer'):
+            if render_layer != 'defaultRenderLayer':
+                log.write('Removing render layer: {} ...'.format(render_layer))
+                sys.solstice.dcc.delete_object(render_layer)
+                render_layer_found = True
+
+        if render_layer_found:
+            log.write_ok('All render layers removed!')
+        else:
+            log.write('Current scene has no render layer nodes!')
 
     def _on_model_proxy_hires_groups(self):
         asset = self._get_asset()
@@ -654,6 +680,10 @@ class PropsPipelineWidget(base.BaseWidget, object):
         print('Importing Skin weights ...')
 
     def _on_print_texture_files(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
         invalid_textures = list()
         solstice_var = os.path.normpath(os.environ['SOLSTICE_PROJECT'])
         all_file_nodes = cmds.ls(et="file")
@@ -663,14 +693,20 @@ class PropsPipelineWidget(base.BaseWidget, object):
             file_exists = os.path.isfile(computed_file)
             if not file_exists or '__working__' in computed_file:
                 invalid_textures.append((current_file, eachFile))
-            print('{} <=====> {} <=====> {}'.format(current_file, eachFile, file_exists))
+            for print_fn in [print, log.write]:
+                print_fn('{} <=====> {} <=====> {}'.format(current_file, eachFile, file_exists))
         if invalid_textures:
-            print('>>> INVALID TEXTURES FOUND <<<')
+            for print_fn in [print, log.write_error]:
+                print_fn('>>> INVALID TEXTURES FOUND <<<')
+
             for txt_data in invalid_textures:
-                print('{} <=====> {}'.format(txt_data[0], txt_data[1]))
+                for print_fn in [print, log.write]:
+                    print_fn('{} <=====> {}'.format(txt_data[0], txt_data[1]))
         else:
-            print('>>> ALL TEXTURE FILES ARE VALID!!! <<<')
-        print('\n\n')
+            for print_fn in [print, log.write_ok]:
+                print_fn('>>> ALL TEXTURE FILES ARE VALID!!! <<<')
+        for print_fn in [print, log.write]:
+            print_fn('\n\n')
 
     def _on_valid_rig_path(self):
         asset = self._get_asset()
@@ -768,6 +804,22 @@ class PropsPipelineWidget(base.BaseWidget, object):
         cmds.setAttr('{}_{}.tag_data'.format(asset.name, group_type.upper()), lock=False)
         cmds.deleteAttr('{}_{}.type'.format(asset.name, group_type.upper()))
         cmds.deleteAttr('{}_{}.tag_data'.format(asset.name, group_type.upper()))
+
+    def _on_clean_file_nodes(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+        file_found = False
+        for render_layer in sys.solstice.dcc.list_nodes(node_type='file'):
+            log.write('Removing file node: {} ...'.format(render_layer))
+            sys.solstice.dcc.delete_object(render_layer)
+            file_found = True
+
+        if file_found:
+            log.write_ok('All file nodes removed!')
+        else:
+            log.write('Current scene has no file nodes!')
 
     def _on_clean_model_file(self):
         asset = self._get_asset()

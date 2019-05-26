@@ -215,7 +215,6 @@ class SolsticePipeline(QObject):
             if module_path.startswith(scripts_dir):
                 try:
                     importlib.import_module(module.__name__)
-                    # reload(module)
                 except Exception as e:
                     self.logger.error('{} | {}'.format(e, traceback.format_exc()))
 
@@ -847,7 +846,10 @@ def is_nuke():
         return 'nuke' in main.__dict__
 
 
-def get_tag_data_nodes():
+def get_tag_data_nodes(as_node=False):
+
+    from solstice.pipeline.core import node
+
     tag_nodes = list()
     objs = sys.solstice.dcc.all_scene_objects()
     for obj in objs:
@@ -855,54 +857,72 @@ def get_tag_data_nodes():
         if valid_tag_data:
             tag_type = sys.solstice.dcc.get_attribute_value(node=obj, attribute_name='tag_type')
             if tag_type and tag_type == 'SOLSTICE_TAG':
+                if as_node:
+                    obj = node.SolsticeTagDataNode(node=obj)
                 tag_nodes.append(obj)
 
     return tag_nodes
 
 
-def get_tag_info_nodes(as_nodes=True):
+def get_tag_info_nodes(as_node=False):
+
+    from solstice.pipeline.core import node
+
     tag_info_nodes = list()
     objs = sys.solstice.dcc.all_scene_objects()
     for obj in objs:
         valid_tag_info_data = sys.solstice.dcc.attribute_exists(node=obj, attribute_name='tag_info')
         if valid_tag_info_data:
+            if as_node:
+                tag_info = sys.solstice.dcc.get_attribute_value(node=obj, attribute_name='tag_info')
+                obj = node.SolsticeTagDataNode(node=obj, tag_info=tag_info)
             tag_info_nodes.append(obj)
 
     return tag_info_nodes
 
 
-def get_assets(as_nodes=True):
+def get_assets(as_nodes=True, allowed_types='all'):
 
     from solstice.pipeline.core import node
 
     asset_nodes = list()
 
+    if not allowed_types:
+        return asset_nodes
+
     abc_nodes = get_alembics(as_nodes=False, only_roots=True)
 
     # We find tag data nodes
-    tag_data_nodes = get_tag_data_nodes()
+    tag_data_nodes = get_tag_data_nodes(as_node=as_nodes)
     for tag_data in tag_data_nodes:
-        cns = sys.sys.solstice.dcc.list_connections(node=tag_data, attribute_name='node')
-        if cns:
-            asset = cns[0]
-            if asset in abc_nodes:
+        asset = tag_data.get_asset()
+        if asset is None or asset in abc_nodes:
+            continue
+        if allowed_types and allowed_types != 'all':
+            asset_type = tag_data.get_types()
+            if asset_type not in allowed_types:
                 continue
-            if as_nodes:
-                asset_nodes.append(node.SolsticeAssetNode(node=asset))
-            else:
-                asset_nodes.append(asset)
+            asset_nodes.append(asset)
+        else:
+            asset_nodes.append(asset)
 
     # We find nodes with tag info attribute (Alembics)
-    tag_info_nodes = get_tag_info_nodes()
+    tag_info_nodes = get_tag_info_nodes(as_node=as_nodes)
     for tag_info in tag_info_nodes:
-        tag_info_dict = sys.solstice.dcc.get_attribute_value(node=tag_info, attribute_name='tag_info')
-        if tag_info_dict:
-            if as_nodes:
-                if tag_info in abc_nodes:
-                    continue
-                asset_nodes.append(node.SolsticeAssetNode(node=tag_info))
-            else:
-                asset_nodes.append(tag_info)
+        asset = tag_info.get_asset()
+        if asset is None:
+            continue
+        if allowed_types and allowed_types != 'all':
+            asset_type = tag_info.get_types()
+            if asset_type not in allowed_types:
+                continue
+            if tag_info in abc_nodes:
+                continue
+            asset_nodes.append(asset)
+        else:
+            if tag_info in abc_nodes:
+                continue
+            asset_nodes.append(asset)
 
     return asset_nodes
 
@@ -921,7 +941,7 @@ def get_alembics(as_nodes=True, only_roots=False):
             abc_nodes.append(obj)
 
     for abc in abc_nodes:
-        cns = sys.sys.solstice.dcc.list_connections(abc, 'transOp')
+        cns = sys.solstice.dcc.list_connections(abc, 'transOp')
         for cn in cns:
             cn_root = sys.solstice.dcc.node_root(cn)
             if cn_root in added_roots:
@@ -1027,3 +1047,28 @@ def create_temp_path(name, clean=True, make_dirs=True):
 def init():
     sys.solstice = SolsticePipeline()
     sys.solstice.setup()
+
+
+def load_shaders():
+    if not is_maya():
+        return
+
+    from solstice.pipeline.tools.shaderlibrary import shaderlibrary
+
+    shaderlibrary.ShaderLibrary.load_all_scene_shaders()
+
+
+def unload_shaders():
+    if not is_maya():
+        return
+
+    from solstice.pipeline.tools.shaderlibrary import shaderlibrary
+
+    shaderlibrary.ShaderLibrary.unload_shaders()
+
+
+def solstice_save():
+    from solstice.pipeline.utils import mayautils
+    mayautils.clean_scene()
+    sys.solstice.dcc.save_current_scene(force=False)
+    mayautils.clean_student_line()

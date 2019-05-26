@@ -88,7 +88,7 @@ class RigControl(object):
         if sys.solstice.dcc.object_exists(translate_to):
             sys.solstice.dcc.delete_object(cmds.pointConstraint(translate_to, target_obj))
         if sys.solstice.dcc.object_exists(rotate_to):
-            sys.solstice.delete_objec(cmds.orientConstraint(rotate_to, target_obj))
+            sys.solstice.dcc.delete_object(cmds.orientConstraint(rotate_to, target_obj))
         if sys.solstice.dcc.object_exists(parent):
             sys.solstice.dcc.set_parent(target_obj, parent)
 

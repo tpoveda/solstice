@@ -184,6 +184,16 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         return cmds.referenceQuery(node, isNodeReferenced=True)
 
     @staticmethod
+    def reference_node(node):
+        """
+        Returns the node associated with the given target reference
+        :param node:str
+        :return:str
+        """
+
+        return cmds.referenceQuery(node, referenceNode=True)
+
+    @staticmethod
     def node_is_loaded(node):
         """
         Returns whether given node is loaded or not
@@ -192,6 +202,15 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
         """
 
         return cmds.referenceQuery(node, isLoaded=True)
+
+    @staticmethod
+    def unload_reference(reference_node):
+        """
+        Unloads given reference node
+        :param reference_node: str
+        """
+
+        return cmds.file(unloadReference=reference_node)
 
     @staticmethod
     def node_children(node, all_hierarchy=True, full_path=True):

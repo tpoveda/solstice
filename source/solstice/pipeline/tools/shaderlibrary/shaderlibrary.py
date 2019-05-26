@@ -27,12 +27,18 @@ from solstice.pipeline.externals.solstice_qt.QtGui import *
 import solstice.pipeline as sp
 from solstice.pipeline.core import syncdialog, assetviewer
 from solstice.pipeline.gui import window, messagehandler
-from solstice.pipeline.utils import pythonutils, shaderutils, artellautils, qtutils, image as img, mayautils as utils
+from solstice.pipeline.utils import pythonutils, decorators, shaderutils, artellautils, qtutils, image as img
 from solstice.pipeline.resources import resource
 
 IGNORE_SHADERS = ['particleCloud1', 'shaderGlow1', 'defaultColorMgtGlobals', 'lambert1']
 IGNORE_ATTRS = ['computedFileTextureNamePattern']
 SHADER_EXT = 'sshader'
+
+if sp.is_maya():
+    from solstice.pipeline.utils import mayautils
+    undo_decorator = mayautils.undo
+else:
+    undo_decorator = decorators.empty
 
 
 class ShaderViewer(QGridLayout, object):
@@ -170,7 +176,7 @@ class ShadingNetwork(object):
             as_type = network_dict[key]['asType']
             node_type = network_dict[key]['type']
             if existing_material is not None and as_type == 'asShader':
-                utils.delete_all_incoming_nodes(node=existing_material)
+                mayautils.delete_all_incoming_nodes(node=existing_material)
                 continue
             elif as_type == 'asShader':
                 node = cls.create_shader_node(node_type=node_type, as_type=as_type, name=key)
@@ -904,7 +910,7 @@ class ShaderLibrary(window.Window, object):
             return exporter.export_shaders(publish=publish)
 
     @staticmethod
-    @utils.undo
+    @undo_decorator
     def load_all_scene_shaders(load=True, apply=True):
         """
         Loops through all tag data scene nodes and loads all necessary shaders into the current scene
@@ -912,14 +918,12 @@ class ShaderLibrary(window.Window, object):
         :return: list<str>, list of loaded shaders
         """
 
-        from solstice.pipeline.tools.outliner import outliner
-
-        tag_nodes = outliner.SolsticeOutliner.get_tag_data_nodes()
-        tag_info_nodes = outliner.SolsticeOutliner.get_tag_info_nodes()
+        tag_nodes = sp.get_tag_data_nodes(as_node=True)
+        tag_info_nodes = sp.get_tag_info_nodes(as_node=True)
         ShaderLibrary.load_scene_shaders(load=load, apply=apply, tag_nodes=tag_nodes, tag_info_nodes=tag_info_nodes)
 
     @staticmethod
-    @utils.undo
+    @undo_decorator
     def load_scene_shaders(load=True, apply=True, tag_nodes=None, tag_info_nodes=None):
         """
         Loops through all tag data scene nodes and loads all necessary shaders into the current scene
@@ -1011,8 +1015,8 @@ class ShaderLibrary(window.Window, object):
                         break
 
                 for shader_mesh in shaders.keys():
-                    shader_short = utils.get_short_name(shader_mesh)
-                    group_short = utils.get_short_name(group_mesh_name)
+                    shader_short = mayautils.get_short_name(shader_mesh)
+                    group_short = mayautils.get_short_name(group_mesh_name)
                     if shader_short == group_short:
                         if mesh not in valid_meshes:
                             valid_meshes.append(mesh)
@@ -1098,13 +1102,11 @@ class ShaderLibrary(window.Window, object):
         return applied_data
 
     @staticmethod
-    @utils.undo
+    @undo_decorator
     def unload_shaders(tag_nodes=None, tag_info_nodes=None):
 
-        from solstice.pipeline.tools.outliner import outliner
-
-        tag_nodes = tag_nodes if tag_nodes else outliner.SolsticeOutliner.get_tag_data_nodes()
-        tag_info_nodes = tag_info_nodes if tag_info_nodes else outliner.SolsticeOutliner.get_tag_info_nodes()
+        tag_nodes = tag_nodes if tag_nodes else sp.get_tag_data_nodes(as_node=True)
+        tag_info_nodes = tag_info_nodes if tag_info_nodes else sp.get_tag_data_nodes(as_node=True)
 
         found_nodes = list()
         found_nodes.extend(tag_nodes)

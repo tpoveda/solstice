@@ -55,6 +55,19 @@
                 "annotation": "Solstice Changelog",
                 "label": "Changelog",
                 "dcc": ["maya", "houdini"]
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
+                "icon": "solstice_save",
+                "command": "import solstice.pipeline as sp; sp.solstice_save()",
+                "annotation": "Save that removes invalid nodes and clean student license from file",
+                "label": "Solstice Save",
+                "dcc": ["maya"]
             }
         ],
         "layout":
@@ -318,6 +331,13 @@
                 "command": "from solstice.pipeline.utils import mayautils; mayautils.clean_student_line();",
                 "annotation": "Clean Student License",
                 "label": "Clean Student License",
+                "dcc": ["maya"]
+            },
+            {
+                "icon": "solstice_save",
+                "command": "import solstice.pipeline as sp; sp.solstice_save()",
+                "annotation": "Save that removes invalid nodes and clean student license from file",
+                "label": "Solstice Save",
                 "dcc": ["maya"]
             }
         ]

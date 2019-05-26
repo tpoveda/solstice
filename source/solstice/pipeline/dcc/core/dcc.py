@@ -177,6 +177,25 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function node_is_referenced() not implemented!')
 
     @staticmethod
+    def unload_reference(reference_node):
+        """
+        Unloads given reference node
+        :param reference_node: str
+        """
+
+        raise NotImplementedError('abstract DCC function unload_reference() not implemented!')
+
+    @staticmethod
+    def reference_node(node):
+        """
+        Returns the node associated with the given target reference
+        :param node:str
+        :return:str
+        """
+        
+        raise NotImplementedError('abstract DCC function node_is_referenced() not implemented!')
+
+    @staticmethod
     def node_is_loaded(node):
         """
         Returns whether given node is loaded or not

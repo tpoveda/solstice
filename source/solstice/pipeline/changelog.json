@@ -177,6 +177,9 @@
     "Added functionality to sync/unload shaders of specific assets using Solstice Outliner",
     "Added functionality to sync/unload all scene shaders using Solstice Outliner",
     "Improve stability of Solstice Outliner",
-    "Complete refactor of the DCC agnostic system"
+    "Complete refactor of the DCC agnostic system",
+    "Added option to clean render layers in TD Toolbox",
+    "Added option to clean file nodes in TD Toolbox",
+    "Added shortcut in main and TD Toolbox to save Solstice files removing invalid nodes and cleaning student license"
   ]
 }

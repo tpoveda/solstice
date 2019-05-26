@@ -332,7 +332,7 @@ def get_horizontal_separator():
     return v_div_w
 
 
-def dock_window(window_class):
+def dock_window(window_class, min_width=300):
 
     if sp.is_maya():
         import maya.cmds as cmds
@@ -343,7 +343,7 @@ def dock_window(window_class):
         except Exception:
             pass
 
-        main_control = cmds.workspaceControl(window_class.name, ttc=["AttributeEditor", -1], iw=300, mw=True, wp='preferred', label=window_class.title)
+        main_control = cmds.workspaceControl(window_class.name, ttc=["AttributeEditor", -1], iw=min_width, mw=True, wp='preferred', label=window_class.title)
 
         control_widget = OpenMayaUI.MQtUtil.findControl(window_class.name)
         control_wrap = wrapInstance(long(control_widget), QWidget)

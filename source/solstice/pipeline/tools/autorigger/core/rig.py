@@ -128,6 +128,13 @@ class AssetRig(object):
         self._main_ctrl = control.Circle('main', normal=[0, 1, 0], radius=radius-6, color_index=16)
         self._main_ctrl.translate_control_shapes(0, 1, 0)
 
+        cmds.addAttr(self._main_grp, ln='root_ctrl', at='message')
+        cmds.addAttr(self._main_grp, ln='main_ctrl', at='message')
+        cmds.setAttr(self._main_grp + '.root_ctrl', lock=False)
+        cmds.setAttr(self._main_grp + '.main_ctrl', lock=False)
+        cmds.connectAttr(self._root_ctrl.node + '.message', self._main_grp + '.root_ctrl')
+        cmds.connectAttr(self._main_ctrl.node + '.message', self._main_grp + '.main_ctrl')
+
     def create_main_attributes(self):
         """
         Function that create main rig attributes
