@@ -111,7 +111,7 @@ def generate_standin_file(asset_name, export_path=None, start_frame=1, end_frame
             sys.solstice.logger.error('Export Path {} does not exists! Aborting operation ...'.format(export_path))
             return
 
-        sys.solstice.select_object(asset.name)
+        sys.solstice.dcc.select_object(asset.name)
         sys.solstice.dcc.refresh_viewport()
         standinmanager.StandinExporter().export_standin(
             export_path=export_path,

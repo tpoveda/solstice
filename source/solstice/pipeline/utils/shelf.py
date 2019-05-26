@@ -77,7 +77,7 @@ class SolsticeShelf(object):
                     houdiniutils.remove_shelf_set(name=self.name)
             else:
                 if sys.solstice.dcc.shelf_exists(shelf_name=self.name):
-                    sys.solstice.delete_shelf(shelf_name=self.name)
+                    sys.solstice.dcc.delete_shelf(shelf_name=self.name)
         else:
             if sp.is_houdini():
                 from solstice.pipeline.utils import houdiniutils

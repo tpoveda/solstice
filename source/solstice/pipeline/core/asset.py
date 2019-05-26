@@ -237,7 +237,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
     def get_server_versions(self, status='published', all_versions=False, categories=None):
         if status == 'published':
             asset_data = list()
-            thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo', self.get_artella_asset_data, [asset_data])
+            thread, event = sys.solstice.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo', self.get_artella_asset_data, [asset_data])
             while not event.is_set():
                 QCoreApplication.processEvents()
                 event.wait(0.05)
@@ -271,7 +271,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
                 server_path = os.path.join(self._asset_path, '__working__', category)
 
                 asset_data = list()
-                thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo', self.get_artella_asset_data_path, [server_path, asset_data])
+                thread, event = sys.solstice.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticePublishedInfo', self.get_artella_asset_data_path, [server_path, asset_data])
                 while not event.is_set():
                     QCoreApplication.processEvents()
                     event.wait(0.05)
@@ -505,7 +505,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
 
     def is_published(self):
         asset_data = list()
-        thread, event = sp.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticeAssetInfo', self.get_artella_asset_data, [asset_data])
+        thread, event = sys.solstice.info_dialog.do('Checking {0} Asset Info'.format(self._name), 'SolsticeAssetInfo', self.get_artella_asset_data, [asset_data])
         while not event.is_set():
             QCoreApplication.processEvents()
             event.wait(0.05)

@@ -424,7 +424,7 @@ class Pipelinizer(window.Window, object):
             cmds.waitCursor(state=True)
             elements = list()
             category_name = pythonutils.string_to_camel_case(category)
-            thread, event = sp.info_dialog.do(
+            thread, event = sys.solstice.info_dialog.do(
                 'Getting Artella "{0}" Info ... Please wait!'.format(category_name),
                 'SolsticeArtella{0}Thread'.format(category_name),
                 self.get_assets_by_category, [category, True, elements])

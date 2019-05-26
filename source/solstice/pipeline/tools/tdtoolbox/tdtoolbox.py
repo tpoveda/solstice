@@ -496,7 +496,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if not valid_tag_data:
             sys.solstice.logger.warning('Main group has not a valid tag data node connected to it. Creating it ...')
             try:
-                sys.solstice.select_object(valid_obj)
+                sys.solstice.dcc.select_object(valid_obj)
                 tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(asset.category)
                 sys.solstice.dcc.clear_selection()
                 valid_tag_data = False

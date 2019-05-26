@@ -599,7 +599,7 @@ class AlembicExporter(QWidget, object):
                 return
             object_to_export = object_to_export[0]
 
-        sys.solstice.select_object(object_to_export)
+        sys.solstice.dcc.select_object(object_to_export)
         AlembicGroup.create_alembic_group()
         self.refresh()
 
@@ -716,7 +716,7 @@ class AlembicExporter(QWidget, object):
                     else:
                         obj_meshes = hires_objs
                 else:
-                    hires_grp = sys.solstice.list_connections(node=tag_node, attribute_name='hires')
+                    hires_grp = sys.solstice.dcc.list_connections(node=tag_node, attribute_name='hires')
                     if hires_grp and sys.solstice.dcc.object_exists(hires_grp[0]):
                         hires_objs = sys.solstice.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='mesh')
                     else:
@@ -788,7 +788,7 @@ class AlembicExporter(QWidget, object):
             tag_node = tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(obj)
             has_hires = sys.solstice.dcc.attribute_exists(node=tag_node, attribute_name='hires') if tag_node else None
             if tag_node and has_hires:
-                hires_grp = sys.solstice.list_connections(node=tag_node, attribute_name='hires')
+                hires_grp = sys.solstice.dcc.list_connections(node=tag_node, attribute_name='hires')
                 if hires_grp and sys.solstice.dcc.object_exists(hires_grp[0]):
                     hires_node = AlembicExporterModelHires(hires_grp)
                     root_grp.addChild(hires_node)
@@ -949,7 +949,7 @@ class AlembicExporter(QWidget, object):
                     sys.solstice.logger.warning('Impossible to retrieve tag info for {} ...'.format(root_node_name))
                     return
                 tag_info[sys.solstice.dcc.node_short_name(root_node_name)] = root_tag_info
-                hires_grp = sys.solstice.list_connections(node=root_tag, attribute_name='hires')
+                hires_grp = sys.solstice.dcc.list_connections(node=root_tag, attribute_name='hires')
                 if hires_grp and sys.solstice.dcc.object_exists(hires_grp[0]):
                     all_nodes.extend(_recursive_hierarchy(root_node_name))
                     export_list.extend(self._get_alembic_rig_export_list(root_node))

@@ -888,7 +888,7 @@ class ValidTagDataNode(check.SanityCheckTask, object):
         if not valid_tag_data:
             self.write_warning('Main group has not a valid tag data node connected to. Creating it ...')
             try:
-                sys.solstice.select_object(valid_obj)
+                sys.solstice.dcc.select_object(valid_obj)
                 tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(self._asset().category)
                 sys.solstice.dcc.clear_selection()
                 self.write_ok('Tag Data Node created successfully!')
@@ -1174,7 +1174,7 @@ class CheckShadingShaders(check.SanityCheckTask, object):
                     if sys.solstice.dcc.object_type(cnt) in shader_types:
                         connected_shaders.append(cnt)
                 if len(connected_shaders) > 0:
-                    target_name = sys.solstice.list_connections(node=shading_group, attribute_name='surfaceShader')[0]
+                    target_name = sys.solstice.dcc.list_connections(node=shading_group, attribute_name='surfaceShader')[0]
                     if shading_group != '{}SG'.format(target_name, shader):
                         self.write_error(
                             'Shader invalid nomenclature: Target name: {} ---------- {} => {}'.format(target_name,
@@ -1569,7 +1569,7 @@ class UpdateTag(check.SanityCheckTask, object):
         if not valid_tag_data:
             self.write_warning('Main group has not a valid tag data node connected to it. Creating it ...')
             try:
-                sys.solstice.select_object(valid_obj)
+                sys.solstice.dcc.select_object(valid_obj)
                 tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(self._asset().category)
                 sys.solstice.dcc.clear_selection()
                 self.write_ok('Tag Data Node created successfully!')

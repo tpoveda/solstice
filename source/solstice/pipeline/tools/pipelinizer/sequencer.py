@@ -133,7 +133,7 @@ class SolsticeSequencer(QWidget, object):
         sequences = list()
 
         try:
-            thread, event = sp.info_dialog.do(
+            thread, event = sys.solstice.info_dialog.do(
                 'Getting Sequences Info ... Please wait!',
                 'SolsticeArtellaSequencesThread',
                 self.get_solstice_sequences, [sequences], show=False
@@ -179,7 +179,7 @@ class SolsticeSequencer(QWidget, object):
         try:
             cmds.waitCursor(state=True)
             sequences = list()
-            thread, event = sp.info_dialog.do(
+            thread, event = sys.solstice.info_dialog.do(
                 'Getting Sequences Info ... Please wait!',
                 'SolsticeArtellaSequencesThread',
                 self.get_solstice_sequences_data, [sequences]
@@ -218,7 +218,7 @@ class SolsticeSequencer(QWidget, object):
             self._shots_stack.setCurrentIndex(1)
             cmds.waitCursor(state=True)
             sequence_shots = list()
-            thread, event = sp.info_dialog.do(
+            thread, event = sys.solstice.info_dialog.do(
                 'Getting Sequence Shots ... Please wait!',
                 'SolsticeArtellaSequencesShotsThread',
                 self.get_sequence_shots, [sequence_shots, selected_widget, 'working'], show=False

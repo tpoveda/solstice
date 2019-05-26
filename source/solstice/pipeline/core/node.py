@@ -655,7 +655,7 @@ class SolsticeTagDataNode(object):
             if not sys.solstice.dcc.attribute_exists(node=self._node, attribute_name='node'):
                 return None
 
-            connections = sys.solstice.list_connections(node=self._node, attribute_name='node')
+            connections = sys.solstice.dcc.list_connections(node=self._node, attribute_name='node')
             if connections:
                 node = connections[0]
                 return SolsticeAssetNode(node=node)
@@ -694,7 +694,7 @@ class SolsticeTagDataNode(object):
             if not sys.solstice.dcc.attribute_exists(node=self._node, attribute_name='proxy'):
                 return None
 
-            connections = sys.solstice.list_connections(node=self._node, attribute_name='proxy')
+            connections = sys.solstice.dcc.list_connections(node=self._node, attribute_name='proxy')
             if connections:
                 node = connections[0]
                 if sys.solstice.dcc.object_exists(node):
@@ -712,7 +712,7 @@ class SolsticeTagDataNode(object):
             if not sys.solstice.dcc.attribute_exists(node=self._node, attribute_name='hires'):
                 return None
 
-            connections = sys.solstice.list_connections(node=self._node, attribute_name='hires')
+            connections = sys.solstice.dcc.list_connections(node=self._node, attribute_name='hires')
             if connections:
                 node = connections[0]
                 if sys.solstice.dcc.object_exists(node):

@@ -407,7 +407,7 @@ class PublishModelTask(task.Task, object):
             if not valid_tag_data:
                 self.write_warning('Main group has not a valid tag data node connected to it. Creating it ...')
                 try:
-                    sys.solstice.select_object(valid_obj)
+                    sys.solstice.dcc.select_object(valid_obj)
                     tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(self._asset().category)
                     sys.solstice.dcc.clear_selection()
                     self.write_ok('Tag Data Node created successfully!')
@@ -561,7 +561,7 @@ class PublishModelTask(task.Task, object):
         # if abc_info_path and os.path.isfile(abc_info_path):
         #     artella.lock_file(abc_info_path)
         #
-        # sys.solstice.select_object(valid_obj)
+        # sys.solstice.dcc.select_object(valid_obj)
         # abc_group = solstice_alembicmanager.AlembicGroup()
         # new_abc_group = abc_group.create_alembic_group(valid_obj)
         # alembic_exporter = solstice_alembicmanager.AlembicExporter()
@@ -880,7 +880,7 @@ class PublishShadingTask(task.Task, object):
                         if sys.solstice.dcc.object_type(cnt) in shader_types:
                             connected_shaders.append(cnt)
                     if len(connected_shaders) > 0:
-                        target_name = sys.solstice.list_connections(node=shading_group, attribute_name='surfaceShader')[0]
+                        target_name = sys.solstice.dcc.list_connections(node=shading_group, attribute_name='surfaceShader')[0]
                         if shading_group != '{}SG'.format(target_name, shader):
                             self.write_error('Shader invalid nomenclature: Target name: {} ---------- {} => {}'.format(target_name, shader, shading_group))
                             self.write('Unlocking shading file ...')

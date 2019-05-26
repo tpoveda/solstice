@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 from functools import partial
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *

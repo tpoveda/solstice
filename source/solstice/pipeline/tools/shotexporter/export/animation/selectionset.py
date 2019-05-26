@@ -58,7 +58,7 @@ class SelectionSet(animobject.AnimObject, object):
             valid_nodes.append(target_node.name())
 
         if valid_nodes:
-            sys.solstice.select_object(valid_nodes, **kwargs)
+            sys.solstice.dcc.select_object(valid_nodes, **kwargs)
             if sp.is_maya():
                 cmds.setFocus('MayaWindow')
         else:

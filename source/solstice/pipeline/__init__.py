@@ -154,7 +154,7 @@ class SolsticePipeline(QObject):
         self.show_changelog()
         self.init_searcher()
 
-        if self.dcc == SolsticeDCC.Maya:
+        if is_maya():
             from solstice.pipeline.utils import mayautils as utils
             utils.viewport_message('Solstice Pipeline Tools loaded successfully!')
 
@@ -292,7 +292,7 @@ class SolsticePipeline(QObject):
 
         icons_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'icons')
         if os.path.exists(icons_path):
-            if self.dcc == SolsticeDCC.Maya:
+            if is_maya():
                 if platform.system() == 'Darwin':
                     os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ':' + icons_path
                 else:
@@ -366,7 +366,7 @@ class SolsticePipeline(QObject):
 
         from solstice.pipeline.utils import menu
 
-        if self.dcc == SolsticeDCC.Maya:
+        if is_maya():
             from solstice.pipeline.utils import mayautils
             try:
                 mayautils.remove_menu('Solstice')
@@ -398,7 +398,7 @@ class SolsticePipeline(QObject):
         """
 
         try:
-            if self.dcc == SolsticeDCC.Maya:
+            if is_maya():
                 import maya.cmds as cmds
                 self.logger.debug('Setting Solstice Project ...')
                 solstice_project_folder = os.environ.get('SOLSTICE_PROJECT', 'folder-not-defined')
@@ -409,7 +409,7 @@ class SolsticePipeline(QObject):
                 else:
                     self.logger.debug('Unable to set Solstice Project! => {}'.format(solstice_project_folder))
             else:
-                self.logger.warning('Impossible to setup Solstice Project in DCC: {}'.format(self.dcc))
+                self.logger.warning('   Impossible to setup Solstice Project in DCC: {}'.format(self.dcc))
         except Exception as e:
             self.logger.debug(str(e))
 
