@@ -60,10 +60,10 @@ class AnimationExporter(base_exporter.BaseExporter, object):
     #     self.exporter_list.refresh_exporter()
     #
     # def _on_update_properties(self, asset_widget):
-    #     if asset_widget and sp.dcc.object_exists(asset_widget.asset.name):
+    #     if asset_widget and sys.solstice.dcc.object_exists(asset_widget.asset.name):
     #         self.anims_list.update_attributes(asset_widget)
     #     else:
-    #         sp.logger.warning('Impossible to update properties because object {} does not exists!'.format(asset_widget.asset))
+    #         sys.solstice.logger.warning('Impossible to update properties because object {} does not exists!'.format(asset_widget.asset))
     #         self.anims_list.clear_properties()
     #
     # def _on_clear_properties(self):
@@ -71,12 +71,12 @@ class AnimationExporter(base_exporter.BaseExporter, object):
 
     # def _on_save(self):
     #     if not sp.is_maya():
-    #         sp.logger.warning('Shot Export only works for Maya!')
+    #         sys.solstice.logger.warning('Shot Export only works for Maya!')
     #         return
     #
     #     import maya.cmds as cmds
     #
-    #     anim_file = sp.dcc.save_file_dialog(title='Animation File', start_directory=sp.get_solstice_project_path(), pattern='Animation Files (*.anim)')
+    #     anim_file = sys.solstice.dcc.save_file_dialog(title='Animation File', start_directory=sp.get_solstice_project_path(), pattern='Animation Files (*.anim)')
     #     print(anim_file)
     #     if not anim_file:
     #         return
@@ -88,15 +88,15 @@ class AnimationExporter(base_exporter.BaseExporter, object):
     #     for w in self.exporter_list.all_widgets():
     #         abc_files = w.asset.get_alembic_files()
     #         if not abc_files:
-    #             sp.logger.warning('Skipping {} because Alembic File does not exists!'.format(w.asset.name))
+    #             sys.solstice.logger.warning('Skipping {} because Alembic File does not exists!'.format(w.asset.name))
     #             continue
-    #         abc_file = sp.dcc.get_attribute_value(node=w.abc_node, attribute_name='abc_File')
+    #         abc_file = sys.solstice.dcc.get_attribute_value(node=w.abc_node, attribute_name='abc_File')
     #         if not os.path.isfile(abc_file):
-    #             sp.logger.warning('Skipping {} because Alembic File {} does not exists!'.format(w.asset.name))
+    #             sys.solstice.logger.warning('Skipping {} because Alembic File {} does not exists!'.format(w.asset.name))
     #             continue
     #         abc_file = os.path.relpath(abc_file, sp.get_solstice_project_path())
     #         if not abc_file:
-    #             sp.logger.warning('Skipping {} because Alembic File {} is not located in Soltice Project path!'.format(w.asset.name))
+    #             sys.solstice.logger.warning('Skipping {} because Alembic File {} is not located in Soltice Project path!'.format(w.asset.name))
     #             continue
     #         anim_name = w.asset.name
     #         anim_uuid = cmds.ls(anim_name, uuid=True)[0]
@@ -109,16 +109,16 @@ class AnimationExporter(base_exporter.BaseExporter, object):
     #         for attr, flag in w.attrs.items():
     #             if not flag and attr not in defines.MUST_ATTRS:
     #                 continue
-    #             attr_value = sp.dcc.get_attribute_value(node=anim_name, attribute_name=attr)
+    #             attr_value = sys.solstice.dcc.get_attribute_value(node=anim_name, attribute_name=attr)
     #             anim_info['anims'][anim_uuid]['attrs'][attr] = attr_value
     #         for attr, flag in w.abc_attrs.items():
     #             if not flag and attr not in defines.ABC_ATTRS:
     #                 continue
-    #             attr_value = sp.dcc.get_attribute_value(node=w.abc_node, attribute_name=attr)
+    #             attr_value = sys.solstice.dcc.get_attribute_value(node=w.abc_node, attribute_name=attr)
     #             anim_info['anims'][anim_uuid]['abc_attrs'][attr] = attr_value
     #
     #     try:
     #         with open(anim_file, 'w') as f:
     #             json.dump(anim_info, f)
     #     except Exception as e:
-    #         sp.logger.error(str(e))
+    #         sys.solstice.logger.error(str(e))

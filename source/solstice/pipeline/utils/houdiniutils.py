@@ -12,8 +12,7 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
-
-import solstice.pipeline as sp
+import sys
 
 import hou
 from hou import shelves
@@ -198,7 +197,7 @@ def create_shelf_tool(tool_name, tool_label, tool_script, tool_type='python', ic
     elif tool_type == 'hscript':
         language = hou.scriptLanguage.HScript
     if language is None:
-        sp.logger.warning('Impossible to create shelf tool {} because script language {} is not supported by {}'.format(tool_name, tool_type, sp.dcc.get_name()))
+        sys.solstice.logger.warning('Impossible to create shelf tool {} because script language {} is not supported by {}'.format(tool_name, tool_type, sys.solstice.dcc.get_name()))
         return None
 
     return shelves.newTool(name=tool_name, label=tool_label, script=tool_script, icon=icon, help=help, language=language)

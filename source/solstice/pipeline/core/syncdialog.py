@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import threading
 import traceback
 
@@ -40,7 +41,7 @@ class SolsticeSync(QDialog, object):
 
     def __init__(self):
         super(SolsticeSync, self).__init__()
-        self.setParent(sp.dcc.get_main_window())
+        self.setParent(sys.solstice.dcc.get_main_window())
         self.custom_ui()
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._update_progress_bar)
@@ -128,8 +129,8 @@ class SolsticeSyncFile(SolsticeSync, object):
         try:
             threading.Thread(target=self.sync_files, args=(self._event,), name='SolsticeSyncFilesThread').start()
         except Exception as e:
-            sp.logger.debug(str(e))
-            sp.logger.debug(traceback.format_exc())
+            sys.solstice.logger.debug(str(e))
+            sys.solstice.logger.debug(traceback.format_exc())
         self.exec_()
 
     def sync_files(self, event):
@@ -163,8 +164,8 @@ class SolsticeSyncPath(SolsticeSync, object):
         try:
             threading.Thread(target=self.sync_files, args=(self._event,), name='SolsticeSyncPathsThread').start()
         except Exception as e:
-            sp.logger.debug(str(e))
-            sp.logger.debug(traceback.format_exc())
+            sys.solstice.logger.debug(str(e))
+            sys.solstice.logger.debug(traceback.format_exc())
         self.exec_()
 
     def sync_files(self, event):
@@ -174,8 +175,8 @@ class SolsticeSyncPath(SolsticeSync, object):
             try:
                 artella.synchronize_path(p)
             except Exception as e:
-                sp.logger.error('Impossible to sync files ... Maybe Artella is down! Try it later ...')
-                sp.logger.error(str(e))
+                sys.solstice.logger.error('Impossible to sync files ... Maybe Artella is down! Try it later ...')
+                sys.solstice.logger.error(str(e))
                 event.set()
             sp.register_asset(p)
         event.set()

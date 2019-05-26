@@ -13,7 +13,9 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import json
+
 from collections import OrderedDict
 
 import solstice.pipeline as sp
@@ -58,7 +60,7 @@ class SolsticeMenu(object):
             return
 
         if not os.path.isfile(file_path):
-            sp.logger.warning('Menu was not created because menu file is not valid or does not exists!')
+            sys.solstice.logger.warning('Menu was not created because menu file is not valid or does not exists!')
             return
 
         menu_data = None

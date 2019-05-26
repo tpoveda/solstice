@@ -12,6 +12,7 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
 import weakref
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
@@ -193,7 +194,7 @@ class ColorButton(QPushButton, object):
             self.color = QColor.fromRgbF(new_color[0], new_color[1], new_color[2])
             self.colorChanged.emit()
         else:
-            sp.logger.warning('Color Editor is not supported in current DCC: {}'.format(sp.dcc.get_name()))
+            sys.solstice.logger.warning('Color Editor is not supported in current DCC: {}'.format(sys.solstice.dcc.get_name()))
             return
 
     def _update_color(self):
@@ -247,7 +248,7 @@ class Base(object):
             else:
                 self._glow_index -= 1
 
-        sp.dcc.execute_deferred(self.update)
+        sys.solstice.dcc.execute_deferred(self.update)
 
     #-----------------------------------------------------------------------------------------#
 

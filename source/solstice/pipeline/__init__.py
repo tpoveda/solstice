@@ -12,6 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+main = __import__('__main__')
+
 import os
 import re
 import sys
@@ -23,6 +25,7 @@ import datetime
 import platform
 import tempfile
 import traceback
+import importlib
 import webbrowser
 
 from solstice.pipeline.externals import solstice_six
@@ -51,15 +54,7 @@ rig_suffix = 'RIG'
 
 # =================================================================================
 
-dcc = abstractdcc.SolsticeDCC()
 Node = dccnode.SolsticeNodeDCC
-sys.solstice_dispatcher = None
-logger = None
-tray = None
-settings = None
-config = None
-info_dialog = None
-
 
 # =================================================================================
 
@@ -134,13 +129,22 @@ class SolsticePipeline(QObject):
     def __init__(self):
         super(SolsticePipeline, self).__init__()
 
+        self.dcc = abstractdcc.SolsticeDCC()
+        self.logger = None
+        self.config = None
+        self.settings = None
+        self.info_dialog = None
+        self.tray = None
+
         self.logger = self.create_solstice_logger()
         self.config = self.init_config()
         self.settings = self.create_solstice_settings()
         self.detect_dcc()
+
+    def setup(self):
         self.update_paths()
         self.set_environment_variables()
-        self.reload_all()
+        self.import_all()
 
         self.info_dialog = self.create_solstice_info_window()
         self.create_solstice_shelf()
@@ -150,7 +154,7 @@ class SolsticePipeline(QObject):
         self.show_changelog()
         self.init_searcher()
 
-        if is_maya():
+        if self.dcc == SolsticeDCC.Maya:
             from solstice.pipeline.utils import mayautils as utils
             utils.viewport_message('Solstice Pipeline Tools loaded successfully!')
 
@@ -160,23 +164,21 @@ class SolsticePipeline(QObject):
         Creates and initializes solstice logger
         """
 
-        from solstice.pipeline.utils import logger
-        global logger
-        logger = logger.Logger(name='solstice', level=logger.LoggerLevel.DEBUG)
+        from solstice.pipeline.utils import logger as logger_utils
+        logger = logger_utils.Logger(name='solstice', level=logger_utils.LoggerLevel.DEBUG)
         logger.debug('Initializing Solstice Tools ...')
         return logger
 
-    @staticmethod
-    def init_config():
+    def init_config(self):
         """
         Read and initializes Solstice settings
         """
 
-        global config
-
-        if not config:
+        if not self.config:
             config = SolsticeConfig()
             config.read()
+        else:
+            return self.config
 
         return config
 
@@ -186,9 +188,8 @@ class SolsticePipeline(QObject):
         Creates a settings file that can be accessed globally by all tools
         """
 
-        from solstice.pipeline.utils import settings
-        global settings
-        settings = settings.create_settings('solstice_pipeline')
+        from solstice.pipeline.utils import settings as setting_utils
+        settings = setting_utils.create_settings('solstice_pipeline')
         return settings
 
     @staticmethod
@@ -198,12 +199,10 @@ class SolsticePipeline(QObject):
         """
 
         from solstice.pipeline.gui import infodialog
-        global info_dialog
         info_dialog = infodialog.InfoDialog()
         return info_dialog
 
-    @staticmethod
-    def reload_all():
+    def import_all(self):
         import inspect
         scripts_dir = os.path.dirname(__file__)
         for key, module in sys.modules.items():
@@ -215,9 +214,10 @@ class SolsticePipeline(QObject):
                 continue
             if module_path.startswith(scripts_dir):
                 try:
-                    reload(module)
+                    importlib.import_module(module.__name__)
+                    # reload(module)
                 except Exception as e:
-                    logger.error('{} | {}'.format(e, traceback.format_exc()))
+                    self.logger.error('{} | {}'.format(e, traceback.format_exc()))
 
     @staticmethod
     def show_changelog():
@@ -242,7 +242,11 @@ class SolsticePipeline(QObject):
         from solstice.pipeline.utils import artellautils
 
         root_path = os.path.dirname(os.path.abspath(__file__))
-        extra_paths = [os.path.join(root_path, 'resources', 'icons'), get_externals_path()]
+        extra_paths = [
+            os.path.join(root_path, 'resources', 'icons'),
+            get_externals_path(),
+            os.path.join(get_externals_path(), 'solstice_studiolibrary', 'packages')
+        ]
         for path in extra_paths:
             if os.path.exists(path) and path not in sys.path:
                 self.logger.debug('Adding Path {} to SYS_PATH ...'.format(path))
@@ -288,14 +292,14 @@ class SolsticePipeline(QObject):
 
         icons_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources', 'icons')
         if os.path.exists(icons_path):
-            if is_maya():
+            if self.dcc == SolsticeDCC.Maya:
                 if platform.system() == 'Darwin':
                     os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ':' + icons_path
                 else:
                     os.environ['XBMLANGPATH'] = os.environ.get('XBMLANGPATH') + ';' + icons_path
                 self.logger.debug('Artella Icons Folder "{}" added to Maya Icons Paths ...'.format(icons_path))
             else:
-                self.logger.debug('Icon Path not found for DCC: {}'.format(dcc))
+                self.logger.debug('Icon Path not found for DCC: {}'.format(self.dcc))
         else:
             self.logger.debug('Solstice Icons not found! Solstice Shelf maybe will not show icons! Please contact TD!')
 
@@ -315,30 +319,24 @@ class SolsticePipeline(QObject):
         Function that updates current DCC
         """
 
-        global dcc
-
-        try:
-            import maya.cmds as cmds
+        if 'cmds' in main.__dict__:
             from solstice.pipeline.dcc.maya import mayadcc
-            dcc = mayadcc.SolsticeMaya()
-        except ImportError:
-            try:
-                import hou
-                from solstice.pipeline.dcc.houdini import houdinidcc
-                dcc = houdinidcc.SolsticeHoudini()
-            except ImportError:
-                try:
-                    import nuke
-                    from solstice.pipeline.dcc.nuke import nukedcc
-                    dcc = nukedcc.SolsticeNuke()
-                except ImportError as e:
-                    print(e)
-                    print('No valid DCC found!')
+            self.dcc = mayadcc.SolsticeMaya()
+        elif 'hou' in main.__dict__:
+            import hou
+            from solstice.pipeline.dcc.houdini import houdinidcc
+            self.dcc = houdinidcc.SolsticeHoudini()
+        elif 'nuke' in main.__dict__:
+            import nuke
+            from solstice.pipeline.dcc.nuke import nukedcc
+            self.dcc = nukedcc.SolsticeNuke()
+        else:
+            self.logger.error('No valid DCC found!')
 
-        if dcc:
-            self.logger.debug('Current DCC: {}'.format(dcc.get_name()))
+        if self.dcc:
+            self.logger.debug('Current DCC: {}'.format(self.dcc.get_name()))
 
-        return dcc
+        return self.dcc
 
     def create_solstice_shelf(self):
         """
@@ -368,7 +366,7 @@ class SolsticePipeline(QObject):
 
         from solstice.pipeline.utils import menu
 
-        if is_maya():
+        if self.dcc == SolsticeDCC.Maya:
             from solstice.pipeline.utils import mayautils
             try:
                 mayautils.remove_menu('Solstice')
@@ -390,7 +388,6 @@ class SolsticePipeline(QObject):
 
         from solstice.pipeline.gui import traymessage
 
-        global tray
         self.logger.debug('Creating Solstice Tray ...')
         tray = traymessage.SolsticeTrayMessage()
         return tray
@@ -401,7 +398,7 @@ class SolsticePipeline(QObject):
         """
 
         try:
-            if is_maya():
+            if self.dcc == SolsticeDCC.Maya:
                 import maya.cmds as cmds
                 self.logger.debug('Setting Solstice Project ...')
                 solstice_project_folder = os.environ.get('SOLSTICE_PROJECT', 'folder-not-defined')
@@ -412,11 +409,19 @@ class SolsticePipeline(QObject):
                 else:
                     self.logger.debug('Unable to set Solstice Project! => {}'.format(solstice_project_folder))
             else:
-                logger.warning('Impossible to setup Solstice Project in DCC: {}'.format(dcc))
+                self.logger.warning('Impossible to setup Solstice Project in DCC: {}'.format(self.dcc))
         except Exception as e:
             self.logger.debug(str(e))
 
+
 # =================================================================================
+
+def reload():
+    for mod in sys.modules.keys():
+        if mod in sys.modules and mod.startswith('solstice'):
+            del sys.modules[mod]
+    sys.solstice.import_all()
+    sys.solstice.detect_dcc()
 
 
 def update_solstice_project_path():
@@ -482,7 +487,7 @@ def get_solstice_changelog_file():
 
     changelog_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'changelog.json')
     if not os.path.isfile(changelog_file):
-        logger.warning('Changelof file: {} does not exists!'.format(changelog_file))
+        sys.solstice.logger.warning('Changelof file: {} does not exists!'.format(changelog_file))
         return False
 
     return changelog_file
@@ -496,7 +501,7 @@ def get_solstice_shelf_file():
 
     shelf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'shelf.json')
     if not os.path.exists(shelf_file):
-        logger.warning('Shelf file: {} does not exists!'.format(shelf_file))
+        sys.solstice.logger.warning('Shelf file: {} does not exists!'.format(shelf_file))
         return False
 
     return shelf_file
@@ -510,7 +515,7 @@ def get_solstice_menu_file():
 
     menu_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'menu.json')
     if not os.path.exists(menu_file):
-        logger.warning('Menu file: {} does not exists!'.format(menu_file))
+        sys.solstice.logger.warning('Menu file: {} does not exists!'.format(menu_file))
         return False
 
     return menu_file
@@ -526,14 +531,14 @@ def get_solstice_assets_path():
     if os.path.exists(assets_path):
         return assets_path
     else:
-        logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
-        logger.debug('Trying to synchronize it ...')
+        sys.solstice.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
+        sys.solstice.logger.debug('Trying to synchronize it ...')
         try:
             from solstice.pipeline.gui import syncdialog
             syncdialog.SolsticeSyncPath(paths=[assets_path]).sync()
             return assets_path
         except Exception as e:
-            logger.debug('Error while synchronizing production path: {}'.format(e))
+            sys.solstice.logger.debug('Error while synchronizing production path: {}'.format(e))
         return None
 
 
@@ -547,14 +552,14 @@ def get_solstice_production_path():
     if os.path.exists(production_path):
         return production_path
     else:
-        logger.debug('Production Path does not exists!: {0}'.format(production_path))
-        logger.debug('Trying to synchronize it ...')
+        sys.solstice.logger.debug('Production Path does not exists!: {0}'.format(production_path))
+        sys.solstice.logger.debug('Trying to synchronize it ...')
         try:
             from solstice.pipeline.gui import syncdialog
             syncdialog.SolsticeSyncPath(paths=[production_path]).sync()
             return production_path
         except Exception as e:
-            logger.debug('Error while synchronizing production path: {}'.format(e))
+            sys.solstice.logger.debug('Error while synchronizing production path: {}'.format(e))
         return None
 
 
@@ -629,11 +634,11 @@ def find_asset(asset_to_search, assets_path=None, update_if_data_not_found=False
                     if update_if_data_not_found:
                         syncdialog.SolsticeSyncFile(files=[asset_data_file]).sync()
                         if not os.path.isfile(asset_data_file):
-                            logger.debug('Impossible to get info of asset "{0}". Aborting!'.format(asset_name))
+                            sys.solstice.logger.debug('Impossible to get info of asset "{0}". Aborting!'.format(asset_name))
                             continue
                     else:
                         if not os.path.isfile(asset_data_file):
-                            logger.debug('Impossible to get info of asset "{0}". Aborting!'.format(asset_name))
+                            sys.solstice.logger.debug('Impossible to get info of asset "{0}". Aborting!'.format(asset_name))
                         continue
 
                 asset_category = pythonutils.camel_case_to_string(os.path.basename(os.path.dirname(asset_path)))
@@ -655,7 +660,7 @@ def find_asset(asset_to_search, assets_path=None, update_if_data_not_found=False
                 found_assets.append(new_asset)
 
     if asset_to_search and len(found_assets) > 1:
-        logger.warning('Multiple assets found with name: {}'.format(asset_to_search))
+        sys.solstice.logger.warning('Multiple assets found with name: {}'.format(asset_to_search))
 
     if len(found_assets) > 1:
         return found_assets
@@ -693,9 +698,9 @@ def register_asset(asset_name):
 
     now = datetime.datetime.now()
     sync_time = now.strftime("%m/%d/%Y %H:%M:%S")
-    logger.debug('Registering Asset Sync: {0} - {1}'.format(asset_name, sync_time))
-    settings.set(settings.app_name, asset_name, str(sync_time))
-    settings.update()
+    sys.solstice.logger.debug('Registering Asset Sync: {0} - {1}'.format(asset_name, sync_time))
+    sys.solstice.settings.set(sys.solstice.settings.app_name, asset_name, str(sync_time))
+    sys.solstice.settings.update()
     return sync_time
 
 
@@ -706,12 +711,12 @@ def update_tools():
 
 def message(msg, title='Solstice Tools'):
     if sys.platform == 'win32':
-        if tray:
-            tray.show_message(title=title, msg=msg)
+        if sys.solstice.tray:
+            sys.solstice.tray.show_message(title=title, msg=msg)
         else:
-            logger.debug(str(msg))
+            sys.solstice.logger.debug(str(msg))
     else:
-        logger.debug(str(msg))
+        sys.solstice.logger.debug(str(msg))
 
 
 def get_artella_project_url():
@@ -803,10 +808,13 @@ def is_maya():
     :return: bool
     """
 
-    if not dcc:
-        return False
+    try:
+        if not sys.solstice.dcc:
+            return False
 
-    return dcc.get_name() == SolsticeDCC.Maya
+        return sys.solstice.dcc.get_name() == SolsticeDCC.Maya
+    except Exception:
+        return 'cmds' in main.__dict__
 
 
 def is_houdini():
@@ -815,10 +823,13 @@ def is_houdini():
     :return: bool
     """
 
-    if not dcc:
-        return False
+    try:
+        if not sys.solstice.dcc:
+            return False
 
-    return dcc.get_name() == SolsticeDCC.Houdini
+        return sys.solstice.dcc.get_name() == SolsticeDCC.Houdini
+    except Exception:
+        return 'houdini' in main.__dict__
 
 
 def is_nuke():
@@ -827,19 +838,22 @@ def is_nuke():
     :return: bool
     """
 
-    if not dcc:
-        return False
+    try:
+        if not sys.solstice.dcc:
+            return False
 
-    return dcc.get_name() == SolsticeDCC.Nuke
+        return sys.solstice.dcc.get_name() == SolsticeDCC.Nuke
+    except Exception:
+        return 'nuke' in main.__dict__
 
 
 def get_tag_data_nodes():
     tag_nodes = list()
-    objs = dcc.all_scene_objects()
+    objs = sys.solstice.dcc.all_scene_objects()
     for obj in objs:
-        valid_tag_data = dcc.attribute_exists(node=obj, attribute_name='tag_type')
+        valid_tag_data = sys.solstice.dcc.attribute_exists(node=obj, attribute_name='tag_type')
         if valid_tag_data:
-            tag_type = dcc.get_attribute_value(node=obj, attribute_name='tag_type')
+            tag_type = sys.solstice.dcc.get_attribute_value(node=obj, attribute_name='tag_type')
             if tag_type and tag_type == 'SOLSTICE_TAG':
                 tag_nodes.append(obj)
 
@@ -848,9 +862,9 @@ def get_tag_data_nodes():
 
 def get_tag_info_nodes(as_nodes=True):
     tag_info_nodes = list()
-    objs = dcc.all_scene_objects()
+    objs = sys.solstice.dcc.all_scene_objects()
     for obj in objs:
-        d
+        valid_tag_info_data = sys.solstice.dcc.attribute_exists(node=obj, attribute_name='tag_info')
         if valid_tag_info_data:
             tag_info_nodes.append(obj)
 
@@ -868,7 +882,7 @@ def get_assets(as_nodes=True):
     # We find tag data nodes
     tag_data_nodes = get_tag_data_nodes()
     for tag_data in tag_data_nodes:
-        cns = dcc.list_connections(node=tag_data, attribute_name='node')
+        cns = sys.sys.solstice.dcc.list_connections(node=tag_data, attribute_name='node')
         if cns:
             asset = cns[0]
             if asset in abc_nodes:
@@ -881,7 +895,7 @@ def get_assets(as_nodes=True):
     # We find nodes with tag info attribute (Alembics)
     tag_info_nodes = get_tag_info_nodes()
     for tag_info in tag_info_nodes:
-        tag_info_dict = dcc.get_attribute_value(node=tag_info, attribute_name='tag_info')
+        tag_info_dict = sys.solstice.dcc.get_attribute_value(node=tag_info, attribute_name='tag_info')
         if tag_info_dict:
             if as_nodes:
                 if tag_info in abc_nodes:
@@ -901,18 +915,18 @@ def get_alembics(as_nodes=True, only_roots=False):
     added_roots = list()
 
     abc_nodes = list()
-    objs = dcc.all_scene_objects()
+    objs = sys.solstice.dcc.all_scene_objects()
     for obj in objs:
-        if dcc.node_type(obj) == 'AlembicNode':
+        if sys.solstice.dcc.node_type(obj) == 'AlembicNode':
             abc_nodes.append(obj)
 
     for abc in abc_nodes:
-        cns = dcc.list_connections(abc, 'transOp')
+        cns = sys.sys.solstice.dcc.list_connections(abc, 'transOp')
         for cn in cns:
-            cn_root = dcc.node_root(cn)
+            cn_root = sys.solstice.dcc.node_root(cn)
             if cn_root in added_roots:
                 continue
-            if dcc.attribute_exists(cn_root, 'tag_info'):
+            if sys.solstice.dcc.attribute_exists(cn_root, 'tag_info'):
                 if as_nodes:
                     if only_roots:
                         all_alembic_roots.append(node.SolsticeAssetNode(node=cn_root))
@@ -939,7 +953,7 @@ def format_path(format_string, path='', **kwargs):
 
     from solstice.pipeline.utils import pythonutils
 
-    logger.debug('Format String: {}'.format(format_string))
+    sys.solstice.logger.debug('Format String: {}'.format(format_string))
 
     dirname, name, extension = pythonutils.split_path(path)
     encoding = locale.getpreferredencoding()
@@ -973,7 +987,7 @@ def format_path(format_string, path='', **kwargs):
 
     resolved_string = solstice_six.u(format_string).format(**kwargs)
 
-    logger.debug('Resolved string: {}'.format(resolved_string))
+    sys.solstice.logger.debug('Resolved string: {}'.format(resolved_string))
 
     return pythonutils.norm_path(resolved_string)
 
@@ -987,7 +1001,7 @@ def temp_path(*args):
 
     from solstice.pipeline.utils import pythonutils
 
-    temp = config.get('tempPath')
+    temp = sys.solstice.config.get('tempPath')
     return pythonutils.norm_path(os.path.join(format_path(temp), *args))
 
 
@@ -1011,4 +1025,5 @@ def create_temp_path(name, clean=True, make_dirs=True):
 
 
 def init():
-    sys.dispatcher = SolsticePipeline()
+    sys.solstice = SolsticePipeline()
+    sys.solstice.setup()

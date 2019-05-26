@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 from solstice.pipeline.externals.solstice_qt.QtCore import *
@@ -141,10 +142,10 @@ class LightRigManager(window.Window, object):
         if sync:
             syncdialog.SolsticeSyncPath(paths=[light_rigs_path]).sync()
         if os.path.exists(light_rigs_path):
-            sp.logger.debug('Getting Light Rigs Path: {0}'.format(light_rigs_path))
+            sys.solstice.logger.debug('Getting Light Rigs Path: {0}'.format(light_rigs_path))
             return light_rigs_path
         else:
-            sp.logger.error('Impossible to sync light rigs! Please contact TD!')
+            sys.solstice.logger.error('Impossible to sync light rigs! Please contact TD!')
             return None
 
     def _update_ui(self):
@@ -168,7 +169,7 @@ class LightRigManager(window.Window, object):
         light_rigs_path = LightRigManager.get_solstice_light_rigs_path(sync=False)
         light_rig = os.path.join(light_rigs_path, '__working__', name.title(), 'LR_{}.ma'.format(name.title()).replace(' ', '_'))
         if not os.path.exists(light_rig):
-            sp.logger.error('Light Rig File {} does not exists!'.format(light_rig))
+            sys.solstice.logger.error('Light Rig File {} does not exists!'.format(light_rig))
             return False
 
         cmds.file(light_rig, o=True, f=True)
@@ -181,7 +182,7 @@ class LightRigManager(window.Window, object):
         light_rigs_path = LightRigManager.get_solstice_light_rigs_path(sync=False)
         light_rig = os.path.join(light_rigs_path, '__working__', name.title(), 'LR_{}.ma'.format(name.title()).replace(' ', '_'))
         if not os.path.exists(light_rig):
-            sp.logger.error('Light Rig File {} does not exists!'.format(light_rig))
+            sys.solstice.logger.error('Light Rig File {} does not exists!'.format(light_rig))
             return False
 
         cmds.file(light_rig, i=True, f=True)
@@ -196,7 +197,7 @@ class LightRigManager(window.Window, object):
         light_rig = os.path.join(light_rigs_path, '__working__', name.title(),
                                  'LR_{}.ma'.format(name.title()).replace(' ', '_'))
         if not os.path.exists(light_rig):
-            sp.logger.error('Light Rig File {} does not exists!'.format(light_rig))
+            sys.solstice.logger.error('Light Rig File {} does not exists!'.format(light_rig))
             return False
 
         cmds.file(light_rig, reference=True, f=True)

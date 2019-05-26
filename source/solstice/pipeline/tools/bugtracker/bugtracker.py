@@ -100,7 +100,7 @@ class BugTracker(dialog.Dialog, object):
         bugs_path = self.get_bugs_folder()
         syncdialog.SolsticeSyncFile(files=[bugs_path]).sync()
         if not os.path.exists(bugs_path):
-            sp.logger.error('Impossible to sync Solstice Bugs Folder ...')
+            sys.solstice.logger.error('Impossible to sync Solstice Bugs Folder ...')
             return
 
         user = '{0}_{1}'.format(getpass.getuser(), sys.platform)

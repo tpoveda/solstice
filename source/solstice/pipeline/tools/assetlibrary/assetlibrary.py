@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import weakref
 from functools import partial
 
@@ -38,7 +39,7 @@ class SolsticeAssetViewer(QWidget, object):
 
     def __init__(self, parent=None):
         if parent is None:
-            parent = sp.dcc.get_main_window()
+            parent = sys.solstice.dcc.get_main_window()
         super(SolsticeAssetViewer, self).__init__(parent=parent)
 
         if sp.is_maya():

@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import time
 from collections import OrderedDict
 
@@ -142,10 +143,10 @@ class SolsticeSequencer(QWidget, object):
                 QCoreApplication.processEvents()
                 event.wait(0.05)
         except Exception as e:
-            sp.logger.debug(str(e))
+            sys.solstice.logger.debug(str(e))
 
         elapsed_time = time.time() - start_time
-        sp.logger.debug('Sequences synchronized in {} seconds'.format(elapsed_time))
+        sys.solstice.logger.debug('Sequences synchronized in {} seconds'.format(elapsed_time))
 
         if sequences:
             sequences = sequences[0]
@@ -172,7 +173,7 @@ class SolsticeSequencer(QWidget, object):
         :return:
         """
 
-        sp.logger.debug('Syncing sequences ...')
+        sys.solstice.logger.debug('Syncing sequences ...')
 
         start_time = time.time()
         try:
@@ -196,11 +197,11 @@ class SolsticeSequencer(QWidget, object):
                     )
                     seq_obj.sync()
         except Exception as e:
-            sp.logger.debug(str(e))
+            sys.solstice.logger.debug(str(e))
             cmds.waitCursor(state=False)
 
         elapsed_time = time.time() - start_time
-        sp.logger.debug('Sequences synchronized in {} seconds'.format(elapsed_time))
+        sys.solstice.logger.debug('Sequences synchronized in {} seconds'.format(elapsed_time))
         cmds.waitCursor(state=False)
 
     def update_shots(self, selected_widget=None):
@@ -208,7 +209,7 @@ class SolsticeSequencer(QWidget, object):
             return
 
         valid_sync = True
-        sp.logger.debug('Syncing sequences ...')
+        sys.solstice.logger.debug('Syncing sequences ...')
 
         self._shots_list.clear()
 
@@ -236,13 +237,13 @@ class SolsticeSequencer(QWidget, object):
                     self._shots_list.addItem(shot_item)
                     self._shots_list.setItemWidget(shot_item, shot_widget)
         except Exception as e:
-            sp.logger.debug(str(e))
+            sys.solstice.logger.debug(str(e))
             cmds.waitCursor(state=False)
             self._shots_stack.setCurrentIndex(0)
             valid_sync = False
 
         elapsed_time = time.time() - start_time
-        sp.logger.debug('Shots updated in {} seconds'.format(elapsed_time))
+        sys.solstice.logger.debug('Shots updated in {} seconds'.format(elapsed_time))
         cmds.waitCursor(state=False)
 
         if valid_sync:

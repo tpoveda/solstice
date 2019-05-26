@@ -12,6 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
+
 import solstice.pipeline as sp
 from solstice.pipeline.utils import attribute
 
@@ -50,7 +52,7 @@ class Pose(animobject.AnimObject, object):
             if attr.is_valid():
                 if attr.value() is None:
                     msg = 'Cannot save the attribute {} with value None'
-                    sp.logger.warning(msg, attr.fullname())
+                    sys.solstice.logger.warning(msg, attr.fullname())
                 else:
                     data['attrs'][attr.attr()] = {
                         'type': attr.attribute_type(),

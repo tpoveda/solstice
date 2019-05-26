@@ -297,8 +297,7 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function list_children() not implemented!')
 
     @staticmethod
-    def list_relatives(
-            node, all_hierarchy=True, full_path=True, relative_type=None, shapes=False, intermediate_shapes=False):
+    def list_relatives(node, all_hierarchy=True, full_path=True, relative_type=None, shapes=False, intermediate_shapes=False):
         """
         Returns a list of relative nodes of the given node
         :param node:
@@ -770,7 +769,7 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function create_shelf() not implemented!')
 
     @staticmethod
-    def delete_shelf(shelf_name):
+    def create_shelf(shelf_name):
         """
         Deletes shelf with given name
         :param shelf_name: str

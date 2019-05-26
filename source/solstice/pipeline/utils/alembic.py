@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import traceback
 
 import solstice.pipeline as sp
@@ -157,7 +158,7 @@ def export(alembicFile,
     """
 
     if not sp.is_maya():
-        sp.logger.warning('DCC {} does not support Alembic Export functionality yet!'.format(sp.dcc.get_name()))
+        sys.solstice.logger.warning('DCC {} does not support Alembic Export functionality yet!'.format(sys.solstice.dcc.get_name()))
         return
 
     import maya.cmds as cmds
@@ -226,7 +227,7 @@ def export(alembicFile,
     jobArg += " -file {0}".format(alembicFile.replace("\\", "/"))
 
     # Execute export
-    sp.dcc.load_plugin('AbcExport.mll', quiet=True)
+    sys.solstice.dcc.load_plugin('AbcExport.mll', quiet=True)
 
     export_args = {
         "dontSkipUnwrittenFrames": dontSkipUnwrittenFrames,
@@ -237,7 +238,7 @@ def export(alembicFile,
 
     print("Exporting with: {0}".format(export_args))
 
-    sp.logger.debug('\n> Exporting model Alembic with jog arguments:\n "{}"'.format(export_args))
+    sys.solstice.logger.debug('\n> Exporting model Alembic with jog arguments:\n "{}"'.format(export_args))
     abc_folder = os.path.dirname(alembicFile)
     if not os.path.exists(abc_folder):
         os.makedirs(abc_folder)
@@ -247,18 +248,18 @@ def export(alembicFile,
     except Exception as e:
         raise Exception(e)
 
-    sp.logger.debug('Abc export completed!')
+    sys.solstice.logger.debug('Abc export completed!')
     return os.path.exists(alembicFile)
 
 def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
     if not os.path.exists(alembic_file):
-        sp.dcc.confirm_dialog(
+        sys.solstice.dcc.confirm_dialog(
             title='Error',
             message='Alembic File does not exists:\n{}'.format(alembic_file)
         )
         return None
 
-    sp.logger.debug('Import Alembic File ({}) with job arguments:\n{}\n\n{}'.format(mode, alembic_file, nodes))
+    sys.solstice.logger.debug('Import Alembic File ({}) with job arguments:\n{}\n\n{}'.format(mode, alembic_file, nodes))
 
     try:
         if sp.is_maya():
@@ -272,28 +273,28 @@ def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
             return res
         elif sp.is_houdini():
             if not parent:
-                sp.logger.warning('Impossible to import Alembic File because not Alembic parent given!')
+                sys.solstice.logger.warning('Impossible to import Alembic File because not Alembic parent given!')
                 return
             parent.parm('fileName').set(alembic_file)
             parent.parm('buildHierarchy').pressButton()
 
     except Exception as e:
-        sp.logger.error(traceback.format_exc())
+        sys.solstice.logger.error(traceback.format_exc())
         raise Exception(e)
 
-    sp.logger.debug('Alembic File {} imported successfully!'.format(os.path.basename(alembic_file)))
+    sys.solstice.logger.debug('Alembic File {} imported successfully!'.format(os.path.basename(alembic_file)))
 
 
 def reference_alembic(alembic_file, namespace=None):
 
     if not sp.is_maya():
-        sp.logger.warning('DCC {} does not support Alembic Reference functionality yet!'.format(sp.dcc.get_name()))
+        sys.solstice.logger.warning('DCC {} does not support Alembic Reference functionality yet!'.format(sys.solstice.dcc.get_name()))
         return
 
     import maya.cmds as cmds
 
     if not os.path.exists(alembic_file):
-        sp.dcc.confirm_dialog(
+        sys.solstice.dcc.confirm_dialog(
             title='Error',
             message='Alembic File does not exists:\n{}'.format(alembic_file)
         )
@@ -305,9 +306,9 @@ def reference_alembic(alembic_file, namespace=None):
         else:
             cmds.file(alembic_file, type='Alembic', reference=True)
     except Exception as e:
-        sp.logger.error(traceback.format_exc())
+        sys.solstice.logger.error(traceback.format_exc())
         raise Exception(e)
 
-    sp.logger.debug('Alembic File {} referenced successfully!'.format(os.path.basename(alembic_file)))
+    sys.solstice.logger.debug('Alembic File {} referenced successfully!'.format(os.path.basename(alembic_file)))
 
     return True

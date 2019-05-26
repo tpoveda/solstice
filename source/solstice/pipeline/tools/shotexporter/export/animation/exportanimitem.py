@@ -12,7 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
-import solstice.pipeline as sp
+import sys
+
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 
@@ -36,7 +37,7 @@ class AnimationAssetItem(assetitem.ExporterAssetItem, object):
         super(AnimationAssetItem, self)._update_attrs()
 
         # Store Alembic Node attrs
-        abc_attrs = sp.dcc.list_attributes(self.abc_node)
+        abc_attrs = sys.solstice.dcc.list_attributes(self.abc_node)
         for attr in abc_attrs:
             if attr not in defines.ABC_ATTRS:
                 continue

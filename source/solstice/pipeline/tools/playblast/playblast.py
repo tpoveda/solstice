@@ -556,7 +556,7 @@ class SolsticeTimeRange(SolsticePlayblastWidget, object):
             try:
                 OpenMayaV1.MEventMessage.removeCallback(callback)
             except RuntimeError as e:
-                sp.logger.error('Encounter error: {}'.format(e))
+                sys.solstice.logger.error('Encounter error: {}'.format(e))
 
 
 class SolsticeCameras(SolsticePlayblastWidget, object):
@@ -670,7 +670,7 @@ class SolsticeCameras(SolsticePlayblastWidget, object):
             self.cameras.blockSignals(False)
         except Exception as e:
             self.cameras.blockSignals(False)
-            sp.logger.debug(str(e))
+            sys.solstice.logger.debug(str(e))
 
         if cam != self.get_outputs()['camera']:
             camera_index = self.cameras.currentIndex()
@@ -1687,8 +1687,8 @@ class SolsticeMaskObject(object):
             try:
                 cmds.loadPlugin(os.path.realpath(__file__).replace('.pyc', '.py'))
             except Exception as e:
-                sp.logger.error('Failed to load SolsticeMask plugin! | {}'.format(str(e)))
-                sp.logger.debug('Please import {} plugin manually!'.format(cls.mask_plugin))
+                sys.solstice.logger.error('Failed to load SolsticeMask plugin! | {}'.format(str(e)))
+                sys.solstice.logger.debug('Please import {} plugin manually!'.format(cls.mask_plugin))
                 return
 
         if not cls.get_mask():
@@ -2413,7 +2413,7 @@ class PlayblastPreview(QWidget, object):
 
             frame_name = capture(**options)
             if not frame_name:
-                sp.logger.warning('Preview failed!')
+                sys.solstice.logger.warning('Preview failed!')
                 return
 
             image = QPixmap(frame_name)
@@ -2488,7 +2488,7 @@ class PlayblastPreset(QWidget, object):
 
         solstice_presets_folder = os.path.normpath(os.path.join(sp.get_solstice_project_path(), 'Assets', 'Scripts', 'PIPELINE', '__working__', 'PlayblastPresets'))
         if not os.path.exists(solstice_presets_folder):
-            sp.logger.debug('Solstice Presets Path not found! Trying to sync through Artella!')
+            sys.solstice.logger.debug('Solstice Presets Path not found! Trying to sync through Artella!')
             syncdialog.SolsticeSyncPath(paths=[os.path.dirname(os.path.dirname(solstice_presets_folder))]).sync()
         self.register_preset_path(solstice_presets_folder)
 
@@ -2507,10 +2507,10 @@ class PlayblastPreset(QWidget, object):
         index = self.presets.findData(path)
         if index == -1:
             if os.path.exists(path):
-                sp.logger.info('Adding previously selected preset explicitily: {}'.format(path))
+                sys.solstice.logger.info('Adding previously selected preset explicitily: {}'.format(path))
                 self.add_preset(path)
             else:
-                sp.logger.warning('Previously selected preset is not available: {}'.format(path))
+                sys.solstice.logger.warning('Previously selected preset is not available: {}'.format(path))
                 index = 0
 
         self.presets.setCurrentIndex(index)
@@ -2540,7 +2540,7 @@ class PlayblastPreset(QWidget, object):
         """
 
         if path in cls.registered_paths:
-            sp.logger.warning('Preset path already registered: "{}"'.format(path))
+            sys.solstice.logger.warning('Preset path already registered: "{}"'.format(path))
             return
         cls.registered_paths.append(path)
 
@@ -2566,7 +2566,7 @@ class PlayblastPreset(QWidget, object):
                 if file_name.startswith('_'):
                     continue
                 if not python.file_has_info(file_name):
-                    sp.logger.warning('File size is smaller than 1 byte for preset file: "{}"'.format(file_name))
+                    sys.solstice.logger.warning('File size is smaller than 1 byte for preset file: "{}"'.format(file_name))
                     continue
                 if file_name not in presets:
                     presets.append(file_name)
@@ -2590,7 +2590,7 @@ class PlayblastPreset(QWidget, object):
 
         filename = os.path.normpath(filename)
         if not os.path.exists(filename):
-            sp.logger.warning('Preset file does not exists: "{}"'.format(filename))
+            sys.solstice.logger.warning('Preset file does not exists: "{}"'.format(filename))
             return
 
         label = os.path.splitext(os.path.basename(filename))[0]
@@ -2598,7 +2598,7 @@ class PlayblastPreset(QWidget, object):
 
         paths = [self.presets.itemData(i) for i in range(item_count)]
         if filename in paths:
-            sp.logger.info('Preset is already in the presets list: "{}"'.format(filename))
+            sys.solstice.logger.info('Preset is already in the presets list: "{}"'.format(filename))
             item_index = paths.index(filename)
         else:
             self.presets.addItem(label, userData=filename)
@@ -2877,7 +2877,7 @@ class SolsticePlayBlast(window.Window, object):
         for widget in config_widgets:
             widget_inputs = widget.get_inputs(as_preset=as_preset)
             if not isinstance(widget_inputs, dict):
-                sp.logger.debug('Widget inputs are not a valid dictionary "{0}" : "{1}"'.format(widget.id, widget_inputs))
+                sys.solstice.logger.debug('Widget inputs are not a valid dictionary "{0}" : "{1}"'.format(widget.id, widget_inputs))
                 return
             if not widget_inputs:
                 continue
@@ -3077,7 +3077,7 @@ def capture(**kwargs):
             # so we ignore the state when calling it with a movie
             # format
             if format != "image" and raw_frame_numbers:
-                sp.logger.warning("Capturing to image format with raw frame numbers is not supported. Ignoring raw frame numbers...")
+                sys.solstice.logger.warning("Capturing to image format with raw frame numbers is not supported. Ignoring raw frame numbers...")
                 raw_frame_numbers = False
 
             output = cmds.playblast(
@@ -3109,7 +3109,7 @@ def capture_scene(options):
     """
 
     filename = options.get('filename', '%TEMP%')
-    sp.logger.info('Capturing to {}'.format(filename))
+    sys.solstice.logger.info('Capturing to {}'.format(filename))
     options = options.copy()
 
     # Force viewer to False in call to capture because we have our own viewer opening call to allow a signal

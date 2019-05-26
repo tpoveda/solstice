@@ -12,20 +12,21 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
-import solstice.pipeline as sp
+import  sys
+
 from solstice.pipeline.utils import namingutils as naming
 from solstice.pipeline.utils import mayautils
 
 import maya.cmds as cmds
 import maya.mel as mel
 
-if sp.dcc.get_version() <= 2017:
+if sys.solstice.dcc.get_version() <= 2017:
     import MASH.api as mapi
     import MASH.undo as undo
     import mash_repro_utils
     import mash_repro_aetemplate
     import MASHoutliner
-elif sp.dcc.get_version() >= 2018:
+elif sys.solstice.dcc.get_version() >= 2018:
     import MASH.api as mapi
     import MASH.undo as undo
     import mash_repro_utils
@@ -69,9 +70,9 @@ def remove_mash_network(network):
 
 
 def get_mash_outliner_tree():
-    if sp.dcc.get_version() <= 2017:
+    if sys.solstice.dcc.get_version() <= 2017:
         return MASHoutliner.OutlinerTreeView()
-    elif sp.dcc.get_version() >= 2018:
+    elif sys.solstice.dcc.get_version() >= 2018:
         return MASH.editor.OutlinerTreeView()
 
 

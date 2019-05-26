@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import json
 import string
 
@@ -21,7 +22,7 @@ from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtGui import *
 
 import solstice.pipeline as sp
-from solstice.pipeline.core import asset, node
+from solstice.pipeline.core import node
 from solstice.pipeline.gui import window, splitters, attributes
 from solstice.pipeline.utils import pythonutils, image as img
 from solstice.pipeline.resources import resource
@@ -207,7 +208,7 @@ class ShotAssets(QWidget, object):
         add_light_action.triggered.connect(self._on_add_lighting)
 
     def _on_add_layout(self):
-        res = sp.dcc.select_file_dialog(
+        res = sys.solstice.dcc.select_file_dialog(
             title='Select Layout File',
             start_directory=sp.get_solstice_project_path(),
             pattern='Layout Files (*.layout)'
@@ -219,7 +220,7 @@ class ShotAssets(QWidget, object):
         self.add_asset(new_layout_asset)
 
     def _on_add_animation(self):
-        res = sp.dcc.select_file_dialog(
+        res = sys.solstice.dcc.select_file_dialog(
             title='Select Animation File',
             start_directory=sp.get_solstice_project_path(),
             pattern='Animation Files (*.anim)'
@@ -304,7 +305,7 @@ class AnimAsset(AbstractItemWidget, object):
 
         # In animations we try to retrieve the assets from the asset name
         self.node = None
-        short_name = sp.dcc.node_short_name(self.name).rstrip(string.digits)
+        short_name = sys.solstice.dcc.node_short_name(self.name).rstrip(string.digits)
         if short_name:
             self.node = node.SolsticeAssetNode(name=short_name)
             print(self.node.get_asset_data_path())
@@ -342,19 +343,19 @@ class AnimAsset(AbstractItemWidget, object):
 
     def reference_animation(self):
         if not self._path:
-            sp.logger.warning('Impossible to reference animation {}'.format(self._name))
+            sys.solstice.logger.warning('Impossible to reference animation {}'.format(self._name))
             return
         anim_path = os.path.join(sp.get_solstice_project_path(), self._path)
         if not os.path.isfile(anim_path) or not anim_path.endswith(sp.DataExtensions.ABC):
-            sp.logger.warning('File {} is not a valid Alembic animation file!'.format(anim_path))
+            sys.solstice.logger.warning('File {} is not a valid Alembic animation file!'.format(anim_path))
             return
 
         if self.node:
             local_max_versions = self.node.get_local_versions()
             if not local_max_versions['model']:
-                sp.logger.warning('Alembic Animation File {} is pointing to a non published asset!'.format(self.name))
+                sys.solstice.logger.warning('Alembic Animation File {} is pointing to a non published asset!'.format(self.name))
         else:
-            sp.logger.warning('Alembic Animation File {} is not linked to any Solstice Asset!'.format(self.name))
+            sys.solstice.logger.warning('Alembic Animation File {} is not linked to any Solstice Asset!'.format(self.name))
 
         if sp.is_houdini():
             alembicmanager.AlembicImporter.import_alembic(anim_path)
@@ -767,23 +768,23 @@ class ShotAssembler(window.Window, object):
     def _add_layout_asset(self, asset, shot_asset):
         asset_path = asset.asset
         if not os.path.isfile(asset_path):
-            sp.logger.warning('Impossible to add Layout asset because Layout File {} does not exists!'.format(asset_path))
+            sys.solstice.logger.warning('Impossible to add Layout asset because Layout File {} does not exists!'.format(asset_path))
             return
 
         try:
             with open(asset_path) as f:
                 asset_data = json.load(f)
         except Exception as e:
-            sp.logger.error(e)
+            sys.solstice.logger.error(e)
             return
 
         layout_data_version = asset_data['data_version']
         exporter_version = asset_data['exporter_version']
         if layout_data_version != sp.DataVersions.LAYOUT:
-            sp.logger.warning('Layout Asset File {} is not compatible with current format. Please contact TD!'.format(asset_path))
+            sys.solstice.logger.warning('Layout Asset File {} is not compatible with current format. Please contact TD!'.format(asset_path))
             return
         if exporter_version != shotexporter.ShotExporter.version:
-            sp.logger.warning('Layout Asset File {} was exported with an older version. Please contact TD!'.format(asset_path))
+            sys.solstice.logger.warning('Layout Asset File {} was exported with an older version. Please contact TD!'.format(asset_path))
             return
 
         for node_id, node_info in asset_data['assets'].items():
@@ -797,24 +798,24 @@ class ShotAssembler(window.Window, object):
     def _add_animation_asset(self, asset, shot_asset):
         asset_path = asset.asset
         if not os.path.isfile(asset_path):
-            sp.logger.warning('Impossible to add Animation asset because Layout File {} does not exists!'.format(asset_path))
+            sys.solstice.logger.warning('Impossible to add Animation asset because Layout File {} does not exists!'.format(asset_path))
             return
 
         try:
             with open(asset_path) as f:
                 asset_data = json.load(f)
         except Exception as e:
-            sp.logger.error(e)
+            sys.solstice.logger.error(e)
             return
 
         anim_data_version = asset_data['data_version']
         exporter_version = asset_data['exporter_version']
         if anim_data_version != sp.DataVersions.LAYOUT:
-            sp.logger.warning(
+            sys.solstice.logger.warning(
                 'Animation Asset File {} is not compatible with current format. Please contact TD!'.format(asset_path))
             return
         if exporter_version != shotexporter.ShotExporter.version:
-            sp.logger.warning(
+            sys.solstice.logger.warning(
                 'Animation Asset File {} was exported with an older version. Please contact TD!'.format(asset_path))
             return
 
@@ -831,7 +832,7 @@ class ShotAssembler(window.Window, object):
     def _add_fx_asset(self, asset, shot_asset):
         asset_path = asset.asset
         if not os.path.isfile(asset_path):
-            sp.logger.warning(
+            sys.solstice.logger.warning(
                 'Impossible to add FX asset because Layout File {} does not exists!'.format(asset_path))
             return
 
@@ -839,7 +840,7 @@ class ShotAssembler(window.Window, object):
             with open(asset_path) as f:
                 asset_data = json.load(f)
         except Exception as e:
-            sp.logger.error(e)
+            sys.solstice.logger.error(e)
             return
 
     def _on_update_properties(self, asset_widget):
@@ -863,12 +864,12 @@ class ShotAssembler(window.Window, object):
 
     def _on_generate_shot(self):
         if not sp.is_maya():
-            sp.logger.warning('Shoot generation is only available in Maya!')
+            sys.solstice.logger.warning('Shoot generation is only available in Maya!')
             return
 
         import maya.cmds as cmds
 
-        sp.dcc.new_file()
+        sys.solstice.dcc.new_file()
 
         from solstice.pipeline.utils import mayautils
 
@@ -883,16 +884,16 @@ class ShotAssembler(window.Window, object):
 
             res = track.get_delta()
             if node_asset.name not in res:
-                sp.logger.warning('Node {} is not loaded!'.format(node_asset.name))
+                sys.solstice.logger.warning('Node {} is not loaded!'.format(node_asset.name))
                 continue
 
             for attr, attr_value in node_asset.get_attributes().items():
                 if type(attr_value) is float:
-                    sp.dcc.set_float_attribute_value(node=node_asset.name, attribute_name=attr, attribute_value=attr_value)
+                    sys.solstice.dcc.set_float_attribute_value(node=node_asset.name, attribute_name=attr, attribute_value=attr_value)
 
-            sp.dcc.clear_selection()
+            sys.solstice.dcc.clear_selection()
 
-        shaderlibrary.ShaderLibrary.load_scene_shaders()
+        shaderlibrary.ShaderLibrary.load_all_scene_shaders()
 
         cmds.viewFit(animate=True)
 

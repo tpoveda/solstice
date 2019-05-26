@@ -61,7 +61,7 @@ class ModelPanelWidget(QWidget, object):
             cmds.modelEditor(model_panel, edit=True, displayTextures=True)
             cmds.modelEditor(model_panel, edit=True, displayAppearance="smoothShaded")
 
-        current_model_panel = sp.dcc.get_current_model_panel()
+        current_model_panel = sys.solstice.dcc.get_current_model_panel()
         if current_model_panel:
             if sp.is_maya():
                 camera = cmds.modelEditor(current_model_panel, query=True, camera=True)

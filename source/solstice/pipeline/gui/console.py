@@ -12,9 +12,9 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
 from io import StringIO
 
-import solstice.pipeline as sp
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 from solstice.pipeline.externals.solstice_qt.QtGui import *
@@ -52,7 +52,7 @@ class SolsticeConsole(QTextEdit, object):
         self.insertPlainText(msg + '\n')
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        sp.logger.debug('{}\n'.format(msg))
+        sys.solstice.logger.debug('{}\n'.format(msg))
 
     def write_error(self, msg):
         """
@@ -65,7 +65,7 @@ class SolsticeConsole(QTextEdit, object):
         self.insertHtml(msg_html)
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        sp.logger.error('{}\n'.format(msg))
+        sys.solstice.logger.error('{}\n'.format(msg))
 
     def write_ok(self, msg):
         """
@@ -77,7 +77,7 @@ class SolsticeConsole(QTextEdit, object):
         self.insertHtml(msg_html)
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        sp.logger.debug('{}\n'.format(msg))
+        sys.solstice.logger.debug('{}\n'.format(msg))
 
     def write_warning(self, msg):
         """
@@ -89,7 +89,7 @@ class SolsticeConsole(QTextEdit, object):
         self.insertHtml(msg_html)
         self.moveCursor(QTextCursor.End)
         self._buffer.write(unicode(msg))
-        sp.logger.warning('{}\n'.format(msg))
+        sys.solstice.logger.warning('{}\n'.format(msg))
 
     def clear(self):
         self.setText('')

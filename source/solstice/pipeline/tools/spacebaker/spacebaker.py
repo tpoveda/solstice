@@ -12,6 +12,7 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
 import traceback
 from functools import partial
 
@@ -21,7 +22,6 @@ from solstice.pipeline.externals.solstice_qt.QtGui import *
 
 import maya.cmds as cmds
 
-import solstice.pipeline as sp
 from solstice.pipeline.gui import window, splitters, buttons
 from solstice.pipeline.utils import mayautils as utils, animutils as anim_utils
 
@@ -225,7 +225,7 @@ class SpaceAnimBaker(window.Window, object):
         new_space._animate_expand(True)
 
         if not self._space_widgets:
-            sp.logger.warning('No spaces created yet! Please add a space first!')
+            sys.solstice.logger.warning('No spaces created yet! Please add a space first!')
             return
 
         if not self.parent_group or not cmds.objExists(self.parent_group):
@@ -242,22 +242,22 @@ class SpaceAnimBaker(window.Window, object):
             self._create_parent_group()
 
         if not self.parent_group:
-            sp.logger.warning('Parent Group not selected!')
+            sys.solstice.logger.warning('Parent Group not selected!')
             return
         if not self.switch_control:
-            sp.logger.warning('Switch Control not selected!')
+            sys.solstice.logger.warning('Switch Control not selected!')
             return
         if not self.switch_attribute:
-            sp.logger.warning('Switch Attribute Name not specified!')
+            sys.solstice.logger.warning('Switch Attribute Name not specified!')
             return
 
         if self.parent_group == self.switch_control:
-            sp.logger.warning('Parent Group and Switch Control cannot be the same object!')
+            sys.solstice.logger.warning('Parent Group and Switch Control cannot be the same object!')
             return
 
         for required in [self.parent_group, self.switch_control]:
             if not cmds.objExists(required):
-                sp.logger.warning('{} does not exists in the scene!'.format(required))
+                sys.solstice.logger.warning('{} does not exists in the scene!'.format(required))
                 return
 
         spaces_group_name = 'SS_spaces_grp'
@@ -281,12 +281,12 @@ class SpaceAnimBaker(window.Window, object):
             return
 
         if self.check_space_exists(driver_node):
-            sp.logger.warning('Already found space driver node: {}'.format(driver_node))
+            sys.solstice.logger.warning('Already found space driver node: {}'.format(driver_node))
             return
 
         display_name = self.get_space_name(new_space)
         if not cmds.objExists(driver_node):
-            sp.logger.warning('{} space driver node does not exist in the scene!'.format(driver_node))
+            sys.solstice.logger.warning('{} space driver node does not exist in the scene!'.format(driver_node))
             return
         if not display_name:
             display_name = utils.get_short_name(driver_node)
@@ -306,11 +306,11 @@ class SpaceAnimBaker(window.Window, object):
         #     if not driver_node:
         #         continue
         #     if self.check_space_exists(driver_node):
-        #         sp.logger.warning('Already found space driver node: {}'.format(driver_node))
+        #         sys.solstice.logger.warning('Already found space driver node: {}'.format(driver_node))
         #         continue
         #     display_name = self.get_space_name(space_widget)
         #     if not cmds.objExists(driver_node):
-        #         sp.logger.warning('{} space driver node does not exist in the scene!'.format(driver_node))
+        #         sys.solstice.logger.warning('{} space driver node does not exist in the scene!'.format(driver_node))
         #         return
         #     if not display_name:
         #         display_name = utils.get_short_name(driver_node)
@@ -327,7 +327,7 @@ class SpaceAnimBaker(window.Window, object):
         #     QMessageBox.warning(self, 'Error', traceback.format_exc())
         #     return
 
-        sp.logger.debug('Space Switch Setup sucessfully created!')
+        sys.solstice.logger.debug('Space Switch Setup sucessfully created!')
 
         return new_space
 
@@ -418,10 +418,10 @@ class SpaceAnimBaker(window.Window, object):
 
             self._update_ui()
         except Exception as e:
-            sp.logger.error(traceback.format_exc())
+            sys.solstice.logger.error(traceback.format_exc())
             return
 
-        sp.logger.debug('Space Switch Setup deleted successfully!')
+        sys.solstice.logger.debug('Space Switch Setup deleted successfully!')
 
     def _update_ui(self):
         if self.target_control_line.text():
@@ -476,7 +476,7 @@ class SpaceAnimBaker(window.Window, object):
         if self.switch_control in sel:
             sel.remove(self.switch_control)
         if len(sel) == 0:
-            sp.logger.warning('Select Driver control first!')
+            sys.solstice.logger.warning('Select Driver control first!')
             return
         if sel:
             self.add_space(from_selection=True)
@@ -518,10 +518,10 @@ class SpaceAnimBaker(window.Window, object):
     def _get_selected(self, line_widget):
         sel = cmds.ls(sl=True, l=True)
         if not sel:
-            sp.logger.warning('Please select a object first!')
+            sys.solstice.logger.warning('Please select a object first!')
             return
         if len(sel) > 1:
-            sp.logger.warning('You have selected more than one object. First item in the selection will be used ...')
+            sys.solstice.logger.warning('You have selected more than one object. First item in the selection will be used ...')
         sel = sel[0]
         if sel.startswith('|'):
             sel = sel[1:]
@@ -596,7 +596,7 @@ class SpaceAnimBaker(window.Window, object):
         if not node:
             return
         if not utils.attribute_exists(node, '{}'.format(SPACE_DRIVER_ATTR)):
-            sp.logger.debug('No space switch found on this node: {}'.format(node))
+            sys.solstice.logger.debug('No space switch found on this node: {}'.format(node))
             QMessageBox.warning(self, 'Value Error', 'No space switch found on this node: {}'.format(node))
             line_widget.clear()
             return
@@ -605,7 +605,7 @@ class SpaceAnimBaker(window.Window, object):
 
     def _get_display_name(self, grp, switcher):
         if not utils.attribute_exists(grp, 'SS_switchNo'):
-            sp.logger.debug('No Switch found, skipping the {} driver'.foramt(grp))
+            sys.solstice.logger.debug('No Switch found, skipping the {} driver'.foramt(grp))
             return
         switch_no = cmds.getAttr('{}.SS_switchNo'.format(grp))
         space_cnt = cmds.listConnections(switcher+'.{}'.format(SPACE_DRIVER_ATTR), p=True)
@@ -656,7 +656,7 @@ class SpaceAnimBaker(window.Window, object):
     def _on_set_parent_group(self):
         self._get_selected(self.parent_space_group_line)
         if self.switch_control == self.parent_group:
-            sp.logger.warning('Parent Group and Switch Control cannot be the same object!')
+            sys.solstice.logger.warning('Parent Group and Switch Control cannot be the same object!')
             self.parent_space_group_line.setText('')
         self.parent_space_group_line.setStyleSheet('')
         self._update_ui()
@@ -700,7 +700,7 @@ class SpaceAnimBaker(window.Window, object):
         if not drivers_list:
             return
         if driver in drivers_list:
-            sp.logger.debug('{} is already a driving space for {}'.format(driver, self.parent_group))
+            sys.solstice.logger.debug('{} is already a driving space for {}'.format(driver, self.parent_group))
             return driver
 
     def get_driver_from_group(self, grp):
@@ -729,11 +729,11 @@ class SpaceAnimBaker(window.Window, object):
                     cmds.pointConstraint(key, driver_grp.fullPathName(), mo=False)
                     cmds.orientConstraint(key, driver_grp.fullPathName(), mo=False)
                 except RuntimeError as e:
-                    sp.logger.error(traceback.format_exc())
+                    sys.solstice.logger.error(traceback.format_exc())
                 try:
                     cmds.parent(driver_grp.fullPathName(), spaces_grp)
                 except Exception as e:
-                    sp.logger.error(traceback.format_exc())
+                    sys.solstice.logger.error(traceback.format_exc())
 
                 if not utils.attribute_exists(controller, attr_name):
                     cmds.addAttr(controller, longName=attr_name, keyable=True, attributeType='enum', enumName=value)
@@ -762,7 +762,7 @@ class SpaceAnimBaker(window.Window, object):
                 try:
                     cmds.parent(constraint_grp_offset, driver_grp.fullPathName())
                 except RuntimeError as e:
-                    sp.logger.error(traceback.format_exc())
+                    sys.solstice.logger.error(traceback.format_exc())
 
                 cns_node = cns(constraint_grp, driven_node, mo=True)[0]
                 cns_target_list = cns(cns_node, targetList=True, query=True)
@@ -778,7 +778,7 @@ class SpaceAnimBaker(window.Window, object):
                 try:
                     cmds.connectAttr('{}.SS_switchNo'.format(constraint_grp), cond+'.secondTerm')
                 except RuntimeError as e:
-                    sp.logger.error(traceback.format_exc())
+                    sys.solstice.logger.error(traceback.format_exc())
 
                 cmds.setAttr(cond+'.operation', 0)
                 cmds.setAttr(cond+'.colorIfTrueR', 1)
@@ -786,12 +786,12 @@ class SpaceAnimBaker(window.Window, object):
                 try:
                     cmds.connectAttr(cond+'.outColorR', '{}.{}'.format(cns_node, cns_weights_list[cns_driver_idx]), force=True)
                 except Exception as e:
-                    sp.logger.error(traceback.format_exc())
+                    sys.solstice.logger.error(traceback.format_exc())
 
                 try:
                     cmds.connectAttr('{}.{}'.format(controller, attr_name), cond+'.firstTerm', force=True)
                 except Exception as e:
-                    sp.logger.error(traceback.format_exc())
+                    sys.solstice.logger.error(traceback.format_exc())
 
                 utils.add_message_attribute(controller, driven_node, 'SS_drivenNode')
                 utils.add_message_attribute(constraint_grp, cond, 'SS_condNode')
@@ -801,7 +801,7 @@ class SpaceAnimBaker(window.Window, object):
         try:
             cmds.connectAttr('{}.{}'.format(controller, attr_name), '{}.{}'.format(controller, SPACE_DRIVER_ATTR), force=True)
         except Exception as e:
-            sp.logger.error(traceback.format_exc())
+            sys.solstice.logger.error(traceback.format_exc())
 
 
 class DropFrame(QFrame):
@@ -1143,10 +1143,10 @@ class SpaceWidget(QFrame, object):
     def _get_selected(self, line_widget):
         sel = cmds.ls(sl=True, l=True)
         if not sel:
-            sp.logger.warning('Please select a object first!')
+            sys.solstice.logger.warning('Please select a object first!')
             return
         if len(sel) > 1:
-            sp.logger.warning('You have selected more than one object. First item in the selection will be used ...')
+            sys.solstice.logger.warning('You have selected more than one object. First item in the selection will be used ...')
         sel = sel[0]
         if sel.startswith('|'):
             sel = sel[1:]
@@ -1201,7 +1201,7 @@ class SpaceWidget(QFrame, object):
         if not switcher_node or not cmds.objExists(switcher_node):
             return
         if self.start_spin.value() == self.end_spin.value():
-            sp.logger.warning('The start and end frame have the same values! Skipping space baking ...')
+            sys.solstice.logger.warning('The start and end frame have the same values! Skipping space baking ...')
             return
         if not self.start_spin.isEnabled():
             return
@@ -1214,13 +1214,13 @@ class SpaceWidget(QFrame, object):
         enum_names = cmds.addAttr(space_cnt[0], query=True, enumName=True)
         enum_list = enum_names.split(':')
         if target_space not in enum_list:
-            sp.logger.warning('Space {} is not stored. Stoping space baking process ...'.format(target_space))
+            sys.solstice.logger.warning('Space {} is not stored. Stoping space baking process ...'.format(target_space))
             return
         index = enum_list.index(target_space)
 
         space_cnt = cmds.listConnections(switcher_node+'.{}'.format(SPACE_DRIVER_ATTR), p=True)[0].split('.')[-1]
         anim_utils.bake_space_switch(node=switcher_node, attr_name=space_cnt, attr_value=index, frame_range=frame_range)
-        sp.logger.debug('Space successfully baked!')
+        sys.solstice.logger.debug('Space successfully baked!')
 
 
 def check_space_switch_node(full_object_name):
@@ -1286,13 +1286,13 @@ def launch_space_switch_marking_menu():
                     radial_index += 1
             cmds.menuItem(l=space, c=bake_cmd, parent=bake_space_menu)
 
-    sp.logger.debug('Initializing Space Switch marking menu ...')
+    sys.solstice.logger.debug('Initializing Space Switch marking menu ...')
     if cmds.popupMenu(SPACE_SWITCH_MENU_NAME, exists=True):
         cmds.deleteUI(SPACE_SWITCH_MENU_NAME)
     try:
         cmds.popupMenu(SPACE_SWITCH_MENU_NAME, mm=1, b=2, ctl=1, p='viewPanes', pmc=_build_marking_menu)
     except TypeError as e:
-        sp.logger.error(traceback.format_exc())
+        sys.solstice.logger.error(traceback.format_exc())
 
 
 def run():

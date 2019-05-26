@@ -12,10 +12,10 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
+
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 from solstice.pipeline.externals.solstice_qt.QtCore import *
-
-import solstice.pipeline as sp
 
 from solstice.pipeline.tools.shotexporter.core import defines
 
@@ -49,7 +49,7 @@ class ExporterAssetItem(object):
         if self._attrs:
             return
 
-        xform_attrs = sp.dcc.list_attributes(self._asset.name)
+        xform_attrs = sys.solstice.dcc.list_attributes(self._asset.name)
         for attr in xform_attrs:
             if attr in defines.MUST_ATTRS:
                 self._attrs[attr] = True

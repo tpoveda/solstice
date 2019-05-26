@@ -12,7 +12,9 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
-import  solstice.pipeline as sp
+import sys
+
+import solstice.pipeline as sp
 from solstice.pipeline.utils import namingutils, exceptions
 
 from solstice.pipeline.tools.shotexporter.export.animation import animobject
@@ -48,15 +50,15 @@ class SelectionSet(animobject.AnimObject, object):
             try:
                 target_node = target_node.to_short_name()
             except exceptions.NoObjectFoundError as e:
-                sp.logger.error(e)
+                sys.solstice.logger.error(e)
                 continue
             except exceptions.MoreThanOneObjectFoundError as e:
-                sp.logger.error(e)
+                sys.solstice.logger.error(e)
 
             valid_nodes.append(target_node.name())
 
         if valid_nodes:
-            sp.dcc.select_object(valid_nodes, **kwargs)
+            sys.solstice.select_object(valid_nodes, **kwargs)
             if sp.is_maya():
                 cmds.setFocus('MayaWindow')
         else:

@@ -12,9 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
 import time
-
-import solstice.pipeline as sp
 
 
 def empty(fn):
@@ -40,6 +39,6 @@ def timing(fn):
         time1 = time.time()
         ret = fn(*args, **kwargs)
         time2 = time.time()
-        sp.logger.debug('%s function took %0.5f sec' % (fn.func_name, (time2 - time1)))
+        sys.solstice.logger.debug('%s function took %0.5f sec' % (fn.func_name, (time2 - time1)))
         return ret
     return wrapper

@@ -12,10 +12,11 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
+
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 
-import solstice.pipeline as sp
 from solstice.pipeline.gui import base, splitters
 
 
@@ -87,10 +88,10 @@ class BaseExporter(base.BaseWidget, object):
             return
         asset_widget = asset_widget[0]
 
-        if asset_widget and sp.dcc.object_exists(asset_widget.asset.name):
+        if asset_widget and sys.solstice.dcc.object_exists(asset_widget.asset.name):
             self.properties_widget.update_attributes(asset_widget)
         else:
-            sp.logger.warning('Impossible to update properties because object {} does not exists!'.format(asset_widget.asset))
+            sys.solstice.logger.warning('Impossible to update properties because object {} does not exists!'.format(asset_widget.asset))
             self.properties_widget.clear_properties()
 
     def _on_clear_properties(self):

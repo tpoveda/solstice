@@ -12,6 +12,7 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
 import webbrowser
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
@@ -149,8 +150,8 @@ class Window(QMainWindow, object):
                 self.callbacks.remove(c)
                 del c
             except Exception as e:
-                sp.logger.error('Impossible to clean callback {}'.format(c))
-                sp.logger.error(str(e))
+                sys.solstice.logger.error('Impossible to clean callback {}'.format(c))
+                sys.solstice.logger.error(str(e))
         self.callbacks = list()
 
     def custom_ui(self):

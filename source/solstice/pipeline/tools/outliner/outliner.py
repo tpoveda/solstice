@@ -12,6 +12,7 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
 import weakref
 import collections
 from functools import partial
@@ -25,7 +26,7 @@ import maya.OpenMaya as OpenMaya
 
 import solstice.pipeline as sp
 from solstice.pipeline.core import node
-from solstice.pipeline.gui import messagehandler
+from solstice.pipeline.gui import messagehandler, stack
 from solstice.pipeline.utils import mayautils, qtutils
 from solstice.pipeline.resources import resource
 
@@ -158,7 +159,7 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
                 elif 'type' in plug.name():
                     model_widget = self.get_file_widget(category='model')
                     if model_widget is None:
-                        sp.logger.warning('Impossible to update type attribute because model wigdet is available!')
+                        sys.solstice.logger.warning('Impossible to update type attribute because model wigdet is available!')
                         return
                     model_widget.model_buttons.proxy_hires_cbx.setCurrentIndex(plug.asInt())
 
@@ -183,8 +184,13 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
         replace_standin = replace_menu.addAction('Standin')
         remove_act = menu.addAction('Delete')
         menu.addSeparator()
+        sync_shaders_act = menu.addAction('Sync Shaders')
+        unload_shaders_act = menu.addAction('Unload Shaders')
 
         replace_abc.triggered.connect(self._on_replace_alembic)
+        replace_rig.triggered.connect(self._on_replace_rig)
+        sync_shaders_act.triggered.connect(self._on_sync_shaders)
+        unload_shaders_act.triggered.connect(self._on_unload_shaders)
 
         action = menu.exec_(self.mapToGlobal(event.pos()))
         self.contextRequested.emit(self, action)
@@ -193,8 +199,9 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
         return self.child_elem.get(category)
 
     def select(self):
-        self.is_selected = True
-        self.item_widget.setStyleSheet('QFrame { background-color: rgb(21,60,97);}')
+        pass
+        # self.is_selected = True
+        # self.item_widget.setStyleSheet('QFrame { background-color: rgb(21,60,97);}')
 
     def deselect(self):
         self.is_selected = False
@@ -266,17 +273,39 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
 
     def _on_replace_alembic(self):
         abc_file = self.asset.get_alembic_files()
-        is_referenced = cmds.referenceQuery(self.asset.node,  isNodeReferenced=True)
+        is_referenced = sys.solstice.dcc.node_is_referenced(self.asset.node)
         self.is_rig()
         # if self.asset.node != hires_group:
         #     is_referenced = cmds.referenceQuery(asset.node, isNodeReferenced=True)
         #     if is_referenced:
         #         namespace = cmds.referenceQuery(asset.node, namespace=True)
         #         if not namespace or not namespace.startswith(':'):
-        #             sp.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(asset.node))
+        #             sys.solstice.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(asset.node))
         #             continue
         #         else:
         #             namespace = namespace[1:] + ':'
+
+    def _on_replace_rig(self):
+        is_referenced = sys.solstice.dcc.node_is_referenced(self.asset.node)
+        if not is_referenced:
+            valid_refs = True
+            children = sys.solstice.dcc.node_children(self.asset.node, all_hierarchy=False, full_path=True)
+            for child in children:
+                is_child_ref = sys.solstice.dcc.node_is_referenced(child)
+                if not is_child_ref:
+                    valid_refs = False
+                    break
+            if not valid_refs:
+                sys.solstice.logger.warning('Impossible to replace {} by rig file ...'.format(self.asset.node))
+                return
+            rig_ref = self.asset.reference_asset_file('rig')
+            print(rig_ref)
+
+    def _on_sync_shaders(self):
+        self.asset.sync_shaders()
+
+    def _on_unload_shaders(self):
+        self.asset.unload_shaders()
 
 
 class OutlinerFileItem(OutlinerTreeItemWidget, object):
@@ -433,6 +462,59 @@ class SolsticeAbstractOutliner(QWidget, object):
         self.custom_ui()
         self.setup_signals()
 
+    @staticmethod
+    def get_file_widget_by_category(category, parent=None):
+        if category == 'model':
+            file_widget = OutlinerModelItem(parent=parent)
+        elif category == 'shading':
+            file_widget = OutlinerShadingItem(parent=parent)
+        elif category == 'groom':
+            file_widget = OutlinerGroomItem(parent=parent)
+        elif category == 'artella':
+            file_widget = OutlinerArtellaItem(parent=parent)
+        else:
+            return None
+
+        return file_widget
+
+    @staticmethod
+    def get_assets(allowed_types='all'):
+
+        asset_nodes = list()
+
+        if not allowed_types:
+            return asset_nodes
+
+        # We find tag data nodes
+        tag_data_nodes = SolsticeOutliner.get_tag_data_nodes()
+        for tag_data in tag_data_nodes:
+            asset = tag_data.get_asset()
+            if asset is None:
+                continue
+            if allowed_types and allowed_types != 'all':
+                asset_type = tag_data.get_types()
+                if asset_type not in allowed_types:
+                    continue
+                asset_nodes.append(asset)
+            else:
+                asset_nodes.append(asset)
+
+        # We find nodes with tag info attribute (alembics)
+        tag_info_nodes = SolsticeOutliner.get_tag_info_nodes()
+        for tag_data in tag_info_nodes:
+            asset = tag_data.get_asset()
+            if asset is None:
+                continue
+            if allowed_types and allowed_types != 'all':
+                asset_type = tag_data.get_types()
+                if asset_type not in allowed_types:
+                    continue
+                asset_nodes.append(asset)
+            else:
+                asset_nodes.append(asset)
+
+        return asset_nodes
+
     def custom_ui(self):
         self.main_layout = QGridLayout()
         self.main_layout.setSpacing(2)
@@ -474,7 +556,35 @@ class SolsticeAbstractOutliner(QWidget, object):
         self.collapse_all_btn.clicked.connect(self._on_collapse_all_assets)
 
     def init_ui(self):
-        pass
+        allowed_types = self.allowed_types()
+        assets = self.get_assets(allowed_types=allowed_types)
+        for asset in assets:
+            asset_widget = OutlinerAssetItem(asset)
+            self.append_widget(asset_widget)
+            self.widget_tree[asset_widget] = list()
+
+            asset_widget.clicked.connect(self._on_item_clicked)
+            asset_widget.viewToggled.connect(self._on_toggle_view)
+            self.callbacks.append(mayautils.MCallbackIdWrapper(asset_widget.add_asset_attributes_change_callback()))
+
+            asset_files = asset.get_asset_files()
+            asset_files['artella'] = None
+            for cat, file_path in asset_files.items():
+                file_widget = self.get_file_widget_by_category(category=cat, parent=asset_widget)
+                if file_widget is not None:
+                    asset_widget.add_child(file_widget, category=cat)
+                    self.widget_tree[asset_widget].append(file_widget)
+                    if cat == 'model':
+                        file_widget.proxyHiresToggled.connect(self._on_toggle_proxy_hires)
+                    elif cat == 'shading':
+                        pass
+                    elif cat == 'groom':
+                        pass
+                    elif cat == 'artella':
+                        pass
+
+    def allowed_types(self):
+        return None
 
     def add_callbacks(self):
         pass
@@ -485,8 +595,8 @@ class SolsticeAbstractOutliner(QWidget, object):
                 self.callbacks.remove(c)
                 del c
             except Exception as e:
-                sp.logger.error('Impossible to clean callback {}'.format(c))
-                sp.logger.error(str(e))
+                sys.solstice.logger.error('Impossible to clean callback {}'.format(c))
+                sys.solstice.logger.error(str(e))
 
         self.callbacks = list()
         self.scrip_jobs = list()
@@ -524,91 +634,9 @@ class SolsticeAbstractOutliner(QWidget, object):
         for asset_widget in self.widget_tree.keys():
             asset_widget.collapse()
 
-
-class SolsticeAssetsOutliner(SolsticeAbstractOutliner, object):
-
-    def __init__(self, parent=None):
-        super(SolsticeAssetsOutliner, self).__init__(parent=parent)
-
-    def add_callbacks(self):
-        self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('SelectionChanged', self._on_selection_changed)))
-        self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('NameChanged', self._on_refresh_outliner)))
-        self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('SceneOpened', self._on_refresh_outliner)))
-        self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('SceneImported', self._on_refresh_outliner)))
-        # self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('Undo', self._on_refresh_outliner)))
-        # self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('Redo', self._on_refresh_outliner)))
-        self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterNew, self._on_refresh_outliner)))
-        self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterOpen, self._on_refresh_outliner)))
-        self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MDGMessage.addNodeRemovedCallback(self._on_refresh_outliner)))
-
-    def init_ui(self):
-        assets = self.get_assets()
-        for asset in assets:
-            asset_widget = OutlinerAssetItem(asset)
-            self.append_widget(asset_widget)
-            self.widget_tree[asset_widget] = list()
-
-            asset_widget.clicked.connect(self._on_item_clicked)
-            asset_widget.viewToggled.connect(self._on_toggle_view)
-            self.callbacks.append(mayautils.MCallbackIdWrapper(asset_widget.add_asset_attributes_change_callback()))
-
-            asset_files = asset.get_asset_files()
-            asset_files['artella'] = None
-            for cat, file_path in asset_files.items():
-                file_widget = self.get_file_widget_by_category(category=cat, parent=asset_widget)
-                if file_widget is not None:
-                    asset_widget.add_child(file_widget, category=cat)
-                    self.widget_tree[asset_widget].append(file_widget)
-                    if cat == 'model':
-                        file_widget.proxyHiresToggled.connect(self._on_toggle_proxy_hires)
-                    elif cat == 'shading':
-                        pass
-                    elif cat == 'groom':
-                        pass
-                    elif cat == 'artella':
-                        pass
-
-    @staticmethod
-    def get_file_widget_by_category(category, parent=None):
-        if category == 'model':
-            file_widget = OutlinerModelItem(parent=parent)
-        elif category == 'shading':
-            file_widget = OutlinerShadingItem(parent=parent)
-        elif category == 'groom':
-            file_widget = OutlinerGroomItem(parent=parent)
-        elif category == 'artella':
-            file_widget = OutlinerArtellaItem(parent=parent)
-        else:
-            return None
-
-        return file_widget
-
-    @staticmethod
-    def get_assets():
-
-        asset_nodes = list()
-
-        # We find tag data nodes
-        tag_data_nodes = SolsticeOutliner.get_tag_data_nodes()
-        for tag_data in tag_data_nodes:
-            asset = tag_data.get_asset()
-            if asset is None:
-                continue
-            asset_nodes.append(asset)
-
-        # We find nodes with tag info attribute (alembics)
-        tag_info_nodes = SolsticeOutliner.get_tag_info_nodes()
-        for tag_data in tag_info_nodes:
-            asset = tag_data.get_asset()
-            if asset is None:
-                continue
-            asset_nodes.append(asset)
-
-        return asset_nodes
-
     def _on_item_clicked(self, widget, event):
         if widget is None:
-            sp.logger.warning('Selected Asset is not valid!')
+            sys.solstice.logger.warning('Selected Asset is not valid!')
             return
 
         asset_name = widget.asset.name
@@ -673,9 +701,32 @@ class SolsticeAssetsOutliner(SolsticeAbstractOutliner, object):
             cmds.select(clear=True)
 
 
+class SolsticeAssetsOutliner(SolsticeAbstractOutliner, object):
+
+    def __init__(self, parent=None):
+        super(SolsticeAssetsOutliner, self).__init__(parent=parent)
+
+    def allowed_types(self):
+        return ['prop']
+
+    def add_callbacks(self):
+        pass
+        # self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('SelectionChanged', self._on_selection_changed)))
+        # self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('NameChanged', self._on_refresh_outliner)))
+        # self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('SceneOpened', self._on_refresh_outliner)))
+        # self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('SceneImported', self._on_refresh_outliner)))
+        # # self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('Undo', self._on_refresh_outliner)))
+        # # self.callbacks.append(solstice_maya_utils.MCallbackIdWrapper(OpenMaya.MEventMessage.addEventCallback('Redo', self._on_refresh_outliner)))
+        # self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterNew, self._on_refresh_outliner)))
+        # self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterOpen, self._on_refresh_outliner)))
+        # self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MDGMessage.addNodeRemovedCallback(self._on_refresh_outliner)))
+
 class SolsticeCharactersOutliner(SolsticeAbstractOutliner, object):
     def __init__(self, parent=None):
         super(SolsticeCharactersOutliner, self).__init__(parent=parent)
+
+    def allowed_types(self):
+        return ['character']
 
 
 class SolsticeLightsOutliner(SolsticeAbstractOutliner, object):
@@ -693,11 +744,73 @@ class SolsticeFXOutliner(SolsticeAbstractOutliner, object):
         super(SolsticeFXOutliner, self).__init__(parent=parent)
 
 
+class SolsticeOutlinerSettings(QWidget, object):
+
+    settingsSaved = Signal()
+
+    def __init__(self, parent=None):
+        super(SolsticeOutlinerSettings, self).__init__(parent=parent)
+
+        self.custom_ui()
+        self.setup_signals()
+
+    def custom_ui(self):
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setAlignment(Qt.AlignTop)
+        self.setLayout(self.main_layout)
+
+        self.save_btn = QPushButton('Save')
+        self.save_btn.setIcon(resource.icon('save'))
+        self.main_layout.addWidget(self.save_btn)
+
+    def setup_signals(self):
+        self.save_btn.clicked.connect(self.settingsSaved.emit)
+
+
+class SolsticeTabs(QWidget, object):
+    def __init__(self, parent=None):
+        super(SolsticeTabs, self).__init__(parent=parent)
+
+        self.custom_ui()
+        self.setup_signals()
+
+    def custom_ui(self):
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setAlignment(Qt.AlignTop)
+        self.setLayout(self.main_layout)
+
+        self.tab_widget = QTabWidget()
+        self.main_layout.addWidget(self.tab_widget)
+
+        self.assets_outliner = SolsticeAssetsOutliner()
+        self.characters_outliner = SolsticeCharactersOutliner()
+        self.lights_outliner = SolsticeLightsOutliner()
+        self.fx_outliner = SolsticeFXOutliner()
+        self.cameras_outliner = SolsticeCamerasOutliner()
+
+        self.tab_widget.addTab(self.assets_outliner, 'Assets')
+        self.tab_widget.addTab(self.characters_outliner, 'Characters')
+        self.tab_widget.addTab(self.lights_outliner, 'Lights')
+        self.tab_widget.addTab(self.fx_outliner, 'FX')
+        self.tab_widget.addTab(self.cameras_outliner, 'Cameras')
+
+    def setup_signals(self):
+        pass
+
+    def get_count(self):
+        return self.tab_widget.count()
+
+    def get_widget(self, index):
+        return self.tab_widget.widget(index)
+
+
 class SolsticeOutliner(QWidget, object):
 
     name = 'SolsticeOutliner'
     title = 'Solstice Tools - Solstice Outliner'
-    version = '1.1'
+    version = '1.2'
 
     instances = list()
 
@@ -759,37 +872,44 @@ class SolsticeOutliner(QWidget, object):
 
     @staticmethod
     def load_shaders():
-        from pipeline.tools import shaderlibrary
+        if not sp.is_maya():
+            return
+
+        from solstice.pipeline.tools.shaderlibrary import shaderlibrary
         reload(shaderlibrary)
 
-        shaderlibrary.ShaderLibrary.load_scene_shaders()
+        shaderlibrary.ShaderLibrary.load_all_scene_shaders()
+
+    def unload_shaders(self):
+        if not sp.is_maya():
+            return
+
+        from solstice.pipeline.tools.shaderlibrary import shaderlibrary
+        reload(shaderlibrary)
+
+        shaderlibrary.ShaderLibrary.unload_shaders()
 
     def custom_ui(self):
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setAlignment(Qt.AlignTop)
         self.parent().layout().addLayout(self.main_layout)
 
         self.toolbar = QToolBar()
         self.setup_toolbar()
         self.main_layout.addWidget(self.toolbar)
 
-        self.tab_widget = QTabWidget()
-        self.main_layout.addWidget(self.tab_widget)
+        self.stack = stack.SlidingStackedWidget(self)
+        self.main_layout.addWidget(self.stack)
 
-        self.assets_outliner = SolsticeAssetsOutliner()
-        self.characters_outliner = SolsticeCharactersOutliner()
-        self.lights_outliner = SolsticeLightsOutliner()
-        self.fx_outliner = SolsticeFXOutliner()
-        self.cameras_outliner = SolsticeCamerasOutliner()
-        #
-        self.tab_widget.addTab(self.assets_outliner, 'Assets')
-        self.tab_widget.addTab(self.characters_outliner, 'Characters')
-        self.tab_widget.addTab(self.lights_outliner, 'Lights')
-        self.tab_widget.addTab(self.fx_outliner, 'FX')
-        self.tab_widget.addTab(self.cameras_outliner, 'Cameras')
+        self.tabs = SolsticeTabs(self)
+        self.settingswidget = SolsticeOutlinerSettings()
+
+        self.stack.addWidget(self.tabs)
+        self.stack.addWidget(self.settingswidget)
 
     def setup_signals(self):
-        pass
+        self.settingswidget.settingsSaved.connect(self.open_tabs)
 
     def setup_toolbar(self):
         load_scene_shaders_action = QToolButton(self)
@@ -797,19 +917,30 @@ class SolsticeOutliner(QWidget, object):
         load_scene_shaders_action.setToolTip('Load and Apply All Scene Shaders')
         load_scene_shaders_action.setStatusTip('Load and Apply All Scene Shaders')
         load_scene_shaders_action.setIcon(resource.icon('apply_shaders'))
-        load_scene_shaders_action.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        load_scene_shaders_action.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
         unload_scene_shaders_action = QToolButton(self)
         unload_scene_shaders_action.setText('Unload Shaders')
         unload_scene_shaders_action.setToolTip('Unload All Scene Shaders')
         unload_scene_shaders_action.setStatusTip('Unload All Scene Shaders')
-        unload_scene_shaders_action.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        unload_scene_shaders_action.setIcon(resource.icon('unload_shaders'))
+        unload_scene_shaders_action.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+
+        settings_action = QToolButton(self)
+        settings_action.setText('Settings')
+        settings_action.setToolTip('Outliner Settings')
+        settings_action.setStatusTip('Outliner Settings')
+        settings_action.setIcon(resource.icon('settings'))
+        settings_action.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
         self.toolbar.addWidget(load_scene_shaders_action)
         self.toolbar.addWidget(unload_scene_shaders_action)
         self.toolbar.addSeparator()
+        self.toolbar.addWidget(settings_action)
 
         load_scene_shaders_action.clicked.connect(self.load_shaders)
+        unload_scene_shaders_action.clicked.connect(self.unload_shaders)
+        settings_action.clicked.connect(self.open_settings)
 
     def init_ui(self):
         for outliner in self.get_outliner_widgets():
@@ -827,6 +958,12 @@ class SolsticeOutliner(QWidget, object):
         for outliner in self.get_outliner_widgets():
             outliner.refresh_outliner()
 
+    def open_tabs(self):
+        self.stack.slide_in_index(0)
+
+    def open_settings(self):
+        self.stack.slide_in_index(1)
+
     def closeEvent(self, event):
         self.remove_callbacks()
         event.accept()
@@ -841,8 +978,8 @@ class SolsticeOutliner(QWidget, object):
 
     def get_outliner_widgets(self):
         outliner_widgets = list()
-        for i in range(self.tab_widget.count()):
-            outliner_widgets.append(self.tab_widget.widget(i))
+        for i in range(self.tabs.get_count()):
+            outliner_widgets.append(self.tabs.get_widget(i))
 
         return outliner_widgets
 

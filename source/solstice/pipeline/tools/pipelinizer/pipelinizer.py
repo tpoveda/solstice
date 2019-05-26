@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import time
 from functools import partial
 from distutils.util import strtobool
@@ -109,7 +110,7 @@ class PipelinizerSettings(QDialog, object):
         if self._settings.has_option(self._settings.app_name, 'auto_check_lock'):
             self._settings.set(self._settings.app_name, 'auto_check_lock', str(self._auto_check_lock_cbx.isChecked()))
         self._settings.update()
-        sp.logger.debug('{0}: Settings Updated successfully!'.format(self._settings.app_name))
+        sys.solstice.logger.debug('{0}: Settings Updated successfully!'.format(self._settings.app_name))
 
 
 class PipelinizerWaiting(QFrame, object):
@@ -415,7 +416,7 @@ class Pipelinizer(window.Window, object):
         """
 
         if sync_type != 'all' and sync_type != 'model' and sync_type != 'shading' and sync_type != 'textures':
-            sp.logger.error('Synchronization type {0} is not valid!'.format(sync_type))
+            sys.solstice.logger.error('Synchronization type {0} is not valid!'.format(sync_type))
             return
 
         start_time = time.time()
@@ -465,10 +466,10 @@ class Pipelinizer(window.Window, object):
                         asset.sync(sync_type=sync_type, ask=False)
                     # solstice_sync_dialog.SolsticeSyncPath(paths=elements_to_sync).sync()
         except Exception as e:
-            sp.logger.debug(str(e))
+            sys.solstice.logger.debug(str(e))
             cmds.waitCursor(state=False)
         elapsed_time = time.time() - start_time
-        sp.logger.debug('{0} synchronized in {1} seconds'.format(category_name, elapsed_time))
+        sys.solstice.logger.debug('{0} synchronized in {1} seconds'.format(category_name, elapsed_time))
         cmds.waitCursor(state=False)
 
     def sync_sequences(self, full_sync=False, ask=False):
@@ -526,8 +527,8 @@ class Pipelinizer(window.Window, object):
             except Exception as e:
                 msg = 'Impossible to retrieve info from Artella. Please try it later'
                 cmds.warning(msg)
-                sp.logger.debug(msg)
-                sp.logger.error(str(e))
+                sys.solstice.logger.debug(msg)
+                sys.solstice.logger.error(str(e))
                 return
             if not info_widget:
                 return

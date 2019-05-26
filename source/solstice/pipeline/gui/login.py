@@ -119,7 +119,7 @@ class SolsticeLoginProcess(spinner.WaitSpinner, object):
         password = data['password']
         can_connect = artella.login_to_artella(user=user, password=password)
         if not can_connect:
-            sp.logger.error('Impossible to connect to Artella, check your user and password please·!')
+            sys.solstice.logger.error('Impossible to connect to Artella, check your user and password please·!')
             return False
 
         # Make sure that user_login.json file is sync
@@ -127,7 +127,7 @@ class SolsticeLoginProcess(spinner.WaitSpinner, object):
         if not os.path.isfile(user_login_file):
             artella.synchronize_file(user_login_file)
         if not user_login_file or not os.path.isfile(user_login_file):
-            sp.logger.debug('Error during logging into Artella, please try it later!')
+            sys.solstice.logger.debug('Error during logging into Artella, please try it later!')
             return False
 
         # We force the unlock of the file
@@ -142,16 +142,16 @@ class SolsticeLoginProcess(spinner.WaitSpinner, object):
                 file_status = artella.get_status(user_login_file)
                 file_info = file_status.references.values()[0]
                 user_id = file_info.locked_by_display
-                sp.logger.debug('ID: {}'.format(user_id))
+                sys.solstice.logger.debug('ID: {}'.format(user_id))
                 if not user_id:
-                    sp.logger.debug('Error during logging into Artella, please try it later!')
+                    sys.solstice.logger.debug('Error during logging into Artella, please try it later!')
                     return False
                 data['users'.title()][user_name] = user_id
                 python.write_json(user_login_file, data)
                 artella.upload_new_asset_version(user_login_file, 'Added user: {}'.format(user_name))
                 artella.unlock_file(user_login_file)
             except Exception as e:
-                sp.logger.error(str(e))
+                sys.solstice.logger.error(str(e))
                 artella.unlock_file(user_login_file)
                 return False
         else:
@@ -162,7 +162,7 @@ class SolsticeLoginProcess(spinner.WaitSpinner, object):
 
     def _on_worker_failure(self, uid, msg):
         self._timer.stop()
-        sp.logger.error('Worker {0} : {1}'.format(uid, msg))
+        sys.solstice.logger.error('Worker {0} : {1}'.format(uid, msg))
 
 
 class SolsticeLoggedWidget(QWidget, object):

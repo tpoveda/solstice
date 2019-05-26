@@ -13,13 +13,13 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import traceback
 
 import solstice.pipeline as sp
 
 from solstice.pipeline.tools.alembicmanager import alembicmanager
 from solstice.pipeline.tools.lightrigs import lightrigs
-from solstice.pipeline.utils import artellautils as artella
 
 if sp.is_maya():
     import maya.cmds as cmds
@@ -36,12 +36,12 @@ def generate_alembic_file(asset_name, start_frame=1, end_frame=1):
     """
 
     if not asset_name:
-        sp.logger.warning('Type an asset name first!')
+        sys.solstice.logger.warning('Type an asset name first!')
         return
 
     asset = sp.find_asset(asset_name)
     if not asset:
-        sp.logger.error('No asset found with name: {}'.format(asset_name))
+        sys.solstice.logger.error('No asset found with name: {}'.format(asset_name))
         return
 
     asset.export_alembic_file(start_frame=start_frame, end_frame=end_frame)
@@ -55,32 +55,32 @@ def setup_standin_export(asset_name, export_path=None):
     """
 
     if not asset_name:
-        sp.logger.warning('Type an asset name first!')
+        sys.solstice.logger.warning('Type an asset name first!')
         return
 
     asset = sp.find_asset(asset_name)
     if not asset:
-        sp.logger.error('No asset found with name: {}'.format(asset_name))
+        sys.solstice.logger.error('No asset found with name: {}'.format(asset_name))
         return
 
-    sp.dcc.new_file()
+    sys.solstice.dcc.new_file()
 
     if not export_path:
         export_path = os.path.dirname(asset.get_asset_file(file_type='model', status='working'))
     if not os.path.isdir(export_path):
-        sp.logger.error('Export Path {} does not exists! Aborting operation ...'.format(export_path))
+        sys.solstice.logger.error('Export Path {} does not exists! Aborting operation ...'.format(export_path))
         return
 
     alembic_name = asset.name + '.abc'
     abc_path = os.path.join(export_path, alembic_name)
     if not os.path.isfile(abc_path):
-        sp.logger.error('Alembic File for asset {} not found: {}. Aborting operation ...'.format(asset_name, abc_path))
+        sys.solstice.logger.error('Alembic File for asset {} not found: {}. Aborting operation ...'.format(asset_name, abc_path))
         return
 
     alembicmanager.AlembicImporter.reference_alembic(abc_path)
-    sp.dcc.refresh_viewport()
-    shaderlibrary.ShaderLibrary.load_scene_shaders()
-    sp.dcc.refresh_viewport()
+    sys.solstice.dcc.refresh_viewport()
+    shaderlibrary.ShaderLibrary.load_all_scene_shaders()
+    sys.solstice.dcc.refresh_viewport()
 
     return True
 
@@ -96,23 +96,23 @@ def generate_standin_file(asset_name, export_path=None, start_frame=1, end_frame
     """
 
     if not asset_name:
-        sp.logger.warning('Type an asset name first!')
+        sys.solstice.logger.warning('Type an asset name first!')
         return
 
     try:
         asset = sp.find_asset(asset_name)
         if not asset:
-            sp.logger.error('No asset found with name: {}'.format(asset_name))
+            sys.solstice.logger.error('No asset found with name: {}'.format(asset_name))
             return
 
         if not export_path:
             export_path = os.path.dirname(asset.get_asset_file(file_type='model', status='working'))
         if not os.path.isdir(export_path):
-            sp.logger.error('Export Path {} does not exists! Aborting operation ...'.format(export_path))
+            sys.solstice.logger.error('Export Path {} does not exists! Aborting operation ...'.format(export_path))
             return
 
-        sp.dcc.select_object(asset.name)
-        sp.dcc.refresh_viewport()
+        sys.solstice.select_object(asset.name)
+        sys.solstice.dcc.refresh_viewport()
         standinmanager.StandinExporter().export_standin(
             export_path=export_path,
             standin_name=asset.name,
@@ -120,7 +120,7 @@ def generate_standin_file(asset_name, export_path=None, start_frame=1, end_frame
             end_frame=end_frame
         )
     except Exception:
-        sp.logger.error(traceback.format_exc())
+        sys.solstice.logger.error(traceback.format_exc())
         return False
 
     return True
@@ -135,26 +135,26 @@ def test_asset_pipeline_files(asset_name, export_path=None, axis_to_move='x'):
     """
 
     if not sp.is_maya():
-        sp.logger.warning('Test Asset functionality is only available in Maya!')
+        sys.solstice.logger.warning('Test Asset functionality is only available in Maya!')
         return
 
     if not asset_name:
-        sp.logger.warning('Type an asset name first!')
+        sys.solstice.logger.warning('Type an asset name first!')
         return
     asset = sp.find_asset(asset_name)
     if not asset:
-        sp.logger.error('No asset found with name: {}'.format(asset_name))
+        sys.solstice.logger.error('No asset found with name: {}'.format(asset_name))
         return
 
-    sp.dcc.new_file()
+    sys.solstice.dcc.new_file()
     if not export_path:
         export_path = os.path.dirname(asset.get_asset_file(file_type='model', status='working'))
     if not os.path.isdir(export_path):
-        sp.logger.error('Export Path {} does not exists! Aborting operation ...'.format(export_path))
+        sys.solstice.logger.error('Export Path {} does not exists! Aborting operation ...'.format(export_path))
         return
 
     asset.import_asset_file('rig', status='working')
-    sp.dcc.refresh_viewport()
+    sys.solstice.dcc.refresh_viewport()
 
     abc_name = asset.name + '.abc'
     abc_path = os.path.join(export_path, abc_name)
@@ -166,7 +166,7 @@ def test_asset_pipeline_files(asset_name, export_path=None, axis_to_move='x'):
     if os.path.isfile(standin_path):
         standinmanager.StandinImporter.import_standin(standin_path)
 
-    sp.dcc.set_integer_attribute_value(node=asset.name, attribute_name='type', attribute_value=1)
+    sys.solstice.dcc.set_integer_attribute_value(node=asset.name, attribute_name='type', attribute_value=1)
 
     hires_name = '|' + asset.name + '1'
     standin_obj = '|' + asset.name + '3'
@@ -192,9 +192,9 @@ def test_asset_pipeline_files(asset_name, export_path=None, axis_to_move='x'):
 
     cmds.viewFit(an=True)
 
-    sp.dcc.refresh_viewport()
+    sys.solstice.dcc.refresh_viewport()
 
-    shaderlibrary.ShaderLibrary.load_scene_shaders()
+    shaderlibrary.ShaderLibrary.load_all_scene_shaders()
 
     lightrigs.LightRigManager.reference_light_rig('Neutral Contrast', do_save=False)
 

@@ -14,6 +14,7 @@ __email__ = "tpoveda@cgart3d.com"
 
 import os
 import re
+import sys
 import ast
 import string
 import collections
@@ -21,6 +22,10 @@ import collections
 import solstice.pipeline as sp
 from solstice.pipeline.utils import pythonutils, browserutils, artellautils as artella
 
+if sp.is_maya():
+    import maya.cmds as cmds
+    from solstice.pipeline.tools.shaderlibrary import shaderlibrary
+    reload(shaderlibrary)
 
 # =================================================================================================
 
@@ -105,27 +110,27 @@ class SolsticeNode(object):
         if self._node is None:
             return False
 
-        self._exists = sp.dcc.object_exists(self.node)
+        self._exists = sys.solstice.dcc.object_exists(self.node)
         if not self._exists:
             return False
 
-        is_referenced = sp.dcc.node_is_referenced(self.node)
+        is_referenced = sys.solstice.dcc.node_is_referenced(self.node)
 
         if not is_referenced:
-            self._nodes_list = sp.dcc.list_children(self.node, all_hierarchy=True, full_path=True, children_type='transform')
+            self._nodes_list = sys.solstice.dcc.list_children(self.node, all_hierarchy=True, full_path=True, children_type='transform')
         else:
-            self._loaded = sp.dcc.node_is_loaded(self.node)
+            self._loaded = sys.solstice.dcc.node_is_loaded(self.node)
             if self._loaded:
                 try:
-                    self._filename = sp.dcc.node_filename(self.node, no_copy_number=True)
+                    self._filename = sys.solstice.dcc.node_filename(self.node, no_copy_number=True)
                     self._valid = True
                 except Exception as e:
                     self._valid = False
-            self._namespace = sp.dcc.node_namespace(self.node)
-            self._parent_namespace = sp.dcc.node_parent_namespace(self.node)
+            self._namespace = sys.solstice.dcc.node_namespace(self.node)
+            self._parent_namespace = sys.solstice.dcc.node_parent_namespace(self.node)
             if self._valid:
-                self._filename_with_copy_number = sp.dcc.node_filename(self.node, no_copy_number=False)
-                self._nodes_list = sp.dcc.node_nodes(self.node)
+                self._filename_with_copy_number = sys.solstice.dcc.node_filename(self.node, no_copy_number=False)
+                self._nodes_list = sys.solstice.dcc.node_nodes(self.node)
 
     def change_namespace(self, new_namespace):
         """
@@ -136,12 +141,12 @@ class SolsticeNode(object):
 
         result = None
         try:
-            result = sp.dcc.change_namespace(self.namespace, new_namespace)
+            result = sys.solstice.dcc.change_namespace(self.namespace, new_namespace)
         except Exception as e:
-            sp.logger.warning('Impossible to change namespace for reference node: "{0}" >> "{1}" to "{2}" --> {3}'.format(self.node, self.namespace, new_namespace, e))
+            sys.solstice.logger.warning('Impossible to change namespace for reference node: "{0}" >> "{1}" to "{2}" --> {3}'.format(self.node, self.namespace, new_namespace, e))
 
         if result:
-            sp.logger.info('Namespace for reference node: "{0}" >> "{1}" to "{2}" changed successfully!'.format(self.node, self.namespace, new_namespace))
+            sys.solstice.logger.info('Namespace for reference node: "{0}" >> "{1}" to "{2}" changed successfully!'.format(self.node, self.namespace, new_namespace))
 
         self.update_info()
 
@@ -156,9 +161,9 @@ class SolsticeNode(object):
 
         result = None
         try:
-            result = sp.dcc.change_filename(node=self.node, new_filename=new_filename)
+            result = sys.solstice.dcc.change_filename(node=self.node, new_filename=new_filename)
         except Exception as e:
-            sp.logger.error('Impossible to change filename for reference node: "{0}" > "{1}" to "{2}" --> {3}'.format(self.node, self.filename, new_filename, e))
+            sys.solstice.logger.error('Impossible to change filename for reference node: "{0}" > "{1}" to "{2}" --> {3}'.format(self.node, self.filename, new_filename, e))
 
         self.update_info()
 
@@ -178,9 +183,9 @@ class SolsticeNode(object):
             if os.path.exists(artella_absolute_path):
                 self.change_filename(artella_absolute_path)
             else:
-                sp.logger.warning('Impossible to convert "{0}" to absolute path: "{1}", because new file does not exists!'.format(self.filename, artella_absolute_path))
+                sys.solstice.logger.warning('Impossible to convert "{0}" to absolute path: "{1}", because new file does not exists!'.format(self.filename, artella_absolute_path))
         except Exception as e:
-            sp.logger.error('Could not import object from reference node: "{}"'.format(str(e)))
+            sys.solstice.logger.error('Could not import object from reference node: "{}"'.format(str(e)))
 
         self.update_info()
 
@@ -200,12 +205,12 @@ class SolsticeNode(object):
                 if os.path.exists(artella_absolute_path):
                     self.change_filename(artella_absolute_path)
 
-            result = sp.dcc.import_reference(self.filename)
+            result = sys.solstice.dcc.import_reference(self.filename)
         except Exception as e:
-            sp.logger.error('Impossible to import objects from reference node: "{0}" --> {1}'.format(self.node, e))
+            sys.solstice.logger.error('Impossible to import objects from reference node: "{0}" --> {1}'.format(self.node, e))
 
         if result:
-            sp.logger.info('Imported objects from node: "{}" successfully!'.format(self.node))
+            sys.solstice.logger.info('Imported objects from node: "{}" successfully!'.format(self.node))
 
         self.update_info()
 
@@ -221,10 +226,48 @@ class SolsticeNode(object):
             sel.add(self.node)
             obj = OpenMaya.MObject()
             sel.getDependNode(0, obj)
-
-        sp.logger.warning('Impossible to retreive MObject in current DCC: {}'.format(sp.dcc.get_name()))
+        else:
+            sys.solstice.logger.warning('Impossible to retreive MObject in current DCC: {}'.format(sys.solstice.dcc.get_name()))
 
         return obj
+
+    def get_tag_node(self):
+        if sys.solstice.dcc.attribute_exists(node=self.name, attribute_name='tag_data'):
+            tag_data_node = cmds.listConnections(self.name+'.tag_data')
+            if tag_data_node:
+                tag_data_node = tag_data_node[0]
+                tag_type = sys.solstice.dcc.get_attribute_value(node=tag_data_node, attribute_name='tag_type')
+                if tag_type and tag_type == 'SOLSTICE_TAG':
+                    tag_node = SolsticeTagDataNode(node=tag_data_node)
+                    return tag_node
+
+    def get_tag_info_node(self):
+        if sys.solstice.dcc.attribute_exists(node=self.name, attribute_name='tag_info'):
+            tag_info = sys.solstice.dcc.get_attribute_value(node=self.name, attribute_name='tag_info')
+            tag_node = SolsticeTagDataNode(node=self.name, tag_info=tag_info)
+            return tag_node
+
+    def sync_shaders(self):
+        tag_node = self.get_tag_node()
+        if tag_node:
+            shaderlibrary.ShaderLibrary.load_scene_shaders(tag_nodes=[tag_node])
+        else:
+            tag_info_node = self.get_tag_info_node()
+            if tag_info_node:
+                shaderlibrary.ShaderLibrary.load_scene_shaders(tag_info_nodes=[tag_info_node])
+            else:
+                sys.solstice.logger.warning('Impossible to sync shaders on asset: {}'.format(self.name))
+
+    def unload_shaders(self):
+        tag_node = self.get_tag_node()
+        if tag_node:
+            shaderlibrary.ShaderLibrary.unload_shaders(tag_nodes=[tag_node])
+        else:
+            tag_info_node = self.get_tag_info_node()
+            if tag_info_node:
+                shaderlibrary.ShaderLibrary.unload_shaders(tag_info_nodes=[tag_info_node])
+            else:
+                sys.solstice.logger.warning('Impossible to sync shaders on asset: {}'.format(self.name))
 
 
 class SolsticeAssetNode(SolsticeNode, object):
@@ -251,7 +294,7 @@ class SolsticeAssetNode(SolsticeNode, object):
         return self._name
 
     def get_short_name(self):
-        return sp.dcc.node_short_name(self._name)
+        return sys.solstice.dcc.node_short_name(self._name)
 
     def get_asset_path(self):
         return self._asset_path
@@ -294,18 +337,16 @@ class SolsticeAssetNode(SolsticeNode, object):
         if not sp.is_maya():
             return None
 
-        import maya.cmds as cmds
-
-        if sp.dcc.attribute_exists(node=self.name, attribute_name='tag_data'):
+        if sys.solstice.dcc.attribute_exists(node=self.name, attribute_name='tag_data'):
             tag_data_node = cmds.listConnections(self.name+'.tag_data')
             if tag_data_node:
                 tag_data_node = tag_data_node[0]
-                tag_type = sp.dcc.get_attribute_value(node=tag_data_node, attribute_name='tag_type')
+                tag_type = sys.solstice.dcc.get_attribute_value(node=tag_data_node, attribute_name='tag_type')
                 if tag_type and tag_type == 'SOLSTICE_TAG':
                     tag_node = SolsticeTagDataNode(node=tag_data_node)
                     return tag_node
-        elif sp.dcc.attribute_exists(node=self.name, attribute_name='tag_info'):
-            tag_info = sp.dcc.get_attribute_value(node=self.name, attribute_name='tag_info')
+        elif sys.solstice.dcc.attribute_exists(node=self.name, attribute_name='tag_info'):
+            tag_info = sys.solstice.dcc.get_attribute_value(node=self.name, attribute_name='tag_info')
             tag_node = SolsticeTagDataNode(node=self.name, tag_info=tag_info)
             return tag_node
 
@@ -317,7 +358,7 @@ class SolsticeAssetNode(SolsticeNode, object):
         if self.valid:
             valid_asset_name = FULL_NAME_REGEX.search(self.filename)
             if not valid_asset_name:
-                sp.logger.warning('File "{0}" does not follow a correct nomenclature!'.format(self.filename))
+                sys.solstice.logger.warning('File "{0}" does not follow a correct nomenclature!'.format(self.filename))
 
     def get_icon(self):
         data_file = self.get_asset_data_path()
@@ -340,6 +381,9 @@ class SolsticeAssetNode(SolsticeNode, object):
         local_folders = dict()
         for f in folders:
             local_folders[f] = dict()
+
+        if not self._asset_path:
+            return local_folders
 
         for p in os.listdir(self._asset_path):
             if status == 'working':
@@ -419,7 +463,7 @@ class SolsticeAssetNode(SolsticeNode, object):
         asset_data_file = os.path.join(asset_path, '__working__', 'data.json')
         if not os.path.isfile(asset_data_file):
             # TODO: Maybe sync automatically if the data file is not already synced
-            sp.logger.warning('Asset Data file {} is not sync yet! Sync it using Solstice Pipelinizer Tool plesae!'.format(asset_data_file))
+            sys.solstice.logger.warning('Asset Data file {} is not sync yet! Sync it using Solstice Pipelinizer Tool plesae!'.format(asset_data_file))
 
         return asset_data_file
 
@@ -507,11 +551,11 @@ class SolsticeAssetNode(SolsticeNode, object):
         return asset_files
 
     def get_main_control(self):
-        if not sp.dcc.object_exists(self.node):
-            sp.logger.warning('Impossible to get main control because node {} does not exists!'.format(self.node))
+        if not sys.solstice.dcc.object_exists(self.node):
+            sys.solstice.logger.warning('Impossible to get main control because node {} does not exists!'.format(self.node))
             return None
 
-        all_relatives = sp.dcc.list_relatives(self.node, all_hierarchy=True, full_path=True)
+        all_relatives = sys.solstice.dcc.list_relatives(self.node, all_hierarchy=True, full_path=True)
         if not all_relatives:
             return
 
@@ -523,19 +567,22 @@ class SolsticeAssetNode(SolsticeNode, object):
         file_path = self.get_asset_file(file_type=file_type, status=status)
         if os.path.isfile(file_path):
             artella.open_file_in_maya(file_path=file_path)
+        else:
+            sys.solstice.logger.warning('Impossible to open asset file of type "{}": {}'.format(file_type, file_path))
 
     def import_asset_file(self, file_type, status='working'):
         file_path = self.get_asset_file(file_type=file_type, status=status)
         if os.path.isfile(file_path):
             artella.import_file_in_maya(file_path)
+        else:
+            sys.solstice.logger.warning('Impossible to import asset file of type "{}": {}'.format(file_type, file_path))
 
-    def reference_asset_file(self, file_type='rig'):
-        asset_name = self._name + '.ma'
-        local_max_versions = self.get_max_local_versions()
-        if local_max_versions[file_type]:
-            published_path = os.path.join(self._asset_path, local_max_versions['rig'][1], 'rig', asset_name)
-            if os.path.isfile(published_path):
-                artella.reference_file_in_maya(file_path=published_path)
+    def reference_asset_file(self, file_type='rig', status='published'):
+        file_path = self.get_asset_file(file_type=file_type, status=status)
+        if os.path.isfile(file_path):
+            artella.reference_file_in_maya(file_path=file_path)
+        else:
+            sys.solstice.logger.warning('Impossible to reference asset file of type "{}": {}'.format(file_type, file_path))
 
     def reference_alembic_file(self, namespace=None):
 
@@ -587,27 +634,28 @@ class SolsticeTagDataNode(object):
         self._tag_info_dict = None
         if tag_info:
             self._tag_info_dict = ast.literal_eval(tag_info)
-            short_node = sp.dcc.node_short_name(self._node)
+            short_node = sys.solstice.dcc.node_short_name(self._node)
             if short_node in self._tag_info_dict.keys():
                 self._tag_info_dict = self._tag_info_dict[short_node]
             else:
                 short_node_strip = short_node.rstrip(string.digits)
-                self._tag_info_dict = self._tag_info_dict[short_node_strip]
+                if short_node_strip in self._tag_info_dict.keys():
+                    self._tag_info_dict = self._tag_info_dict[short_node_strip]
 
     def get_node(self):
         return self._node
 
     def get_asset(self):
-        if not self._node or not sp.dcc.object_exists(self._node):
+        if not self._node or not sys.solstice.dcc.object_exists(self._node):
             return None
 
         if self._tag_info_dict:
             return SolsticeAssetNode(node=self._node)
         else:
-            if not sp.dcc.attribute_exists(node=self._node, attribute_name='node'):
+            if not sys.solstice.dcc.attribute_exists(node=self._node, attribute_name='node'):
                 return None
 
-            connections = sp.dcc.list_connections(node=self._node, attribute_name='node')
+            connections = sys.solstice.list_connections(node=self._node, attribute_name='node')
             if connections:
                 node = connections[0]
                 return SolsticeAssetNode(node=node)
@@ -615,81 +663,87 @@ class SolsticeTagDataNode(object):
         return None
 
     def get_tag_type(self):
-        if not self._node or not sp.dcc.object_exists(self._node):
-            return None
-        if not sp.dcc.attribute_exists(node=self._node, attribute_name='tag_type'):
-            return None
+        if self._tag_info_dict:
+            return self._tag_info_dict.get('tag_type', None)
+        else:
+            if not self._node or not sys.solstice.dcc.object_exists(self._node):
+                return None
+            if not sys.solstice.dcc.attribute_exists(node=self._node, attribute_name='tag_type'):
+                return None
 
-        return sp.dcc.get_attribute_value(node=self._node, attribute_name='tag_type')
+            return sys.solstice.dcc.get_attribute_value(node=self._node, attribute_name='tag_type')
 
     def get_types(self):
-        if not self._node or not sp.dcc.object_exists(self._node):
-            return []
-        if not sp.dcc.attribute_exists(node=self._node, attribute_name='types'):
-            return []
+        if self._tag_info_dict:
+            return self._tag_info_dict.get('types', None)
+        else:
+            if not self._node or not sys.solstice.dcc.object_exists(self._node):
+                return []
+            if not sys.solstice.dcc.attribute_exists(node=self._node, attribute_name='types'):
+                return []
 
-        return sp.dcc.get_attribute_value(node=self._node, attribute_name='types')
+            return sys.solstice.dcc.get_attribute_value(node=self._node, attribute_name='types')
 
     def get_proxy_group(self):
-        if not self._node or not sp.dcc.object_exists(self._node):
+        if not self._node or not sys.solstice.dcc.object_exists(self._node):
             return None
 
         if self._tag_info_dict:
             return self._node
         else:
-            if not sp.dcc.attribute_exists(node=self._node, attribute_name='proxy'):
+            if not sys.solstice.dcc.attribute_exists(node=self._node, attribute_name='proxy'):
                 return None
 
-            connections = sp.dcc.list_connections(node=self._node, attribute_name='proxy')
+            connections = sys.solstice.list_connections(node=self._node, attribute_name='proxy')
             if connections:
                 node = connections[0]
-                if sp.dcc.object_exists(node):
+                if sys.solstice.dcc.object_exists(node):
                     return node
 
         return None
 
     def get_hires_group(self):
-        if not self._node or not sp.dcc.object_exists(self._node):
+        if not self._node or not sys.solstice.dcc.object_exists(self._node):
             return None
 
         if self._tag_info_dict:
             return self._node
         else:
-            if not sp.dcc.attribute_exists(node=self._node, attribute_name='hires'):
+            if not sys.solstice.dcc.attribute_exists(node=self._node, attribute_name='hires'):
                 return None
 
-            connections = sp.dcc.list_connections(node=self._node, attribute_name='hires')
+            connections = sys.solstice.list_connections(node=self._node, attribute_name='hires')
             if connections:
                 node = connections[0]
-                if sp.dcc.object_exists(node):
+                if sys.solstice.dcc.object_exists(node):
                     return node
 
         return None
 
     def get_shaders(self):
-        if not self._node or not sp.dcc.object_exists(self._node):
+        if not self._node or not sys.solstice.dcc.object_exists(self._node):
             return None
 
         if self._tag_info_dict:
             shaders_info = self._tag_info_dict.get('shaders', None)
             if not shaders_info:
-                sp.logger.warning('Impossible retrieve shaders info of node: {}'.format(self._node))
+                sys.solstice.logger.warning('Impossible retrieve shaders info of node: {}'.format(self._node))
                 return
             shaders_info_fixed = shaders_info.replace("'", "\"")
             shaders_dict = ast.literal_eval(shaders_info_fixed)
             if type(shaders_dict) != dict:
-                sp.logger.error('Impossible to get dictionary from shaders info. Maybe shaders are not set up properly. Please contact TD!')
+                sys.solstice.logger.error('Impossible to get dictionary from shaders info. Maybe shaders are not set up properly. Please contact TD!')
             else:
                 return shaders_dict
         else:
-            if not sp.dcc.attribute_exists(node=self._node, attribute_name='shaders'):
+            if not sys.solstice.dcc.attribute_exists(node=self._node, attribute_name='shaders'):
                 return None
 
-            shaders_attr = sp.dcc.get_attribute_value(node=self._node, attribute_name='shaders')
+            shaders_attr = sys.solstice.dcc.get_attribute_value(node=self._node, attribute_name='shaders')
             shaders_attr_fixed = shaders_attr.replace("'", "\"")
             shaders_dict = ast.literal_eval(shaders_attr_fixed)
             if type(shaders_dict) != dict:
-                sp.logger.error('Impossible to get dictionary from shaders attribute. Maybe shaders are not set up properly. Please contact TD!')
+                sys.solstice.logger.error('Impossible to get dictionary from shaders attribute. Maybe shaders are not set up properly. Please contact TD!')
             else:
                 return shaders_dict
 

@@ -12,6 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
+
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
@@ -315,7 +317,7 @@ class SolsticeScatter(window.Window, object):
         else:
             self._categories_widget.setEnabled(True)
 
-        if sp.dcc.get_version() <= 2017:
+        if sys.solstice.dcc.get_version() <= 2017:
             self._mash_outliner.updateModel()
         else:
             self._mash_outliner.populateItems()
@@ -323,7 +325,7 @@ class SolsticeScatter(window.Window, object):
     def _add_mash(self):
         mash_network = mashutils.create_mash_network()
         painter = mash_network.addNode('MASH_Placer')
-        if sp.dcc.get_version() <= 2017:
+        if sys.solstice.dcc.get_version() <= 2017:
             self._mash_outliner.updateModel()
         else:
             self._mash_outliner.populateItems()
@@ -333,7 +335,7 @@ class SolsticeScatter(window.Window, object):
         mash_network = self.get_selected_mash_network()
         instancer = mash_network.instancer
         self._mash_outliner._deleteNode()
-        if sp.dcc.get_version() <= 2017:
+        if sys.solstice.dcc.get_version() <= 2017:
             self._mash_outliner.updateModel()
         else:
             self._mash_outliner.populateItems()

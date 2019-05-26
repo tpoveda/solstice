@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
@@ -120,12 +121,12 @@ def load_script(name):
 
     script_to_load = os.path.join(scripts_path, name)
     if not os.path.isfile(script_to_load):
-        sp.logger.error('ERROR: Impossible to load {} script'.format(name))
+        sys.solstice.logger.error('ERROR: Impossible to load {} script'.format(name))
         return
     try:
-        sp.logger.debug('Loading MEL script: {}'.format(name))
+        sys.solstice.logger.debug('Loading MEL script: {}'.format(name))
         mel.eval('source "{}"'.format(script_to_load).replace('\\', '/'))
-        sp.logger.debug('MEL script {} loaded successfully!'.format(name))
+        sys.solstice.logger.debug('MEL script {} loaded successfully!'.format(name))
     except Exception as e:
         cmds.error('ERROR: Impossible to evaluation {} script'.format(name))
         print('-' * 100)
@@ -140,7 +141,7 @@ def load_vl_scripts():
     if not os.path.exists(scripts_path):
         cmds.error('Solstice Picker Scripts not found!')
 
-    sp.logger.debug('Loading pickers MEL scripts ...')
+    sys.solstice.logger.debug('Loading pickers MEL scripts ...')
 
     load_script('vlRigIt_getModuleFromControl.mel')
     load_script('vlRigIt_getControlsFromModuleList.mel')

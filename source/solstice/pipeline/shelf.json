@@ -5,7 +5,7 @@
         [
             {
                 "icon": "setproject.png",
-                "command": "import solstice.pipeline; import sys; sys.dispatcher.update_solstice_project();",
+                "command": "import solstice.pipeline; import sys; sys.solstice.update_solstice_project();",
                 "annotation": "Auto Setup Solstice Project",
                 "label": "Set Project",
                 "dcc": ["maya", "houdini"]
@@ -295,7 +295,7 @@
             },
             {
                 "icon": "shaders_sync",
-                "command": "from solstice.pipeline.tools.shaderlibrary import shaderlibrary; shaderlibrary.ShaderLibrary.load_scene_shaders();",
+                "command": "from solstice.pipeline.tools.shaderlibrary import shaderlibrary; shaderlibrary.ShaderLibrary.load_all_scene_shaders();",
                 "annotation": "Solstice Shaders Sync",
                 "label": "Shaders Sync",
                 "dcc": ["maya"]

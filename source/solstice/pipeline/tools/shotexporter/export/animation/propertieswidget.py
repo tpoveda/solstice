@@ -28,7 +28,7 @@ class AnimationPropertiesWidget(propertieslist.BasePropertiesListWidget, object)
         self.clear_properties()
         self._current_asset = asset_widget
 
-        xform_attrs = sp.dcc.list_attributes(asset_widget.asset.name)
+        xform_attrs = sys.solstice.dcc.list_attributes(asset_widget.asset.name)
         for attr in xform_attrs:
             if attr not in defines.MUST_ATTRS:
                 continue
@@ -38,7 +38,7 @@ class AnimationPropertiesWidget(propertieslist.BasePropertiesListWidget, object)
             else:
                 new_attr.uncheck()
 
-        abc_attrs = sp.dcc.list_attributes(asset_widget.abc_node)
+        abc_attrs = sys.solstice.dcc.list_attributes(asset_widget.abc_node)
         for attr in abc_attrs:
             if attr not in defines.ABC_ATTRS:
                 continue
@@ -59,4 +59,4 @@ class AnimationPropertiesWidget(propertieslist.BasePropertiesListWidget, object)
             self._current_asset.abc_attrs[attr_name] = flag
             return
 
-        sp.logger.warning('Impossible to udpate attribute {} because node {} has no that attribute!'.format(attr_name, self._current_asset.asset))
+        sys.solstice.logger.warning('Impossible to udpate attribute {} because node {} has no that attribute!'.format(attr_name, self._current_asset.asset))

@@ -131,7 +131,7 @@ class AssetViewer(grid.GridWidget, object):
             #     if not new_asset.is_published():
             #         continue
             #     else:
-            #         sp.logger.debug('Adding asset: {}'.format(new_asset.name))
+            #         sys.solstice.logger.debug('Adding asset: {}'.format(new_asset.name))
 
             if self._item_pressed_callback:
                 asset._asset_btn.clicked.connect(partial(self._item_pressed_callback, asset))

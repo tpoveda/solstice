@@ -12,6 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
+
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice.pipeline as sp
@@ -21,7 +23,7 @@ if sp.is_maya():
 
 
 class MessageHandler(object):
-    parent_window = sp.dcc.get_main_window()
+    parent_window = sys.solstice.dcc.get_main_window()
 
     def set_message(self, msg, level=0):
         """

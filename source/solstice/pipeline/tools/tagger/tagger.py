@@ -444,7 +444,7 @@ class HighProxyEditor(TaggerEditor, object):
                 return
         else:
             if not cmds.objExists(tag_data):
-                sp.logger.error('Tag Data {} does not exists in current scene!'.format(tag_data))
+                sys.solstice.logger.error('Tag Data {} does not exists in current scene!'.format(tag_data))
                 return False
             tag_data_node = tag_data
 
@@ -454,7 +454,7 @@ class HighProxyEditor(TaggerEditor, object):
 
         sel_name = cmds.ls(SolsticeTagger.current_selection, long=True)
         if len(sel_name) > 1:
-            sp.logger.error('Multiple assets with same name: {}'.format(SolsticeTagger.current_selection))
+            sys.solstice.logger.error('Multiple assets with same name: {}'.format(SolsticeTagger.current_selection))
             return False
         sel_name = sel_name[0]
 
@@ -465,7 +465,7 @@ class HighProxyEditor(TaggerEditor, object):
             proxy_name = '{}_proxy_grp'.format(name)
             children = cmds.listRelatives(sel_name, allDescendents=True, type='transform', fullPath=True)
             if not children:
-                sp.logger.error('Proxy Group not found!')
+                sys.solstice.logger.error('Proxy Group not found!')
                 return False
             for obj in children:
                 base_name = obj.split('|')[-1]
@@ -473,10 +473,10 @@ class HighProxyEditor(TaggerEditor, object):
                     if proxy_path is None:
                         proxy_path = obj
                     else:
-                        sp.logger.error('Multiple proxy groups in the asset. Asset only can have one proxy group: {}'.format(proxy_name))
+                        sys.solstice.logger.error('Multiple proxy groups in the asset. Asset only can have one proxy group: {}'.format(proxy_name))
                         return False
         if proxy_path is None or not cmds.objExists(proxy_path):
-            sp.logger.error('Proxy Group not found!')
+            sys.solstice.logger.error('Proxy Group not found!')
             return False
         try:
             cmds.setAttr(tag_data_node + '.proxy', lock=False)
@@ -496,7 +496,7 @@ class HighProxyEditor(TaggerEditor, object):
                 return
         else:
             if not cmds.objExists(tag_data):
-                sp.logger.error('Tag Data {} does not exists in current scene!'.format(tag_data))
+                sys.solstice.logger.error('Tag Data {} does not exists in current scene!'.format(tag_data))
                 return False
             tag_data_node = tag_data
 
@@ -506,7 +506,7 @@ class HighProxyEditor(TaggerEditor, object):
 
         sel_name = cmds.ls(SolsticeTagger.current_selection, long=True)
         if len(sel_name) > 1:
-            sp.logger.error('Multiple assets with same name: {}'.format(SolsticeTagger.current_selection))
+            sys.solstice.logger.error('Multiple assets with same name: {}'.format(SolsticeTagger.current_selection))
             return False
         sel_name = sel_name[0]
 
@@ -517,7 +517,7 @@ class HighProxyEditor(TaggerEditor, object):
             hires_name = '{}_hires_grp'.format(name)
             children = cmds.listRelatives(sel_name, allDescendents=True, type='transform', fullPath=True)
             if not children:
-                sp.logger.error('Hires Group not found!')
+                sys.solstice.logger.error('Hires Group not found!')
                 return False
             for obj in children:
                 base_name = obj.split('|')[-1]
@@ -525,12 +525,12 @@ class HighProxyEditor(TaggerEditor, object):
                     if hires_path is None:
                         hires_path = obj
                     else:
-                        sp.logger.error(
+                        sys.solstice.logger.error(
                             'Multiple hires groups in the asset. Asset only can have one hires group: {}'.format(
                                 hires_name))
                         return False
         if hires_path is None or not cmds.objExists(hires_path):
-            sp.logger.error('Hires Group not found!')
+            sys.solstice.logger.error('Hires Group not found!')
             return False
         try:
             cmds.setAttr(tag_data_node + '.hires', lock=False)

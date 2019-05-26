@@ -12,6 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
+
 import solstice.pipeline as sp
 from solstice.pipeline.tools.autorigger.core import naming
 
@@ -46,21 +48,21 @@ class RigControl(object):
         ctrl_new_name = node
         if auto_rename:
             ctrl_new_name = naming.build_name(node, naming.Names.Control)
-            sp.dcc.rename_node(node, ctrl_new_name)
+            sys.solstice.dcc.rename_node(node, ctrl_new_name)
 
-        ctrl_shapes = sp.dcc.list_shapes(ctrl_new_name, full_path=True)
+        ctrl_shapes = sys.solstice.dcc.list_shapes(ctrl_new_name, full_path=True)
         for shp in ctrl_shapes:
-            sp.dcc.set_integer_attribute_value(shp, 'ove', True)
-            sp.dcc.set_integer_attribute_value(shp, 'ovc', True)
+            sys.solstice.dcc.set_integer_attribute_value(shp, 'ove', True)
+            sys.solstice.dcc.set_integer_attribute_value(shp, 'ovc', True)
             if color_index > -1 and color_index < 32:
-                sp.dcc.set_integer_attribute_value(shp, 'ovc', color_index)
+                sys.solstice.dcc.set_integer_attribute_value(shp, 'ovc', color_index)
             else:
                 if ctrl_new_name.startswith('l_') or ctrl_new_name.endswith('_l') or '_l_' in ctrl_new_name:
-                    sp.dcc.set_integer_attribute_value(shp, 'ovc', 6)
+                    sys.solstice.dcc.set_integer_attribute_value(shp, 'ovc', 6)
                 elif ctrl_new_name.startswith('r_') or ctrl_new_name.endswith('_r') or '_r_' in ctrl_new_name:
-                    sp.dcc.set_integer_attribute_value(shp, 'ovc', 13)
+                    sys.solstice.dcc.set_integer_attribute_value(shp, 'ovc', 13)
                 else:
-                    sp.dcc.set_integer_attribute_value(shp, 'ovc', 22)
+                    sys.solstice.dcc.set_integer_attribute_value(shp, 'ovc', 22)
 
         self._node = ctrl_new_name
 
@@ -82,13 +84,13 @@ class RigControl(object):
                 else:
                     self._offset = cmds.group(self._root, name=naming.build_name(ctrl_new_name, naming.Names.OffsetGroup))
 
-        target_obj = self._offset if self._offset and sp.dcc.object_exists(self._offset) else ctrl_new_name
-        if sp.dcc.object_exists(translate_to):
-            sp.dcc.delete_object(cmds.pointConstraint(translate_to, target_obj))
-        if sp.dcc.object_exists(rotate_to):
-            sp.dcc.delete_objec(cmds.orientConstraint(rotate_to, target_obj))
-        if sp.dcc.object_exists(parent):
-            sp.dcc.set_parent(target_obj, parent)
+        target_obj = self._offset if self._offset and sys.solstice.dcc.object_exists(self._offset) else ctrl_new_name
+        if sys.solstice.dcc.object_exists(translate_to):
+            sys.solstice.dcc.delete_object(cmds.pointConstraint(translate_to, target_obj))
+        if sys.solstice.dcc.object_exists(rotate_to):
+            sys.solstice.delete_objec(cmds.orientConstraint(rotate_to, target_obj))
+        if sys.solstice.dcc.object_exists(parent):
+            sys.solstice.dcc.set_parent(target_obj, parent)
 
         single_attr_lock_list = list()
         for lock_channel in lock_channels:
@@ -106,12 +108,12 @@ class RigControl(object):
             # if self._root:
             #     cmds.setAttr('{}.{}'.format(self._root, attr, lock=True, keyable=False, channelBox=False))
 
-        ctrl_shapes = sp.dcc.list_shapes(ctrl_new_name, full_path=True)
+        ctrl_shapes = sys.solstice.dcc.list_shapes(ctrl_new_name, full_path=True)
         if len(ctrl_shapes) > 1:
             for i in range(len(ctrl_shapes)):
-                sp.dcc.rename_node(ctrl_shapes[i], '{}{}Shape'.format(node, naming.get_alpha(i, capital=True)))
+                sys.solstice.dcc.rename_node(ctrl_shapes[i], '{}{}Shape'.format(node, naming.get_alpha(i, capital=True)))
         else:
-            sp.dcc.rename_node(ctrl_shapes[0], '{}Shape'.format(node))
+            sys.solstice.dcc.rename_node(ctrl_shapes[0], '{}Shape'.format(node))
 
     @property
     def node(self):
@@ -180,7 +182,7 @@ class RigControl(object):
         :param full_path: bool
         """
 
-        return sp.dcc.list_shapes(node=self._node, full_path=full_path)
+        return sys.solstice.dcc.list_shapes(node=self._node, full_path=full_path)
 
     def get_shapes_components(self):
         """

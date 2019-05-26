@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import shutil
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
@@ -39,7 +40,7 @@ class ThumbnailCaptureDialog(QDialog, object):
     captured = Signal(str)
 
     def __init__(self, path='', parent=None, start_frame=None, end_frame=None, step=1):
-        parent = parent or sp.dcc.get_main_window()
+        parent = parent or sys.solstice.dcc.get_main_window()
         super(ThumbnailCaptureDialog, self).__init__(parent=parent)
 
         self.setObjectName('thumbnailCaptureDialog')
@@ -51,8 +52,8 @@ class ThumbnailCaptureDialog(QDialog, object):
         self._start_frame = None
         self._capture_path = None
 
-        start_frame = start_frame or int(sp.dcc.get_current_frame())
-        end_frame = end_frame or int(sp.dcc.get_current_frame())
+        start_frame = start_frame or int(sys.solstice.dcc.get_current_frame())
+        end_frame = end_frame or int(sys.solstice.dcc.get_current_frame())
 
         self.set_start_frame(start_frame)
         self.set_end_frame(end_frame)
@@ -168,7 +169,7 @@ class ThumbnailCaptureDialog(QDialog, object):
         """
 
         if not sp.is_maya():
-            sp.logger.warning('Playblast capture is only supported in Maya!')
+            sys.solstice.logger.warning('Playblast capture is only supported in Maya!')
             return
 
         path = self.path()
@@ -200,17 +201,17 @@ class ThumbnailCaptureDialog(QDialog, object):
         """
 
         if not sp.is_maya():
-            sp.logger.warning('Playblast capture is only supported in Maya!')
+            sys.solstice.logger.warning('Playblast capture is only supported in Maya!')
             return
 
-        sp.logger.debug('Playblasting {}'.format(filename))
+        sys.solstice.logger.debug('Playblasting {}'.format(filename))
 
         if start_frame == end_frame and os.path.exists(filename):
             os.remove(filename)
 
         frame = [i for i in range(start_frame, end_frame + 1, step)]
 
-        model_panel = model_panel or sp.dcc.get_current_model_panel()
+        model_panel = model_panel or sys.solstice.dcc.get_current_model_panel()
         if cmds.modelPanel(model_panel, query=True, exists=True):
             cmds.setFocus(model_panel)
             if playblast_renderer:
@@ -244,11 +245,11 @@ class ThumbnailCaptureDialog(QDialog, object):
         source = path.replace("####", str(int(0)).rjust(4, "0"))
         if start_frame == end_frame:
             target= source.replace(".0000.", ".")
-            sp.logger.info("Renaming '%s' => '%s" % (source, target))
+            sys.solstice.logger.info("Renaming '%s' => '%s" % (source, target))
             os.rename(source, target)
             source = target
 
-        sp.logger.info('Playblasted "{}"'.format(source))
+        sys.solstice.logger.info('Playblasted "{}"'.format(source))
 
         return source
 

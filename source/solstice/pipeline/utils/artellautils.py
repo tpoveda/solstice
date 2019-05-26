@@ -55,11 +55,11 @@ def update_artella_paths():
 
     artella_folder = get_artella_data_folder()
 
-    sp.logger.debug('Updating Artella paths from: {0}'.format(artella_folder))
+    sys.solstice.logger.debug('Updating Artella paths from: {0}'.format(artella_folder))
     if artella_folder is not None and os.path.exists(artella_folder):
         for subdir, dirs, files in os.walk(artella_folder):
             if subdir not in sys.path:
-                sp.logger.debug('Adding Artella path: {0}'.format(subdir))
+                sys.solstice.logger.debug('Adding Artella path: {0}'.format(subdir))
                 sys.path.append(subdir)
 
 
@@ -81,7 +81,7 @@ def check_artella_plugin_loaded():
     """
 
     if sp.is_maya():
-        return sp.dcc.is_plugin_loaded('Artella')
+        return sys.solstice.dcc.is_plugin_loaded('Artella')
 
     return False
 
@@ -110,9 +110,9 @@ def get_artella_data_folder():
         if len(artella_folder) == 1:
             artella_folder = artella_folder[0]
         else:
-            sp.logger.info('Artella folder not found!')
+            sys.solstice.logger.info('Artella folder not found!')
 
-    sp.logger.debug('ARTELLA FOLDER: {}'.format(artella_folder))
+    sys.solstice.logger.debug('ARTELLA FOLDER: {}'.format(artella_folder))
     if not os.path.exists(artella_folder):
         QMessageBox.information(None, 'Artella App Folder {} does not exists! Please contact Solstice TD!')
 
@@ -187,7 +187,7 @@ def launch_artella_app():
     # TODO: This should not work in MAC, find a cross-platform way of doing this
 
     if os.name == 'mac':
-        sp.logger.info('Launch Artella App: does not supports MAC yet')
+        sys.solstice.logger.info('Launch Artella App: does not supports MAC yet')
         QMessageBox.information(None, 'Solstice Tools do not support automatically Artella Launch for Mac. Please close Maya, launch Artella manually, and start Maya again!')
         artella_app_file = get_artella_app() + '.bundle'
     else:
@@ -196,11 +196,11 @@ def launch_artella_app():
         artella_app_file = get_artella_launch_shortcut()
 
     artella_app_file = artella_app_file
-    sp.logger.info('Artella App File: {0}'.format(artella_app_file))
+    sys.solstice.logger.info('Artella App File: {0}'.format(artella_app_file))
 
     if os.path.isfile(artella_app_file):
-        sp.logger.info('Launching Artella App ...')
-        sp.logger.debug('Artella App File: {0}'.format(artella_app_file))
+        sys.solstice.logger.info('Launching Artella App ...')
+        sys.solstice.logger.debug('Artella App File: {0}'.format(artella_app_file))
         os.startfile(artella_app_file.replace('\\', '//'))
 
 
@@ -215,11 +215,11 @@ def close_all_artella_app_processes(console):
     try:
         for proc in psutil.process_iter():
             if proc.name() == artella_app_name + '.exe':
-                sp.logger.debug('Killing Artella App process: {}'.format(proc.name()))
+                sys.solstice.logger.debug('Killing Artella App process: {}'.format(proc.name()))
                 proc.kill()
         return True
     except:
-        sp.logger.error('Impossible to close Artella app instances because psutil library is not available!')
+        sys.solstice.logger.error('Impossible to close Artella app instances because psutil library is not available!')
         return False
 
 
@@ -246,7 +246,7 @@ def connect_artella_app_to_spigot(cli=None):
     elif sp.is_houdini():
         pass_msg_fn = pass_msg_to_main_thread
     else:
-        sp.logger.error('Impossible to connect Artella to Spigot!')
+        sys.solstice.logger.error('Impossible to connect Artella to Spigot!')
         return
 
     cli.listen(artella_app_identifier, pass_msg_fn)
@@ -258,9 +258,9 @@ def get_handle_msg(json_msg):
     if sp.is_houdini():
         try:
             msg = json.loads(json_msg)
-            sp.logger.debug(msg)
+            sys.solstice.logger.debug(msg)
         except Exception:
-            sp.logger.warning('Unknown command!')
+            sys.solstice.logger.warning('Unknown command!')
     else:
         return artella.handleMessage(json_msg)
 
@@ -272,12 +272,12 @@ def load_artella_maya_plugin():
     """
 
     if sp.is_maya():
-        sp.logger.debug('Loading Artella Maya Plugin ...')
+        sys.solstice.logger.debug('Loading Artella Maya Plugin ...')
         artella_maya_plugin_folder = get_artella_dcc_plugin(dcc='maya')
         artella_maya_plugin_file = os.path.join(artella_maya_plugin_folder, artella_maya_plugin_name)
         if os.path.isfile(artella_maya_plugin_file):
-            if not sp.dcc.is_plugin_loaded(artella_maya_plugin_name):
-                sp.dcc.load_plugin(artella_maya_plugin_file)
+            if not sys.solstice.dcc.is_plugin_loaded(artella_maya_plugin_name):
+                sys.solstice.dcc.load_plugin(artella_maya_plugin_file)
                 return True
 
     return False
@@ -339,7 +339,7 @@ def get_metadata():
 
     spigot = get_spigot_client()
     rsp = spigot.execute(command_action='do', command_name='getMetaData', payload='{}')
-    sp.logger.debug(rsp)
+    sys.solstice.logger.debug(rsp)
     rsp = json.loads(rsp)
 
     metadata = classes.ArtellaAppMetaData(
@@ -361,7 +361,7 @@ def get_status(file_path, as_json=False):
 
     uri = get_cms_uri(file_path)
     if not uri:
-        sp.logger.info('Unable to get cmds uri from path: {}'.format(file_path))
+        sys.solstice.logger.info('Unable to get cmds uri from path: {}'.format(file_path))
         return False
 
     spigot = get_spigot_client()
@@ -371,7 +371,7 @@ def get_status(file_path, as_json=False):
             rsp = json.loads(rsp)
         except Exception:
             msg = 'Artella is not available at this moment ... Restart Maya and try again please!'
-            sp.logger.error(msg)
+            sys.solstice.logger.error(msg)
             sp.message(msg)
             return {}
 
@@ -401,15 +401,15 @@ def get_cms_uri_current_file():
     :return: str
     """
 
-    current_file = sp.dcc.scene_name()
-    sp.logger.debug('Getting CMS Uri of file {0}'.format(current_file))
+    current_file = sys.solstice.dcc.scene_name()
+    sys.solstice.logger.debug('Getting CMS Uri of file {0}'.format(current_file))
 
     cms_uri = artella.getCmsUri(current_file)
     if not cms_uri:
-        sp.logger.error('Unable to get CMS uri from path: {0}'.format(current_file))
+        sys.solstice.logger.error('Unable to get CMS uri from path: {0}'.format(current_file))
         return False
 
-    sp.logger.debug('Retrieved CMS uri: {0}'.format(cms_uri))
+    sys.solstice.logger.debug('Retrieved CMS uri: {0}'.format(cms_uri))
     req = json.dumps({'cms_uri': cms_uri})
 
     return req
@@ -435,7 +435,7 @@ def get_cms_uri(path):
                 break
 
     if not cms_uri:
-        sp.logger.error('Unable to get CMS uri from path: {0}'.format(path))
+        sys.solstice.logger.error('Unable to get CMS uri from path: {0}'.format(path))
         return False
 
     req = json.dumps({'cms_uri': cms_uri})
@@ -448,11 +448,11 @@ def get_status_current_file():
     :return:
     """
 
-    current_file = sp.dcc.scene_name()
-    sp.logger.debug('Getting Artella Status of file {0}'.format(current_file))
+    current_file = sys.solstice.dcc.scene_name()
+    sys.solstice.logger.debug('Getting Artella Status of file {0}'.format(current_file))
 
     status = get_status(current_file)
-    sp.logger.debug('{0} STATUS -> {1}'.format(current_file, status))
+    sys.solstice.logger.debug('{0} STATUS -> {1}'.format(current_file, status))
 
     return status
 
@@ -486,7 +486,7 @@ def synchronize_path(path):
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
 
-    sp.logger.debug(rsp)
+    sys.solstice.logger.debug(rsp)
     return rsp
 
 
@@ -505,10 +505,10 @@ def synchronize_file(file_path):
         if isinstance(rsp, basestring):
             rsp = json.loads(rsp)
 
-        sp.logger.debug(rsp)
+        sys.solstice.logger.debug(rsp)
         return rsp
     except Exception as e:
-        sp.logger.error(str(e))
+        sys.solstice.logger.error(str(e))
         return None
 
 
@@ -527,11 +527,11 @@ def get_asset_history(file_path, as_json=False):
             rsp = json.loads(rsp)
     except Exception as e:
         msg = 'Error while getting file history info: {}'.format(rsp)
-        sp.logger.error(msg)
-        sp.logger.error(str(e))
+        sys.solstice.logger.error(msg)
+        sys.solstice.logger.error(str(e))
         return {}
 
-    sp.logger.debug(rsp)
+    sys.solstice.logger.debug(rsp)
 
     if as_json:
         return rsp
@@ -568,7 +568,7 @@ def launch_maya(file_path, maya_version=None):
         return
 
     if maya_version is None:
-        maya_version = sp.dcc.get_version()
+        maya_version = sys.solstice.dcc.get_version()
 
     spigot = get_spigot_client()
 
@@ -580,7 +580,7 @@ def launch_maya(file_path, maya_version=None):
     rsp = spigot.execute(command_action='do', command_name='launchApp', payload=payload)
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
-    sp.logger.debug(rsp)
+    sys.solstice.logger.debug(rsp)
 
 
 def open_file_in_maya(file_path, maya_version=None):
@@ -594,7 +594,7 @@ def open_file_in_maya(file_path, maya_version=None):
         return None
 
     if maya_version is None:
-        maya_version = sp.dcc.get_version()
+        maya_version = sys.solstice.dcc.get_version()
 
     spigot = get_spigot_client()
 
@@ -613,7 +613,7 @@ def open_file_in_maya(file_path, maya_version=None):
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
 
-    sp.logger.debug(rsp)
+    sys.solstice.logger.debug(rsp)
     return rsp
 
 
@@ -628,7 +628,7 @@ def import_file_in_maya(file_path, maya_version=None):
         return None
 
     if maya_version is None:
-        maya_version = sp.dcc.get_version()
+        maya_version = sys.solstice.dcc.get_version()
 
     spigot = get_spigot_client()
 
@@ -643,7 +643,7 @@ def import_file_in_maya(file_path, maya_version=None):
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
 
-    sp.logger.debug(rsp)
+    sys.solstice.logger.debug(rsp)
     return rsp
 
 
@@ -658,7 +658,7 @@ def reference_file_in_maya(file_path, maya_version=None):
         return None
 
     if maya_version is None:
-        maya_version = sp.dcc.get_version()
+        maya_version = sys.solstice.dcc.get_version()
 
     spigot = get_spigot_client()
 
@@ -673,7 +673,7 @@ def reference_file_in_maya(file_path, maya_version=None):
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
 
-    sp.logger.debug(rsp)
+    sys.solstice.logger.debug(rsp)
     return rsp
 
 
@@ -687,7 +687,7 @@ def is_published(file_path):
     rsp = get_status(file_path=file_path, as_json=True)
     meta = rsp.get('meta', {})
     if meta.get('status') != 'OK':
-        sp.logger.info('Status is not OK: {}'.format(meta))
+        sys.solstice.logger.info('Status is not OK: {}'.format(meta))
         return False
 
     return 'release_name' in meta
@@ -705,30 +705,30 @@ def is_locked(file_path):
     if rsp:
         if isinstance(rsp, classes.ArtellaDirectoryMetaData):
             if rsp.header.status != 'OK':
-                sp.logger.info('Status is not OK: {}'.format(rsp))
+                sys.solstice.logger.info('Status is not OK: {}'.format(rsp))
                 return False, False
 
             file_path = rsp.header.file_path or ''
             if not file_path or file_path == '':
-                sp.logger.info('File path not found in response: {}'.format(rsp))
+                sys.solstice.logger.info('File path not found in response: {}'.format(rsp))
                 return False, False
 
             for ref, ref_data in rsp.references.items():
                 file_data = ref_data.path
                 if not file_data:
-                    sp.logger.info('File data not found in response: {}'.format(rsp.get('data', {}), ))
+                    sys.solstice.logger.info('File data not found in response: {}'.format(rsp.get('data', {}), ))
                     return
                 if ref_data.locked:
                     user_id = get_current_user_id()
                     return True, user_id == ref_data.locked_view
         elif isinstance(rsp, classes.ArtellaHeaderMetaData):
             if rsp.status != 'OK':
-                sp.logger.info('Status is not OK: {}'.format(rsp))
+                sys.solstice.logger.info('Status is not OK: {}'.format(rsp))
                 return False, False
 
             file_path_header = rsp.file_path or ''
             if not file_path_header or file_path_header == '':
-                sp.logger.info('File path not found in response: {}'.format(rsp))
+                sys.solstice.logger.info('File path not found in response: {}'.format(rsp))
                 return False, False
 
             # This happens when we are trying to lock a file that has not been uploaded to Artella yet
@@ -745,43 +745,43 @@ def lock_file(file_path=None, force=False):
     """
 
     if not file_path:
-        file_path = sp.dcc.scene_name()
+        file_path = sys.solstice.dcc.scene_name()
     if not file_path:
-        sp.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
+        sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
 
     file_published = is_published(file_path=file_path)
     if file_published:
         msg = 'Current file ({}) is published and cannot be edited'.format(os.path.basename(file_path))
-        sp.logger.info(msg)
+        sys.solstice.logger.info(msg)
         sp.message(msg)
-        sp.dcc.confirm_dialog(title='Solstice Tools - Cannot Lock File', message=msg, button=['OK'])
+        sys.solstice.dcc.confirm_dialog(title='Solstice Tools - Cannot Lock File', message=msg, button=['OK'])
         return False
 
     in_edit_mode, is_locked_by_me = is_locked(file_path=file_path)
     can_write = os.access(file_path, os.W_OK)
     if not can_write and is_locked_by_me:
         msg = 'Unable to check local write permissions for file: {}'.format(file_path)
-        sp.logger.info(msg)
+        sys.solstice.logger.info(msg)
         sp.message(msg)
 
     if in_edit_mode is None and is_locked_by_me is None:
         msg = 'File is not versioned yet! '
-        sp.logger.info(msg)
+        sys.solstice.logger.info(msg)
         return True
 
     if in_edit_mode and not is_locked_by_me:
         msg = 'Locked by another user or workspace or file is not uploaded to Artella yet: {}'.format(os.path.basename(file_path))
-        sp.logger.info(msg)
-        sp.dcc.warning(msg)
+        sys.solstice.logger.info(msg)
+        sys.solstice.dcc.warning(msg)
         return False
     elif force or not in_edit_mode:
         result = 'Yes'
         if not force and not in_edit_mode:
             msg = '{} needs to be in Edit mode to save your file. Would like to turn edit mode on now?'.format(os.path.basename(file_path))
-            sp.logger.info(msg)
+            sys.solstice.logger.info(msg)
             sp.message(msg)
-            result = sp.dcc.confirm_dialog(title='Solstice Tools - Lock File', message=msg, button=['Yes', 'No'], cancel_button='No', dismiss_string='No')
+            result = sys.solstice.dcc.confirm_dialog(title='Solstice Tools - Lock File', message=msg, button=['Yes', 'No'], cancel_button='No', dismiss_string='No')
         if result != 'Yes':
             return False
 
@@ -795,13 +795,13 @@ def lock_file(file_path=None, force=False):
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
 
-    sp.logger.debug('Server checkout response: {}'.format(rsp))
+    sys.solstice.logger.debug('Server checkout response: {}'.format(rsp))
 
     if rsp.get('meta', {}).get('status') != 'OK':
         msg = 'Failed to lock {}'.format(os.path.basename(file_path))
-        sp.logger.info(msg)
-        sp.dcc.warning(msg)
-        sp.dcc.confirm_dialog(title='Solstice Tools - Failed to Lock File', message=msg, button=['OK'])
+        sys.solstice.logger.info(msg)
+        sys.solstice.dcc.warning(msg)
+        sys.solstice.dcc.confirm_dialog(title='Solstice Tools - Failed to Lock File', message=msg, button=['OK'])
         return False
 
     return True
@@ -823,9 +823,9 @@ def upload_file(file_path, comment):
 
     if rsp.get('status', {}).get('meta', {}).get('status') != 'OK':
         msg = 'Failed to publish version to Artella {}'.format(os.path.basename(file_path))
-        sp.logger.info(msg)
-        sp.dcc.warning(msg)
-        sp.dcc.confirm_dialog(title='Solstice Tools -  Failed to Upload Bug. Restart Solstice Tools please!', message=msg, button=['OK'])
+        sys.solstice.logger.info(msg)
+        sys.solstice.dcc.warning(msg)
+        sys.solstice.dcc.confirm_dialog(title='Solstice Tools -  Failed to Upload Bug. Restart Solstice Tools please!', message=msg, button=['OK'])
         return False
 
     return True
@@ -844,7 +844,7 @@ def can_unlock(file_path):
         return
 
     if type(asset_status) == classes.ArtellaHeaderMetaData:
-        sp.logger.debug('File {} is not uploaded on Artella yet, so you cannot unlock it!')
+        sys.solstice.logger.debug('File {} is not uploaded on Artella yet, so you cannot unlock it!')
         return False
 
     asset_info = asset_status.references.values()[0]
@@ -869,7 +869,7 @@ def unlock_file(file_path):
     payload = json.dumps(payload)
 
     if not can_unlock(file_path=file_path):
-        sp.logger.debug('Impossible to unlock file. File is locked by other user!')
+        sys.solstice.logger.debug('Impossible to unlock file. File is locked by other user!')
         return
 
     rsp = spigot.execute(command_action='do', command_name='unlock', payload=payload)
@@ -882,7 +882,7 @@ def unlock_file(file_path):
     if rsp:
         if rsp.get('meta', {}).get('status') != 'OK':
             msg = 'Failed to unlock {}'.format(os.path.basename(file_path))
-            sp.logger.info(msg)
+            sys.solstice.logger.info(msg)
             return False
     else:
         return False
@@ -899,13 +899,13 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
     """
 
     if not file_path:
-        file_path = sp.dcc.scene_name()
+        file_path = sys.solstice.dcc.scene_name()
     if not file_path:
-        sp.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
+        sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
 
     msg = 'Making new version for {}'.format(file_path)
-    sp.logger.info(msg)
+    sys.solstice.logger.info(msg)
     sp.message(msg)
     if file_path is not None and file_path != '':
         valid_lock = lock_file(file_path=file_path)
@@ -913,16 +913,16 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
             return False
 
         if not skip_saving:
-            if sp.dcc.scene_is_modified():
-                sp.dcc.save_current_scene(force=True)
+            if sys.solstice.dcc.scene_is_modified():
+                sys.solstice.dcc.save_current_scene(force=True)
             if mayautils.file_has_student_line(filename=file_path):
                 mayautils.clean_student_line(filename=file_path)
                 if mayautils.file_has_student_line(filename=file_path):
-                    sp.logger.error('After updating model path the Student License could not be fixed again!')
+                    sys.solstice.logger.error('After updating model path the Student License could not be fixed again!')
                     return False
 
         msg = 'Saving new file version on Artella Server: {}'.format(file_path)
-        sp.logger.info(msg)
+        sys.solstice.logger.info(msg)
         sp.message(msg)
         if comment is None:
             result = cmds.promptDialog(title='Solstice Tools - Save New Version on Artella Server', message=msg, button=['Save', 'Cancel'], cancelButton='Cancel', dismissString='Cancel', scrollableField=True)
@@ -945,7 +945,7 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
             rsp = json.loads(rsp)
 
         if 'status' in rsp and 'meta' in rsp['status'] and rsp['status']['meta']['status'] != 'OK':
-            sp.logger.info('Make new version response: {}'.format(rsp))
+            sys.solstice.logger.info('Make new version response: {}'.format(rsp))
             msg = 'Failed to make new version of {}'.format(os.path.basename(file_path))
             cmds.confirmDialog(title='Solstice Tools - Failed to Make New Version', message=msg, button=['OK'])
             return False
@@ -954,7 +954,7 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
 
     else:
         msg = 'The file has not been created yet'
-        sp.logger.debug(msg)
+        sys.solstice.logger.debug(msg)
         cmds.warning(msg)
         cmds.confirmDialog(title='Solstice Tools - Failed to Make New Version', message=msg, button=['OK'])
 
@@ -982,7 +982,7 @@ def publish_asset(asset_path, comment, selected_versions, version_name):
     if isinstance(rsp, basestring):
         rsp = json.loads(rsp)
 
-    sp.logger.debug(rsp)
+    sys.solstice.logger.debug(rsp)
     return rsp
 
 
@@ -992,8 +992,8 @@ def within_artella_scene():
     :return: bool
     """
 
-    current_scene = sp.dcc.scene_name() or 'untitled'
-    sp.logger.debug('Current scene name: {}'.format(current_scene))
+    current_scene = sys.solstice.dcc.scene_name() or 'untitled'
+    sys.solstice.logger.debug('Current scene name: {}'.format(current_scene))
     if 'artella' not in current_scene.lower():
         return False
     return True
@@ -1050,9 +1050,9 @@ def get_dependencies(file_path):
     """
 
     if not file_path:
-        file_path = sp.dcc.scene_name()
+        file_path = sys.solstice.dcc.scene_name()
     if not file_path:
-        sp.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
+        sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
 
     if file_path is not None and file_path != '':
@@ -1065,7 +1065,7 @@ def get_dependencies(file_path):
 
         if isinstance(rsp, basestring):
             rsp = json.loads(rsp)
-        sp.logger.debug(rsp)
+        sys.solstice.logger.debug(rsp)
 
         return rsp
 
@@ -1081,4 +1081,4 @@ if sp.is_maya():
             update_artella_paths()
             import Artella as artella
         except Exception:
-            sp.logger.error('Impossible to load Artella Plugin!')
+            sys.solstice.logger.error('Impossible to load Artella Plugin!')

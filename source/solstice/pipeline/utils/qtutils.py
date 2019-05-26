@@ -14,6 +14,7 @@ __email__ = "tpoveda@cgart3d.com"
 
 import os
 import re
+import sys
 import subprocess
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
@@ -56,13 +57,13 @@ def dock_solstice_widget(widget_class):
     if sp.is_maya():
         import maya.cmds as cmds
         import maya.OpenMayaUI as OpenMayaUI
-        from pipeline.utils import mayautils
+        from solstice.pipeline.utils import mayautils
 
         workspace_control = widget_class.__name__ + '_workspace_control'
 
         try:
             cmds.deleteUI(workspace_control)
-            sp.logger.debug('Removing workspace {0}'.format(workspace_control))
+            sys.solstice.logger.debug('Removing workspace {0}'.format(workspace_control))
         except:
             pass
 
@@ -392,7 +393,7 @@ def is_modifier():
     :return: bool
     """
 
-    return is_atl_modifier() or is_control_modifier()
+    return is_alt_modifier() or is_control_modifier()
 
 
 def is_alt_modifier():

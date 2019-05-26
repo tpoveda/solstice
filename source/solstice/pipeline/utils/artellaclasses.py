@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import collections
 
 import solstice.pipeline as sp
@@ -137,12 +138,20 @@ class ArtellaAssetMetaData(object):
     def published_shading(self):
         return self._published_folders['shading']
 
+    @property
+    def published_rig(self):
+        return self._published_folders['rig']
+
+    @property
+    def published_grooming(self):
+        return self._published_folders['grooming']
+
     def get_is_published(self):
         is_published = True
         for f in self._must_folders:
             must_dict = self._published_folders[f]
             if not must_dict:
-                sp.logger.debug('Asset {0} is not published -> Folder "{1}" is not published yet!'.format(self._path, f))
+                sys.solstice.logger.debug('Asset {0} is not published -> Folder "{1}" is not published yet!'.format(self._path, f))
                 is_published = False
         return is_published
 
@@ -232,20 +241,20 @@ class ArtellaReferencesMetaData(object):
         Prints in logger the info of the current Artella object
         """
 
-        sp.logger.debug('Name: {}'.format(self.name))
-        sp.logger.debug('Path: {}'.format(self.path))
-        sp.logger.debug('Maximum Version Deleted: {}'.format(self.maximum_version_deleted))
-        sp.logger.debug('Is Directory: {}'.format(self.is_directory))
-        sp.logger.debug('Is Deleted: {}'.format(self.deleted))
-        sp.logger.debug('Local Version: {}'.format(self.local_version))
-        sp.logger.debug('View Version: {}'.format(self.view_version))
-        sp.logger.debug('Relative Path: {}'.format(self.relative_path))
-        sp.logger.debug('Maximum Version: {}'.format(self.maximum_version))
-        sp.logger.debug('View Version Digest: {}'.format(self.view_version_digest))
-        sp.logger.debug('Locked: {}'.format(self.locked))
-        sp.logger.debug('Locked By: {}'.format(self.locked_by))
-        sp.logger.debug('Locked View: {}'.format(self.locked_view))
-        sp.logger.debug('Locked By Display: {}'.format(self.locked_by_display))
+        sys.solstice.logger.debug('Name: {}'.format(self.name))
+        sys.solstice.logger.debug('Path: {}'.format(self.path))
+        sys.solstice.logger.debug('Maximum Version Deleted: {}'.format(self.maximum_version_deleted))
+        sys.solstice.logger.debug('Is Directory: {}'.format(self.is_directory))
+        sys.solstice.logger.debug('Is Deleted: {}'.format(self.deleted))
+        sys.solstice.logger.debug('Local Version: {}'.format(self.local_version))
+        sys.solstice.logger.debug('View Version: {}'.format(self.view_version))
+        sys.solstice.logger.debug('Relative Path: {}'.format(self.relative_path))
+        sys.solstice.logger.debug('Maximum Version: {}'.format(self.maximum_version))
+        sys.solstice.logger.debug('View Version Digest: {}'.format(self.view_version_digest))
+        sys.solstice.logger.debug('Locked: {}'.format(self.locked))
+        sys.solstice.logger.debug('Locked By: {}'.format(self.locked_by))
+        sys.solstice.logger.debug('Locked View: {}'.format(self.locked_view))
+        sys.solstice.logger.debug('Locked By Display: {}'.format(self.locked_by_display))
 
 
 class ArtellaDirectoryMetaData(object):
@@ -278,9 +287,9 @@ class ArtellaDirectoryMetaData(object):
         Prints in logger the info of the current Artella object
         """
 
-        sp.logger.debug('Path: {}'.format(self.path))
-        sp.logger.debug('Header: {}'.format(self.header))
-        sp.logger.debug('References: {}'.format(self.references))
+        sys.solstice.logger.debug('Path: {}'.format(self.path))
+        sys.solstice.logger.debug('Header: {}'.format(self.header))
+        sys.solstice.logger.debug('References: {}'.format(self.references))
 
 
 class ArtellaAppMetaData(object):
@@ -318,7 +327,7 @@ class ArtellaAppMetaData(object):
         :return:
         """
 
-        sp.logger.debug('Updating Artella Local Root to {0}'.format(self._local_root))
+        sys.solstice.logger.debug('Updating Artella Local Root to {0}'.format(self._local_root))
         os.environ['ART_LOCAL_ROOT'] = self._local_root
 
 

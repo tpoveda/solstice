@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import glob
 import stat
 import shutil
@@ -55,7 +56,7 @@ class MCallbackIdWrapper(object):
     def __init__(self, callback_id):
         super(MCallbackIdWrapper, self).__init__()
         self.callback_id = callback_id
-        sp.logger.debug('Adding Callback: %s' % self.callback_id)
+        sys.solstice.logger.debug('Adding Callback: %s' % self.callback_id)
 
     def __del__(self):
         try:
@@ -66,7 +67,7 @@ class MCallbackIdWrapper(object):
             OpenMaya.MMessage.removeCallback(self.callback_id)
         except Exception:
             pass
-        sp.logger.debug('Removing Callback: %s' % self.callback_id)
+        sys.solstice.logger.debug('Removing Callback: %s' % self.callback_id)
 
     def __repr__(self):
         return 'MCallbackIdWrapper(%r)' % self.callback_id
@@ -748,7 +749,7 @@ def fix_playblast_output_path(file_path):
     """
 
     if file_path is None:
-        sp.logger.warning('Playblast did not result in output path. Maybe it was interrupted!')
+        sys.solstice.logger.warning('Playblast did not result in output path. Maybe it was interrupted!')
         return
 
     if not os.path.exists(file_path):
@@ -806,7 +807,7 @@ def file_has_student_line(filename):
     """
 
     if not os.path.exists(filename):
-        sp.logger.error('File "{}" does not exists!'.format(filename))
+        sys.solstice.logger.error('File "{}" does not exists!'.format(filename))
         return False
 
     with open(filename, 'r') as f:
@@ -833,11 +834,11 @@ def clean_student_line(filename=None):
         filename = cmds.file(q=True, sn=True)
 
     if not os.path.exists(filename):
-        sp.logger.error('File "{}" does not exists!'.format(filename))
+        sys.solstice.logger.error('File "{}" does not exists!'.format(filename))
         return False
 
     if not file_has_student_line(filename=filename):
-        sp.logger.info('File is already cleaned: no student line found!')
+        sys.solstice.logger.info('File is already cleaned: no student line found!')
         return False
 
     with open(filename, 'r') as f:
@@ -855,14 +856,14 @@ def clean_student_line(filename=None):
                     continue
             f.write(line)
             if step_count > step:
-                sp.logger.debug('Updating File: {}% ...'.format(100/(len(lines)/step_count)))
+                sys.solstice.logger.debug('Updating File: {}% ...'.format(100/(len(lines)/step_count)))
                 step += step
 
     if changed:
         os.chmod(filename, stat.S_IWUSR | stat.S_IREAD)
         shutil.copy2(no_student_filename, filename)
         os.remove(no_student_filename)
-        sp.logger.info('Student file cleaned successfully!')
+        sys.solstice.logger.info('Student file cleaned successfully!')
 
     return changed
 
@@ -1079,7 +1080,7 @@ def get_project_rule(rule):
     workspace = cmds.workspace(query=True, rootDirectory=True)
     workspace_folder = cmds.workspace(fileRuleEntry=rule)
     if not workspace_folder:
-        sp.logger.warning('File Rule Entry "{}" has no value, please check if the rule name is typed correctly!'.format(rule))
+        sys.solstice.logger.warning('File Rule Entry "{}" has no value, please check if the rule name is typed correctly!'.format(rule))
 
     return os.path.join(workspace, workspace_folder)
 
@@ -1140,7 +1141,7 @@ def add_message_attribute(node_a, node_b, attr_name, force=True):
     try:
         cmds.connectAttr('{}.{}'.format(node_a, attr_name), '{}.{}'.format(node_b, attr_name), f=force)
     except StandardError as e:
-        sp.logger.debug(e)
+        sys.solstice.logger.debug(e)
 
 
 def get_locked_attributes(node, mode='rotate'):

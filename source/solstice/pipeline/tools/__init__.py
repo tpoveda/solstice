@@ -12,7 +12,7 @@ def get_tool_ui_file(tool_name):
 
     ui_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), tool_name, 'ui', tool_name+'.ui')
     if not os.path.isfile(ui_file):
-        sp.logger.warning('Solstice Tool {} has not a valid UI: {}'.format(tool_name, ui_file))
+        sys.solstice.logger.warning('Solstice Tool {} has not a valid UI: {}'.format(tool_name, ui_file))
         return None
 
     return ui_file

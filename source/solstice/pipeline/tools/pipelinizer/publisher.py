@@ -13,7 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
-import re
+import sys
 import json
 import weakref
 import traceback
@@ -168,7 +168,7 @@ class PublishTexturesTask(task.Task, object):
             return published_done
         except Exception as e:
             self.write_error('Error while publishing textures files. Reverting process ...')
-            sp.logger.error(str(e))
+            sys.solstice.logger.error(str(e))
             self.write('Unlocking texture files ...')
             for txt in textures:
                 valid_unlock = artella.unlock_file(txt)
@@ -223,18 +223,18 @@ class PublishModelTask(task.Task, object):
         try:
             # Open model file scene
             self.write('Opening model file in Maya ...')
-            sp.dcc.open_file(model_path, force=True)
+            sys.solstice.dcc.open_file(model_path, force=True)
 
             # Clean unknown nodes and old plugins for the current scene
             self.write('Cleaning unknown nodes from the asset scene ...')
-            unknown_nodes = sp.dcc.list_nodes(node_type='unknown')
+            unknown_nodes = sys.solstice.dcc.list_nodes(node_type='unknown')
             if unknown_nodes and type(unknown_nodes) == list:
                 for i in unknown_nodes:
-                    if sp.dcc.object_exists(i):
-                        if not sp.dcc.node_is_referenced(i):
+                    if sys.solstice.dcc.object_exists(i):
+                        if not sys.solstice.dcc.node_is_referenced(i):
                             self.write_ok('Removing {} item ...'.format(i))
-                            sp.dcc.delete_object(i)
-            unknown_nodes = sp.dcc.list_nodes(node_type='unknown')
+                            sys.solstice.dcc.delete_object(i)
+            unknown_nodes = sys.solstice.dcc.list_nodes(node_type='unknown')
             if unknown_nodes and type(unknown_nodes) == list:
                 if len(unknown_nodes) > 0:
                     self.write_error('Error while removing unknown nodes. Please contact TD!')
@@ -242,12 +242,12 @@ class PublishModelTask(task.Task, object):
                     self.write_ok('Unknown nodes removed successfully!')
 
             self.write('Cleaning old plugins nodes from the asset scene ...')
-            old_plugins = sp.dcc.list_old_plugins()
+            old_plugins = sys.solstice.dcc.list_old_plugins()
             if old_plugins and type(old_plugins) == list:
                 for plugin in old_plugins:
                     self.write_ok('Removing {} old plugin ...'.format(plugin))
-                    sp.dcc.remove_old_plugin(plugin)
-            old_plugins = sp.dcc.list_old_plugins()
+                    sys.solstice.dcc.remove_old_plugin(plugin)
+            old_plugins = sys.solstice.dcc.list_old_plugins()
             if old_plugins and type(old_plugins) == list:
                 if len(old_plugins) > 0:
                     self.write_error('Error while removing old plugins nodes. Please contact TD!')
@@ -257,10 +257,10 @@ class PublishModelTask(task.Task, object):
             # Check that model file has a main group with valid name
             self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
             valid_obj = None
-            if sp.dcc.object_exists(self._asset().name):
-                objs = sp.dcc.list_nodes(node_name=self._asset().name)
+            if sys.solstice.dcc.object_exists(self._asset().name):
+                objs = sys.solstice.dcc.list_nodes(node_name=self._asset().name)
                 for obj in objs:
-                    parent = sp.dcc.node_parent(obj)
+                    parent = sys.solstice.dcc.node_parent(obj)
                     if parent is None:
                         valid_obj = obj
                 if not valid_obj:
@@ -276,7 +276,7 @@ class PublishModelTask(task.Task, object):
             self.write_ok('Asset main group is valid: {}'.format(self._asset().name))
 
             # Check that model file has no shaders stored inside it
-            shaders = sp.dcc.list_materials()
+            shaders = sys.solstice.dcc.list_materials()
             invalid_shaders = list()
             for shader in shaders:
                 if shader not in ['lambert1', 'particleCloud1']:
@@ -301,12 +301,12 @@ class PublishModelTask(task.Task, object):
             hires_grp = None
             proxy_grp_name = '{}_proxy_grp'.format(self._asset().name)
             hires_grp_name = '{}_hires_grp'.format(self._asset().name)
-            children = sp.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True, relative_type='transform')
+            children = sys.solstice.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True, relative_type='transform')
             if children:
                 for child in children:
                     child_name = child.split('|')[-1]
                     if child_name == proxy_grp_name:
-                        proxy_children = sp.dcc.list_relatives(node=child_name, all_hierarchy=True, relative_type='transform')
+                        proxy_children = sys.solstice.dcc.list_relatives(node=child_name, all_hierarchy=True, relative_type='transform')
                         if len(proxy_children) > 0:
                             valid_proxy = True
                             if proxy_grp is None:
@@ -322,7 +322,7 @@ class PublishModelTask(task.Task, object):
                             artella.unlock_file(model_path)
                             return False
                     if child_name == hires_grp_name:
-                        hires_children = sp.dcc.list_relatives(node=child_name, all_hierarchy=True, relative_type='transform')
+                        hires_children = sys.solstice.dcc.list_relatives(node=child_name, all_hierarchy=True, relative_type='transform')
                         if len(hires_children) > 0:
                             valid_hires = True
                             if hires_grp is None:
@@ -349,7 +349,7 @@ class PublishModelTask(task.Task, object):
                 return False
 
             # Check if proxy group has valid proxy mesh stored
-            if proxy_grp is None or not sp.dcc.object_exists(proxy_grp):
+            if proxy_grp is None or not sys.solstice.dcc.object_exists(proxy_grp):
                 self.write_error('Proxy Group not found! Group with name {} must exist in the model asset Maya file!'.format(hires_grp_name))
                 self.write('Unlocking model file ...')
                 artella.unlock_file(model_path)
@@ -357,8 +357,8 @@ class PublishModelTask(task.Task, object):
 
             proxy_mesh = None
             proxy_name = '{}_proxy'.format(self._asset().name)
-            proxy_meshes = sp.dcc.list_relatives(node=proxy_grp, all_hierarchy=True, full_path=True, relative_type='transform')
-            hires_meshes = sp.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='transform')
+            proxy_meshes = sys.solstice.dcc.list_relatives(node=proxy_grp, all_hierarchy=True, full_path=True, relative_type='transform')
+            hires_meshes = sys.solstice.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True, relative_type='transform')
             for mesh in proxy_meshes:
                 child_name = mesh.split('|')[-1]
                 if child_name == proxy_name:
@@ -370,7 +370,7 @@ class PublishModelTask(task.Task, object):
                         artella.unlock_file(model_path)
                         return False
 
-            if proxy_mesh is None or not sp.dcc.object_exists(proxy_mesh):
+            if proxy_mesh is None or not sys.solstice.dcc.object_exists(proxy_mesh):
                 self.write_error('No valid Proxy Mesh in the file. Please check that proxy mesh follows nomenclature {}_proxy!'.format(self._asset().name))
                 self.write('Unlocking model file ...')
                 artella.unlock_file(model_path)
@@ -395,9 +395,9 @@ class PublishModelTask(task.Task, object):
                 return False
 
             valid_tag_data = False
-            main_group_connections = sp.dcc.list_source_destination_connections(valid_obj)
+            main_group_connections = sys.solstice.dcc.list_source_destination_connections(valid_obj)
             for connection in main_group_connections:
-                attrs = sp.dcc.list_user_attributes(connection)
+                attrs = sys.solstice.dcc.list_user_attributes(connection)
                 if attrs and type(attrs) == list:
                     for attr in attrs:
                         if attr == 'tag_type':
@@ -407,15 +407,15 @@ class PublishModelTask(task.Task, object):
             if not valid_tag_data:
                 self.write_warning('Main group has not a valid tag data node connected to it. Creating it ...')
                 try:
-                    sp.dcc.select_object(valid_obj)
+                    sys.solstice.select_object(valid_obj)
                     tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(self._asset().category)
-                    sp.dcc.clear_selection()
+                    sys.solstice.dcc.clear_selection()
                     self.write_ok('Tag Data Node created successfully!')
                     self.write('Checking if Tag Data Node was created successfully ...')
                     valid_tag_data = False
-                    main_group_connections = sp.dcc.list_source_destination_connections(valid_obj)
+                    main_group_connections = sys.solstice.dcc.list_source_destination_connections(valid_obj)
                     for connection in main_group_connections:
-                        attrs = sp.dcc.list_user_attributes(connection)
+                        attrs = sys.solstice.dcc.list_user_attributes(connection)
                         if attrs and type(attrs) == list:
                             for attr in attrs:
                                 if attr == 'tag_type':
@@ -431,13 +431,13 @@ class PublishModelTask(task.Task, object):
                     return False
         except Exception as e:
             self.write_error('Error while publishing model file. Reverting process ...')
-            sp.logger.error(str(e))
+            sys.solstice.logger.error(str(e))
             self.write('Unlocking model file ...')
             artella.unlock_file(model_path)
             return False
 
         tag_data_node = tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(new_selection=valid_obj)
-        if not tag_data_node or not sp.dcc.object_exists(tag_data_node):
+        if not tag_data_node or not sys.solstice.dcc.object_exists(tag_data_node):
             self.write_error('Impossible to get tag data of current selection: {}!'.format(tag_data_node))
             self.write('Unlocking model file ...')
             artella.unlock_file(model_path)
@@ -507,20 +507,20 @@ class PublishModelTask(task.Task, object):
             self.write_ok('Shading Meshes and Model Hires meshes are valid!')
 
         # Create if necessary shaders attribute in model tag data node
-        if not tag_data_node or not sp.dcc.object_exists(tag_data_node):
+        if not tag_data_node or not sys.solstice.dcc.object_exists(tag_data_node):
             self.write_error('Tag data does not exists in the current scene!'.format(tag_data_node))
             self.write('Unlocking model file ...')
             artella.unlock_file(model_path)
             return False
 
-        attr_exists = sp.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
+        attr_exists = sys.solstice.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
         if attr_exists:
             self.write('Unlocking shaders tag data attribute on tag data node: {}'.format(tag_data_node))
-            sp.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
+            sys.solstice.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
         else:
             self.write('Creating shaders attribute on tag data node: {}'.format(tag_data_node))
-            sp.dcc.add_string_attribute(node=tag_data_node, attribute_name='shaders')
-            attr_exists = sp.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
+            sys.solstice.dcc.add_string_attribute(node=tag_data_node, attribute_name='shaders')
+            attr_exists = sys.solstice.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
             if not attr_exists:
                 self.write_error('No Shaders attribute found on model tag data node: {}'.format(tag_data_node))
                 self.write('Unlocking model file ...')
@@ -530,16 +530,16 @@ class PublishModelTask(task.Task, object):
                 self.write_ok('Shaders attribute created successfully on tag data node!')
 
         self.write('Storing shaders data into shaders tag data node attribute ...')
-        sp.dcc.unlock_attribute(node=tag_data_node, attribute_name='shaders')
-        sp.dcc.set_string_attribute_value(node=tag_data_node, attribute_name='shaders', attribute_value=shader_data)
-        sp.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
+        sys.solstice.dcc.unlock_attribute(node=tag_data_node, attribute_name='shaders')
+        sys.solstice.dcc.set_string_attribute_value(node=tag_data_node, attribute_name='shaders', attribute_value=shader_data)
+        sys.solstice.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
         self.write_ok('Shaders data added to model tag data node successfully!')
 
         # ===============================================================================================================================
 
         self.write('Saving changes to model file ...')
-        if sp.dcc.scene_is_modified():
-            sp.dcc.save_current_scene(force=True)
+        if sys.solstice.dcc.scene_is_modified():
+            sys.solstice.dcc.save_current_scene(force=True)
 
         # If we are working in Maya, we clean Student License
         if sp.is_maya():
@@ -561,7 +561,7 @@ class PublishModelTask(task.Task, object):
         # if abc_info_path and os.path.isfile(abc_info_path):
         #     artella.lock_file(abc_info_path)
         #
-        # sp.dcc.select_object(valid_obj)
+        # sys.solstice.select_object(valid_obj)
         # abc_group = solstice_alembicmanager.AlembicGroup()
         # new_abc_group = abc_group.create_alembic_group(valid_obj)
         # alembic_exporter = solstice_alembicmanager.AlembicExporter()
@@ -572,7 +572,7 @@ class PublishModelTask(task.Task, object):
         # alembic_exporter.end.setValue(1)
         # alembic_exporter.open_folder_after_export_cbx.setChecked(False)
         # alembic_exporter._on_export()
-        # sp.dcc.delete_object(new_abc_group)
+        # sys.solstice.dcc.delete_object(new_abc_group)
 
         result = qtutils.show_question(None, 'Publishing file {0}'.format(model_path), 'File validated successfully! Do you want to continue with the publish process?')
         published_done = False
@@ -679,11 +679,11 @@ class PublishShadingTask(task.Task, object):
         valid_obj = None
         for file_path, file_type in zip([model_path, shading_path], ['model', 'shading']):
             self.write('Checking if asset {0} file main group has a valid nomenclature: {1}'.format(file_type, self._asset().name))
-            sp.dcc.open_file(file_path, force=True)
-            if sp.dcc.object_exists(self._asset().name):
-                objs = sp.dcc.list_nodes(node_name=self._asset().name)
+            sys.solstice.dcc.open_file(file_path, force=True)
+            if sys.solstice.dcc.object_exists(self._asset().name):
+                objs = sys.solstice.dcc.list_nodes(node_name=self._asset().name)
                 for obj in objs:
-                    parent = sp.dcc.node_parent(obj)
+                    parent = sys.solstice.dcc.node_parent(obj)
                     if parent is None:
                         valid_obj = obj
                 if not valid_obj:
@@ -719,7 +719,7 @@ class PublishShadingTask(task.Task, object):
 
         try:
             import maya.cmds as cmds
-            sp.dcc.open_file(shading_path, force=True)
+            sys.solstice.dcc.open_file(shading_path, force=True)
             solstice_var = os.environ['SOLSTICE_PROJECT']
             self.write('Updating textures paths ...')
             textures_updated = False
@@ -771,18 +771,18 @@ class PublishShadingTask(task.Task, object):
 
             # Open shading file scene
             self.write('Opening shading file in Maya ...')
-            sp.dcc.open_file(shading_path, force=True)
+            sys.solstice.dcc.open_file(shading_path, force=True)
 
             # Clean unknown nodes and old plugins for the current scene
             self.write('Cleaning unknown nodes from the asset scene ...')
-            unknown_nodes = sp.dcc.list_nodes(node_type='unknown')
+            unknown_nodes = sys.solstice.dcc.list_nodes(node_type='unknown')
             if unknown_nodes and type(unknown_nodes) == list:
                 for i in unknown_nodes:
-                    if sp.dcc.object_exists(i):
-                        if not sp.dcc.node_is_referenced(i):
+                    if sys.solstice.dcc.object_exists(i):
+                        if not sys.solstice.dcc.node_is_referenced(i):
                             self.write_ok('Removing {} item ...'.format(i))
-                            sp.dcc.delete_object(i)
-            unknown_nodes = sp.dcc.list_nodes(node_type='unknown')
+                            sys.solstice.dcc.delete_object(i)
+            unknown_nodes = sys.solstice.dcc.list_nodes(node_type='unknown')
             if unknown_nodes and type(unknown_nodes) == list:
                 if len(unknown_nodes) > 0:
                     self.write_error('Error while removing unknown nodes. Please contact TD!')
@@ -790,12 +790,12 @@ class PublishShadingTask(task.Task, object):
                     self.write_ok('Unknown nodes removed successfully!')
 
             self.write('Cleaning old plugins nodes from the asset scene ...')
-            old_plugins = sp.dcc.list_old_plugins()
+            old_plugins = sys.solstice.dcc.list_old_plugins()
             if old_plugins and type(old_plugins) == list:
                 for plugin in old_plugins:
                     self.write_ok('Removing {} old plugin ...'.format(plugin))
-                    sp.dcc.remove_old_plugin(plugin)
-            old_plugins = sp.dcc.list_old_plugins()
+                    sys.solstice.dcc.remove_old_plugin(plugin)
+            old_plugins = sys.solstice.dcc.list_old_plugins()
             if old_plugins and type(old_plugins) == list:
                 if len(old_plugins) > 0:
                     self.write_error('Error while removing old plugins nodes. Please contact TD!')
@@ -805,10 +805,10 @@ class PublishShadingTask(task.Task, object):
             # Check that shading file has a main group with valid name
             self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))
             valid_obj = None
-            if sp.dcc.object_exists(self._asset().name):
-                objs = sp.dcc.list_nodes(node_name=self._asset().name)
+            if sys.solstice.dcc.object_exists(self._asset().name):
+                objs = sys.solstice.dcc.list_nodes(node_name=self._asset().name)
                 for obj in objs:
-                    parent = sp.dcc.node_parent(obj)
+                    parent = sys.solstice.dcc.node_parent(obj)
                     if parent is None:
                         valid_obj = obj
                 if not valid_obj:
@@ -826,11 +826,11 @@ class PublishShadingTask(task.Task, object):
 
             shading_meshes = list()
             self.write('Getting meshes of shading file ...')
-            xform_relatives = sp.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True, relative_type='transform', shapes=False, intermediate_shapes=False)
+            xform_relatives = sys.solstice.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True, relative_type='transform', shapes=False, intermediate_shapes=False)
             if xform_relatives:
                 for obj in xform_relatives:
-                    if sp.dcc.object_exists(obj):
-                        shapes = sp.dcc.list_shapes(node=obj, full_path=True, intermediate_shapes=False)
+                    if sys.solstice.dcc.object_exists(obj):
+                        shapes = sys.solstice.dcc.list_shapes(node=obj, full_path=True, intermediate_shapes=False)
                         if shapes:
                             self.write('Found mesh on shading file: {}'.format(obj))
                             shading_meshes.append(obj)
@@ -838,7 +838,7 @@ class PublishShadingTask(task.Task, object):
 
             # Check that shading groups nomenclature is valid
             self.write('Getting asset shaders from shading file ...')
-            shaders = sp.dcc.list_materials()
+            shaders = sys.solstice.dcc.list_materials()
             asset_shaders = list()
             for shader in shaders:
                 if shader not in ['lambert1', 'particleCloud1']:
@@ -852,7 +852,7 @@ class PublishShadingTask(task.Task, object):
                 return False
 
             self.write('Checking that nomenclature of shaders and shading groups are valid')
-            shader_types = sp.dcc.list_node_types('shader')
+            shader_types = sys.solstice.dcc.list_node_types('shader')
             for shader in asset_shaders:
                 if shader in ['lambert1', 'particleCloud1']:
                     continue
@@ -863,7 +863,7 @@ class PublishShadingTask(task.Task, object):
                     self.write('Unlocking shading file ...')
                     artella.unlock_file(shading_path)
                     return False
-                shading_groups = sp.dcc.list_connections_of_type(node=shader, connection_type='shadingEngine')
+                shading_groups = sys.solstice.dcc.list_connections_of_type(node=shader, connection_type='shadingEngine')
                 if not shading_groups or len(shading_groups) <= 0:
                     self.write_warning('Shader {} has not a shading group connected to it!'.format(shader))
                     continue
@@ -873,14 +873,14 @@ class PublishShadingTask(task.Task, object):
                     artella.unlock_file(shading_path)
                     return False
                 shading_group = shading_groups[0]
-                connections = sp.dcc.list_source_connections(node=shading_group)
+                connections = sys.solstice.dcc.list_source_connections(node=shading_group)
                 if connections is not None:
                     connected_shaders = list()
                     for cnt in connections:
-                        if sp.dcc.object_type(cnt) in shader_types:
+                        if sys.solstice.dcc.object_type(cnt) in shader_types:
                             connected_shaders.append(cnt)
                     if len(connected_shaders) > 0:
-                        target_name = sp.dcc.list_connections(node=shading_group, attribute_name='surfaceShader')[0]
+                        target_name = sys.solstice.list_connections(node=shading_group, attribute_name='surfaceShader')[0]
                         if shading_group != '{}SG'.format(target_name, shader):
                             self.write_error('Shader invalid nomenclature: Target name: {} ---------- {} => {}'.format(target_name, shader, shading_group))
                             self.write('Unlocking shading file ...')
@@ -908,7 +908,7 @@ class PublishShadingTask(task.Task, object):
 
         except Exception as e:
             self.write_error('Error while publishing shading files. Reverting process ...')
-            sp.logger.error(e)
+            sys.solstice.logger.error(e)
             self.write('Unlocking shading file ...')
             artella.unlock_file(shading_path)
             return False
@@ -916,7 +916,7 @@ class PublishShadingTask(task.Task, object):
         # Save changes on shading file
         self.write('Saving changes to shading file ...')
         try:
-            sp.dcc.save_current_scene(force=True)
+            sys.solstice.dcc.save_current_scene(force=True)
 
             # If we are working in Maya, we remove Student License
             if sp.is_maya():

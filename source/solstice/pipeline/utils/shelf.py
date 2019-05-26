@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import json
 from collections import OrderedDict
 from functools import partial
@@ -24,9 +25,7 @@ import solstice.pipeline as sp
 from solstice.pipeline.utils import qtutils as qt
 from solstice.pipeline.resources import resource
 
-if sp.is_maya():
-    from solstice.pipeline.utils import mayautils
-elif sp.is_houdini():
+if sp.is_houdini():
     from solstice.pipeline.utils import houdiniutils
 
 
@@ -52,7 +51,7 @@ class SolsticeShelf(object):
         :return:
         """
 
-        return sp.dcc.add_shelf_menu_item(parent=parent, label=label, command=command, icon=icon)
+        return sys.solstice.dcc.add_shelf_menu_item(parent=parent, label=label, command=command, icon=icon)
 
     @staticmethod
     def add_sub_menu(parent, label, icon=None):
@@ -64,7 +63,7 @@ class SolsticeShelf(object):
         :return:
         """
 
-        return sp.dcc.add_shelf_sub_menu_item(parent=parent, label=label, icon=icon)
+        return sys.solstice.dcc.add_shelf_sub_menu_item(parent=parent, label=label, icon=icon)
 
     def create(self, delete_if_exists=True):
         """
@@ -77,19 +76,19 @@ class SolsticeShelf(object):
                 if houdiniutils.shelf_set_exists(shelf_set_name=self.name):
                     houdiniutils.remove_shelf_set(name=self.name)
             else:
-                if sp.dcc.shelf_exists(shelf_name=self.name):
-                    sp.dcc.delete_shelf(shelf_name=self.name)
+                if sys.solstice.dcc.shelf_exists(shelf_name=self.name):
+                    sys.solstice.delete_shelf(shelf_name=self.name)
         else:
             if sp.is_houdini():
                 from solstice.pipeline.utils import houdiniutils
                 assert not houdiniutils.shelf_set_exists(shelf_set_name=self.name), 'Shelf Set with name {} already exists!'.format(self.name)
             else:
-                assert not sp.dcc.shelf_exists(self.name), 'Shelf with name {} already exists!'.format(self.name)
+                assert not sys.solstice.dcc.shelf_exists(self.name), 'Shelf with name {} already exists!'.format(self.name)
 
         if sp.is_houdini():
             houdiniutils.create_shelf_set(name=self.name, dock=True)
         else:
-            self.name = sp.dcc.create_shelf(shelf_name=self.name)
+            self.name = sys.solstice.dcc.create_shelf(shelf_name=self.name)
 
         # ========================================================================================================
 
@@ -161,7 +160,7 @@ class SolsticeShelf(object):
         :return:
         """
 
-        return sp.dcc.add_shelf_separator(shelf_name=self.name)
+        return sys.solstice.dcc.add_shelf_separator(shelf_name=self.name)
 
     def build_category(self, shelf_file, category_name):
         if sp.is_maya():
@@ -212,7 +211,7 @@ class SolsticeShelf(object):
         with open(shelf_file) as f:
             shelf_data = json.load(f, object_pairs_hook=OrderedDict)
             if not 'solstice_shelf' in shelf_data:
-                sp.logger.warning('Impossible to create Solstice Shelf! Please contact TD!')
+                sys.solstice.logger.warning('Impossible to create Solstice Shelf! Please contact TD!')
                 return
 
             if sp.is_houdini():
@@ -225,7 +224,7 @@ class SolsticeShelf(object):
                         if annotation == 'separator':
                             continue
                         dcc = i.get('dcc')
-                        if sp.dcc.get_name() not in dcc:
+                        if sys.solstice.dcc.get_name() not in dcc:
                             continue
                         icon = os.path.join(sp.get_solstice_icons_path(), i.get('icon'))
                         command = i.get('command')
@@ -248,7 +247,7 @@ class SolsticeShelf(object):
                             continue
 
                         dcc = i.get('dcc')
-                        if sp.dcc.get_name() not in dcc:
+                        if sys.solstice.dcc.get_name() not in dcc:
                             continue
                         icon = i.get('icon')
                         command = i.get('command')
@@ -271,7 +270,7 @@ class SolsticeShelf(object):
         with open(shelf_file) as f:
             shelf_data = json.load(f, object_pairs_hook=OrderedDict)
             if not 'solstice_shelf' in shelf_data:
-                sp.logger.warning('Impossible to create Solstice Shelf! Please contact TD!')
+                sys.solstice.logger.warning('Impossible to create Solstice Shelf! Please contact TD!')
                 return
 
             if sp.is_houdini():
@@ -295,7 +294,7 @@ class SolsticeShelf(object):
     def clear_list(self):
         if sp.is_maya():
             import maya.cmds as cmds
-            if sp.dcc.shelf_exists(shelf_name=self.name):
+            if sys.solstice.dcc.shelf_exists(shelf_name=self.name):
                 menu_items = cmds.shelfLayout(self.name, query=True, childArray=True)
                 for item in menu_items:
                     try:

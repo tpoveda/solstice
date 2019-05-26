@@ -12,6 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
+
 import maya.cmds as cmds
 
 import solstice.pipeline as sp
@@ -80,7 +82,7 @@ def create_basic_asset_rig(main_grp=None, reduction=60):
     if not cmds.objExists(main_grp):
         return
 
-    sp.logger.debug('Creating Asset Rig for: {}'.format(main_grp))
+    sys.solstice.logger.debug('Creating Asset Rig for: {}'.format(main_grp))
 
     rig_grp = cmds.group(name='rig', empty=True, world=True)
     proxy_grp = cmds.group(name='proxy', empty=True, world=True)
@@ -174,7 +176,7 @@ def create_basic_asset_rig(main_grp=None, reduction=60):
                         sx=0, sy=1, sz=0, sw=0, preserveTopology=1, keepQuadsWeight=1, vertexMapName="", cachingReduce=1,
                         ch=1, p=reduction, vct=0, tct=0, replaceOriginal=1)
     except Exception as e:
-        sp.logger.warning('Impossible to reduce proxy mesh: {}'.format(e))
+        sys.solstice.logger.warning('Impossible to reduce proxy mesh: {}'.format(e))
 
     # cmds.polyReduce(combine_mesh, percentage=95, ch=False)
     cmds.parent(combine_mesh, proyx_asset_grp)
@@ -244,7 +246,7 @@ def check_shaders_nomenclature(name=None):
     if name is None or not cmds.objExists(name):
         sel = cmds.ls(sl=True)
         if not sel:
-            sp.logger.warning('No shaders to check. Please select an object!')
+            sys.solstice.logger.warning('No shaders to check. Please select an object!')
             return
         name = sel[0]
 
@@ -285,7 +287,7 @@ def rename_shaders(name=None):
     if name is None or not cmds.objExists(name):
         sel = cmds.ls(sl=True)
         if not sel:
-            sp.logger.warning('No shaders to rename. Please select an object!')
+            sys.solstice.logger.warning('No shaders to rename. Please select an object!')
             return
         name = sel[0]
 
@@ -315,4 +317,4 @@ def rename_shaders(name=None):
                 cmds.rename(shader, '{}_{}'.format(name, shader))
         except Exception as e:
             cmds.warning('Skipping shader {}'.format(shader))
-            sp.logger.error(str(e))
+            sys.solstice.logger.error(str(e))

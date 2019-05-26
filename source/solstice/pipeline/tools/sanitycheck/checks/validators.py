@@ -12,13 +12,13 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
 import threading
 import traceback
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
-import solstice.pipeline as sp
 from solstice.pipeline.gui import dialog, splitters
 
 from solstice.pipeline.tools.sanitycheck.checks import checkgroups
@@ -45,8 +45,8 @@ class SanityCheckValidator(dialog.Dialog, object):
         try:
             threading.Thread(target=self.do_check, args=(self._event,), name=self.name).start()
         except Exception as e:
-            sp.logger.debug(str(e))
-            sp.logger.debug(traceback.format_exc())
+            sys.solstice.logger.debug(str(e))
+            sys.solstice.logger.debug(traceback.format_exc())
             return False
         self.exec_()
 

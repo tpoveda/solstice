@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 
 import solstice.pipeline as sp
 
@@ -37,19 +38,19 @@ def asset_published(asset_name):
 
     asset = sp.find_asset(asset_name)
     if not asset:
-        sp.logger.warning('No asset found with name: {}'.format(asset_name))
+        sys.solstice.logger.warning('No asset found with name: {}'.format(asset_name))
         return
 
     slack_token = get_solstice_slack_api()
     if not slack_token:
-        sp.logger.warning('Solstice Slack App is not available because you are not a developer. Please contact TD!')
+        sys.solstice.logger.warning('Solstice Slack App is not available because you are not a developer. Please contact TD!')
         return
 
     msg = 'Solstice Publisher: {} has been published!'.format(asset.name)
     asset_url = asset.get_asset_artella_url()
     asset_render = asset.get_artella_render_image()
     if not asset_render:
-        sp.logger.warning('Impossible to send message because render image is not available!')
+        sys.solstice.logger.warning('Impossible to send message because render image is not available!')
         return
 
     sc = SlackClient(slack_token)
@@ -85,7 +86,7 @@ def new_version(file_name, url, comment, channel_name='general'):
 
     slack_token = get_solstice_slack_api()
     if not slack_token:
-        sp.logger.warning('Solstice Slack App is not available because you are not a developer. Please contact TD!')
+        sys.solstice.logger.warning('Solstice Slack App is not available because you are not a developer. Please contact TD!')
         return
 
     msg = 'New version of file {} has been uploaded into Artella server!'.format(os.path.relpath(file_name, sp.get_solstice_project_path()))
@@ -123,7 +124,7 @@ def new_viewport_image(image_path, file_name, channel_name='general'):
 
     slack_token = get_solstice_slack_api()
     if not slack_token:
-        sp.logger.warning('Solstice Slack App is not available because you are not a developer. Please contact TD!')
+        sys.solstice.logger.warning('Solstice Slack App is not available because you are not a developer. Please contact TD!')
         return
 
     sc = SlackClient(slack_token)

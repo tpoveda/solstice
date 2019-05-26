@@ -117,18 +117,18 @@ class SolsticePickers(window.Window, object):
         try:
             exec(command)
         except Exception as e:
-            sp.logger.error('{} | {}'.format(e, traceback.format_exc()))
+            sys.solstice.logger.error('{} | {}'.format(e, traceback.format_exc()))
             QMessageBox.information(self, '{} Picker'.format(character_name.capitalize()), '{} Picker is not created yet, wait for future updates!'.format(character_name.capitalize()))
 
     def open_anim_school_picker(self):
-        sp.logger.debug('Opening Anim School Picker')
+        sys.solstice.logger.debug('Opening Anim School Picker')
         externals_path = sp.get_externals_path()
         if not os.path.exists(externals_path):
-            sp.logger.error('Externals Path {} does not exists! Please contact TD team!'.format(externals_path))
+            sys.solstice.logger.error('Externals Path {} does not exists! Please contact TD team!'.format(externals_path))
             return
         anim_school_folder = os.path.join(externals_path, 'solstice_animschoolpicker')
         if not os.path.exists(anim_school_folder):
-            sp.logger.error('Anim School Picker Folder {} does not exists! Please contact TD team!'.format(anim_school_folder))
+            sys.solstice.logger.error('Anim School Picker Folder {} does not exists! Please contact TD team!'.format(anim_school_folder))
             return
 
         if sys.platform == 'win32':
@@ -140,68 +140,68 @@ class SolsticePickers(window.Window, object):
             return
 
         if not os.path.exists(anim_school_plugin):
-            sp.logger.error('No valid Anim School Picker Plugin file found: {}'.format(anim_school_plugin))
+            sys.solstice.logger.error('No valid Anim School Picker Plugin file found: {}'.format(anim_school_plugin))
             return
 
         if cmds.pluginInfo('AnimSchoolPicker', query=True, loaded=True):
-            sp.logger.debug('Anim School Picker already loaded')
+            sys.solstice.logger.debug('Anim School Picker already loaded')
         else:
             try:
                 cmds.loadPlugin(anim_school_plugin)
-                sp.logger.debug('Anim School Picker Plugin loaded successfully!')
+                sys.solstice.logger.debug('Anim School Picker Plugin loaded successfully!')
             except Exception as e:
-                sp.logger.error('Error while loading Anim School Picker Plugin. Please contact TD team!')
-                sp.logger.error(str(e))
+                sys.solstice.logger.error('Error while loading Anim School Picker Plugin. Please contact TD team!')
+                sys.solstice.logger.error(str(e))
                 return
 
         try:
             cmds.AnimSchoolPicker()
-            sp.logger.debug('Anim School Picker launched successfully!')
+            sys.solstice.logger.debug('Anim School Picker launched successfully!')
         except Exception as e:
-            sp.logger.error('Error while launcher Anim School Picker. Please contact TD team!')
-            sp.logger.error(str(e))
+            sys.solstice.logger.error('Error while launcher Anim School Picker. Please contact TD team!')
+            sys.solstice.logger.error(str(e))
             return
 
-        sp.logger.debug('Trying to open Solstice Pickers MEL scripts ...')
+        sys.solstice.logger.debug('Trying to open Solstice Pickers MEL scripts ...')
         try:
             self._init_picker_scripts()
-            sp.logger.debug('Solstice Picker Scripts loaded successfully!')
+            sys.solstice.logger.debug('Solstice Picker Scripts loaded successfully!')
         except Exception as e:
-            sp.logger.warning('Solstice Picker Scripts have not been loaded successfully! Picker Scripts will not work!')
+            sys.solstice.logger.warning('Solstice Picker Scripts have not been loaded successfully! Picker Scripts will not work!')
             pass
 
     def _update_pickers_label(self):
-        sp.logger.debug('Updating Pickers Path label ...')
+        sys.solstice.logger.debug('Updating Pickers Path label ...')
         externals_path = sp.get_externals_path()
         if not os.path.exists(externals_path):
-            sp.logger.error('Externals Path {} does not exists! Please contact TD team!'.format(externals_path))
+            sys.solstice.logger.error('Externals Path {} does not exists! Please contact TD team!'.format(externals_path))
             return
         anim_school_folder = os.path.join(externals_path, 'solstice_animschoolpicker')
         if not os.path.exists(anim_school_folder):
-            sp.logger.error(
+            sys.solstice.logger.error(
                 'Anim School Picker Folder {} does not exists! Please contact TD team!'.format(anim_school_folder))
             return
         anim_school_pickers_folder = os.path.join(anim_school_folder, 'pickers')
         if not os.path.exists(anim_school_pickers_folder):
-            sp.logger.warning('Solstice Pickers for Anim School Picker not found!')
+            sys.solstice.logger.warning('Solstice Pickers for Anim School Picker not found!')
         else:
             pass
             # self.pickers_path_lbl.setText('Pickers Path: {}'.format(anim_school_pickers_folder))
 
     def _open_pickers_folder(self):
-        sp.logger.debug('Opening Pickers Folder')
+        sys.solstice.logger.debug('Opening Pickers Folder')
         externals_path = sp.get_externals_path()
         if not os.path.exists(externals_path):
-            sp.logger.error('Externals Path {} does not exists! Please contact TD team!'.format(externals_path))
+            sys.solstice.logger.error('Externals Path {} does not exists! Please contact TD team!'.format(externals_path))
             return
         anim_school_folder = os.path.join(externals_path, 'solstice_animschoolpicker')
         if not os.path.exists(anim_school_folder):
-            sp.logger.error(
+            sys.solstice.logger.error(
                 'Anim School Picker Folder {} does not exists! Please contact TD team!'.format(anim_school_folder))
             return
         anim_school_pickers_folder = os.path.join(anim_school_folder, 'pickers')
         if not os.path.exists(anim_school_pickers_folder):
-            sp.logger.warning('Solstice Pickers for Anim School Picker not found!')
+            sys.solstice.logger.warning('Solstice Pickers for Anim School Picker not found!')
         else:
             pythonutils.open_file(anim_school_pickers_folder)
 
@@ -211,14 +211,14 @@ class SolsticePickers(window.Window, object):
 
     def _open_studio_library(self):
         try:
-            sp.logger.debug('Trying to import Studio Libary ...')
+            sys.solstice.logger.debug('Trying to import Studio Libary ...')
             import solstice_studiolibrarymaya
             solstice_studiolibrarymaya.registerItems()
             solstice_studiolibrarymaya.enableMayaClosedEvent()
             import solstice_studiolibrarymaya.mayalibrarywidget
             import solstice_studiolibrary.librarywidget
-            sp.logger.debug('Studio Library imported successfully!')
-            sp.logger.debug('Trying to open Studio Library ...')
+            sys.solstice.logger.debug('Studio Library imported successfully!')
+            sys.solstice.logger.debug('Trying to open Studio Library ...')
             try:
                 self.pose_widget = solstice_studiolibrary.librarywidget.LibraryWidget.instance()
             except Exception:
@@ -226,19 +226,19 @@ class SolsticePickers(window.Window, object):
                     reload(solstice_studiolibrary.librarywidget)
                     self.pose_widget = solstice_studiolibrary.librarywidget.LibraryWidget.instance()
                 except Exception as e:
-                    sp.logger.error('Error while opening Studio Libary. Please contact TD team!')
-                    sp.logger.error(str(e))
-            sp.logger.debug('Studio Library opened successfully!')
+                    sys.solstice.logger.error('Error while opening Studio Libary. Please contact TD team!')
+                    sys.solstice.logger.error(str(e))
+            sys.solstice.logger.debug('Studio Library opened successfully!')
         except Exception as e:
-            sp.logger.error('Error while opening Studio Libary. Please contact TD team!')
-            sp.logger.error(str(e))
+            sys.solstice.logger.error('Error while opening Studio Libary. Please contact TD team!')
+            sys.solstice.logger.error(str(e))
             return
 
     def _init_picker_scripts(self):
         if not os.path.exists(utils.scripts_path):
             cmds.error('Solstice Picker Scripts not found!')
 
-        sp.logger.debug('Loading pickers MEL scripts ...')
+        sys.solstice.logger.debug('Loading pickers MEL scripts ...')
 
         utils.load_script('vlRigIt_getModuleFromControl.mel')
         utils.load_script('vlRigIt_getControlsFromModuleList.mel')

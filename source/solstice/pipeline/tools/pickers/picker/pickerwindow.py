@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import weakref
 from functools import partial
 
@@ -21,7 +22,6 @@ from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import maya.cmds as cmds
 
-import solstice.pipeline as sp
 from solstice.pipeline.gui import window
 
 from solstice.pipeline.tools.pickers.picker import utils as utils
@@ -202,7 +202,7 @@ class PickerWindow(QWidget, object):
         if not os.path.exists(utils.scripts_path):
             cmds.error('Solstice Picker Scripts not found!')
 
-        sp.logger.debug('Loading pickers MEL scripts ...')
+        sys.solstice.logger.debug('Loading pickers MEL scripts ...')
 
         utils.load_script('vlRigIt_getModuleFromControl.mel')
         utils.load_script('vlRigIt_getControlsFromModuleList.mel')

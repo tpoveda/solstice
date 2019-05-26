@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import abc
 import json
 import time
@@ -265,10 +266,10 @@ class AnimObject(object):
         """
 
         if not sp.is_maya():
-            sp.logger.warning('Anim Object saving is only supported in Maya!')
+            sys.solstice.logger.warning('Anim Object saving is only supported in Maya!')
             return
 
-        sp.logger.debug('Saving Anim Object: {}'.format(path))
+        sys.solstice.logger.debug('Saving Anim Object: {}'.format(path))
 
         encoding = locale.getpreferredencoding()
         user = getpass.getuser()
@@ -298,7 +299,7 @@ class AnimObject(object):
         with open(path, 'w') as f:
             f.write(str(data))
 
-        sp.logger.debug('Saved Anim Object: {}'.format(path))
+        sys.solstice.logger.debug('Saved Anim Object: {}'.format(path))
 
     def dump(self, data=None):
         """

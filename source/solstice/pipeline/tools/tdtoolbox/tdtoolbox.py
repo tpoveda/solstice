@@ -13,6 +13,8 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
+import json
 import weakref
 import urllib2
 import tempfile
@@ -22,9 +24,10 @@ from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 from solstice.pipeline.gui import base, window, splitters, buttons, stack, accordion, console, messagehandler
-from solstice.pipeline.utils import pipelineutils, rigutils, artellautils as artella, slackutils as slack
+from solstice.pipeline.utils import browserutils, pipelineutils, rigutils, artellautils as artella, slackutils as slack
 
 from solstice.pipeline.tools.sanitycheck.checks import assetchecks
+from solstice.pipeline.tools.tagger import tagger
 
 if sp.is_maya():
     import maya.cmds as cmds
@@ -171,17 +174,25 @@ class PropsPipelineWidget(base.BaseWidget, object):
         save_rig_btn = QPushButton('Save Rig')
         new_rig_version_btn = QPushButton('New Rig Version')
         model_proxy_hires_groups_btn = QPushButton('Setup Model Proxy/Hires Groups')
+        create_tag_btn = QPushButton('Create Tag')
         check_tag_btn = QPushButton('Check Tag')
         update_tag_btn = QPushButton('Update Tag')
+        open_skin_weights_saver_btn = QPushButton('Open bSkinSaver')
+        export_skin_weights_btn = QPushButton('Export Skin Weights')
+        import_skin_weight_btn = QPushButton('Import Skin Weights')
         rig_utils_lyt.addWidget(valid_rig_path_btn, 0, 0)
         rig_utils_lyt.addWidget(valid_builder_path_btn, 0, 1)
         rig_utils_lyt.addWidget(lock_rig_btn, 1, 0)
         rig_utils_lyt.addWidget(save_rig_btn, 1, 1)
         rig_utils_lyt.addWidget(new_rig_version_btn, 2, 0)
         rig_utils_lyt.addWidget(model_proxy_hires_groups_btn, 2, 1)
-        rig_utils_lyt.addWidget(check_tag_btn, 3, 0)
-        rig_utils_lyt.addWidget(update_tag_btn, 3, 1)
-        rig_utils_lyt.addWidget(build_rig_btn, 4, 0, 1, 2)
+        rig_utils_lyt.addWidget(create_tag_btn, 3, 0)
+        rig_utils_lyt.addWidget(check_tag_btn, 3, 1)
+        rig_utils_lyt.addWidget(update_tag_btn, 4, 0)
+        rig_utils_lyt.addWidget(open_skin_weights_saver_btn, 4, 1)
+        rig_utils_lyt.addWidget(export_skin_weights_btn, 5, 0)
+        rig_utils_lyt.addWidget(import_skin_weight_btn, 5, 1)
+        rig_utils_lyt.addWidget(build_rig_btn, 6, 0, 1, 2)
 
         shading_utils = QWidget()
         shading_check_lyt = QGridLayout()
@@ -311,8 +322,12 @@ class PropsPipelineWidget(base.BaseWidget, object):
         save_rig_btn.clicked.connect(self._on_save_rig)
         new_rig_version_btn.clicked.connect(self._on_new_rig_version)
         model_proxy_hires_groups_btn.clicked.connect(self._on_model_proxy_hires_groups)
+        create_tag_btn.clicked.connect(self._on_create_tag)
         check_tag_btn.clicked.connect(self._on_check_tag)
         update_tag_btn.clicked.connect(self._on_update_tag)
+        open_skin_weights_saver_btn.clicked.connect(self._on_open_skinweights_saver)
+        export_skin_weights_btn.clicked.connect(self._on_export_skin_weights)
+        import_skin_weight_btn.clicked.connect(self._on_import_skin_weights)
         print_texture_files.clicked.connect(self._on_print_texture_files)
         update_textures_paths_btn.clicked.connect(self._on_update_textures_path)
         clean_textures_paths_btn.clicked.connect(self._on_clean_textures_path)
@@ -371,7 +386,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if model_path is None or not os.path.isfile(model_path):
             return False
         log.write('Opening model file in Maya ...')
-        sp.dcc.open_file(model_path, force=True)
+        sys.solstice.dcc.open_file(model_path, force=True)
 
     def _on_valid_proxy_path(self):
         asset = self._get_asset()
@@ -384,7 +399,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if proxy_path is None or not os.path.isfile(proxy_path):
             return False
         log.write('Opening proxy model file in Maya ...')
-        sp.dcc.open_file(proxy_path, force=True)
+        sys.solstice.dcc.open_file(proxy_path, force=True)
 
     def _on_check_model_main_group(self):
         asset = self._get_asset()
@@ -394,9 +409,9 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_path = asset.get_asset_file(file_type='model', status='working')
         if model_path is None or not os.path.isfile(model_path):
             return False
-        if sp.dcc.scene_name() != model_path:
+        if sys.solstice.dcc.scene_name() != model_path:
             log.write('Opening model file in Maya ...')
-            sp.dcc.open_file(model_path, force=True)
+            sys.solstice.dcc.open_file(model_path, force=True)
         check = assetchecks.CheckModelMainGroup(asset=weakref.ref(asset), log=log)
         check.check()
 
@@ -408,9 +423,9 @@ class PropsPipelineWidget(base.BaseWidget, object):
         proxy_path = asset.get_asset_file(file_type='proxy', status='working')
         if proxy_path is None or not os.path.isfile(proxy_path):
             return False
-        if sp.dcc.scene_name() != proxy_path:
+        if sys.solstice.dcc.scene_name() != proxy_path:
             log.write('Opening proxy file in Maya ...')
-            sp.dcc.open_file(proxy_path, force=True)
+            sys.solstice.dcc.open_file(proxy_path, force=True)
         check = assetchecks.CheckModelProxyMainGroup(asset=weakref.ref(asset), log=log)
         check.check()
 
@@ -422,9 +437,9 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_path = asset.get_asset_file(file_type='model', status='working')
         if model_path is None or not os.path.isfile(model_path):
             return False
-        if sp.dcc.scene_name() != model_path:
+        if sys.solstice.dcc.scene_name() != model_path:
             log.write('Opening model file in Maya ...')
-            sp.dcc.open_file(model_path, force=True)
+            sys.solstice.dcc.open_file(model_path, force=True)
         check = assetchecks.ModelHasNoShaders(asset=weakref.ref(asset), log=log)
         check.check()
 
@@ -436,9 +451,9 @@ class PropsPipelineWidget(base.BaseWidget, object):
         proxy_path = asset.get_asset_file(file_type='proxy', status='working')
         if proxy_path is None or not os.path.isfile(proxy_path):
             return False
-        if sp.dcc.scene_name() != proxy_path:
+        if sys.solstice.dcc.scene_name() != proxy_path:
             log.write('Opening proxy file in Maya ...')
-            sp.dcc.open_file(proxy_path, force=True)
+            sys.solstice.dcc.open_file(proxy_path, force=True)
         check = assetchecks.ProxyHasNoShaders(asset=weakref.ref(asset), log=log)
         check.check()
 
@@ -450,6 +465,148 @@ class PropsPipelineWidget(base.BaseWidget, object):
         check = assetchecks.RigProxyHiresGroups(asset=weakref.ref(asset), log=log)
         check.check()
 
+    def _on_create_tag(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+
+        valid_obj = None
+        if sys.solstice.dcc.object_exists(asset.name):
+            objs = sys.solstice.dcc.list_nodes(node_name=asset.name)
+            for obj in objs:
+                parent = sys.solstice.dcc.node_parent(obj)
+                if parent is None:
+                    valid_obj = obj
+            if not valid_obj:
+                sys.solstice.logger.error('Main group is not valid. Please change it manually to {}'.format(asset.name))
+                return False
+
+        # Check if main group has a valid tag node connected
+        valid_tag_data = False
+        main_group_connections = sys.solstice.dcc.list_source_destination_connections(valid_obj)
+        for connection in main_group_connections:
+            attrs = sys.solstice.dcc.list_user_attributes(connection)
+            if attrs and type(attrs) == list:
+                for attr in attrs:
+                    if attr == 'tag_type':
+                        valid_tag_data = True
+                        break
+
+        if not valid_tag_data:
+            sys.solstice.logger.warning('Main group has not a valid tag data node connected to it. Creating it ...')
+            try:
+                sys.solstice.select_object(valid_obj)
+                tagger.SolsticeTagger.create_new_tag_data_node_for_current_selection(asset.category)
+                sys.solstice.dcc.clear_selection()
+                valid_tag_data = False
+                main_group_connections = sys.solstice.dcc.list_source_destination_connections(valid_obj)
+                for connection in main_group_connections:
+                    attrs = sys.solstice.dcc.list_user_attributes(connection)
+                    if attrs and type(attrs) == list:
+                        for attr in attrs:
+                            if attr == 'tag_type':
+                                valid_tag_data = True
+                if not valid_tag_data:
+                    sys.solstice.logger.error('Impossible to create tag data node. Please contact TD team to fix this ...')
+                    return False
+            except Exception as e:
+                sys.solstice.logger.error('Impossible to create tag data node. Please contact TD team to fix this ...')
+                sys.solstice.logger.error(str(e))
+                return False
+
+        tag_data_node = tagger.SolsticeTagger.get_tag_data_node_from_curr_sel(new_selection=valid_obj)
+        if not tag_data_node or not sys.solstice.dcc.object_exists(tag_data_node):
+            sys.solstice.logger.error('Impossible to get tag data of current selection: {}!'.format(tag_data_node))
+            return False
+
+        # Connect proxy group to tag data node
+        valid_connection = tagger.HighProxyEditor.update_proxy_group(tag_data=tag_data_node)
+        if not valid_connection:
+            sys.solstice.logger.warning(
+                'Error while connecting Proxy Group to tag data node!  Check Maya editor for more info about the error!')
+
+        # Connect hires group to tag data node
+        valid_connection = tagger.HighProxyEditor.update_hires_group(tag_data=tag_data_node)
+        if not valid_connection:
+            sys.solstice.logger.warning(
+                'Error while connecting hires group to tag data node! Check Maya editor for more info about the error!')
+            return False
+
+        # Getting shaders info data
+        shaders_file = shaderlibrary.ShaderLibrary.get_asset_shader_file_path(asset=asset)
+        if not os.path.exists(shaders_file):
+            sys.solstice.logger.warning(
+                'Shaders JSON file for asset {0} does not exists: {1}'.format(asset.name, shaders_file))
+
+        with open(shaders_file) as f:
+            shader_data = json.load(f)
+        if shader_data is None:
+            sys.solstice.logger.warning(
+                'Shaders JSON file for asset {0} is not valid: {1}'.format(asset.name, shaders_file))
+
+        hires_grp = None
+        hires_grp_name = '{}_hires_grp'.format(asset.name)
+        children = sys.solstice.dcc.list_relatives(node=valid_obj, all_hierarchy=True, full_path=True, relative_type='transform')
+        if children:
+            for child in children:
+                child_name = child.split('|')[-1]
+                if child_name == hires_grp_name:
+                    hires_children = sys.solstice.dcc.list_relatives(node=child_name, all_hierarchy=True,
+                                                           relative_type='transform')
+                    if len(hires_children) > 0:
+                        if hires_grp is None:
+                            hires_grp = child
+                        else:
+                            sys.solstice.logger.error('Multiple Hires groups in the file. Please check it!')
+                            return False
+        if not hires_grp:
+            sys.solstice.logger.error('No hires group found ...')
+            return False
+        hires_meshes = sys.solstice.dcc.list_relatives(node=hires_grp, all_hierarchy=True, full_path=True,
+                                             relative_type='transform')
+
+        # Checking if shader data is valid
+        check_meshes = dict()
+        for shading_mesh, shading_group in shader_data.items():
+            shading_name = shading_mesh.split('|')[-1]
+            check_meshes[shading_mesh] = False
+            for model_mesh in hires_meshes:
+                mesh_name = model_mesh.split('|')[-1]
+                if shading_name == mesh_name:
+                    check_meshes[shading_mesh] = True
+
+        valid_meshes = True
+        for mesh_name, mesh_check in check_meshes.items():
+            if mesh_check is False:
+                sys.solstice.logger.error('Mesh {} not found in both model and shading file ...'.format(mesh_name))
+                valid_meshes = False
+        if not valid_meshes:
+            sys.solstice.logger.error('Some shading meshes and model hires meshes are missed. Please contact TD!')
+            return False
+
+        # Create if necessary shaders attribute in model tag data node
+        if not tag_data_node or not sys.solstice.dcc.object_exists(tag_data_node):
+            sys.solstice.logger.error('Tag data does not exists in the current scene!'.format(tag_data_node))
+            return False
+
+        attr_exists = sys.solstice.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
+        if attr_exists:
+            sys.solstice.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
+        else:
+            sys.solstice.dcc.add_string_attribute(node=tag_data_node, attribute_name='shaders')
+            attr_exists = sys.solstice.dcc.attribute_exists(node=tag_data_node, attribute_name='shaders')
+            if not attr_exists:
+                sys.solstice.logger.error('No Shaders attribute found on model tag data node: {}'.format(tag_data_node))
+                return False
+
+        sys.solstice.dcc.unlock_attribute(node=tag_data_node, attribute_name='shaders')
+        sys.solstice.dcc.set_string_attribute_value(node=tag_data_node, attribute_name='shaders', attribute_value=shader_data)
+        sys.solstice.dcc.lock_attribute(node=tag_data_node, attribute_name='shaders')
+
+        return True
+
+
     def _on_check_tag(self):
         asset = self._get_asset()
         if not asset:
@@ -459,7 +616,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if rig_path is None or not os.path.isfile(rig_path):
             return False
         log.write('Opening rig file in Maya ...')
-        sp.dcc.open_file(rig_path, force=True)
+        sys.solstice.dcc.open_file(rig_path, force=True)
         check = assetchecks.CheckRigTag(asset=weakref.ref(asset), log=log)
         check.check()
 
@@ -472,15 +629,48 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if rig_path is None or not os.path.isfile(rig_path):
             return False
         log.write('Opening rig file in Maya ...')
-        sp.dcc.open_file(rig_path, force=True)
+        sys.solstice.dcc.open_file(rig_path, force=True)
         check = assetchecks.UpdateTag(asset=weakref.ref(asset), file_type='rig', log=log)
         check.check()
 
+    def _on_open_skinweights_saver(self):
+        from solstice.pipeline.externals import bSkinSaver
+        bSkinSaver.showUI()
+
+    def _on_export_skin_weights(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+
+        print('Exporting Skin weights ...')
+
+    def _on_import_skin_weights(self):
+        asset = self._get_asset()
+        if not asset:
+            return
+        log = run_console()
+
+        print('Importing Skin weights ...')
+
     def _on_print_texture_files(self):
+        invalid_textures = list()
+        solstice_var = os.path.normpath(os.environ['SOLSTICE_PROJECT'])
         all_file_nodes = cmds.ls(et="file")
         for eachFile in all_file_nodes:
             current_file = cmds.getAttr("%s.fileTextureName" % eachFile)
-            print(current_file)
+            computed_file = browserutils.clean_path(current_file.replace('$SOLSTICE_PROJECT', solstice_var))
+            file_exists = os.path.isfile(computed_file)
+            if not file_exists or '__working__' in computed_file:
+                invalid_textures.append((current_file, eachFile))
+            print('{} <=====> {} <=====> {}'.format(current_file, eachFile, file_exists))
+        if invalid_textures:
+            print('>>> INVALID TEXTURES FOUND <<<')
+            for txt_data in invalid_textures:
+                print('{} <=====> {}'.format(txt_data[0], txt_data[1]))
+        else:
+            print('>>> ALL TEXTURE FILES ARE VALID!!! <<<')
+        print('\n\n')
 
     def _on_valid_rig_path(self):
         asset = self._get_asset()
@@ -493,7 +683,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if rig_path is None or not os.path.isfile(rig_path):
             return False
         log.write('Opening rig file in Maya ...')
-        sp.dcc.open_file(rig_path, force=True)
+        sys.solstice.dcc.open_file(rig_path, force=True)
 
     def _on_valid_builder_path(self):
         asset = self._get_asset()
@@ -506,7 +696,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if builder_path is None or not os.path.isfile(builder_path):
             return False
         log.write('Opening builder file in Maya ...')
-        sp.dcc.open_file(builder_path, force=True)
+        sys.solstice.dcc.open_file(builder_path, force=True)
 
     def _on_build_rig(self):
         asset = self._get_asset()
@@ -537,7 +727,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
             artella.lock_file(rig_path, force=True)
 
         try:
-            sp.dcc.save_current_scene(file_path=rig_path)
+            sys.solstice.dcc.save_current_scene(file_path=rig_path)
             mayautils.clean_student_line(rig_path)
             log.write_ok('Rig File saved successfully!')
         finally:
@@ -590,16 +780,16 @@ class PropsPipelineWidget(base.BaseWidget, object):
             if not proxy_grp:
                 return
             proxy_grp = proxy_grp[0]
-            unparent_children = [child for child in sp.dcc.list_children(proxy_grp, all_hierarchy=False, children_type='transform', full_path=False) if 'Constraint' not in child]
+            unparent_children = [child for child in sys.solstice.dcc.list_children(proxy_grp, all_hierarchy=False, children_type='transform', full_path=False) if 'Constraint' not in child]
             for child in unparent_children:
-                sp.dcc.set_parent(child, None)
-            children = [child for child in sp.dcc.list_children(asset.name, all_hierarchy=False, children_type='transform', full_path=False)]
+                sys.solstice.dcc.set_parent(child, None)
+            children = [child for child in sys.solstice.dcc.list_children(asset.name, all_hierarchy=False, children_type='transform', full_path=False)]
             for child in children:
-                sp.dcc.delete_object(child)
+                sys.solstice.dcc.delete_object(child)
             for obj in unparent_children:
-                sp.dcc.set_parent(obj, asset.name)
-            sp.dcc.rename_node(asset.name, '{}_MODEL'.format(asset.name))
-            sp.dcc.clear_selection()
+                sys.solstice.dcc.set_parent(obj, asset.name)
+            sys.solstice.dcc.rename_node(asset.name, '{}_MODEL'.format(asset.name))
+            sys.solstice.dcc.clear_selection()
 
             self._on_remove_type_tag_data_attrs('model')
 
@@ -614,16 +804,16 @@ class PropsPipelineWidget(base.BaseWidget, object):
             if not proxy_grp:
                 return
             proxy_grp = proxy_grp[0]
-            unparent_children = [child for child in sp.dcc.list_children(proxy_grp, all_hierarchy=False, children_type='transform', full_path=False) if 'Constraint' not in child]
+            unparent_children = [child for child in sys.solstice.dcc.list_children(proxy_grp, all_hierarchy=False, children_type='transform', full_path=False) if 'Constraint' not in child]
             for child in unparent_children:
-                sp.dcc.set_parent(child, None)
-            children = [child for child in sp.dcc.list_children(asset.name, all_hierarchy=False, children_type='transform', full_path=False)]
+                sys.solstice.dcc.set_parent(child, None)
+            children = [child for child in sys.solstice.dcc.list_children(asset.name, all_hierarchy=False, children_type='transform', full_path=False)]
             for child in children:
-                sp.dcc.delete_object(child)
+                sys.solstice.dcc.delete_object(child)
             for obj in unparent_children:
-                sp.dcc.set_parent(obj, asset.name)
-            sp.dcc.rename_node(asset.name, '{}_PROXY'.format(asset.name))
-            sp.dcc.clear_selection()
+                sys.solstice.dcc.set_parent(obj, asset.name)
+            sys.solstice.dcc.rename_node(asset.name, '{}_PROXY'.format(asset.name))
+            sys.solstice.dcc.clear_selection()
 
             self._on_remove_type_tag_data_attrs('proxy')
 
@@ -649,7 +839,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if shading_path is None or not os.path.isfile(shading_path):
             return False
         log.write('Opening shading file in Maya ...')
-        sp.dcc.open_file(shading_path, force=True)
+        sys.solstice.dcc.open_file(shading_path, force=True)
 
     def _on_check_shading_main_group(self):
         asset = self._get_asset()
@@ -660,7 +850,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if shading_path is None or not os.path.isfile(shading_path):
             return False
         log.write('Opening shading file in Maya ...')
-        sp.dcc.open_file(shading_path, force=True)
+        sys.solstice.dcc.open_file(shading_path, force=True)
         check = assetchecks.CheckShadingMainGroup(asset=weakref.ref(asset), log=log)
         check.check()
 
@@ -673,7 +863,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if shading_path is None or not os.path.isfile(shading_path):
             return False
         log.write('Opening shading file in Maya ...')
-        sp.dcc.open_file(shading_path, force=True)
+        sys.solstice.dcc.open_file(shading_path, force=True)
         check = assetchecks.CheckShadingShaders(asset=weakref.ref(asset), log=log)
         check.check()
 
@@ -714,7 +904,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if shading_path is None or not os.path.isfile(shading_path):
             return False
         log.write('Opening shading file in Maya ...')
-        sp.dcc.open_file(shading_path, force=True)
+        sys.solstice.dcc.open_file(shading_path, force=True)
         check = assetchecks.RenameShaders(asset=weakref.ref(asset), log=log)
         check.check()
 
@@ -727,7 +917,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         if shading_path is None or not os.path.isfile(shading_path):
             return False
         log.write('Opening shading file in Maya ...')
-        sp.dcc.open_file(shading_path, force=True)
+        sys.solstice.dcc.open_file(shading_path, force=True)
         do_continue = messagehandler.MessageHandler().show_confirm_dialog(
             'Do you want to submit export shader files to Artella?')
         if do_continue:
@@ -762,7 +952,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
     def _on_generate_standin(self):
         valid_export = pipelineutils.generate_standin_file(self.asset_name_line.text())
         if not valid_export:
-            sp.dcc.new_file(force=True)
+            sys.solstice.dcc.new_file(force=True)
         self.gen_standin_btn.setEnabled(False)
         self.prepare_standin_btn.setEnabled(True)
 
@@ -805,7 +995,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
     def _on_sync_shaders(self):
         if not sp.is_maya():
             return
-        shaderlibrary.ShaderLibrary.load_scene_shaders()
+        shaderlibrary.ShaderLibrary.load_all_scene_shaders()
 
     def _on_render_low_res(self):
         if not sp.is_maya():
@@ -844,7 +1034,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         try:
             with os.fdopen(fd, 'w') as tmp:
                 view_image.writeToFile(path, 'png')
-                slack.new_viewport_image(os.path.normpath(path), os.path.basename(sp.dcc.scene_name()), channel_name='pipeline')
+                slack.new_viewport_image(os.path.normpath(path), os.path.basename(sys.solstice.dcc.scene_name()), channel_name='pipeline')
         finally:
             os.remove(path)
 
@@ -857,12 +1047,12 @@ class PropsPipelineWidget(base.BaseWidget, object):
         asset.sync()
 
     def _on_lock_file(self):
-        current_file = sp.dcc.scene_name()
+        current_file = sys.solstice.dcc.scene_name()
         if os.path.isfile(current_file):
             artella.lock_file(current_file, force=True)
 
     def _on_new_file_version(self):
-        current_file = sp.dcc.scene_name()
+        current_file = sys.solstice.dcc.scene_name()
         if not os.path.isfile(current_file):
             return
 
@@ -902,11 +1092,11 @@ class PropsPipelineWidget(base.BaseWidget, object):
             asset_name = self.asset_name_line.text()
 
         if not asset_name:
-            sp.logger.warning('Type an asset name first!')
+            sys.solstice.logger.warning('Type an asset name first!')
             return
         asset = sp.find_asset(asset_name)
         if not asset:
-            sp.logger.error('No asset found with name: {}'.format(asset_name))
+            sys.solstice.logger.error('No asset found with name: {}'.format(asset_name))
             return
 
         return asset
@@ -1090,7 +1280,7 @@ class SolsticeTDToolbox(window.Window, object):
     def custom_ui(self):
         super(SolsticeTDToolbox, self).custom_ui()
 
-        self.resize(480, 550)
+        self.resize(480, 700)
 
         self.toolbow_widget = TDToolBoxWidget(parent=self)
         self.main_layout.addWidget(self.toolbow_widget)

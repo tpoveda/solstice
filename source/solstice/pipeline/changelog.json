@@ -172,6 +172,11 @@
   [
     "Alembic Workflow now support proper rig/model pipeline",
     "Fixed Alembic Import when importing multiple Alembic Assets in one unique Alembic file",
-    "Shader Sync now supports list of shader dicts"
+    "Shader Sync now supports list of shader dicts",
+    "Fixed hires hierarchy on props auto rigger tool",
+    "Added functionality to sync/unload shaders of specific assets using Solstice Outliner",
+    "Added functionality to sync/unload all scene shaders using Solstice Outliner",
+    "Improve stability of Solstice Outliner",
+    "Complete refactor of the DCC agnostic system"
   ]
 }

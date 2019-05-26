@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 
 import solstice.pipeline as sp
 
@@ -200,7 +201,7 @@ def match_names(source_objects, target_objects=None, target_namespaces=None, sea
                     results.append((source_node, target_node))
                     yield (source_node, target_node)
                 else:
-                    sp.logger.warning('Cannot find matching target object for {}'.format(source_node.name()))
+                    sys.solstice.logger.warning('Cannot find matching target object for {}'.format(source_node.name()))
         else:
             not_used_namespaces.append(source_namespace)
 
@@ -228,8 +229,8 @@ def match_names(source_objects, target_objects=None, target_namespaces=None, sea
                     results.append((source_node, target_node))
                     yield (source_node, target_node)
                 else:
-                    sp.logger.warning('Cannot find matching target object for {}'.format(source_node.name()))
+                    sys.solstice.logger.warning('Cannot find matching target object for {}'.format(source_node.name()))
 
     for target_nodes in target_index.values():
         for target_node in target_nodes:
-            sp.logger.debug('Cannot find matching ')
+            sys.solstice.logger.debug('Cannot find matching ')

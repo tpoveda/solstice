@@ -86,7 +86,7 @@ class BasePropertiesListWidget(QWidget, object):
         self.clear_properties()
         self._current_asset = asset_widget.asset
 
-        xform_attrs = sp.dcc.list_attributes(asset_widget.asset.name)
+        xform_attrs = sys.solstice.dcc.list_attributes(asset_widget.asset.name)
         for attr in xform_attrs:
             new_attr = self.add_attribute(attr)
             if self._current_asset.attrs[new_attr.name] is True:
@@ -108,7 +108,7 @@ class BasePropertiesListWidget(QWidget, object):
             return
 
         if attr_name not in self._current_asset.attrs.keys():
-            sp.logger.warning('Impossible to udpate attribute {} because node {} has no that attribute!'.format(attr_name, self._current_asset.asset))
+            sys.solstice.logger.warning('Impossible to udpate attribute {} because node {} has no that attribute!'.format(attr_name, self._current_asset.asset))
             return
 
         self._current_asset.attrs[attr_name] = flag

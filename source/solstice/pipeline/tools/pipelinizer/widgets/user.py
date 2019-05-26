@@ -108,11 +108,11 @@ class UserInfoWidget(QWidget, object):
         self.updatedAvailability.emit(available)
 
     def _on_worker_completed(self, uid, data):
-        sp.logger.debug('Worker completed')
+        sys.solstice.logger.debug('Worker completed')
 
     def _on_worker_failure(self, uid, msg):
         self._timer.stop()
-        sp.logger.error('Worker {0} : {1}'.format(uid, msg))
+        sys.solstice.logger.error('Worker {0} : {1}'.format(uid, msg))
 
     def enable_artella(self):
         self._artella_color = QColor(0, 255, 0, 255)
@@ -167,7 +167,7 @@ class UserWidget(QWidget, object):
             if not os.path.isfile(user_login_file):
                 artella.synchronize_file(user_login_file)
             if not user_login_file:
-                sp.logger.debug('Error during logging into Artella, please try it later!')
+                sys.solstice.logger.debug('Error during logging into Artella, please try it later!')
                 return False
 
             # We force the unlock of the file
@@ -182,16 +182,16 @@ class UserWidget(QWidget, object):
             if user_name not in data['users'.title()]:
                 valid_lock = artella.lock_file(user_login_file, force=True)
                 if not valid_lock:
-                    sp.logger.debug('Impossible to get user avatar. Applying default one ...')
+                    sys.solstice.logger.debug('Impossible to get user avatar. Applying default one ...')
                     self._update_user_info(pixmap=user_pixmap)
                     return
                 try:
                     file_status = artella.get_status(user_login_file)
                     file_info = file_status.references.values()[0]
                     user_id = file_info.locked_by_display
-                    sp.logger.debug('ID: {}'.format(user_id))
+                    sys.solstice.logger.debug('ID: {}'.format(user_id))
                     if not user_id:
-                        sp.logger.debug('Error during logging into Artella, please try it later!')
+                        sys.solstice.logger.debug('Error during logging into Artella, please try it later!')
                         self._update_user_info(pixmap=user_pixmap)
                         return
                     data['users'.title()][user_name] = user_id
@@ -199,7 +199,7 @@ class UserWidget(QWidget, object):
                     artella.upload_new_asset_version(user_login_file, 'Added user: {}'.format(user_name))
                     artella.unlock_file(user_login_file)
                 except Exception as e:
-                    sp.logger.error(str(e))
+                    sys.solstice.logger.error(str(e))
                     artella.unlock_file(user_login_file)
                     self._update_user_info(pixmap=user_pixmap)
                     return
@@ -213,7 +213,7 @@ class UserWidget(QWidget, object):
                 user_pixmap = QPixmap(image)
             except Exception as e:
                 user_pixmap = self._user_pixmap
-                sp.logger.debug(str(e))
+                sys.solstice.logger.debug(str(e))
         except Exception:
             user_pixmap = resource.pixmap(name='no_user', category='images', extension='png')
 
@@ -228,7 +228,7 @@ class UserWidget(QWidget, object):
         self.stack_widget.setCurrentIndex(1)
 
     def _on_worker_completed(self):
-        sp.logger.debug('Worker completed')
+        sys.solstice.logger.debug('Worker completed')
 
     def _on_worker_failure(self, uid, msg):
-        sp.logger.error('Worker {0} : {1}'.format(uid, msg))
+        sys.solstice.logger.error('Worker {0} : {1}'.format(uid, msg))

@@ -294,7 +294,7 @@ class RelinkerWidget(QWidget, object):
 
     @mayautils.maya_undo
     def _relink_textures(self):
-        sp.logger.debug(' ========= RELINKING TEXTURES =========')
+        sys.solstice.logger.debug(' ========= RELINKING TEXTURES =========')
         files = cmds.ls(type='file')
         if self.new_textures_path_list.count() > 0 and len(self.relinking_list.items()) > 0:
             for file_name, file_path in self.relinking_list.iteritems():
@@ -306,14 +306,14 @@ class RelinkerWidget(QWidget, object):
                             for f in files:
                                 if cmds.getAttr(f + '.fileTextureName') == self.curr_asset_textures_path_list.item(
                                         i).text():
-                                    sp.logger.debug('Relinking texture {} to {}'.format(mod_txt, file_path))
+                                    sys.solstice.logger.debug('Relinking texture {} to {}'.format(mod_txt, file_path))
                                     cmds.setAttr(f + '.fileTextureName', file_path, type='string')
                     else:
                         if file_name in self.curr_asset_textures_path_list.item(i).text():
                             for f in files:
                                 if cmds.getAttr(f + '.fileTextureName') == self.curr_asset_textures_path_list.item(
                                         i).text():
-                                    sp.logger.debug('Relinking texture {} to {}'.format(
+                                    sys.solstice.logger.debug('Relinking texture {} to {}'.format(
                                         self.curr_asset_textures_path_list.item(i).text(), file_path))
                                     cmds.setAttr(f + '.fileTextureName', file_path, type='string')
 

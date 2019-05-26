@@ -12,6 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
+
 from solstice.pipeline.utils import exceptions
 
 
@@ -55,7 +57,7 @@ class SolsticeNodeDCC(object):
 
         import solstice.pipeline as sp
         if self._short_name is None:
-            self._short_name = sp.dcc.node_short_name(self.name())
+            self._short_name = sys.solstice.dcc.node_short_name(self.name())
 
         return self._short_name
 
@@ -119,11 +121,11 @@ class SolsticeNodeDCC(object):
         import solstice.pipeline as sp
 
         if object is None and not selection:
-            objects = sp.dcc.list_nodes()
+            objects = sys.solstice.dcc.list_nodes()
         else:
             objects = objects or []
             if selection:
-                objects.extend(sp.dcc.selected_nodes(full_path=False) or [])
+                objects.extend(sys.solstice.dcc.selected_nodes(full_path=False) or [])
 
         return [cls(name) for name in objects]
 
@@ -135,7 +137,7 @@ class SolsticeNodeDCC(object):
 
         import solstice.pipeline as sp
 
-        names = sp.dcc.list_nodes(node_name=self.short_name())
+        names = sys.solstice.dcc.list_nodes(node_name=self.short_name())
         if len(names) == 1:
             return SolsticeNodeDCC(names[0])
         elif len(names) > 1:
@@ -160,7 +162,7 @@ class SolsticeNodeDCC(object):
 
         import solstice.pipeline as sp
 
-        return sp.dcc.object_exists(self.name())
+        return sys.solstice.dcc.object_exists(self.name())
 
     def is_long(self):
         """
@@ -178,4 +180,4 @@ class SolsticeNodeDCC(object):
 
         import solstice.pipeline as sp
 
-        return sp.dcc.node_is_referenced(self.name())
+        return sys.solstice.dcc.node_is_referenced(self.name())

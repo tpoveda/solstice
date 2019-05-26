@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import json
 import traceback
 from functools import partial
@@ -28,8 +29,6 @@ from solstice.pipeline.core import syncdialog, assetviewer
 from solstice.pipeline.gui import window, messagehandler
 from solstice.pipeline.utils import pythonutils, shaderutils, artellautils, qtutils, image as img, mayautils as utils
 from solstice.pipeline.resources import resource
-
-from solstice.pipeline.tools.outliner import outliner
 
 IGNORE_SHADERS = ['particleCloud1', 'shaderGlow1', 'defaultColorMgtGlobals', 'lambert1']
 IGNORE_ATTRS = ['computedFileTextureNamePattern']
@@ -62,6 +61,7 @@ class ShaderViewer(QGridLayout, object):
                 continue
             item.widget().setParent(None)
             self.removeItem(item)
+
 
 class SolsticeShaderExportSplash(QSplashScreen, object):
     def __init__(self, *args, **kwargs):
@@ -111,7 +111,7 @@ class ShadingNetwork(object):
         :return: list<str>, list of exported shaders
         """
         if not os.path.exists(shaders_path):
-            sp.logger.debug('ShaderLibrary: Shaders Path {0} is not valid! Aborting export!'.format(shaders_path))
+            sys.solstice.logger.debug('ShaderLibrary: Shaders Path {0} is not valid! Aborting export!'.format(shaders_path))
 
         if shaders is None:
             shaders = cmds.ls(materials=True)
@@ -127,26 +127,26 @@ class ShadingNetwork(object):
 
                 # Export the shader in the given path and with the proper format
                 out_file = os.path.join(shaders_path, shader + '.' + SHADER_EXT)
-                sp.logger.debug('Generating Shader {0} in {1}'.format(shader, out_file))
+                sys.solstice.logger.debug('Generating Shader {0} in {1}'.format(shader, out_file))
 
                 # if os.path.isfile(out_file):
                 #     temp_file, temp_filename = tempfile.mkstemp()
                 #     cls.write(shader_network, temp_filename)
                 #     if filecmp.cmp(out_file, temp_filename):
-                #         sp.logger.debug('Shader file already exists and have same size. No new shader file will be generated!')
+                #         sys.solstice.logger.debug('Shader file already exists and have same size. No new shader file will be generated!')
                 #         result = solstice_qt_utils.show_question(None, 'New Shader File Version', 'Shader File {} already exists with same file size! Do you want to upload it to Artella anyways?'.format(shader))
                 #         if result == QMessageBox.No:
                 #             upload_new_version = False
                 #     else:
-                #         sp.logger.debug('Writing shader file: {}'.format(out_file))
+                #         sys.solstice.logger.debug('Writing shader file: {}'.format(out_file))
                 #         cls.write(shader_network, out_file)
                 # else:
                 artellautils.lock_file(out_file, force=True)
-                sp.logger.debug('Writing shader file: {}'.format(out_file))
+                sys.solstice.logger.debug('Writing shader file: {}'.format(out_file))
                 cls.write(shader_network, out_file)
 
                 if publish:
-                    sp.logger.debug('Creating new shader version in Artella: {}'.format(out_file))
+                    sys.solstice.logger.debug('Creating new shader version in Artella: {}'.format(out_file))
                     artellautils.upload_new_asset_version(out_file, comment='New Shader {} version'.format(shader), skip_saving=True)
                 artellautils.unlock_file(out_file)
 
@@ -210,7 +210,7 @@ class ShadingNetwork(object):
                 try:
                     cmds.rename(key, name)
                 except Exception:
-                    sp.logger.debug('ShaderLibrary: Impossible to rename {0} to {1}'.format(key, name))
+                    sys.solstice.logger.debug('ShaderLibrary: Impossible to rename {0} to {1}'.format(key, name))
 
     @classmethod
     def create_shader_node(cls, node_type, as_type, name):
@@ -267,7 +267,7 @@ class ShadingNetwork(object):
                         else:
                             attrs['attr'][attr] = value
                 except Exception:
-                    sp.logger.debug('ShaderLibrary: Attribute {0} skipped'.format(attr))
+                    sys.solstice.logger.debug('ShaderLibrary: Attribute {0} skipped'.format(attr))
                     continue
             else:
                 connected_node, connection = cmds.connectionInfo('{0}.{1}'.format(shader_node, attr), sourceFromDestination=True).split('.')
@@ -287,7 +287,7 @@ class ShadingNetwork(object):
             try:
                 cmds.connectAttr('{0}.{1}'.format(con_node, con_attr), '{0}.{1}'.format(shader_node, attr), force=True)
             except Exception:
-                # sp.logger.debug('ShaderLibrary: Attribute Connection {0} skipped!'.format(attr))
+                # sys.solstice.logger.debug('ShaderLibrary: Attribute Connection {0} skipped!'.format(attr))
                 continue
 
         if 'notes' not in attrs['attr'] and cmds.objExists(shader_node) and cmds.attributeQuery('notes', node=shader_node, exists=True):
@@ -307,7 +307,7 @@ class ShadingNetwork(object):
                 try:
                     cmds.setAttr('{0}.{1}'.format(shader_node, attr), type=attr_type, *attribute)
                 except Exception:
-                    sp.logger.debug('ShaderLibrary: setAttr {0} skipped!'.format(attr))
+                    sys.solstice.logger.debug('ShaderLibrary: setAttr {0} skipped!'.format(attr))
                     continue
             elif isinstance(attrs['attr'][attr], basestring):
                 if attr == 'notes' and not cmds.attributeQuery('notes', node=shader_node, exists=True):
@@ -315,13 +315,13 @@ class ShadingNetwork(object):
                 try:
                     cmds.setAttr('{}.{}'.format(shader_node, attr), attrs['attr'][attr], type='string')
                 except Exception:
-                    sp.logger.debug('ShaderLibrary: setAttr {0} skipped!'.format(attr))
+                    sys.solstice.logger.debug('ShaderLibrary: setAttr {0} skipped!'.format(attr))
                     continue
             else:
                 try:
                     cmds.setAttr('{}.{}'.format(shader_node, attr), attrs['attr'][attr])
                 except:
-                    sp.logger.debug('ShaderLibrary: setAttr {0} skipped!'.format(attr))
+                    sys.solstice.logger.debug('ShaderLibrary: setAttr {0} skipped!'.format(attr))
                     continue
 
 
@@ -379,11 +379,11 @@ class ShaderWidget(QWidget, object):
         if self.do_export.isChecked():
             shader_library_path = ShaderLibrary.get_shader_library_path()
             if not os.path.exists(shader_library_path):
-                sp.logger.debug('Shader Library {0} not found! Aborting shader export! Contact TD!'.format(shader_library_path))
+                sys.solstice.logger.debug('Shader Library {0} not found! Aborting shader export! Contact TD!'.format(shader_library_path))
                 return
 
             if not cmds.objExists(self._name):
-                sp.logger.debug('Shader {0} does not exists in the scene! Aborting shader export!'.format(self._name))
+                sys.solstice.logger.debug('Shader {0} does not exists in the scene! Aborting shader export!'.format(self._name))
                 return
 
             px = QPixmap(QSize(100, 100))
@@ -394,7 +394,7 @@ class ShaderWidget(QWidget, object):
                 network = ShadingNetwork.write_network(shaders_path=shader_library_path, shaders=[self._name], icon_path=temp_file, publish=publish)
                 exported_shaders = network
             except Exception as e:
-                sp.logger.debug('Aborting shader export: {0}'.format(str(e)))
+                sys.solstice.logger.debug('Aborting shader export: {0}'.format(str(e)))
                 os.remove(temp_file)
                 return
             os.remove(temp_file)
@@ -486,7 +486,7 @@ class ShaderExporter(QDialog, object):
         exported_shaders = list()
 
         if self._shaders_list.count() <= 0:
-            sp.logger.error('No Shaders To Export. Aborting ....')
+            sys.solstice.logger.error('No Shaders To Export. Aborting ....')
             return exported_shaders
 
         try:
@@ -502,10 +502,10 @@ class ShaderExporter(QDialog, object):
                     else:
                         exported_shaders.append(exported_shader)
                 else:
-                    sp.logger.error('Error while exporting shader: {}'.format(shader.name))
+                    sys.solstice.logger.error('Error while exporting shader: {}'.format(shader.name))
         except Exception as e:
-            sp.logger.debug(str(e))
-            sp.logger.debug(traceback.format_exc())
+            sys.solstice.logger.debug(str(e))
+            sys.solstice.logger.debug(traceback.format_exc())
 
         return exported_shaders
 
@@ -517,7 +517,7 @@ class ShaderExporter(QDialog, object):
         self.repaint()
         self.export_shaders(publish=publish)
         self.exportFinished.emit()
-        sp.logger.debug('Shaders exported successfully!')
+        sys.solstice.logger.debug('Shaders exported successfully!')
         self.close()
 
 
@@ -559,7 +559,7 @@ class ShaderViewerWidget(QWidget, object):
 
         self.shader_path = os.path.join(ShaderLibrary.get_shader_library_path(), shader_name+'.'+SHADER_EXT)
         if not os.path.isfile(self.shader_path):
-            sp.logger.debug('Shader Data Path {0} for shader {1} is not valid!'.format(self.hader_path, shader_name))
+            sys.solstice.logger.debug('Shader Data Path {0} for shader {1} is not valid!'.format(self.hader_path, shader_name))
             return
 
         shader_data = ShadingNetwork.read(self.shader_path)
@@ -603,10 +603,10 @@ class ShaderLibrary(window.Window, object):
         if not os.path.exists(self._shader_library_path):
             result = qtutils.show_question(None, 'Shading Library Path not found!', 'Shaders Library Path is not sync! To start using this tool you should sync this folder first. Do you want to do it?')
             if result == QMessageBox.Yes:
-                sp.logger.debug('Solstice Shader Library Path not found! Trying to sync through Artella!')
+                sys.solstice.logger.debug('Solstice Shader Library Path not found! Trying to sync through Artella!')
                 self.update_shaders_from_artella()
                 if not os.path.exists(self._shader_library_path):
-                    sp.logger.debug('Solstice Shader not found after sync. Something is wrong, please contact TD!')
+                    sys.solstice.logger.debug('Solstice Shader not found after sync. Something is wrong, please contact TD!')
                     self._valid_state = False
             else:
                 self._valid_state = False
@@ -693,7 +693,7 @@ class ShaderLibrary(window.Window, object):
         syncdialog.SolsticeSyncFile(files=[self._shader_library_path]).sync()
 
     def update_shader_library(self):
-        sp.logger.debug('Updating Shaders ...')
+        sys.solstice.logger.debug('Updating Shaders ...')
 
         self.shader_viewer.clear()
 
@@ -736,18 +736,18 @@ class ShaderLibrary(window.Window, object):
         shader_library_path = ShaderLibrary.get_shader_library_path()
         if not os.path.exists(shader_library_path):
             # TODO: If folder is not sync, sync automatically?
-            sp.logger.debug('Solstice Shaders Library folder is not synchronized in your PC. Syncronize it please!')
+            sys.solstice.logger.debug('Solstice Shaders Library folder is not synchronized in your PC. Syncronize it please!')
             return False
 
         shader_path = os.path.join(shader_library_path, shader_name + '.' + SHADER_EXT)
         if os.path.isfile(shader_path):
             if cmds.objExists(shader_name):
-                sp.logger.warning('ShaderLibrary: Shader {} already exists! Shader skipped!'.format(shader_name))
+                sys.solstice.logger.warning('ShaderLibrary: Shader {} already exists! Shader skipped!'.format(shader_name))
                 return False
             else:
                 ShadingNetwork.load_network(shader_file_path=shader_path)
         else:
-            sp.logger.warning('ShaderLibrary: Shader {0} does not exist! Shader skipped!'.format(shader_path))
+            sys.solstice.logger.warning('ShaderLibrary: Shader {0} does not exist! Shader skipped!'.format(shader_path))
             return False
 
         return True
@@ -765,13 +765,13 @@ class ShaderLibrary(window.Window, object):
         """
 
         if asset is None:
-            sp.logger.debug('Given Asset to export is not valid! Aborting operation ...')
+            sys.solstice.logger.debug('Given Asset to export is not valid! Aborting operation ...')
             return
 
         try:
             asset.open_asset_file(file_type='shading', status='working')
         except Exception:
-            sp.logger.debug('Impossible to open Working Shading file for asset: {}'.format(asset.name))
+            sys.solstice.logger.debug('Impossible to open Working Shading file for asset: {}'.format(asset.name))
             return
 
         all_shading_groups = list()
@@ -784,7 +784,7 @@ class ShaderLibrary(window.Window, object):
                     json_data[mesh][shape] = dict()
                     shading_groups = cmds.listConnections(shape, type='shadingEngine')
                     if shading_groups is None:
-                        sp.logger.warning('Shading Mesh {} has not a shader applied to it, applying default shader ...'.format(shape))
+                        sys.solstice.logger.warning('Shading Mesh {} has not a shader applied to it, applying default shader ...'.format(shape))
                         shading_groups = ['initialShadingGroup']
                     for shading_grp in shading_groups:
                         shading_grp_mat = cmds.ls(cmds.listConnections(shading_grp), materials=True)
@@ -827,7 +827,7 @@ class ShaderLibrary(window.Window, object):
                     qtutils.show_info(None, 'New Shaders JSON file version', 'Error while creating new version of JSON shaders version: {} Create it manaully later through Artella!'.format(asset_shading_file))
                 artellautils.unlock_file(asset_shading_file)
         except Exception as e:
-            sp.logger.error(str(e))
+            sys.solstice.logger.error(str(e))
             artellautils.unlock_file(asset_shading_file)
 
         # To export shaders file we need to use ShaderLibrary Tool
@@ -850,20 +850,20 @@ class ShaderLibrary(window.Window, object):
     @staticmethod
     def export_asset_shaders(asset, status='published', publish=True, do_exec=False):
         if asset is None:
-            sp.logger.debug('Given Asset to export is not valid! Aborting operation ...')
+            sys.solstice.logger.debug('Given Asset to export is not valid! Aborting operation ...')
             return
 
         asset.sync(sync_type='shading', status=status)
         shading_path = asset.get_asset_file(file_type='shading', status=status)
 
         if shading_path is None:
-            sp.logger.error('Last published shading file {} is not sync in your computer!'.format(shading_path))
+            sys.solstice.logger.error('Last published shading file {} is not sync in your computer!'.format(shading_path))
             return
 
         if not os.path.isfile(shading_path):
             shading_path = shading_path.replace('SHD', 'shd')
             if not os.path.isfile(shading_path):
-                sp.logger.error('Last published shading file {} is not sync in your computer!'.format(shading_path))
+                sys.solstice.logger.error('Last published shading file {} is not sync in your computer!'.format(shading_path))
                 return
 
         cmds.file(shading_path, o=True, f=True)
@@ -873,10 +873,10 @@ class ShaderLibrary(window.Window, object):
 
         asset_group = cmds.ls(asset.name, type='transform')
         if len(asset_group) <= 0:
-            sp.logger.error('No asset shader group found in the scene ... Aborting exporting process ...')
+            sys.solstice.logger.error('No asset shader group found in the scene ... Aborting exporting process ...')
             return
         if len(asset_group) > 1:
-            sp.logger.error('More than one asset shader group found in the scene ... Aborting exporting process ...')
+            sys.solstice.logger.error('More than one asset shader group found in the scene ... Aborting exporting process ...')
             return
 
         grp = asset_group[0]
@@ -905,7 +905,22 @@ class ShaderLibrary(window.Window, object):
 
     @staticmethod
     @utils.undo
-    def load_scene_shaders(load=True, apply=True):
+    def load_all_scene_shaders(load=True, apply=True):
+        """
+        Loops through all tag data scene nodes and loads all necessary shaders into the current scene
+        If a specific shader is already loaded, that shader is skipeed
+        :return: list<str>, list of loaded shaders
+        """
+
+        from solstice.pipeline.tools.outliner import outliner
+
+        tag_nodes = outliner.SolsticeOutliner.get_tag_data_nodes()
+        tag_info_nodes = outliner.SolsticeOutliner.get_tag_info_nodes()
+        ShaderLibrary.load_scene_shaders(load=load, apply=apply, tag_nodes=tag_nodes, tag_info_nodes=tag_info_nodes)
+
+    @staticmethod
+    @utils.undo
+    def load_scene_shaders(load=True, apply=True, tag_nodes=None, tag_info_nodes=None):
         """
         Loops through all tag data scene nodes and loads all necessary shaders into the current scene
         If a specific shader is already loaded, that shader is skipeed
@@ -920,11 +935,13 @@ class ShaderLibrary(window.Window, object):
         applied_data = list()
         updated_textures = list()
 
-        tag_nodes = outliner.SolsticeOutliner.get_tag_data_nodes()
-        tag_info_nodes = outliner.SolsticeOutliner.get_tag_info_nodes()
+        if tag_nodes is None:
+            tag_nodes = list()
+        if tag_info_nodes is None:
+            tag_info_nodes = list()
 
         if not tag_nodes and not tag_info_nodes:
-            sp.logger.error('No tag nodes found in the current scene. Aborting shaders loading ...')
+            sys.solstice.logger.error('No tag nodes found in the current scene. Aborting shaders loading ...')
             return None
 
         added_mats = list()
@@ -936,7 +953,7 @@ class ShaderLibrary(window.Window, object):
         for tag in found_nodes:
             shaders = tag.get_shaders()
             if not shaders:
-                sp.logger.error('No shaders found for asset: {}'.format(tag.get_asset().node))
+                sys.solstice.logger.error('No shaders found for asset: {}'.format(tag.get_asset().node))
                 continue
 
             asset = tag.get_asset()
@@ -946,7 +963,7 @@ class ShaderLibrary(window.Window, object):
                 hires_group = tag.get_asset().node
 
             if not hires_group or not cmds.objExists(hires_group):
-                sp.logger.error('No Hires group found for asset: {}'.format(tag.get_asset().node))
+                sys.solstice.logger.error('No Hires group found for asset: {}'.format(tag.get_asset().node))
                 continue
 
             hires_meshes = [obj for obj in
@@ -954,7 +971,7 @@ class ShaderLibrary(window.Window, object):
                                                noIntermediate=True, fullPath=True) if
                             cmds.objExists(obj) and cmds.listRelatives(obj, shapes=True)]
             if not hires_meshes or len(hires_meshes) <= 0:
-                sp.logger.error('No Hires meshes found for asset: {}'.format(tag.get_asset().node))
+                sys.solstice.logger.error('No Hires meshes found for asset: {}'.format(tag.get_asset().node))
                 continue
 
             if asset.node != hires_group:
@@ -962,7 +979,7 @@ class ShaderLibrary(window.Window, object):
                 if is_referenced:
                     namespace = cmds.referenceQuery(asset.node, namespace=True)
                     if not namespace or not namespace.startswith(':'):
-                        sp.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(asset.node))
+                        sys.solstice.logger.error('Node {} has not a valid namespace!. Please contact TD!'.format(asset.node))
                         continue
                     else:
                         namespace = namespace[1:] + ':'
@@ -1002,14 +1019,14 @@ class ShaderLibrary(window.Window, object):
                             break
 
             if len(valid_meshes) <= 0:
-                sp.logger.error('No valid meshes found on asset. Please contact TD!'.format(tag.get_asset()))
+                sys.solstice.logger.error('No valid meshes found on asset. Please contact TD!'.format(tag.get_asset()))
                 continue
 
             meshes_shading_groups = list()
             for mesh in valid_meshes:
                 mesh_shapes = cmds.listRelatives(mesh, shapes=True, noIntermediate=True)
                 if not mesh_shapes or len(mesh_shapes) <= 0:
-                    sp.logger.error('Mesh {} has not valid shapes!'.format(mesh))
+                    sys.solstice.logger.error('Mesh {} has not valid shapes!'.format(mesh))
                     continue
                 for shape in mesh_shapes:
                     shape_name = shape.split(':')[-1]
@@ -1021,7 +1038,7 @@ class ShaderLibrary(window.Window, object):
                             if shape_name == shader_shape_name:
                                 meshes_shading_groups.append([mesh, shader_group])
             if len(meshes_shading_groups) <= 0:
-                sp.logger.error('No valid shading groups found on asset. Please contact TD!'.format(tag.get_asset()))
+                sys.solstice.logger.error('No valid shading groups found on asset. Please contact TD!'.format(tag.get_asset()))
                 continue
 
             for mesh_info in meshes_shading_groups:
@@ -1029,7 +1046,7 @@ class ShaderLibrary(window.Window, object):
                 shading_info = mesh_info[1]
                 for shading_grp, materials in shading_info.items():
                     if not materials or len(materials) <= 0:
-                        sp.logger.error('No valid materials found on mesh {0} of asset {1}'.format(mesh, tag.get_asset()))
+                        sys.solstice.logger.error('No valid materials found on mesh {0} of asset {1}'.format(mesh, tag.get_asset()))
                         continue
 
                     # If shading group already exists we do not create the material
@@ -1042,10 +1059,10 @@ class ShaderLibrary(window.Window, object):
                         added_mats.append(mat)
 
                         if load:
-                            sp.logger.debug('Loading Shader: {}'.format(mat))
+                            sys.solstice.logger.debug('Loading Shader: {}'.format(mat))
                             valid_shader = ShaderLibrary.load_shader(mat)
                             if not valid_shader:
-                                sp.logger.error('Error while loading shader {}'.format(mat))
+                                sys.solstice.logger.error('Error while loading shader {}'.format(mat))
 
                 # After materials are created we try to apply to the meshes
                 try:
@@ -1054,12 +1071,12 @@ class ShaderLibrary(window.Window, object):
                             for mat in materials:
                                 if not materials or len(materials) <= 0:
                                     continue
-                                sp.logger.error(
+                                sys.solstice.logger.error(
                                     'Shading group {}  loaded from shader info does not exists!'.format(shading_grp))
                                 shading_grp = mat + 'SG'
-                                sp.logger.error('Applying shading group based on nomenclature: {}'.format(shading_grp))
+                                sys.solstice.logger.error('Applying shading group based on nomenclature: {}'.format(shading_grp))
                                 if cmds.objExists(shading_grp):
-                                    sp.logger.error(
+                                    sys.solstice.logger.error(
                                         'Impossible to set shading group {0} to mesh {1}'.format(shading_grp, mesh))
                                     break
 
@@ -1071,14 +1088,53 @@ class ShaderLibrary(window.Window, object):
                                 if f not in updated_textures:
                                     updated_textures.append(f)
                                     cmds.ogs(regenerateUVTilePreview=f)
-                            sp.logger.debug('Shading set {0} applied to mesh {1}'.format(shading_grp, mesh))
+                            sys.solstice.logger.debug('Shading set {0} applied to mesh {1}'.format(shading_grp, mesh))
                         applied_data.append([mesh, shading_grp])
 
                 except Exception as e:
-                    sp.logger.error('Impossible to set shading group {0} to mesh {1}'.format(shading_grp, mesh))
-                    sp.logger.error(str(e))
+                    sys.solstice.logger.error('Impossible to set shading group {0} to mesh {1}'.format(shading_grp, mesh))
+                    sys.solstice.logger.error(str(e))
 
         return applied_data
+
+    @staticmethod
+    @utils.undo
+    def unload_shaders(tag_nodes=None, tag_info_nodes=None):
+
+        from solstice.pipeline.tools.outliner import outliner
+
+        tag_nodes = tag_nodes if tag_nodes else outliner.SolsticeOutliner.get_tag_data_nodes()
+        tag_info_nodes = tag_info_nodes if tag_info_nodes else outliner.SolsticeOutliner.get_tag_info_nodes()
+
+        found_nodes = list()
+        found_nodes.extend(tag_nodes)
+        found_nodes.extend(tag_info_nodes)
+
+        for tag in found_nodes:
+            shaders = tag.get_shaders()
+            if not shaders:
+                sys.solstice.logger.error('No shaders found for asset: {}'.format(tag.get_asset().node))
+                continue
+
+            for shader_geo, shader_shapes in shaders.items():
+                for shader_shp, shader_data in shader_shapes.items():
+                    for shader_sg, shader_names in shader_data.items():
+                        found_meshes = list()
+                        if not sys.solstice.dcc.object_exists(shader_sg):
+                            continue
+                        cns = cmds.listConnections(shader_sg)
+                        for cnt in cns:
+                            cnt_type = cmds.nodeType(cnt, i=True)
+                            if 'dagNode' in cnt_type:
+                                found_meshes.append(cnt)
+                        for mesh in found_meshes:
+                            cmds.sets(mesh, edit=True, forceElement='initialShadingGroup')
+
+                        for shd in shader_names:
+                            if sys.solstice.dcc.object_exists(shd) and shd not in ['lambert1', 'particleCloud1']:
+                                sys.solstice.dcc.delete_object(shd)
+                        if shader_sg not in ['initialShadingGroup', 'initialParticleSE']:
+                            sys.solstice.dcc.delete_object(shader_sg)
 
     def _export_selected_shaders(self):
         shaders = cmds.ls(sl=True, materials=True)
@@ -1096,7 +1152,7 @@ class ShaderLibrary(window.Window, object):
         pythonutils.open_folder(self.get_shader_library_path())
 
     def _on_asset_click(self, asset):
-        sp.logger.debug('Generating Shading info for asset: {}'.format(asset.name))
+        sys.solstice.logger.debug('Generating Shading info for asset: {}'.format(asset.name))
         self._on_export_asset_shaders(asset=asset, status='published')
 
 

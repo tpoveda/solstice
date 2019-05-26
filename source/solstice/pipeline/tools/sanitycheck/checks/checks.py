@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 
 import solstice.pipeline as sp
 from solstice.pipeline.tools.sanitycheck.checks import check
@@ -44,7 +45,7 @@ class StudentLicenseCheck(check.SanityCheckTask, object):
         self._valid_check = not mayautils.file_has_student_line(filename=scene_path)
         valid = super(StudentLicenseCheck, self).fix()
         if not valid:
-            sp.logger.warning('Impossible to fix Maya Student License Check')
+            sys.solstice.logger.warning('Impossible to fix Maya Student License Check')
             return False
 
         return True
@@ -67,7 +68,7 @@ class CleanOldPluginsCheck(check.SanityCheckTask, object):
         old_plugins = cmds.unknownPlugin(query=True, list=True)
         if old_plugins and type(old_plugins) == list:
             for plugin in old_plugins:
-                sp.logger.info('Removing {} old plugin ...'.format(plugin))
+                sys.solstice.logger.info('Removing {} old plugin ...'.format(plugin))
                 cmds.unknownPlugin(plugin, remove=True)
 
         cmds.SaveScene()
@@ -98,7 +99,7 @@ class CleanUnknownNodesCheck(check.SanityCheckTask, object):
             for i in unknown_nodes:
                 if cmds.objExists(i):
                     if not cmds.referenceQuery(i, isNodeReferenced=True):
-                        sp.logger.info('Removing {} unknown node ...'.format(i))
+                        sys.solstice.logger.info('Removing {} unknown node ...'.format(i))
                         cmds.delete(i)
 
         cmds.SaveScene()

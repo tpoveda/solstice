@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import json
 import logging
 
@@ -20,8 +21,6 @@ import maya.app.general.mayaMixin as mayaMixin
 
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 from solstice.pipeline.externals.solstice_qt.QtCore import *
-
-import solstice.pipeline as sp
 
 
 class SolsticeSettings(QObject, object):
@@ -49,7 +48,7 @@ class SolsticeSettings(QObject, object):
     def __setitem__(self, attr, value):
         if attr in self.solstice_globals.keys():
             if type(value) is type(self.solstice_globals[attr]):
-                sp.logger.debug('Set prefs: {}={}'.format(attr, value))
+                sys.solstice.logger.debug('Set prefs: {}={}'.format(attr, value))
                 self.solstice_globals[attr] = value
                 self.dump_prefs
             else:
@@ -100,8 +99,8 @@ class SolsticeSettings(QObject, object):
                 self.solstice_globals = prefs
 
             json.dump(self.solstice_globals, f)
-            sp.logger.debug('Solstice globals dumped: {}'.format(self.solstice_globals))
-        sp.logger.set_log_level(self.solstice_globals['LOG_LEVEL'])
+            sys.solstice.logger.debug('Solstice globals dumped: {}'.format(self.solstice_globals))
+        sys.solstice.logger.set_log_level(self.solstice_globals['LOG_LEVEL'])
 
     def show(self):
         self.ui.show(dockable=True)
@@ -150,7 +149,7 @@ class SolsticeSettingsTool(mayaMixin.MayaQWidgetDockableMixin, QWidget):
             self.main_layout.insertWidget(0, widget)
             self.preferences_tracking_dir[widget.name_lbl] = widget.float_spn
         else:
-            sp.logger.debug('No assignment for {} : {} : {}'.format(name, value, type(value)))
+            sys.solstice.logger.debug('No assignment for {} : {} : {}'.format(name, value, type(value)))
 
     def _on_save(self):
         prefs = dict()

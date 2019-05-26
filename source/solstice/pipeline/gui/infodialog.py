@@ -12,6 +12,7 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
 import threading
 
 import solstice.pipeline as sp
@@ -139,7 +140,7 @@ class InfoDialog(QDialog, object):
     def keyPressEvent(self, event):
         if event.type() == QEvent.KeyPress:
             if event.key() == Qt.Key_Escape:
-                sp.logger.debug('Process stopped by user!')
+                sys.solstice.logger.debug('Process stopped by user!')
                 self._event.set()
                 self._update_progress_bar()
 

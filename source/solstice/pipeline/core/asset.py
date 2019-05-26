@@ -515,9 +515,9 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
                 return
             published_in_server = asset_data.get_is_published()
             if published_in_server:
-                sp.logger.debug('Asset {0} is published in Artella Server!'.format(self._name))
+                sys.solstice.logger.debug('Asset {0} is published in Artella Server!'.format(self._name))
                 return True
-        sp.logger.debug('Asset {0} is not published in Artella Server!'.format(self._name))
+        sys.solstice.logger.debug('Asset {0} is not published in Artella Server!'.format(self._name))
         return False
 
     def get_artella_asset_data(self, thread_result=None, thread_event=None):
@@ -575,7 +575,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
                         format_txt = naming.format_path(fixed_txt)
                         current_textures.append(format_txt)
             else:
-                sp.logger.warning('Published textures path {} does not exists! Impossible to update texture paths ...'.format(textures_path))
+                sys.solstice.logger.warning('Published textures path {} does not exists! Impossible to update texture paths ...'.format(textures_path))
 
         return current_textures
 
@@ -667,8 +667,8 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
 
     def sync(self, sync_type='all', status='all', ask=False):
 
-        if sync_type != 'all' and sync_type != 'model' and sync_type != 'shading' and sync_type != 'textures':
-            sp.logger.error('Synchronization type {0} is not valid!'.format(sync_type))
+        if sync_type != 'all' and sync_type != 'model' and sync_type != 'shading' and sync_type != 'textures' and sync_type != 'rig':
+            sys.solstice.logger.error('Synchronization type {0} is not valid!'.format(sync_type))
             return
 
         if ask:
@@ -700,7 +700,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
 
         syncdialog.SolsticeSyncFile(files=paths_to_sync).sync()
         elapsed_time = time.time() - start_time
-        sp.logger.debug('{0} synchronized in {1} seconds'.format(self._name, elapsed_time))
+        sys.solstice.logger.debug('{0} synchronized in {1} seconds'.format(self._name, elapsed_time))
         self.syncFinished.emit()
 
     def export_alembic_file(self, file_type='model', start_frame=1, end_frame=1):
@@ -709,13 +709,13 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
 
         export_path = os.path.dirname(self.get_asset_file(file_type='model', status='working'))
         self.open_asset_file(file_type=file_type, status='working')
-        sp.dcc.refresh_viewport()
+        sys.solstice.dcc.refresh_viewport()
         if file_type == 'model':
             object_to_export = '{}_MODEL'.format(self.name)
-            if not sp.dcc.object_exists(object_to_export):
-                sp.logger.error('Model Group {} does not exists!'.format(object_to_export))
+            if not sys.solstice.dcc.object_exists(object_to_export):
+                sys.solstice.logger.error('Model Group {} does not exists!'.format(object_to_export))
                 return
-            sp.dcc.rename_node(object_to_export, self.name)
+            sys.solstice.dcc.rename_node(object_to_export, self.name)
 
         check = assetchecks.UpdateTag(asset=weakref.ref(self), log=None)
         check.check()
@@ -726,21 +726,21 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
             start_frame=start_frame,
             end_frame=end_frame
         )
-        sp.dcc.new_file()
+        sys.solstice.dcc.new_file()
 
     def export_standin_file(self, start_frame=1, end_frame=1):
-        sp.dcc.new_file()
+        sys.solstice.dcc.new_file()
         export_path = os.path.dirname(self.get_asset_file(file_type='model', status='working'))
         alembic_name = self.name + '.abc'
         abc_path = os.path.join(export_path, alembic_name)
         if not os.path.isfile(abc_path):
-            sp.logger.warning('Impossible to export Standin file because asset {} has not a valid Alembic file exported: {}'.format(self.name, abc_path))
+            sys.solstice.logger.warning('Impossible to export Standin file because asset {} has not a valid Alembic file exported: {}'.format(self.name, abc_path))
             return
 
         alembicmanager.AlembicImporter.reference_alembic(abc_path)
-        sp.dcc.refresh_viewport()
-        shaderlibrary.ShaderLibrary.load_scene_shaders()
-        sp.dcc.refresh_viewport()
+        sys.solstice.dcc.refresh_viewport()
+        shaderlibrary.ShaderLibrary.load_all_scene_shaders()
+        sys.solstice.dcc.refresh_viewport()
         standinmanager.StandinExporter().export_standin(
             export_path=export_path,
             standin_name=self.name,
@@ -748,7 +748,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
             end_frame=end_frame
         )
 
-        sp.dcc.new_file()
+        sys.solstice.dcc.new_file()
 
     def import_model_file(self, status='published'):
         asset_name = self._name + '.ma'
@@ -834,7 +834,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
 
         asset_data_file = os.path.join(asset_path, '__working__', 'art', self.name+'_render.png')
         if not os.path.isfile(asset_data_file):
-            sp.logger.warning('Asset {} has not a render file available!'.format(self.name))
+            sys.solstice.logger.warning('Asset {} has not a render file available!'.format(self.name))
             return None
 
         return asset_data_file
@@ -858,7 +858,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
         if os.path.exists(working_path):
             builder_path = os.path.join(working_path, 'builder')
             if not os.path.isdir(builder_path):
-                sp.logger.warning('Builder Folder for Asset {} does not exists!'.format(self.name))
+                sys.solstice.logger.warning('Builder Folder for Asset {} does not exists!'.format(self.name))
                 return
             builder_path = os.path.join(builder_path, asset_name)
             artella.import_file_in_maya(file_path=builder_path)
@@ -866,17 +866,17 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
     def build_rig(self):
         rig_path = os.path.join(self.asset_path, '__working__', 'rig')
         if not os.path.isdir(rig_path):
-            sp.logger.warning('Asset has no valid rig setup available!'.format(self.name))
+            sys.solstice.logger.warning('Asset has no valid rig setup available!'.format(self.name))
             return
 
         scripts_path = os.path.join(rig_path, 'scripts')
         if not os.path.isdir(scripts_path):
-            sp.logger.warning('Asset has no vlaid rig scripts folder available!'.format(self.name))
+            sys.solstice.logger.warning('Asset has no vlaid rig scripts folder available!'.format(self.name))
             return
 
         build_script = os.path.join(scripts_path, '{}.py'.format(self.name))
         if not os.path.isfile(build_script):
-            sp.logger.warning('Building Script for Asset {} is not available!'.format(self.name))
+            sys.solstice.logger.warning('Building Script for Asset {} is not available!'.format(self.name))
             return
 
         if scripts_path not in sys.path:
@@ -884,10 +884,10 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
 
         rig_mod = importlib.import_module(self.name)
         if not rig_mod:
-            sp.logger.error('Impossible to import Rig Python Module for {}'.format(self.name))
+            sys.solstice.logger.error('Impossible to import Rig Python Module for {}'.format(self.name))
 
         if not hasattr(rig_mod, 'build'):
-            sp.logger.warning('Rig Module {} does not implements build function!'.format(rig_mod))
+            sys.solstice.logger.warning('Rig Module {} does not implements build function!'.format(rig_mod))
             return
 
         reload(rig_mod)
@@ -902,6 +902,9 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
     def has_textures(self):
         return True
 
+    def has_rig(self):
+        return True
+
     def has_groom(self):
         return False
 
@@ -914,6 +917,8 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
             return self.has_textures()
         if category == 'groom':
             return self.has_groom()
+        if category == 'rig':
+            return self.has_rig()
 
 
 class CharacterAsset(AssetWidget, object):
@@ -980,6 +985,7 @@ class PublishedInfoWidget(QWidget, object):
         self._has_model = asset.has_model()
         self._has_shading = asset.has_shading()
         self._has_textures = asset.has_textures()
+        self._has_rig = asset.has_rig()
         self._has_groom = asset.has_groom()
 
         self._main_layout = QVBoxLayout()

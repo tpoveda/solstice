@@ -13,8 +13,8 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 import os
+import sys
 import json
-import time
 
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
@@ -66,7 +66,7 @@ class LayoutExporter(base_exporter.BaseExporter, object):
 
     def _on_save(self):
         if not sp.is_maya():
-            sp.logger.warning('Shot Export only works for Maya!')
+            sys.solstice.logger.warning('Shot Export only works for Maya!')
             return
 
         self.show_layout_capture_dialog()
@@ -90,7 +90,7 @@ class LayoutExporter(base_exporter.BaseExporter, object):
             path = sp.temp_path('sequence', 'thumbnail.jpg')
             thumbnailcapture.thumbnail_capture(show=True, path=path, clear_cache=True, step=1, captured=self._do_save)
         except Exception as e:
-            sp.logger.error(e)
+            sys.solstice.logger.error(e)
             messagebox.MessageBox.critical(self, 'Error while capturing thumbnail', str(e))
             raise
 
@@ -99,16 +99,16 @@ class LayoutExporter(base_exporter.BaseExporter, object):
         from solstice.pipeline.tools.shotexporter import shotexporter
 
         if not sp.is_maya():
-            sp.logger.warning('Shot Export only works for Maya!')
+            sys.solstice.logger.warning('Shot Export only works for Maya!')
             return
 
-        scene_name = sp.dcc.scene_name()
+        scene_name = sys.solstice.dcc.scene_name()
         if not scene_name:
             scene_name = 'undefined'
         else:
             scene_name = os.path.basename(scene_name)
 
-        export_path = sp.dcc.select_folder_dialog(title='Select Layout Export Path', start_directory=sp.get_solstice_project_path())
+        export_path = sys.solstice.dcc.select_folder_dial(title='Select Layout Export Path', start_directory=sp.get_solstice_project_path())
         if not export_path:
             return
 
@@ -134,12 +134,12 @@ class LayoutExporter(base_exporter.BaseExporter, object):
             for attr, flag in asset.attrs.items():
                 if not flag and attr not in defines.MUST_ATTRS:
                     continue
-                attr_value = sp.dcc.get_attribute_value(node=asset_name, attribute_name=attr)
+                attr_value = sys.solstice.dcc.get_attribute_value(node=asset_name, attribute_name=attr)
                 layout_info['assets'][asset_uuid]['attrs'][attr] = attr_value
 
         try:
             with open(export_path, 'w') as f:
                 json.dump(layout_info, f)
         except Exception as e:
-            sp.logger.error(str(e))
+            sys.solstice.logger.error(str(e))
 

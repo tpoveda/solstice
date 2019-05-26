@@ -12,6 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
+
 import solstice.pipeline as sp
 
 if sp.is_maya():
@@ -52,7 +54,7 @@ def get_from_selection():
     :return: list(str)
     """
 
-    dag_paths = sp.dcc.selected_nodes(full_path=False)
+    dag_paths = sys.solstice.dcc.selected_nodes(full_path=False)
 
     return get_from_dag_paths(dag_paths)
 

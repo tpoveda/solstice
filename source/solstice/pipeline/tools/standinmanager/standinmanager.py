@@ -73,7 +73,7 @@ class StandinImporter(QWidget, object):
     @staticmethod
     def import_standin(standin_path, standin_name=None):
         if not standin_path or not os.path.isfile(standin_path):
-            sp.logger.warning('Alembic file {} does not exits!'.format(standin_path))
+            sys.solstice.logger.warning('Alembic file {} does not exits!'.format(standin_path))
             return None
 
         if standin_name is None:
@@ -208,7 +208,7 @@ class StandinExporter(QWidget, object):
 
     def export_standin(self, export_path, standin_name, start_frame=1, end_frame=1):
         if not export_path or not os.path.isdir(export_path):
-            sp.logger.warning('Impossible to export Standin in invalid path: {}'.format(export_path))
+            sys.solstice.logger.warning('Impossible to export Standin in invalid path: {}'.format(export_path))
             return None
 
         self.name_line.setText(standin_name)
@@ -252,10 +252,10 @@ class StandinExporter(QWidget, object):
     def _get_selected(self, line_widget):
         sel = cmds.ls(sl=True, l=True)
         if not sel:
-            sp.logger.warning('Please select a object first!')
+            sys.solstice.logger.warning('Please select a object first!')
             return
         if len(sel) > 1:
-            sp.logger.warning('You have selected more than one object. First item in the selection will be used ...')
+            sys.solstice.logger.warning('You have selected more than one object. First item in the selection will be used ...')
         sel = sel[0]
         if sel.startswith('|'):
             sel = sel[1:]
@@ -320,7 +320,7 @@ class StandinExporter(QWidget, object):
                 icon='warning'
             )
             if res != 'Yes':
-                sp.logger.debug('Aborting Standin Export operation ...')
+                sys.solstice.logger.debug('Aborting Standin Export operation ...')
                 return
 
         res = cmds.confirmDialog(
@@ -333,7 +333,7 @@ class StandinExporter(QWidget, object):
         )
 
         if res != 'Yes':
-            sp.logger.debug('Aborting Standin Export operation ...')
+            sys.solstice.logger.debug('Aborting Standin Export operation ...')
             return
 
         if os.path.isfile(standin_file):
@@ -346,13 +346,13 @@ class StandinExporter(QWidget, object):
                 dismissString='No'
             )
             if res != 'Yes':
-                sp.logger.debug('Aborting Alembic Export operation ...')
+                sys.solstice.logger.debug('Aborting Alembic Export operation ...')
                 return
 
         sel = cmds.ls(sl=True)
 
         if self.auto_sync_shaders.isChecked():
-            shaderlibrary.ShaderLibrary.load_scene_shaders()
+            shaderlibrary.ShaderLibrary.load_all_scene_shaders()
 
         start_frame = self.start.value()
         end_frame = self.end.value()

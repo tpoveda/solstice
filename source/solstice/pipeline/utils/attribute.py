@@ -12,6 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
+
 import solstice.pipeline as sp
 
 if sp.is_maya():
@@ -112,7 +114,7 @@ class Attribute(object):
         """
 
         node, attr_name = self.fullname().split('.')
-        return sp.dcc.is_attribute_locked(node=node, attribute_name=attr_name)
+        return sys.solstice.dcc.is_attribute_locked(node=node, attribute_name=attr_name)
 
     def is_unlocked(self):
         """
@@ -150,7 +152,7 @@ class Attribute(object):
         :return: bool
         """
 
-        return sp.dcc.object_exists(self.fullname())
+        return sys.solstice.dcc.object_exists(self.fullname())
 
     def pretty_print(self):
         """
@@ -176,7 +178,7 @@ class Attribute(object):
         """
 
         node, _ = self.fullname().split('.')
-        return sp.dcc.attribute_query(node=self.name(), attribute_name=self.attr(), **kwargs)
+        return sys.solstice.dcc.attribute_query(node=self.name(), attribute_name=self.attr(), **kwargs)
 
     def list_connections(self, **kwargs):
         """
@@ -220,10 +222,10 @@ class Attribute(object):
 
         if self._value is None or not self._cache:
             try:
-                self._value = sp.dcc.get_attribute_value(node=self.name(), attribute_name=self.attr())
+                self._value = sys.solstice.dcc.get_attribute_value(node=self.name(), attribute_name=self.attr())
             except Exception:
                 msg = 'Cannot get attribute value for "{}"'.format(self.fullname())
-                sp.logger.error(msg)
+                sys.solstice.logger.error(msg)
 
         return self._value
 
@@ -235,11 +237,11 @@ class Attribute(object):
 
         if self._type is None:
             try:
-                self._type = sp.dcc.get_attribute_type(node=self.name(), attribut_name=self.attr())
+                self._type = sys.solstice.dcc.get_attribute_type(node=self.name(), attribut_name=self.attr())
                 self._type = self._type.encode('ascii')
             except Exception:
                 msg = 'Cannot get attribute type for "{}"'.format(self.fullname())
-                sp.logger.error(msg)
+                sys.solstice.logger.error(msg)
 
         return self._type
 
@@ -260,26 +262,26 @@ class Attribute(object):
                 value = self.value() + _value
         except TypeError as e:
             msg = 'Cannot blend attribute {}: Error: {}'.format(self.fullname(), e)
-            sp.logger.error(msg)
+            sys.solstice.logger.error(msg)
 
         try:
             if self.attribute_type() in ['string']:
-                sp.dcc.set_attribute_by_type(node=self.name(), attribute_name=self.attr(), attribute_value=value, attribute_type=self.attribute_type())
+                sys.solstice.dcc.set_attribute_by_type(node=self.name(), attribute_name=self.attr(), attribute_value=value, attribute_type=self.attribute_type())
             elif self.attribute_type() in ['list', 'matrix']:
                 if sp.is_maya():
                     cmds.setAttr(self.fullname(), *value, type=self.attribute_type())
             else:
-                sp.dcc.set_numeric_attribute_value(node=node, attribute_name=attr_name, attribute_value=value, clamp=clamp)
+                sys.solstice.dcc.set_numeric_attribute_value(node=node, attribute_name=attr_name, attribute_value=value, clamp=clamp)
         except (ValueError, RuntimeError) as e:
             msg = 'Cannot set attribute {}: Error: {}'.format(self.fullname(), e)
-            sp.logger.error(msg)
+            sys.solstice.logger.error(msg)
 
         try:
             if key:
                 self.set_key_frame(value=value)
         except TypeError as e:
             msg = 'Cannot key asttribute {}: Error: {}'.format(self.fullname(), e)
-            sp.logger.error(msg)
+            sys.solstice.logger.error(msg)
 
     def set_key_frame(self, value, respect_keyable=True, **kwargs):
         """
@@ -301,7 +303,7 @@ class Attribute(object):
         kwargs.setdefault('value', value)
         kwargs.setdefault('respectKeyable', respect_keyable)
 
-        sp.dcc.set_key_frame(node=self.name(), attribute_name=self.attr(), **kwargs)
+        sys.solstice.dcc.set_key_framert(node=self.name(), attribute_name=self.attr(), **kwargs)
 
     def set_static_key_frame(self, value, time, option):
         """
@@ -312,12 +314,12 @@ class Attribute(object):
         """
 
         if option == 'replaceCompletely':
-            sp.dcc.cut_key(node=self.name(), attribute_name=self.attr())
+            sys.solstice.dcc.cut_key(node=self.name(), attribute_name=self.attr())
             self.set_value(value=value, key=False)
         elif self.is_connected():
             # TODO: Should also support static attrs when there is animation.
             if option == 'replace':
-                sp.dcc.cut_key(node=self.name(), attribute_name=self.attr(), time=time)
+                sys.solstice.dcc.cut_key(node=self.name(), attribute_name=self.attr(), time=time)
                 self.insert_static_key_frame(value, time)
         else:
             self.set_value(value=value, key=False)
@@ -333,14 +335,14 @@ class Attribute(object):
         duration = end_time - start_time
 
         try:
-            sp.dcc.offset_keyframes(node=self.name(), attribute_name=self.attr(), start_time=start_time, end_time=1000000, duration=duration)
+            sys.solstice.dcc.offset_keyframes(node=self.name(), attribute_name=self.attr(), start_time=start_time, end_time=1000000, duration=duration)
             self.set_key_frame(value=value, time=(start_time, start_time), ott='step')
             self.set_key_frame(value=value, time=(end_time, end_time), itt='flat', ott='flat')
-            next_frame = sp.dcc.find_next_key_frame(node=self.name(), attribute_name=self.attr(), start_time=end_time, end_time=end_time)
-            sp.dcc.set_flat_key_frame(node=self.name(), attribute_name=self.attr(), start_time=next_frame, end_time=next_frame)
+            next_frame = sys.solstice.dcc.find_next_key_frame(node=self.name(), attribute_name=self.attr(), start_time=end_time, end_time=end_time)
+            sys.solstice.dcc.set_flat_key_frame(node=self.name(), attribute_name=self.attr(), start_time=next_frame, end_time=next_frame)
         except TypeError as e:
             msg = 'Cannot insert static key frame for attribute {}: Error: {}'.format(self.fullname(), e)
-            sp.logger.error(msg)
+            sys.solstice.logger.error(msg)
 
     def set_anim_curve(self, curve, time, option, source=None, connect=False):
         """
@@ -359,45 +361,45 @@ class Attribute(object):
             source = (None, None)
 
         if not self.exists():
-            sp.logger.warning('Attr {} does not exists!'.format(self.fullname()))
+            sys.solstice.logger.warning('Attr {} does not exists!'.format(self.fullname()))
             return
         if self.is_locked():
-            sp.logger.warning('Attribute {} is locked! Cannot set anim curve when the attribute is locked!'.format(self.fullname()))
+            sys.solstice.logger.warning('Attribute {} is locked! Cannot set anim curve when the attribute is locked!'.format(self.fullname()))
             return
 
         if source is None:
-            first = sp.dcc.find_first_key_in_anim_curve(curve)
-            last = sp.dcc.find_last_key_in_anim_curve(curve)
+            first = sys.solstice.dcc.find_first_key_in_anim_curve(curve)
+            last = sys.solstice.dcc.find_last_key_in_anim_curve(curve)
             source = (first, last)
 
-        success = sp.dcc.copy_anim_curve(curve=curve, start_time=source[0], end_time=source[1])
+        success = sys.solstice.dcc.copy_anim_curve(curve=curve, start_time=source[0], end_time=source[1])
         if not success:
             msg = 'Cannot copy keys from the animation curve {}'.format(curve)
-            sp.logger.error(msg)
+            sys.solstice.logger.error(msg)
             return
 
         if option == 'replace':
-            sp.dcc.cut_key(node=self.name(), attribute_name=self.attr(), time=time)
+            sys.solstice.dcc.cut_key(node=self.name(), attribute_name=self.attr(), time=time)
         else:
             time = (start_time, end_time)
 
         try:
-            sp.dcc.copy_key(node=self.name(), attribute_name=self.attr(), time=source)
-            sp.dcc.paste_key(node=self.name(), attribute_name=self.attr(), option=option, time=time, connect=connect)
+            sys.solstice.dcc.copy_key(node=self.name(), attribute_name=self.attr(), time=source)
+            sys.solstice.dcc.paste_key(node=self.name(), attribute_name=self.attr(), option=option, time=time, connect=connect)
             if option == 'replaceCompletely':
                 target_curve = self.anim_curve()
                 if target_curve:
-                    curve_color = sp.dcc.get_attribute_value(node=curve, attribute_name='curveColor')
-                    pre_infinity = sp.dcc.get_attribute_value(node=curve, attribute_name='preInfinity')
-                    post_infinity = sp.dcc.get_attribute_value(node=curve, attribute_name='postInfinity')
-                    use_curve_color = sp.dcc.get_attribute_value(node=curve, attribute_name='useCurveColor')
-                    sp.dcc.set_numeric_attribute_value(node=curve, attribute_name='preInfinity', attribute_value=pre_infinity)
-                    sp.dcc.set_numeric_attribute_value(node=curve, attribute_name='postInfinity', attribute_value=post_infinity)
-                    sp.dcc.set_numeric_attribute_value(node=curve, attribute_name='curveColor', attribute_value=curve_color)
-                    sp.dcc.set_numeric_attribute_value(node=curve, attribute_name='useCurveColor', attribute_value=use_curve_color)
+                    curve_color = sys.solstice.dcc.get_attribute_value(node=curve, attribute_name='curveColor')
+                    pre_infinity = sys.solstice.dcc.get_attribute_value(node=curve, attribute_name='preInfinity')
+                    post_infinity = sys.solstice.dcc.get_attribute_value(node=curve, attribute_name='postInfinity')
+                    use_curve_color = sys.solstice.dcc.get_attribute_value(node=curve, attribute_name='useCurveColor')
+                    sys.solstice.dcc.set_numeric_attribute_value(node=curve, attribute_name='preInfinity', attribute_value=pre_infinity)
+                    sys.solstice.dcc.set_numeric_attribute_value(node=curve, attribute_name='postInfinity', attribute_value=post_infinity)
+                    sys.solstice.dcc.set_numeric_attribute_value(node=curve, attribute_name='curveColor', attribute_value=curve_color)
+                    sys.solstice.dcc.set_numeric_attribute_value(node=curve, attribute_name='useCurveColor', attribute_value=use_curve_color)
         except RuntimeError:
             msg = 'Cannot paste anim curve "{}" to attribute "{}"'.format(curve, fullname)
-            sp.logger.error(msg)
+            sys.solstice.logger.error(msg)
 
     def anim_curve(self):
         """
@@ -406,18 +408,18 @@ class Attribute(object):
         """
 
         if not sp.is_maya():
-            sp.logger.warning('Animation Curves are only supported in Maya!')
+            sys.solstice.logger.warning('Animation Curves are only supported in Maya!')
             return
 
         result = None
 
         if self.exists():
             n = self.list_connections(plugs=True, destination=True)
-            if n and 'animCurve' in sp.dcc.node_type(n):
+            if n and 'animCurve' in sys.solstice.dcc.node_type(n):
                 result = n
-            elif n and 'character' in sp.dcc.node_type(n):
+            elif n and 'character' in sys.solstice.dcc.node_type(n):
                 n = self.list_connections(n, plugs=True, destination=False)
-                if n and 'animCurve' in sp.dcc.node_type(n):
+                if n and 'animCurve' in sys.solstice.dcc.node_type(n):
                     result = n
 
             if result:
@@ -440,7 +442,7 @@ class Attribute(object):
 
         if connection:
             if ignore_connections:
-                connection_type = sp.dcc.node_type(connection)
+                connection_type = sys.solstice.dcc.node_type(connection)
                 for ignore_type in ignore_connections:
                     if connection_type.startswith(ignore_type):
                         return False
@@ -469,12 +471,12 @@ class Attribute(object):
         if not self.exists():
             return False
 
-        if not sp.dcc.list_attributes(node=self.fullname(), unlocked=True, keyable=True, multi=True, scalar=True):
+        if not sys.solstice.dcc.list_attributes(node=self.fullname(), unlocked=True, keyable=True, multi=True, scalar=True):
             return False
 
         connection = self.list_connections(destination=True)
         if connection:
-            connection_type = sp.dcc.node_type(connection)
+            connection_type = sys.solstice.dcc.node_type(connection)
             for valid_type in valid_connections:
                 if connection_type.startswith(valid_type):
                     return True
