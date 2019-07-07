@@ -68,21 +68,21 @@ class SolsticeLauncher(QObject, object):
         maya_location = solstice_launcher_utils.get_maya_installation(2019)
         houdini_location = solstice_launcher_utils.get_houdini_installation()
         nuke_location = solstice_launcher_utils.get_nuke_installation()
-        if maya_location and not houdini_location and not nuke_location:
-            self.selected_dcc = SolsticeDccs.Maya
-        elif houdini_location and not maya_location and not nuke_location:
-            self.selected_dcc = SolsticeDccs.Houdini
-        elif nuke_location and not maya_location and not houdini_location:
-            self.selected_dcc = SolsticeDccs.Nuke
+        # if maya_location and not houdini_location and not nuke_location:
+        #     self.selected_dcc = SolsticeDccs.Maya
+        # elif houdini_location and not maya_location and not nuke_location:
+        #     self.selected_dcc = SolsticeDccs.Houdini
+        # elif nuke_location and not maya_location and not houdini_location:
+        #     self.selected_dcc = SolsticeDccs.Nuke
 
         console = solstice_console.SolsticeConsole()
         console.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
         dcc_config = cfg.create_config(window=self, dcc_install_path=None, console=console)
 
-        if self.selected_dcc is None:
-            dcc_selector = DCCSelector(dcc_config)
-            dcc_selector.exec_()
-            self.selected_dcc = dcc_selector.selected_dcc
+        # if self.selected_dcc is None:
+        dcc_selector = DCCSelector(dcc_config)
+        dcc_selector.exec_()
+        self.selected_dcc = dcc_selector.selected_dcc
 
         if self.selected_dcc is None:
             QMessageBox.information(None, 'Maya and Houdini installations not found', 'Solstice Launcher cannot launch non supported DCC. Closing it ...!')
