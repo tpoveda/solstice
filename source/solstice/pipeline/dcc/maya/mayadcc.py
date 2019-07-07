@@ -771,9 +771,9 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
             return cmds.confirmDialog(title=title, message=message, button=button, cancelButton=cancel_button, defaultButton=default_button, dismissString=dismiss_string)
 
         if button:
-            return cmds.confirmDialog(title=title, message=message)
-        else:
             return cmds.confirmDialog(title=title, message=message, button=button)
+        else:
+            return cmds.confirmDialog(title=title, message=message)
 
     @staticmethod
     def warning(message):

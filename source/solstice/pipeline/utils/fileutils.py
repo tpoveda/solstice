@@ -55,4 +55,3 @@ def clean_file_paths():
         clean_path = f_path.replace('\\', '/')
         cmds.setAttr("{0}.fileTextureName".format(f), lock=False)
         cmds.setAttr("{0}.fileTextureName".format(f), clean_path, type="string")
-

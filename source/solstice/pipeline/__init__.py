@@ -1080,6 +1080,10 @@ def init():
 
 
 def load_shaders():
+    """
+    Function that loads all the shaders of the current scene
+    """
+
     if not is_maya():
         return
 
@@ -1089,6 +1093,10 @@ def load_shaders():
 
 
 def unload_shaders():
+    """
+    Function that uloads and removes all the shaders loaded of the current scene
+    """
+
     if not is_maya():
         return
 
@@ -1098,7 +1106,81 @@ def unload_shaders():
 
 
 def solstice_save():
+    """
+    Function that saves current file cleaning student license
+    """
+
     from solstice.pipeline.utils import mayautils
-    mayautils.clean_scene()
+
+    if is_maya():
+        mayautils.clean_scene()
+
     sys.solstice.dcc.save_current_scene(force=False)
-    mayautils.clean_student_line()
+
+    if is_maya():
+        mayautils.clean_student_line()
+
+
+def lock_file(file_path=None):
+    """
+    Locks current file in Artella
+    :param file_path: file to lock
+    """
+
+    from solstice.pipeline.utils import artellautils
+
+    if not file_path:
+        file_path = sys.solstice.dcc.scene_name()
+        if not file_path:
+            sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
+            return False
+
+    if not os.path.isfile(file_path):
+        sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
+        return False
+
+    artellautils.lock_file(file_path=file_path, force=True)
+
+
+def unlock_file(file_path=None):
+    """
+    Unlocks current file in Artella
+    :param file_path:
+    """
+
+    from solstice.pipeline.utils import artellautils
+
+    if not file_path:
+        file_path = sys.solstice.dcc.scene_name()
+        if not file_path:
+            sys.solstice.logger.error('File {} cannot be unlocked because it does not exists!'.format(file_path))
+            return False
+
+    if not os.path.isfile(file_path):
+        sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
+        return False
+
+    msg = 'If changes in file: \n\n{}\n\n are not submitted to Artella yet, submit them before unlocking the file please. \n\n Do you want to continue?'.format(file_path)
+    res = sys.solstice.dcc.confirm_dialog(title='Solstice Tools - Unlock File', message=msg, button=['Yes', 'No'], cancel_button='No', dismiss_string='No')
+    if res != 'Yes':
+        return False
+
+    artellautils.unlock_file(file_path=file_path)
+
+
+def upload_working_version(file_path=None):
+    """
+    Uploads a new version of the given file
+    :param file_path: str
+    """
+
+    print('Uploading new working version ...')
+
+
+def run_publisher():
+    """
+    Runs the publisher taking into account the current scene status
+    :return:
+    """
+
+    print('Executing publisher tool ...')

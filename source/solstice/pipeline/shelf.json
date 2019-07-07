@@ -37,11 +37,52 @@
                 "dcc": ["maya", "houdini"]
             },
             {
+                "icon": "upload_publish",
+                "command": "import solstice.pipeline as sp; sp.run_publisher()",
+                "annotation": "Runs Solstice Publisher Tool",
+                "label": "Solstice Publisher",
+                "dcc": ["maya", "houdini"]
+            },
+            {
                 "icon": "outline.png",
                 "command": "from solstice.pipeline.tools.outliner import outliner; outliner.run();",
                 "annotation": "Solstice Outliner Tool",
                 "label": "Outliner",
                 "dcc": ["maya"]
+            },
+            {
+                "icon": "",
+                "command": "",
+                "annotation": "separator",
+                "label": ""
+            },
+            {
+                "icon": "lock_file",
+                "command": "import solstice.pipeline as sp; sp.lock_file()",
+                "annotation": "Locks current file in Artella server",
+                "label": "Lock File",
+                "dcc": ["maya", "houdini"]
+            },
+            {
+                "icon": "solstice_save",
+                "command": "import solstice.pipeline as sp; sp.solstice_save()",
+                "annotation": "Save, remove invalid nodes and clean student license from file",
+                "label": "Solstice Save",
+                "dcc": ["maya", "houdini"]
+            },
+            {
+                "icon": "upload_wip",
+                "command": "import solstice.pipeline as sp; sp.upload_working_version()",
+                "annotation": "Upload new working version of the current file",
+                "label": "New Working Version",
+                "dcc": ["maya", "houdini"]
+            },
+            {
+                "icon": "unlock_file",
+                "command": "import solstice.pipeline as sp; sp.unlock_file()",
+                "annotation": "Unlocks current file in Artella server",
+                "label": "Unlock File",
+                "dcc": ["maya", "houdini"]
             },
             {
                 "icon": "",
@@ -55,19 +96,6 @@
                 "annotation": "Solstice Changelog",
                 "label": "Changelog",
                 "dcc": ["maya", "houdini"]
-            },
-            {
-                "icon": "",
-                "command": "",
-                "annotation": "separator",
-                "label": ""
-            },
-            {
-                "icon": "solstice_save",
-                "command": "import solstice.pipeline as sp; sp.solstice_save()",
-                "annotation": "Save that removes invalid nodes and clean student license from file",
-                "label": "Solstice Save",
-                "dcc": ["maya"]
             }
         ],
         "layout":
