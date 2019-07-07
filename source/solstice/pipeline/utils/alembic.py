@@ -251,7 +251,8 @@ def export(alembicFile,
     sys.solstice.logger.debug('Abc export completed!')
     return os.path.exists(alembicFile)
 
-def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
+
+def import_alembic(alembic_file, mode='import', nodes=None, parent=None, unresolve_path=False):
     if not os.path.exists(alembic_file):
         sys.solstice.dcc.confirm_dialog(
             title='Error',
@@ -262,20 +263,24 @@ def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
     sys.solstice.logger.debug('Import Alembic File ({}) with job arguments:\n{}\n\n{}'.format(mode, alembic_file, nodes))
 
     try:
+        if unresolve_path:
+            abc_file = sp.unresolve_path(alembic_file)
+        else:
+            abc_file = alembic_file
         if sp.is_maya():
             import maya.cmds as cmds
             if nodes:
-                res = cmds.AbcImport(alembic_file, ct=' '.join(nodes))
+                res = cmds.AbcImport(abc_file, ct=' '.join(nodes))
             elif parent:
-                res = cmds.AbcImport(alembic_file, mode=mode, rpr=parent)
+                res = cmds.AbcImport(abc_file, mode=mode, rpr=parent)
             else:
-                res = cmds.AbcImport(alembic_file, mode=mode)
+                res = cmds.AbcImport(abc_file, mode=mode)
             return res
         elif sp.is_houdini():
             if not parent:
                 sys.solstice.logger.warning('Impossible to import Alembic File because not Alembic parent given!')
                 return
-            parent.parm('fileName').set(alembic_file)
+            parent.parm('fileName').set(abc_file)
             parent.parm('buildHierarchy').pressButton()
 
     except Exception as e:
@@ -285,7 +290,7 @@ def import_alembic(alembic_file, mode='import', nodes=None, parent=None):
     sys.solstice.logger.debug('Alembic File {} imported successfully!'.format(os.path.basename(alembic_file)))
 
 
-def reference_alembic(alembic_file, namespace=None):
+def reference_alembic(alembic_file, namespace=None, unresolve_path=False):
 
     if not sp.is_maya():
         sys.solstice.logger.warning('DCC {} does not support Alembic Reference functionality yet!'.format(sys.solstice.dcc.get_name()))
@@ -301,10 +306,15 @@ def reference_alembic(alembic_file, namespace=None):
         return None
 
     try:
-        if namespace:
-            cmds.file(alembic_file, type='Alembic', reference=True, namespace=namespace)
+        if unresolve_path:
+            abc_file = sp.unresolve_path(alembic_file)
         else:
-            cmds.file(alembic_file, type='Alembic', reference=True)
+            abc_file = alembic_file
+
+        if namespace:
+            cmds.file(abc_file, type='Alembic', reference=True, namespace=namespace)
+        else:
+            cmds.file(abc_file, type='Alembic', reference=True)
     except Exception as e:
         sys.solstice.logger.error(traceback.format_exc())
         raise Exception(e)

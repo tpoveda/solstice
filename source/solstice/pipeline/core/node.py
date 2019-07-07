@@ -499,7 +499,7 @@ class SolsticeAssetNode(SolsticeNode, object):
 
         return [standin_file, standin_bbox]
 
-    def get_asset_file(self, file_type, status):
+    def get_asset_file(self, file_type, status, unresolve_path=False):
         """
         Returns file to an asset file
         :param file_type: str
@@ -538,12 +538,15 @@ class SolsticeAssetNode(SolsticeNode, object):
             if local_max_versions[file_type]:
                 file_path = os.path.join(self._asset_path, local_max_versions[file_type][1], file_type, asset_name)
 
+        if unresolve_path:
+            file_path = sp.unresolve_path(file_path)
+
         return browserutils.clean_path(file_path)
 
-    def get_asset_files(self, status='published'):
+    def get_asset_files(self, status='published', unresolve_path=False):
         asset_files = dict()
         for cat in sp.valid_categories:
-            asset_file = self.get_asset_file(cat, status)
+            asset_file = self.get_asset_file(cat, status, unresolve_path=unresolve_path)
             if asset_file is None or not os.path.exists(asset_file):
                 continue
             asset_files[cat] = asset_file
@@ -563,28 +566,34 @@ class SolsticeAssetNode(SolsticeNode, object):
             if obj.endswith('root_ctrl'):
                 return obj
 
-    def open_asset_file(self, file_type, status):
-        file_path = self.get_asset_file(file_type=file_type, status=status)
+    def open_asset_file(self, file_type, status, unresolve_path=True):
+        file_path = self.get_asset_file(file_type=file_type, status=status, unresolve_path=False)
         if os.path.isfile(file_path):
+            if unresolve_path:
+                file_path = sp.unresolve_path(file_path)
             artella.open_file_in_maya(file_path=file_path)
         else:
             sys.solstice.logger.warning('Impossible to open asset file of type "{}": {}'.format(file_type, file_path))
 
-    def import_asset_file(self, file_type, status='working'):
-        file_path = self.get_asset_file(file_type=file_type, status=status)
+    def import_asset_file(self, file_type, status='working', unresolve_path=True):
+        file_path = self.get_asset_file(file_type=file_type, status=status, unresolve_path=False)
         if os.path.isfile(file_path):
+            if unresolve_path:
+                file_path = sp.unresolve_path(file_path)
             artella.import_file_in_maya(file_path)
         else:
             sys.solstice.logger.warning('Impossible to import asset file of type "{}": {}'.format(file_type, file_path))
 
-    def reference_asset_file(self, file_type='rig', status='published'):
-        file_path = self.get_asset_file(file_type=file_type, status=status)
+    def reference_asset_file(self, file_type='rig', status='published', unresolve_path=True):
+        file_path = self.get_asset_file(file_type=file_type, status=status, unresolve_path=False)
         if os.path.isfile(file_path):
+            if unresolve_path:
+                file_path = sp.unresolve_path(file_path)
             artella.reference_file_in_maya(file_path=file_path)
         else:
             sys.solstice.logger.warning('Impossible to reference asset file of type "{}": {}'.format(file_type, file_path))
 
-    def reference_alembic_file(self, namespace=None):
+    def reference_alembic_file(self, namespace=None,  unresolve_path=True):
 
         from solstice.pipeline.tools.alembicmanager import alembicmanager
 
@@ -594,11 +603,22 @@ class SolsticeAssetNode(SolsticeNode, object):
             published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', alembic_name)
             if os.path.isfile(published_path):
                 if sp.is_houdini():
-                    alembicmanager.AlembicImporter.import_alembic(published_path)
+                    alembicmanager.AlembicImporter.import_alembic(published_path, unresolve_path=unresolve_path)
                 else:
-                    alembicmanager.AlembicImporter.reference_alembic(published_path, namespace=namespace)
+                    alembicmanager.AlembicImporter.reference_alembic(published_path, namespace=namespace, unresolve_path=unresolve_path)
 
-    def import_standin_file(self):
+    def import_alembic_file(self, unresolve_path=True):
+
+        from solstice.pipeline.tools.alembicmanager import alembicmanager
+
+        alembic_name = self._name + '.abc'
+        local_max_versions = self.get_max_local_versions()
+        if local_max_versions['model']:
+            published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', alembic_name)
+            if os.path.isfile(published_path):
+                alembicmanager.AlembicImporter.import_alembic(published_path, unresolve_path=unresolve_path)
+
+    def import_standin_file(self, unresolve_path=True):
 
         from solstice.pipeline.tools.standinmanager import standinmanager
 
@@ -607,7 +627,7 @@ class SolsticeAssetNode(SolsticeNode, object):
         if local_max_versions['model']:
             published_path = os.path.join(self._asset_path, local_max_versions['model'][1], 'model', standin_name)
             if os.path.isfile(published_path):
-                standinmanager.StandinImporter.import_standin(published_path)
+                standinmanager.StandinImporter.import_standin(published_path, unresolve_path=unresolve_path)
 
     def _get_asset_path(self):
         assets_path = sp.get_solstice_assets_path()

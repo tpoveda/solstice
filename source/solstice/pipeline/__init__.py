@@ -1005,7 +1005,7 @@ def format_path(format_string, path='', **kwargs):
 
     kwargs.update(labels)
 
-    resolved_string = solstice_six.u(format_string).format(**kwargs)
+    resolved_string = solstice_six.u(str(format_string)).format(**kwargs)
 
     sys.solstice.logger.debug('Resolved string: {}'.format(resolved_string))
 
@@ -1023,6 +1023,36 @@ def temp_path(*args):
 
     temp = sys.solstice.config.get('tempPath')
     return pythonutils.norm_path(os.path.join(format_path(temp), *args))
+
+
+def unresolve_path(path_to_unresolve):
+    """
+    Converts path to a valid Solstice unresolved path
+    :param path_to_unresolve: str
+    :return: str
+    """
+
+    path_to_unresolve = path_to_unresolve.replace('\\', '/')
+    solstice_var = os.environ['SOLSTICE_PROJECT']
+    if path_to_unresolve.startswith(solstice_var):
+        path_to_unresolve = path_to_unresolve.replace(solstice_var, '$SOLSTICE_PROJECT/')
+
+    return path_to_unresolve
+
+
+def resolve_path(path_to_resolve):
+    """
+    Converts unresolved path to a valid full path
+    :param path_to_resolve: str
+    :return: str
+    """
+
+    path_to_resolve = path_to_resolve.replace('\\', '/')
+    solstice_var = os.environ['SOLSTICE_PROJECT']
+    if path_to_resolve.startswith('$SOLSTICE_PROJECT/'):
+        path_to_resolve = path_to_resolve.replace('$SOLSTICE_PROJECT/', solstice_var)
+
+    return path_to_resolve
 
 
 def create_temp_path(name, clean=True, make_dirs=True):

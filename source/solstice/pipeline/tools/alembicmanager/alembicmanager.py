@@ -1218,7 +1218,7 @@ class AlembicImporter(QWidget, object):
             self.alembic_path_line.setText(abc_file)
 
     @classmethod
-    def import_alembic(cls, alembic_path, parent=None):
+    def import_alembic(cls, alembic_path, parent=None, unresolve_path=False):
         if not alembic_path or not os.path.isfile(alembic_path):
             sys.solstice.logger.warning('Alembic file {} does not exits!'.format(alembic_path))
             return None
@@ -1242,10 +1242,10 @@ class AlembicImporter(QWidget, object):
         if parent and valid_tag_info:
             cls._add_tag_info_data(tag_info=tag_info, attr_node=parent)
 
-        alembic.import_alembic(alembic_path, mode='import', nodes=None, parent=parent)
+        alembic.import_alembic(alembic_path, mode='import', nodes=None, parent=parent, unresolve_path=unresolve_path)
 
     @staticmethod
-    def reference_alembic(alembic_path, namespace=None):
+    def reference_alembic(alembic_path, namespace=None, unresolve_path=False):
 
         if not sp.is_maya():
             sys.solstice.logger.warning('DCC {} does not supports the reference of Alembic groups!'.format(sys.solstice.dcc.get_name()))
@@ -1278,7 +1278,7 @@ class AlembicImporter(QWidget, object):
         if not namespace:
             namespace = abc_name
 
-        valid_reference = alembic.reference_alembic(alembic_path, namespace=namespace)
+        valid_reference = alembic.reference_alembic(alembic_path, namespace=namespace, unresolve_path=unresolve_path)
         if not valid_reference:
             sys.solstice.logger.warning('Error while reference Alembic file: {}'.format(alembic_path))
             return
