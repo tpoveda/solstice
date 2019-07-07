@@ -12,6 +12,7 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import sys
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *

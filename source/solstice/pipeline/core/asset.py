@@ -641,6 +641,8 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
         sync_shading_action = QAction('Shading', self._menu)
         sync_menu.addAction(sync_shading_action)
         self._menu.addAction(sync_action)
+        sync_rig_action = QAction('Rig', self._menu)
+        sync_menu.addAction(sync_rig_action)
         # check_versions_action = QAction('Check for New Versions', self._menu)
         # self._menu.addAction(check_versions_action)
         import_asset_action = QAction('Import to current scene ...', self._menu)
@@ -653,6 +655,7 @@ class AssetWidget(QWidget, node.SolsticeAssetNode):
         sync_model_action.triggered.connect(partial(self.sync, 'model', 'all', False))
         sync_textures_action.triggered.connect(partial(self.sync, 'textures', 'all', False))
         sync_shading_action.triggered.connect(partial(self.sync, 'shading', 'all', False))
+        sync_rig_action.triggered.connect(partial(self.sync, 'rig', 'all', False))
         import_asset_action.triggered.connect(self.import_model_file)
         reference_asset_action.triggered.connect(self.reference_asset_file)
 

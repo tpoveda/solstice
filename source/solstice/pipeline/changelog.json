@@ -181,5 +181,11 @@
     "Added option to clean render layers in TD Toolbox",
     "Added option to clean file nodes in TD Toolbox",
     "Added shortcut in main and TD Toolbox to save Solstice files removing invalid nodes and cleaning student license"
+  ],
+  "14.0":
+  [
+    "Added option to sync asset rig files",
+    "Now when an asset is synced rig files are also synced",
+    "Rigs, Alembics and Standins now are imported with proper Solstice unresolved path"
   ]
 }
