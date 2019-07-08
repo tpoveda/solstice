@@ -144,7 +144,7 @@
             },
             {
                 "icon": "refreshvl.png",
-                "command": "from solstice.pipeline.pickers.picker import picker_utils; picker_utils.load_vl_scripts();",
+                "command": "from solstice.pipeline.tools.pickers.picker import utils; utils.load_vl_scripts();",
                 "annotation": "Load Picker Scripts",
                 "label": "Refresh Picker Scripts",
                 "dcc": ["maya"]
