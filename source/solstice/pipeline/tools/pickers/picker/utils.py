@@ -147,6 +147,8 @@ def load_vl_scripts():
     load_script('vlRigIt_getControlsFromModuleList.mel')
     load_script('vlRigIt_selectModuleControls.mel')
     load_script('vlRigIt_snap_ikFk.mel')
+    load_script('vlRigIt_snapParent.mel')
+    load_script('vlRigIt_snapParentAskSetKey.mel')
     load_script('vl_resetTransformations.mel')
     load_script('vl_resetAttributes.mel')
     load_script('vl_contextualMenuBuilder.mel')
