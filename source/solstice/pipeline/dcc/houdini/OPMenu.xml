@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menuDocument>
+	<menu>
+				 <scriptItem id="solstice_unlockHDA">
+       	    <label>Artella - Unlock HDA</label>
+            <insertAfter>opmenu.optypemanager</insertAfter>
+       	    <context>
+       		<expression><![CDATA[
+node = kwargs["node"]
+if node.type().definition() is None:
+   return False
+# this should be after checking the node definition is not None
+installPath = hou.expandString('$HFS')
+if installPath in node.type().definition().libraryFilePath():
+    return False
+#if not node.matchesCurrentDefinition():
+#   return False
+if node.isInsideLockedHDA() and not node.isEditableInsideLockedHDA():
+   return False
+if hou.hda.safeguardHDAs():
+   return False
+if not node.type().areContentsViewable():
+   return False
+return True
+       ]]></expression>
+       	    </context>
+        <scriptCode><![CDATA[
+node = kwargs["node"]
+from solstice.pipeline.utils import houdiniutils
+houdiniutils.unlock_hda(node)
+        ]]></scriptCode>
+       	</scriptItem>
+		 <scriptItem id="solstice_uploadWorkingHDAVersion">
+       	    <label>Artella - New HDA Working Version</label>
+            <insertAfter>opmenu.optypemanager</insertAfter>
+       	    <context>
+       		<expression><![CDATA[
+node = kwargs["node"]
+if node.type().definition() is None:
+   return False
+# this should be after checking the node definition is not None
+installPath = hou.expandString('$HFS')
+if installPath in node.type().definition().libraryFilePath():
+    return False
+#if not node.matchesCurrentDefinition():
+#   return False
+if node.isInsideLockedHDA() and not node.isEditableInsideLockedHDA():
+   return False
+if hou.hda.safeguardHDAs():
+   return False
+if not node.type().areContentsViewable():
+   return False
+return True
+       ]]></expression>
+       	    </context>
+        <scriptCode><![CDATA[
+node = kwargs["node"]
+from solstice.pipeline.utils import houdiniutils
+houdiniutils.upload_hda_working_version(node)
+        ]]></scriptCode>
+       	</scriptItem>
+		 <scriptItem id="solstice_lockHDA">
+       	    <label>Artella - Lock HDA</label>
+            <insertAfter>opmenu.optypemanager</insertAfter>
+       	    <context>
+       		<expression><![CDATA[
+node = kwargs["node"]
+if node.type().definition() is None:
+   return False
+# this should be after checking the node definition is not None
+installPath = hou.expandString('$HFS')
+if installPath in node.type().definition().libraryFilePath():
+    return False
+#if not node.matchesCurrentDefinition():
+#   return False
+if node.isInsideLockedHDA() and not node.isEditableInsideLockedHDA():
+   return False
+if hou.hda.safeguardHDAs():
+   return False
+if not node.type().areContentsViewable():
+   return False
+return True
+       ]]></expression>
+       	    </context>
+        <scriptCode><![CDATA[
+node = kwargs["node"]
+import solstice.pipeline as sp
+sp.init(force_skip_hello=True)
+from solstice.pipeline.utils import houdiniutils
+houdiniutils.lock_hda(node)
+        ]]></scriptCode>
+       	</scriptItem>
+	</menu>
+</menuDocument>

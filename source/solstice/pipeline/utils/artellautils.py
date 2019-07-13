@@ -46,6 +46,24 @@ spigot_client = None
 
 # ---------------------------------------------------------------------------------------
 
+class AbstractArtella(object):
+    """
+    Class that is used by non supported Artella DCCs (such as Houdini) to interface
+    with official Artella python module
+    """
+
+    @staticmethod
+    def getCmsUri(broken_path):
+        path_parts = re.split(r'[/\\]', broken_path)
+        while len(path_parts):
+            path_part = path_parts.pop(0)
+            if path_part == '_art':
+                relative_path = '/'.join(path_parts)
+                return relative_path
+        return ''
+
+# ---------------------------------------------------------------------------------------
+
 
 def update_artella_paths():
     """
@@ -401,7 +419,7 @@ def get_cms_uri_current_file():
     :return: str
     """
 
-    current_file = sys.solstice.dcc.scene_name()
+    current_file = sys.solstice.dcc.scene_path()
     sys.solstice.logger.debug('Getting CMS Uri of file {0}'.format(current_file))
 
     cms_uri = artella.getCmsUri(current_file)
@@ -450,7 +468,7 @@ def get_status_current_file():
     :return:
     """
 
-    current_file = sys.solstice.dcc.scene_name()
+    current_file = sys.solstice.dcc.scene_path()
     sys.solstice.logger.debug('Getting Artella Status of file {0}'.format(current_file))
 
     status = get_status(current_file)
@@ -687,6 +705,9 @@ def is_published(file_path):
     """
 
     rsp = get_status(file_path=file_path, as_json=True)
+    if not rsp:
+        return False
+
     meta = rsp.get('meta', {})
     if meta.get('status') != 'OK':
         sys.solstice.logger.info('Status is not OK: {}'.format(meta))
@@ -747,7 +768,7 @@ def lock_file(file_path=None, force=False):
     """
 
     if not file_path:
-        file_path = sys.solstice.dcc.scene_name()
+        file_path = sys.solstice.dcc.scene_path()
     if not file_path:
         sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
@@ -803,7 +824,7 @@ def lock_file(file_path=None, force=False):
         msg = 'Failed to lock {}'.format(os.path.basename(file_path))
         sys.solstice.logger.info(msg)
         sys.solstice.dcc.warning(msg)
-        sys.solstice.dcc.confirm_dialog(title='Solstice Tools - Failed to Lock File', message=msg, button=['OK'])
+        # sys.solstice.dcc.confirm_dialog(title='Solstice Tools - Failed to Lock File', message=msg, button=['OK'])
         return False
 
     return True
@@ -901,7 +922,7 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
     """
 
     if not file_path:
-        file_path = sys.solstice.dcc.scene_name()
+        file_path = sys.solstice.dcc.scene_path()
     if not file_path:
         sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
@@ -994,7 +1015,7 @@ def within_artella_scene():
     :return: bool
     """
 
-    current_scene = sys.solstice.dcc.scene_name() or 'untitled'
+    current_scene = sys.solstice.dcc.scene_path() or 'untitled'
     sys.solstice.logger.debug('Current scene name: {}'.format(current_scene))
     if 'artella' not in current_scene.lower():
         return False
@@ -1052,7 +1073,7 @@ def get_dependencies(file_path):
     """
 
     if not file_path:
-        file_path = sys.solstice.dcc.scene_name()
+        file_path = sys.solstice.dcc.scene_path()
     if not file_path:
         sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
@@ -1083,4 +1104,8 @@ if sp.is_maya():
             update_artella_paths()
             import Artella as artella
         except Exception:
+            artella = AbstractArtella
             sys.solstice.logger.error('Impossible to load Artella Plugin!')
+else:
+    artella = AbstractArtella
+    sys.solstice.logger.debug('Using Solstice Abstract Artella Class')

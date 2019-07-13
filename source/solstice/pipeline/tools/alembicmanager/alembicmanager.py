@@ -665,7 +665,7 @@ class AlembicExporter(QWidget, object):
         """
 
         shot_name = ''
-        current_scene = sys.solstice.dcc.scene_name()
+        current_scene = sys.solstice.dcc.scene_path()
         if current_scene:
             current_scene = os.path.basename(current_scene)
 
@@ -1191,7 +1191,7 @@ class AlembicImporter(QWidget, object):
         """
 
         shot_name = 'Undefined'
-        current_scene = sys.solstice.dcc.scene_name()
+        current_scene = sys.solstice.dcc.scene_path()
         if current_scene:
             current_scene = os.path.basename(current_scene)
 

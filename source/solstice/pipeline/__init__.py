@@ -319,13 +319,13 @@ class SolsticePipeline(QObject):
         Function that updates current DCC
         """
 
-        if 'cmds' in main.__dict__:
-            from solstice.pipeline.dcc.maya import mayadcc
-            self.dcc = mayadcc.SolsticeMaya()
-        elif 'hou' in main.__dict__:
+        if 'hou' in main.__dict__:
             import hou
             from solstice.pipeline.dcc.houdini import houdinidcc
             self.dcc = houdinidcc.SolsticeHoudini()
+        elif 'cmds' in main.__dict__:
+            from solstice.pipeline.dcc.maya import mayadcc
+            self.dcc = mayadcc.SolsticeMaya()
         elif 'nuke' in main.__dict__:
             import nuke
             from solstice.pipeline.dcc.nuke import nukedcc
@@ -1075,7 +1075,10 @@ def create_temp_path(name, clean=True, make_dirs=True):
     return path
 
 
-def init():
+def init(force_skip_hello=False):
+    if force_skip_hello:
+        os.environ['SOLSTICE_PIPELINE_SHOW'] = ''
+
     sys.solstice = SolsticePipeline()
     sys.solstice.setup()
 
@@ -1136,7 +1139,7 @@ def lock_file(file_path=None, notify=False):
     from solstice.pipeline.utils import artellautils
 
     if not file_path:
-        file_path = sys.solstice.dcc.scene_name()
+        file_path = sys.solstice.dcc.scene_path()
         if not file_path:
             sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
             return False
@@ -1145,7 +1148,10 @@ def lock_file(file_path=None, notify=False):
         sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
 
-    artellautils.lock_file(file_path=file_path, force=True)
+    valid_lock = artellautils.lock_file(file_path=file_path, force=True)
+    if not valid_lock:
+        return False
+
     if notify:
         sys.solstice.tray.show_message(title='Lock File', msg='File locked successfully!')
 
@@ -1161,7 +1167,7 @@ def unlock_file(file_path=None, notify=False):
     from solstice.pipeline.utils import artellautils
 
     if not file_path:
-        file_path = sys.solstice.dcc.scene_name()
+        file_path = sys.solstice.dcc.scene_path()
         if not file_path:
             sys.solstice.logger.error('File {} cannot be unlocked because it does not exists!'.format(file_path))
             return False
@@ -1172,8 +1178,12 @@ def unlock_file(file_path=None, notify=False):
 
     msg = 'If changes in file: \n\n{}\n\n are not submitted to Artella yet, submit them before unlocking the file please. \n\n Do you want to continue?'.format(file_path)
     res = sys.solstice.dcc.confirm_dialog(title='Solstice Tools - Unlock File', message=msg, button=['Yes', 'No'], cancel_button='No', dismiss_string='No')
-    if res != 'Yes':
-        return False
+    if is_houdini():
+        if res != QMessageBox.StandardButton.Yes:
+            return
+    else:
+        if res != 'Yes':
+            return False
 
     artellautils.unlock_file(file_path=file_path)
     if notify:
@@ -1182,7 +1192,7 @@ def unlock_file(file_path=None, notify=False):
     return True
 
 
-def upload_working_version(file_path=None, notify=False):
+def upload_working_version(file_path=None, skip_saving=False, notify=False):
     """
     Uploads a new version of the given file
     :param file_path: str
@@ -1191,7 +1201,7 @@ def upload_working_version(file_path=None, notify=False):
     from solstice.pipeline.utils import artellautils
 
     if not file_path:
-        file_path = sys.solstice.dcc.scene_name()
+        file_path = sys.solstice.dcc.scene_path()
 
     if not file_path:
         sys.solstice.logger.warning('Impossible to make a new version of an empty file path. Open a scene located in Solstice Artella folder!')
@@ -1220,7 +1230,7 @@ def upload_working_version(file_path=None, notify=False):
         comment, res = QInputDialog.getText(sys.solstice.dcc.get_main_window(), 'Make New Version ({}) : {}'.format(current_version, short_path), 'Comment')
 
     if res and comment:
-        artellautils.upload_new_asset_version(file_path=file_path, comment=comment)
+        artellautils.upload_new_asset_version(file_path=file_path, comment=comment, skip_saving=skip_saving)
 
         if notify:
             sys.solstice.tray.show_message(title='New Working Version', msg='New Working version {} uploaded to Artella server succesfully!'.format(current_version))

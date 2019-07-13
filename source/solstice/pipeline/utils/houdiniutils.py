@@ -12,11 +12,14 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import os
 import sys
 
 import hou
 from hou import shelves
 import hdefereval
+
+import solstice.pipeline as sp
 
 
 def get_houdini_version(as_string=True):
@@ -220,3 +223,80 @@ def get_time_slider_range():
 
     playbar_frame = hou.playbar.playbackRange()
     return [playbar_frame.x(), playbar_frame.y()]
+
+
+def lock_hda(node):
+    """
+    Function that locks given HDA node in Artella server
+    :param node: HDA
+    :return: bool
+    """
+
+    if node is None:
+        return
+
+    if node.type().definition() is None:
+        return None
+
+    type_def = node.type().definition()
+
+    if type_def.libraryFilePath() == 'Embedded':
+        print('HDA is embedded. Cannot Lock HDA node')
+        return
+
+    hda_path = type_def.libraryFilePath()
+    if os.path.isfile(hda_path):
+        sp.lock_file(hda_path, notify=True)
+        return True
+
+    return False
+
+
+def unlock_hda(node):
+    """
+    Function that unlocks given HDA node in Artella server
+    :param node: HDA
+    :return: bool
+    """
+
+    if node is None:
+        return
+
+    if node.type().definition() is None:
+        return None
+
+    type_def = node.type().definition()
+
+    if type_def.libraryFilePath() == 'Embedded':
+        print('HDA is embedded. Cannot unlock HDA node')
+        return
+
+    hda_path = type_def.libraryFilePath()
+    if os.path.isfile(hda_path):
+        sp.unlock_file(hda_path, notify=True)
+        return True
+
+    return False
+
+
+def upload_hda_working_version(node):
+
+    if node is None:
+        return
+
+    if node.type().definition() is None:
+        return None
+
+    type_def = node.type().definition()
+
+    if type_def.libraryFilePath() == 'Embedded':
+        print('HDA is embedded. Cannot upload new version for HDA node')
+        return
+
+    hda_path = type_def.libraryFilePath()
+    if os.path.isfile(hda_path):
+        # type_def.save(hda_path)
+        sp.upload_working_version(hda_path, skip_saving=True, notify=True)
+        return True
+
+    return False

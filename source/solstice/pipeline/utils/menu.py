@@ -41,6 +41,9 @@ class SolsticeMenu(object):
         :return: variant, nativeMenu || None
         """
 
+        if not sp.is_maya():
+            return
+
         if utils.check_menu_exists(self.name):
             return
 
