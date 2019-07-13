@@ -1,11 +1,14 @@
+echo on
 rem Solstice Houdini Bootstrap
 
-notepad.exe
+set houdini_exec=%1
+set h_path=%2
+set scripts_path=%3
 
-REM set houdini_exec = %1
-REM set scripts_path = %2
+rem set Houdini paths
+set "HOUDINI_PATH=%h_path%;&"
 
-REM rem set Houdini paths
-REM set "HOUDINI_PATH=&;%cd%"
+echo %houdini_exec%
+echo %scripts_path%
 
-REM %houdini_exec% waitforui %scripts_path%
+%houdini_exec% waitforui %scripts_path%
