@@ -194,6 +194,7 @@ class SolsticeLauncher(QObject, object):
         updater = solstice_updater.SolsticeUpdater(config=config, parent=self._splash)
         self.main_layout.addWidget(updater)
         updater.show()
+        updater.raise_()
         app.processEvents()
 
         need_to_update = solstice_updater.check_solstice_tools_version(console=console, updater=updater)
@@ -299,7 +300,22 @@ class SolsticeLauncher(QObject, object):
                 QMessageBox.information(None, 'No valid init script for Houdini found!',
                                         'Solstice Launcher cannot launch Houdini. Init Script not found: {}!'.format(script_path))
                 return None
-            solstice_houdini_utils.launch_houdini(exec_=exec_, console=console, script_path=script_path)
+
+            houdini_path = os.path.join(install_path, 'dcc', 'houdini')
+            if not os.path.isdir(houdini_path):
+                QMessageBox.information(None, 'No valid Houdini DCC folder found!',
+                                        'Solstice Launcher cannot launch Houdini. Houdini DCC folder not found: {}!'.format(
+                                            houdini_path))
+                return None
+
+            houdini_bootstrap = os.path.join(install_path, houdini_path, 'houdini_bootstrap.bat')
+            if not os.path.isfile(houdini_bootstrap):
+                QMessageBox.information(None, 'No valid Houdini Bootstrap found!',
+                                        'Solstice Launcher cannot launch Houdini. Bootstrap not found: {}!'.format(
+                                            houdini_bootstrap))
+                return None
+
+            solstice_houdini_utils.launch_houdini(exec_=exec_, console=console, script_path=script_path, houdini_path=houdini_path, bootstrap=houdini_bootstrap)
         elif self.selected_dcc == SolsticeDccs.Nuke:
             script_path = os.path.join(install_path, 'userSetup.py')
             if not os.path.isfile(script_path):

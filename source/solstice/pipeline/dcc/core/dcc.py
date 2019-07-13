@@ -690,6 +690,15 @@ class SolsticeDCC(object):
         raise NotImplementedError('abstract DCC function scene_name() not implemented!')
 
     @staticmethod
+    def scene_path():
+        """
+        Returns the path of the current scene
+        :return: str
+        """
+
+        raise NotImplementedError('abstract DCC function scene_path() not implemented!')
+
+    @staticmethod
     def scene_is_modified():
         """
         Returns whether current scene has been modified or not since last save

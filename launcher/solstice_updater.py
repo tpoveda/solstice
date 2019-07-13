@@ -88,7 +88,8 @@ class SolsticeUpdater(QWidget, object):
 
         self.config = config
 
-        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+        # self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.FramelessWindowHint)
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(5, 2, 5, 2)

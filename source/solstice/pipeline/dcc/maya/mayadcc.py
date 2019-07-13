@@ -12,6 +12,8 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
+import os
+
 import maya.cmds as cmds
 import maya.utils as utils
 
@@ -727,6 +729,19 @@ class SolsticeMaya(dcc.SolsticeDCC, object):
     def scene_name():
         """
         Returns the name of the current scene
+        :return: str
+        """
+
+        scene_path = cmds.file(query=True, sceneName=True)
+        if not scene_path:
+            return ''
+
+        return os.path.dirname(scene_path)
+
+    @staticmethod
+    def scene_path():
+        """
+        Returns the path of the current scene
         :return: str
         """
 

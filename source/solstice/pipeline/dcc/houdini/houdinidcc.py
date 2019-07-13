@@ -15,6 +15,9 @@ __email__ = "tpoveda@cgart3d.com"
 import hou
 import hdefereval
 
+from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+
 import solstice.pipeline as sp
 from solstice.pipeline.dcc.core import dcc
 from solstice.pipeline.utils import houdiniutils
@@ -79,6 +82,49 @@ class SolsticeHoudini(dcc.SolsticeDCC, object):
         """
 
         return node
+
+    @staticmethod
+    def scene_name():
+        """
+        Returns the name of the current scene
+        :return: str
+        """
+
+        return hou.hipFile.name()
+
+    @staticmethod
+    def scene_path():
+        """
+        Returns the path of the current scene
+        :return: str
+        """
+
+        return hou.hipFile.path()
+
+    @staticmethod
+    def confirm_dialog(title, message, button=None, cancel_button=None, default_button=None, dismiss_string=None):
+        """
+        Shows DCC confirm dialog
+        :param title:
+        :param message:
+        :param button:
+        :param cancel_button:
+        :param default_button:
+        :param dismiss_string:
+        :return:
+        """
+
+        return QMessageBox.question(SolsticeHoudini.get_main_window(), title, message)
+
+    @staticmethod
+    def warning(message):
+        """
+        Prints a warning message
+        :param message: str
+        :return:
+        """
+
+        QMessageBox.warning(SolsticeHoudini.get_main_window(), 'Warning', message)
 
     @staticmethod
     def shelf_exists(shelf_name):
