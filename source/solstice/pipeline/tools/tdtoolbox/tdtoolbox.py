@@ -418,7 +418,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_path = asset.get_asset_file(file_type='model', status='working')
         if model_path is None or not os.path.isfile(model_path):
             return False
-        if sys.solstice.dcc.scene_name() != model_path:
+        if sys.solstice.dcc.scene_path() != model_path:
             log.write('Opening model file in Maya ...')
             sys.solstice.dcc.open_file(model_path, force=True)
         check = assetchecks.CheckModelMainGroup(asset=weakref.ref(asset), log=log)
@@ -432,7 +432,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         proxy_path = asset.get_asset_file(file_type='proxy', status='working')
         if proxy_path is None or not os.path.isfile(proxy_path):
             return False
-        if sys.solstice.dcc.scene_name() != proxy_path:
+        if sys.solstice.dcc.scene_path() != proxy_path:
             log.write('Opening proxy file in Maya ...')
             sys.solstice.dcc.open_file(proxy_path, force=True)
         check = assetchecks.CheckModelProxyMainGroup(asset=weakref.ref(asset), log=log)
@@ -446,7 +446,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         model_path = asset.get_asset_file(file_type='model', status='working')
         if model_path is None or not os.path.isfile(model_path):
             return False
-        if sys.solstice.dcc.scene_name() != model_path:
+        if sys.solstice.dcc.scene_path() != model_path:
             log.write('Opening model file in Maya ...')
             sys.solstice.dcc.open_file(model_path, force=True)
         check = assetchecks.ModelHasNoShaders(asset=weakref.ref(asset), log=log)
@@ -460,7 +460,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         proxy_path = asset.get_asset_file(file_type='proxy', status='working')
         if proxy_path is None or not os.path.isfile(proxy_path):
             return False
-        if sys.solstice.dcc.scene_name() != proxy_path:
+        if sys.solstice.dcc.scene_path() != proxy_path:
             log.write('Opening proxy file in Maya ...')
             sys.solstice.dcc.open_file(proxy_path, force=True)
         check = assetchecks.ProxyHasNoShaders(asset=weakref.ref(asset), log=log)
@@ -1086,7 +1086,7 @@ class PropsPipelineWidget(base.BaseWidget, object):
         try:
             with os.fdopen(fd, 'w') as tmp:
                 view_image.writeToFile(path, 'png')
-                slack.new_viewport_image(os.path.normpath(path), os.path.basename(sys.solstice.dcc.scene_name()), channel_name='pipeline')
+                slack.new_viewport_image(os.path.normpath(path), os.path.basename(sys.solstice.dcc.scene_path()), channel_name='pipeline')
         finally:
             os.remove(path)
 
@@ -1099,12 +1099,12 @@ class PropsPipelineWidget(base.BaseWidget, object):
         asset.sync()
 
     def _on_lock_file(self):
-        current_file = sys.solstice.dcc.scene_name()
+        current_file = sys.solstice.dcc.scene_path()
         if os.path.isfile(current_file):
             artella.lock_file(current_file, force=True)
 
     def _on_new_file_version(self):
-        current_file = sys.solstice.dcc.scene_name()
+        current_file = sys.solstice.dcc.scene_path()
         if not os.path.isfile(current_file):
             return
 
