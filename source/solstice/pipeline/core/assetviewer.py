@@ -112,6 +112,9 @@ class AssetViewer(grid.GridWidget, object):
             as_checkable=self._checkable_assets
         )
 
+        if not all_assets:
+            return
+
         for asset in all_assets:
 
             if not asset:

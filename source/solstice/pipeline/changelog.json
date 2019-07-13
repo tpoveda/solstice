@@ -186,6 +186,8 @@
   [
     "Added option to sync asset rig files",
     "Now when an asset is synced rig files are also synced",
-    "Rigs, Alembics and Standins now are imported with proper Solstice unresolved path"
+    "Rigs, Alembics and Standins now are imported with proper Solstice unresolved path",
+    "Added Lock and Unlock Shortcuts in Solstice Shelf",
+    "Added shortcut to publish new WIP version of the current opened file into Artella server in Solstice shelf"
   ]
 }

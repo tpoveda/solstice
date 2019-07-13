@@ -30,6 +30,7 @@ import webbrowser
 
 from solstice.pipeline.externals import solstice_six
 from solstice.pipeline.externals.solstice_qt.QtCore import *
+from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 from solstice.pipeline.resources import solstice_resources
 from solstice.pipeline.dcc.core import dcc as abstractdcc, node as dccnode
@@ -1105,7 +1106,7 @@ def unload_shaders():
     shaderlibrary.ShaderLibrary.unload_shaders()
 
 
-def solstice_save():
+def solstice_save(notify=False):
     """
     Function that saves current file cleaning student license
     """
@@ -1120,8 +1121,13 @@ def solstice_save():
     if is_maya():
         mayautils.clean_student_line()
 
+    if notify:
+        sys.solstice.tray.show_message(title='Save File', msg='File saved successfully!')
 
-def lock_file(file_path=None):
+    return True
+
+
+def lock_file(file_path=None, notify=False):
     """
     Locks current file in Artella
     :param file_path: file to lock
@@ -1140,9 +1146,13 @@ def lock_file(file_path=None):
         return False
 
     artellautils.lock_file(file_path=file_path, force=True)
+    if notify:
+        sys.solstice.tray.show_message(title='Lock File', msg='File locked successfully!')
+
+    return True
 
 
-def unlock_file(file_path=None):
+def unlock_file(file_path=None, notify=False):
     """
     Unlocks current file in Artella
     :param file_path:
@@ -1166,15 +1176,58 @@ def unlock_file(file_path=None):
         return False
 
     artellautils.unlock_file(file_path=file_path)
+    if notify:
+        sys.solstice.tray.show_message(title='Unlock File', msg='File unlocked successfully!')
+
+    return True
 
 
-def upload_working_version(file_path=None):
+def upload_working_version(file_path=None, notify=False):
     """
     Uploads a new version of the given file
     :param file_path: str
     """
 
-    print('Uploading new working version ...')
+    from solstice.pipeline.utils import artellautils
+
+    if not file_path:
+        file_path = sys.solstice.dcc.scene_name()
+
+    if not file_path:
+        sys.solstice.logger.warning('Impossible to make a new version of an empty file path. Open a scene located in Solstice Artella folder!')
+        return
+
+    if not file_path.startswith(get_solstice_assets_path()):
+        sys.solstice.logger.warning('Impossible to make a new version of a file that is not located in Solstice Artella folder. Open a scene located in Solstice Artella folder!')
+        return
+
+    short_path = file_path.replace(get_solstice_assets_path(), '')[1:]
+
+    history = artellautils.get_asset_history(file_path)
+    file_versions = history.versions
+    if not file_versions:
+        current_version = 1
+    else:
+        current_version = 0
+        for v in file_versions:
+            if int(v[0]) > current_version:
+                current_version = int(v[0])
+        current_version += 1
+
+    try:
+        comment, res = QInputDialog.getMultiLineText(sys.solstice.dcc.get_main_window(), 'Make New Version ({}) : {}'.format(current_version, short_path), 'Comment')
+    except Exception:
+        comment, res = QInputDialog.getText(sys.solstice.dcc.get_main_window(), 'Make New Version ({}) : {}'.format(current_version, short_path), 'Comment')
+
+    if res and comment:
+        artellautils.upload_new_asset_version(file_path=file_path, comment=comment)
+
+        if notify:
+            sys.solstice.tray.show_message(title='New Working Version', msg='New Working version {} uploaded to Artella server succesfully!'.format(current_version))
+
+        return True
+
+    return False
 
 
 def run_publisher():

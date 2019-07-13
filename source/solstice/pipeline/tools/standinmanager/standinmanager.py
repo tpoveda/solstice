@@ -71,7 +71,7 @@ class StandinImporter(QWidget, object):
         self.import_btn.clicked.connect(self._on_import)
 
     @staticmethod
-    def import_standin(standin_path, standin_name=None):
+    def import_standin(standin_path, standin_name=None, unresolve_path=False):
         if not standin_path or not os.path.isfile(standin_path):
             sys.solstice.logger.warning('Alembic file {} does not exits!'.format(standin_path))
             return None
@@ -82,7 +82,12 @@ class StandinImporter(QWidget, object):
         standin_node = cmds.createNode('aiStandIn', name='{}_standin'.format(standin_name))
         xform = cmds.listRelatives(standin_node, parent=True)[0]
         cmds.rename(xform, standin_name)
-        cmds.setAttr('{}.dso'.format(standin_node), standin_path, type='string')
+
+        if unresolve_path:
+            ass_path = sp.unresolve_path(standin_path)
+        else:
+            ass_path = standin_path
+        cmds.setAttr('{}.dso'.format(standin_node), ass_path, type='string')
 
     def refresh(self):
         if self.standin_path_line.text() and os.path.isfile(self.standin_path_line.text()):

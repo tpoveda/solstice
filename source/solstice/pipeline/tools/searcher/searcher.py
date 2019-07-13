@@ -64,7 +64,7 @@ class SolsticeSearcher():
 
             return hotkey
         else:
-            sys.solstice.logger.warning('Impossible to install searcher hotkey in DCC: {}'.format(sp.dcc))
+            sys.solstice.logger.warning('Impossible to install searcher hotkey in DCC: {}'.format(sys.solstice.dcc))
 
     @staticmethod
     def get_content():

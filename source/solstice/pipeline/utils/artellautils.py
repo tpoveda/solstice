@@ -422,6 +422,8 @@ def get_cms_uri(path):
     :return: dict
     """
 
+    path = os.path.normpath(path)
+
     cms_uri = None
     if sp.is_maya():
         cms_uri = artella.getCmsUri(path)

@@ -51,7 +51,8 @@ class SolsticeSync(QDialog, object):
 
     def custom_ui(self):
 
-        self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        # self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
 
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
@@ -88,6 +89,7 @@ class SolsticeSync(QDialog, object):
         self.setFixedSize(splash_pixmap.size())
 
     def sync(self):
+        self.raise_()
         self._timer.start(200)
 
     def keyPressEvent(self, event):
