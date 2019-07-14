@@ -527,11 +527,16 @@ def get_solstice_assets_path():
     :return: str
     """
 
+
     assets_path = os.path.join(get_solstice_project_path(), 'Assets')
     if os.path.exists(assets_path):
         return assets_path
     else:
         sys.solstice.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
+
+        from solstice.pipeline.utils import qtutils
+        qtutils.show_info(None, 'Asset Path does not exists!}', 'Assets Folder is going to be synced from Artella server. Be patience during the process, the process can take quite a long time')
+
         sys.solstice.logger.debug('Trying to synchronize it ...')
         try:
             from solstice.pipeline.core import syncdialog
@@ -553,7 +558,12 @@ def get_solstice_production_path():
         return production_path
     else:
         sys.solstice.logger.debug('Production Path does not exists!: {0}'.format(production_path))
+
+        from solstice.pipeline.utils import qtutils
+        qtutils.show_info(None, 'Production Path does not exists!}', 'Production Folder is going to be synced from Artella server. Be patience during the process, the process can take quite a long time')
+
         sys.solstice.logger.debug('Trying to synchronize it ...')
+
         try:
             from solstice.pipeline.core import syncdialog
             syncdialog.SolsticeSyncPath(paths=[production_path]).sync()
@@ -1054,6 +1064,16 @@ def resolve_path(path_to_resolve):
         path_to_resolve = path_to_resolve.replace('$SOLSTICE_PROJECT/', solstice_var)
 
     return path_to_resolve
+
+
+def project_relative_path(full_path):
+    """
+    Returns relative path of the given path from the Solstice Artella Project path
+    :param full_path: str
+    :return: str
+    """
+
+    return os.path.relpath(full_path, get_solstice_project_path())
 
 
 def create_temp_path(name, clean=True, make_dirs=True):
