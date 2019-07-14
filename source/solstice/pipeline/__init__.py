@@ -534,7 +534,7 @@ def get_solstice_assets_path():
         sys.solstice.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
         sys.solstice.logger.debug('Trying to synchronize it ...')
         try:
-            from solstice.pipeline.gui import syncdialog
+            from solstice.pipeline.core import syncdialog
             syncdialog.SolsticeSyncPath(paths=[assets_path]).sync()
             return assets_path
         except Exception as e:
@@ -555,7 +555,7 @@ def get_solstice_production_path():
         sys.solstice.logger.debug('Production Path does not exists!: {0}'.format(production_path))
         sys.solstice.logger.debug('Trying to synchronize it ...')
         try:
-            from solstice.pipeline.gui import syncdialog
+            from solstice.pipeline.core import syncdialog
             syncdialog.SolsticeSyncPath(paths=[production_path]).sync()
             return production_path
         except Exception as e:

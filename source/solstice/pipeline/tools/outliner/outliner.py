@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-ool used to show assets related with Solstice
+Tool used to show assets related with Solstice
 """
 
 from __future__ import print_function, division, absolute_import
@@ -14,23 +14,19 @@ __email__ = "tpoveda@cgart3d.com"
 
 import sys
 import weakref
-import collections
 from functools import partial
 
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
-from solstice.pipeline.externals.solstice_qt.QtGui import *
-
-import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
 
 import solstice.pipeline as sp
-from solstice.pipeline.core import node
 from solstice.pipeline.gui import messagehandler, stack
-from solstice.pipeline.utils import decorators, qtutils
+from solstice.pipeline.utils import decorators, qtutils, outliner as utils
 from solstice.pipeline.resources import resource
 
 if sp.is_maya():
+    import maya.cmds as cmds
+    import maya.OpenMaya as OpenMaya
     from solstice.pipeline.utils import mayautils
     undo_decorator = mayautils.undo
 else:
@@ -46,110 +42,15 @@ except Exception:
     pass
 
 
-class OutlinerTreeItemWidget(QWidget, object):
-    clicked = Signal(QObject)
-    viewToggled = Signal(QObject)
-    nameChanged = Signal(QObject)
-
-    def __init__(self, name, parent=None):
-        super(OutlinerTreeItemWidget, self).__init__(parent)
-
-        self.setMouseTracking(True)
-
-        self.parent = parent
-        self.long_name = name
-        self.name = name.split('|')[-1]
-        self.block_callbacks = False
-        self.is_selected = False
-        self.parent_elem = None
-        self.child_elem = dict()
-
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-
-        self.custom_ui()
-        self.setup_signals()
-
-    def custom_ui(self):
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
-        self.setLayout(self.main_layout)
-
-        self.item_widget = QFrame()
-        self.item_layout = QGridLayout()
-        self.item_layout.setContentsMargins(0, 0, 0, 0)
-        self.item_widget.setLayout(self.item_layout)
-        self.main_layout.addWidget(self.item_widget)
-
-        self.child_widget = QWidget()
-        self.child_layout = QVBoxLayout()
-        self.child_layout.setContentsMargins(0, 0, 0, 0)
-        self.child_layout.setSpacing(0)
-        self.child_widget.setLayout(self.child_layout)
-        self.main_layout.addWidget(self.child_widget)
-
-    def setup_signals(self):
-        pass
-
-    def add_child(self, widget, category):
-        widget.parent_elem = self
-        self.child_elem[category] = widget
-        self.child_layout.addWidget(widget)
-
-
-class OutlinerAssetItem(OutlinerTreeItemWidget, object):
-    clicked = Signal(QObject, QEvent)
-    contextRequested = Signal(QObject, QAction)
+class OutlinerAssetItem(utils.OutlinerAssetItem, object):
     viewToggled = Signal(QObject, bool)
     viewSolo = Signal(QObject, bool)
 
     def __init__(self, asset, parent=None):
+        super(OutlinerAssetItem, self).__init__(asset=asset, parent=parent)
 
-        self.asset = asset
-        self.parent = parent
-
-        super(OutlinerAssetItem, self).__init__(asset.get_short_name(), parent)
-
-        self.collapse()
-
-    def custom_ui(self):
-        super(OutlinerAssetItem, self).custom_ui()
-
-        self.item_widget.setFrameStyle(QFrame.Raised | QFrame.StyledPanel)
-        self.item_widget.setStyleSheet('QFrame { background-color: rgb(55,55,55);}')
-
-        icon = QIcon()
-        icon.addPixmap(QPixmap(':/nudgeDown.png'), QIcon.Normal, QIcon.On)
-        icon.addPixmap(QPixmap(':/nudgeRight.png'), QIcon.Normal, QIcon.Off);
-        self.expand_btn = QPushButton()
-        self.expand_btn.setStyleSheet("QPushButton#expand_btn:checked {background-color: green; border: none}")
-        self.expand_btn.setStyleSheet("QPushButton { color:white; } QPushButton:checked { background-color: rgb(55,55, 55); border: none; } QPushButton:pressed { background-color: rgb(55,55, 55); border: none; }")  # \
-        self.expand_btn.setFlat(True)
-        self.expand_btn.setIcon(icon)
-        self.expand_btn.setCheckable(True)
-        self.expand_btn.setChecked(True)
-        self.expand_btn.setFixedWidth(25)
-        self.expand_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
-        self.item_layout.addWidget(self.expand_btn, 0, 0, 1, 1)
-
-        self.asset_buttons = AssetDisplayButtons()
-        self.item_layout.addWidget(self.asset_buttons, 0, 1, 1, 1)
-
-        pixmap = QPixmap(':/pickGeometryObj.png')
-        icon_lbl = QLabel()
-        icon_lbl.setMaximumWidth(18)
-        icon_lbl.setPixmap(pixmap)
-        self.item_layout.addWidget(icon_lbl, 0, 2, 1, 1)
-
-        self.asset_lbl = QLabel(self.name)
-        self.item_layout.addWidget(self.asset_lbl, 0, 3, 1, 1)
-
-        self.item_layout.setColumnStretch(1, 5)
-        self.item_layout.setAlignment(Qt.AlignLeft)
-
-    def setup_signals(self):
-        self.expand_btn.clicked.connect(self._on_toggle_children)
-        self.asset_buttons.view_btn.toggled.connect(partial(self.viewToggled.emit, self))
+    def get_display_widget(self):
+        return utils.AssetDisplayButtons()
 
     def add_asset_attributes_change_callback(self):
         obj = self.asset.get_mobject()
@@ -169,20 +70,7 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
                         return
                     model_widget.model_buttons.proxy_hires_cbx.setCurrentIndex(plug.asInt())
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            if self.is_selected:
-                self.deselect()
-            else:
-                self.select()
-            self.clicked.emit(self, event)
-
-    def contextMenuEvent(self, event):
-        if not self.is_selected:
-            self.select()
-
-        menu = QMenu(self)
-        menu.setStyleSheet('background-color: rgb(68,68,68);')
+    def create_menu(self, menu):
         replace_menu = QMenu('Replace by', self)
         menu.addMenu(replace_menu)
         replace_abc = replace_menu.addAction('Alembic')
@@ -197,37 +85,6 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
         replace_rig.triggered.connect(self._on_replace_rig)
         sync_shaders_act.triggered.connect(self._on_sync_shaders)
         unload_shaders_act.triggered.connect(self._on_unload_shaders)
-
-        action = menu.exec_(self.mapToGlobal(event.pos()))
-        self.contextRequested.emit(self, action)
-
-    def get_file_widget(self, category):
-        return self.child_elem.get(category)
-
-    def select(self):
-        pass
-        # self.is_selected = True
-        # self.item_widget.setStyleSheet('QFrame { background-color: rgb(21,60,97);}')
-
-    def deselect(self):
-        self.is_selected = False
-        self.item_widget.setStyleSheet('QFrame { background-color: rgb(55,55,55);}')
-
-    def expand(self):
-        self.expand_btn.setChecked(True)
-        self._on_toggle_children()
-
-    def collapse(self):
-        self.expand_btn.setChecked(False)
-        self._on_toggle_children()
-
-    def set_select(self, select=False):
-        if select:
-            self.select()
-        else:
-            self.deselect()
-
-        return self.is_selected
 
     def is_rig(self):
         """
@@ -272,10 +129,6 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
         """
 
         pass
-
-    def _on_toggle_children(self):
-        state = self.expand_btn.isChecked()
-        self.child_widget.setVisible(state)
 
     @undo_decorator
     def _on_replace_alembic(self):
@@ -336,40 +189,7 @@ class OutlinerAssetItem(OutlinerTreeItemWidget, object):
         self.asset.unload_shaders()
 
 
-class OutlinerFileItem(OutlinerTreeItemWidget, object):
-    clicked = Signal(QObject, QEvent)
-    doubleClicked = Signal()
-    contextRequested = Signal(QObject, QAction)
-
-    def __init__(self, category, parent=None):
-        super(OutlinerFileItem, self).__init__(name=category, parent=parent)
-
-        self.setMouseTracking(True)
-
-        self.custom_ui()
-        self.setup_signals()
-
-    @staticmethod
-    def get_category_pixmap():
-        return QPixmap(':/out_particle.png')
-
-    def custom_ui(self):
-        super(OutlinerFileItem, self).custom_ui()
-
-        self.item_widget.setFrameStyle(QFrame.Raised | QFrame.StyledPanel)
-        self.setStyleSheet('background-color: rgb(68,68,68);')
-
-        pixmap = self.get_category_pixmap()
-        icon_lbl = QLabel()
-        icon_lbl.setMaximumWidth(18)
-        icon_lbl.setPixmap(pixmap)
-        self.item_layout.addWidget(icon_lbl, 0, 1, 1, 1)
-
-        self.target_lbl = QLabel(self.name.title())
-        self.item_layout.addWidget(self.target_lbl, 0, 2, 1, 1)
-
-
-class OutlinerModelItem(OutlinerFileItem, object):
+class OutlinerModelItem(utils.OutlinerFileItem, object):
 
     proxyHiresToggled = Signal(QObject, int)
 
@@ -390,7 +210,7 @@ class OutlinerModelItem(OutlinerFileItem, object):
     #     self.model_buttons.proxy_hires_cbx.currentIndexChanged.connect(partial(self.proxyHiresToggled.emit, self))
 
 
-class OutlinerShadingItem(OutlinerFileItem, object):
+class OutlinerShadingItem(utils.OutlinerFileItem, object):
     def __init__(self, parent=None):
         super(OutlinerShadingItem, self).__init__(category='shading', parent=parent)
 
@@ -399,12 +219,12 @@ class OutlinerShadingItem(OutlinerFileItem, object):
         return  resource.pixmap('shader', category='icons').scaled(18, 18, Qt.KeepAspectRatio)
 
 
-class OutlinerGroomItem(OutlinerFileItem, object):
+class OutlinerGroomItem(utils.OutlinerFileItem, object):
     def __init__(self, parent=None):
         super(OutlinerGroomItem, self).__init__(category='groom', parent=parent)
 
 
-class OutlinerArtellaItem(OutlinerFileItem, object):
+class OutlinerArtellaItem(utils.OutlinerFileItem, object):
     def __init__(self, parent=None):
         super(OutlinerArtellaItem, self).__init__(category='artella', parent=parent)
 
@@ -413,49 +233,7 @@ class OutlinerArtellaItem(OutlinerFileItem, object):
         return resource.pixmap('artella', category='icons').scaled(18, 18, Qt.KeepAspectRatio)
 
 
-class DisplayButtonsWidget(QWidget, object):
-    def __init__(self, parent=None):
-        super(DisplayButtonsWidget, self).__init__(parent)
-
-        self.setMinimumWidth(100)
-        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        self.setMouseTracking(True)
-
-        self.main_layout = QHBoxLayout()
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(1)
-        self.setLayout(self.main_layout)
-
-        self.custom_ui()
-        self.setup_signals()
-
-    def custom_ui(self):
-        pass
-
-    def setup_signals(self):
-        pass
-
-
-class AssetDisplayButtons(DisplayButtonsWidget, object):
-
-    def __init__(self, parent=None):
-        super(AssetDisplayButtons, self).__init__(parent=parent)
-
-    def custom_ui(self):
-
-        self.setMinimumWidth(25)
-
-        self.view_btn = QPushButton()
-        self.view_btn.setIcon(QIcon(QPixmap(':/eye.png')))
-        self.view_btn.setFlat(True)
-        self.view_btn.setFixedWidth(25)
-        self.view_btn.setCheckable(True)
-        self.view_btn.setChecked(True)
-        self.view_btn.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        self.main_layout.addWidget(self.view_btn)
-
-
-class ModelDisplayButtons(DisplayButtonsWidget, object):
+class ModelDisplayButtons(utils.DisplayButtonsWidget, object):
     def __init__(self, parent=None):
         super(ModelDisplayButtons, self).__init__(parent=parent)
 
@@ -469,7 +247,7 @@ class ModelDisplayButtons(DisplayButtonsWidget, object):
         self.main_layout.addWidget(self.proxy_hires_cbx)
 
 
-class ArtellaDisplayButtons(DisplayButtonsWidget, object):
+class ArtellaDisplayButtons(utils.DisplayButtonsWidget, object):
     def __init__(self, parent=None):
         super(ArtellaDisplayButtons, self).__init__(parent=parent)
 
@@ -477,18 +255,9 @@ class ArtellaDisplayButtons(DisplayButtonsWidget, object):
         self.setMinimumWidth(25)
 
 
-class SolsticeAbstractOutliner(QWidget, object):
+class SolsticeBaseOutliner(utils.BaseOutliner, object):
     def __init__(self, parent=None):
-        super(SolsticeAbstractOutliner, self).__init__(parent=parent)
-
-        self.widget_tree = collections.defaultdict(list)
-        self.callbacks = list()
-        self.widgets = list()
-
-        self.setMouseTracking(True)
-
-        self.custom_ui()
-        self.setup_signals()
+        super(SolsticeBaseOutliner, self).__init__(parent=parent)
 
     @staticmethod
     def get_file_widget_by_category(category, parent=None):
@@ -504,46 +273,6 @@ class SolsticeAbstractOutliner(QWidget, object):
             return None
 
         return file_widget
-
-    def custom_ui(self):
-        self.main_layout = QGridLayout()
-        self.main_layout.setSpacing(2)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.main_layout)
-
-        self.refresh_btn = QPushButton()
-        self.refresh_btn.setIcon(resource.icon('refresh'))
-        self.refresh_btn.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        self.main_layout.addWidget(self.refresh_btn, 0, 0, 1, 1)
-
-        self.expand_all_btn = QPushButton()
-        self.expand_all_btn.setIcon(resource.icon('expand'))
-        self.expand_all_btn.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        self.main_layout.addWidget(self.expand_all_btn, 0, 1, 1, 1)
-
-        self.collapse_all_btn = QPushButton()
-        self.collapse_all_btn.setIcon(resource.icon('collapse'))
-        self.collapse_all_btn.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        self.main_layout.addWidget(self.collapse_all_btn, 0, 2, 1, 1)
-
-        scroll_widget = QWidget()
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet('QScrollArea { background-color: rgb(57,57,57);}')
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        scroll_area.setWidget(scroll_widget)
-
-        self.outliner_layout = QVBoxLayout()
-        self.outliner_layout.setContentsMargins(1, 1, 1, 1)
-        self.outliner_layout.setSpacing(0)
-        self.outliner_layout.addStretch()
-        scroll_widget.setLayout(self.outliner_layout)
-        self.main_layout.addWidget(scroll_area, 1, 0, 1, 4)
-
-    def setup_signals(self):
-        self.refresh_btn.clicked.connect(self._on_refresh_outliner)
-        self.expand_all_btn.clicked.connect(self._on_expand_all_assets)
-        self.collapse_all_btn.clicked.connect(self._on_collapse_all_assets)
 
     def init_ui(self):
         allowed_types = self.allowed_types()
@@ -573,92 +302,6 @@ class SolsticeAbstractOutliner(QWidget, object):
                     elif cat == 'artella':
                         pass
 
-    def allowed_types(self):
-        return None
-
-    def add_callbacks(self):
-        pass
-
-    def remove_callbacks(self):
-        for c in self.callbacks:
-            try:
-                self.callbacks.remove(c)
-                del c
-            except Exception as e:
-                sys.solstice.logger.error('Impossible to clean callback {}'.format(c))
-                sys.solstice.logger.error(str(e))
-
-        self.callbacks = list()
-        self.scrip_jobs = list()
-
-    def append_widget(self, asset):
-        self.widgets.append(asset)
-        self.outliner_layout.insertWidget(0, asset)
-
-    def remove_widget(self, asset):
-        pass
-
-    def refresh_outliner(self):
-        self._on_refresh_outliner()
-
-    def clear_outliner_layout(self):
-        del self.widgets[:]
-        while self.outliner_layout.count():
-            child = self.outliner_layout.takeAt(0)
-            if child.widget() is not None:
-                child.widget().deleteLater()
-
-        self.outliner_layout.setSpacing(0)
-        self.outliner_layout.addStretch()
-
-    def _on_refresh_outliner(self, *args):
-        self.widget_tree = collections.defaultdict(list)
-        self.clear_outliner_layout()
-        self.init_ui()
-
-    def _on_expand_all_assets(self):
-        for asset_widget in self.widget_tree.keys():
-            asset_widget.expand()
-
-    def _on_collapse_all_assets(self):
-        for asset_widget in self.widget_tree.keys():
-            asset_widget.collapse()
-
-    def _on_item_clicked(self, widget, event):
-        if widget is None:
-            sys.solstice.logger.warning('Selected Asset is not valid!')
-            return
-
-        asset_name = widget.asset.name
-        item_state = widget.is_selected
-        if cmds.objExists(asset_name):
-            is_modified = event.modifiers() == Qt.ControlModifier
-            if not is_modified:
-                cmds.select(clear=True)
-
-            for asset_widget, file_items in self.widget_tree.items():
-                if asset_widget != widget:
-                    continue
-                if is_modified and widget.is_selected:
-                    cmds.select(asset_widget.asset.name, add=True)
-                else:
-                    asset_widget.deselect()
-                    cmds.select(asset_widget.asset.name, deselect=True)
-
-            widget.set_select(item_state)
-            if not is_modified:
-                cmds.select(asset_name)
-        else:
-            self._on_refresh_outliner()
-
-    def _on_selection_changed(self, *args):
-        selection = cmds.ls(sl=True, l=True)
-        for asset_widget, file_items in self.widget_tree.items():
-            if '|{}'.format(asset_widget.asset.name) in selection:
-                asset_widget.select()
-            else:
-                asset_widget.deselect()
-
     def _on_toggle_view(self, widget, state):
         node_name = widget.asset.node
         if cmds.objExists(node_name):
@@ -686,12 +329,8 @@ class SolsticeAbstractOutliner(QWidget, object):
                     widget.parent.block_callbacks = False
                 widget.parent.block_callbacks = False
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            cmds.select(clear=True)
 
-
-class SolsticeAssetsOutliner(SolsticeAbstractOutliner, object):
+class SolsticeAssetsOutliner(SolsticeBaseOutliner, object):
 
     def __init__(self, parent=None):
         super(SolsticeAssetsOutliner, self).__init__(parent=parent)
@@ -711,7 +350,7 @@ class SolsticeAssetsOutliner(SolsticeAbstractOutliner, object):
         # self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterOpen, self._on_refresh_outliner)))
         # self.callbacks.append(mayautils.MCallbackIdWrapper(OpenMaya.MDGMessage.addNodeRemovedCallback(self._on_refresh_outliner)))
 
-class SolsticeCharactersOutliner(SolsticeAbstractOutliner, object):
+class SolsticeCharactersOutliner(SolsticeBaseOutliner, object):
     def __init__(self, parent=None):
         super(SolsticeCharactersOutliner, self).__init__(parent=parent)
 
@@ -719,17 +358,17 @@ class SolsticeCharactersOutliner(SolsticeAbstractOutliner, object):
         return ['character']
 
 
-class SolsticeLightsOutliner(SolsticeAbstractOutliner, object):
+class SolsticeLightsOutliner(SolsticeBaseOutliner, object):
     def __init__(self, parent=None):
         super(SolsticeLightsOutliner, self).__init__(parent=parent)
 
 
-class SolsticeCamerasOutliner(SolsticeAbstractOutliner, object):
+class SolsticeCamerasOutliner(SolsticeBaseOutliner, object):
     def __init__(self, parent=None):
         super(SolsticeCamerasOutliner, self).__init__(parent=parent)
 
 
-class SolsticeFXOutliner(SolsticeAbstractOutliner, object):
+class SolsticeFXOutliner(SolsticeBaseOutliner, object):
     def __init__(self, parent=None):
         super(SolsticeFXOutliner, self).__init__(parent=parent)
 
@@ -942,4 +581,4 @@ class SolsticeOutliner(QWidget, object):
 
 
 def run():
-    qtutils.dock_window(SolsticeOutliner, min_width=400)
+    qtutils.dock_window(SolsticeOutliner, min_width=350)

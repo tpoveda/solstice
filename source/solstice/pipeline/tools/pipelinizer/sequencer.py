@@ -256,6 +256,9 @@ class SolsticeSequencer(QWidget, object):
         """
 
         production_path = sp.get_solstice_production_path()
+        if not production_path:
+            return
+
         production_info = artella.get_status(production_path)
         if not production_info:
             return
@@ -283,6 +286,8 @@ class SolsticeSequencer(QWidget, object):
         """
 
         sequences = self.get_solstice_sequences_data()
+        if not sequences:
+            return
 
         sequences_dict = OrderedDict()
         for seq in sequences:

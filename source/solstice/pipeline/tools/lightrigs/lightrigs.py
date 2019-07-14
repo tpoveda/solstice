@@ -68,7 +68,7 @@ class LightRig(QWidget, object):
         self.light_menu.addAction(import_action)
         self.light_menu.addAction(reference_action)
 
-        self.light_btn.clicked.connect(self._on_open_light_rig)
+        self.light_btn.clicked.connect(self._on_reference_light_rig)
         open_action.triggered.connect(self._on_open_light_rig)
         import_action.triggered.connect(self._on_import_light_rig)
         reference_action.triggered.connect(self._on_reference_light_rig)

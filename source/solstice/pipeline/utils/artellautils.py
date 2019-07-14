@@ -440,6 +440,9 @@ def get_cms_uri(path):
     :return: dict
     """
 
+    if not path:
+        return path
+
     path = os.path.normpath(path)
 
     cms_uri = None
