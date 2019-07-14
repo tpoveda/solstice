@@ -148,10 +148,12 @@ class SolsticeSequencer(QWidget, object):
         elapsed_time = time.time() - start_time
         sys.solstice.logger.debug('Sequences synchronized in {} seconds'.format(elapsed_time))
 
+        self.sequencerInitialized.emit()
+
         if sequences:
             sequences = sequences[0]
-
-        self.sequencerInitialized.emit()
+        else:
+            return
 
         for seq_data, seq_files in sequences.items():
             sequence_widget = sequencerwidget.SequenceWidget(sequence_data=seq_data, sequence_files=seq_files)
