@@ -11,6 +11,13 @@
                 "dcc": ["maya", "houdini"]
             },
             {
+                "icon": "artella.png",
+                "command": "import solstice.pipeline as sp;sp.open_artella_project()",
+                "annotation": "Solstice Artella Project",
+                "label": "Artella Project",
+                "dcc": ["maya", "houdini", "nuke"]
+            },
+            {
                 "icon": "",
                 "command": "",
                 "annotation": "separator",
