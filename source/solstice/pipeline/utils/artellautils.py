@@ -18,6 +18,7 @@ import sys
 import json
 import urllib2
 import platform
+import traceback
 try:
     import psutil
 except:
@@ -502,7 +503,7 @@ def synchronize_path(path):
     :param path: str
     """
 
-    uri =  get_cms_uri(path)
+    uri = get_cms_uri(path)
     spigot = get_spigot_client()
     rsp = spigot.execute(command_action='do', command_name='updateCollection', payload=uri)
 
@@ -532,6 +533,33 @@ def synchronize_file(file_path):
         return rsp
     except Exception as e:
         sys.solstice.logger.error(str(e))
+        return None
+
+
+def synchronize_path_with_folders(file_path, recursive=False):
+    """
+    Syncronizhes given path and all its folders
+    :param file_path: str
+    :param recursive: bool
+    :return:
+    """
+
+    try:
+        status = get_status(file_path)
+        if isinstance(status, classes.ArtellaDirectoryMetaData):
+            references = status.references
+            for ref_name, ref_data in references.items():
+                ref_path = ref_data.path
+                if ref_data.is_directory:
+                    synchronize_path(ref_path)
+                    if recursive:
+                        synchronize_path_with_folders(ref_path, recursive=True)
+                else:
+                    print('Syncing: {}'.format(ref_path))
+                    synchronize_file(ref_path)
+    except Exception as e:
+        sys.solstice.logger.error(str(e))
+        sys.solstice.logger.error(traceback.format_exc())
         return None
 
 

@@ -14,20 +14,21 @@ __email__ = "tpoveda@cgart3d.com"
 
 import os
 import sys
+import traceback
 
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 from solstice.pipeline.externals.solstice_qt.QtCore import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.gui import window, splitters
-from solstice.pipeline.utils import artellautils as artella
+from solstice.pipeline.utils import qtutils, artellautils as artella
 from solstice.pipeline.resources import resource
 
 
 class BatchUploader(window.Window, object):
 
-    name = 'SolsticeBatchUploader'
-    title = 'Solstice Tools - Artella Batch Uploader'
+    name = 'SolsticeArtellaBatcher'
+    title = 'Solstice Tools - Artella Batcher'
     version = '1.0'
 
     def __init__(self):
@@ -35,6 +36,8 @@ class BatchUploader(window.Window, object):
 
     def custom_ui(self):
         super(BatchUploader, self).custom_ui()
+
+        self.set_logo('solstice_artella_batcher')
 
         self.resize(450, 650)
 
@@ -60,13 +63,20 @@ class BatchUploader(window.Window, object):
         self._folder_path.setContextMenuPolicy(Qt.CustomContextMenu)
         browse_icon = resource.icon('open')
         self._browse_btn = QPushButton()
+        self._browse_btn.setFlat(True)
         self._browse_btn.setIcon(browse_icon)
         self._browse_btn.setFixedWidth(30)
         self._browse_btn.setToolTip('Browse Root Folder')
         self._browse_btn.setStatusTip('Browse Root Folder')
+        sync_icon = resource.icon('sync')
+        self._sync_btn = QPushButton()
+        self._sync_btn.setFlat(True)
+        self._sync_btn.setIcon(sync_icon)
         path_base_layout.addWidget(path_lbl)
         path_base_layout.addWidget(self._folder_path)
         path_base_layout.addWidget(self._browse_btn)
+        path_base_layout.addWidget(splitters.get_horizontal_separator_widget())
+        path_base_layout.addWidget(self._sync_btn)
 
         self._all_cbx = QCheckBox()
         self._all_cbx.setChecked(True)
@@ -75,6 +85,9 @@ class BatchUploader(window.Window, object):
         cbx_lyt.setSpacing(0)
         cbx_lyt.addWidget(self._all_cbx)
         cbx_lyt.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
+        self._total_items_lbl = QLabel('')
+        cbx_lyt.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Preferred))
+        cbx_lyt.addWidget(self._total_items_lbl)
 
         self._files_list = QTreeWidget()
         self._files_list.setColumnCount(4)
@@ -93,12 +106,18 @@ class BatchUploader(window.Window, object):
         buttons_layout = QHBoxLayout()
         buttons_layout.setContentsMargins(2, 2, 2, 2)
         buttons_layout.setSpacing(2)
+        lock_icon = resource.icon('lock')
+        unlock_icon = resource.icon('unlock')
+        upload_icon = resource.icon('upload')
         self._lock_btn = QPushButton('Lock')
-        self._upload_btn = QPushButton('Upload')
+        self._lock_btn.setIcon(lock_icon)
         self._unlock_btn = QPushButton('Unlock')
+        self._unlock_btn.setIcon(unlock_icon)
+        self._upload_btn = QPushButton('Upload')
+        self._upload_btn.setIcon(upload_icon)
         buttons_layout.addWidget(self._lock_btn)
-        buttons_layout.addWidget(self._upload_btn)
         buttons_layout.addWidget(self._unlock_btn)
+        buttons_layout.addWidget(self._upload_btn)
 
         self.main_layout.addWidget(self._path_widget)
         self.main_layout.addLayout(splitters.SplitterLayout())
@@ -108,11 +127,18 @@ class BatchUploader(window.Window, object):
         self.main_layout.addWidget(self._progress_lbl)
         self.main_layout.addLayout(buttons_layout)
 
+        self._files_list.model().dataChanged.connect(self._on_data_changed)
         self._browse_btn.clicked.connect(self._on_browse)
+        self._sync_btn.clicked.connect(self._on_sync)
         self._all_cbx.toggled.connect(self._on_toggle_all)
         self._lock_btn.clicked.connect(self._on_lock)
         self._upload_btn.clicked.connect(self._on_upload)
         self._unlock_btn.clicked.connect(self._on_unlock)
+
+    def _on_data_changed(self):
+        checked_items = self._checked_items()
+        total_checked_items = len(list(checked_items))
+        self._total_items_lbl.setText('Total Checked Items: {}'.format(total_checked_items))
 
     def _refresh_files(self):
         root_path = self._folder_path.text()
@@ -138,7 +164,6 @@ class BatchUploader(window.Window, object):
             self._files_list.resizeColumnToContents(i)
 
     def _on_browse(self):
-
         stored_path = self.settings.get('upload_path')
         if stored_path and os.path.isdir(stored_path):
             start_directory = stored_path
@@ -159,6 +184,31 @@ class BatchUploader(window.Window, object):
 
         self._refresh_files()
         self._refresh_versions()
+
+    def _on_sync(self):
+        current_path = self._folder_path.text()
+        if not current_path or not os.path.isdir(current_path):
+            sys.solstice.logger.warning('Selected a folder to sync first!')
+            return
+
+        result = qtutils.show_question(None, 'Synchronizing folder: {}'.format(current_path),
+                                       'Are you sure you want to synchronize this folder? This can take quite a lot of time!')
+        if result == QMessageBox.No:
+            return
+
+        try:
+            self._progress.setVisible(True)
+            self._progress_lbl.setText('Synchronizing files ... Please wait!')
+            self.repaint()
+            artella.synchronize_path_with_folders(current_path, recursive=True)
+        except Exception as e:
+            sys.solstice.logger.error(str(e))
+            sys.solstice.logger.error(traceback.format_exc())
+        finally:
+            self._progress.setVisible(False)
+            self._progress_lbl.setText('')
+            self._refresh_files()
+            self._refresh_versions()
 
     def _on_toggle_all(self, flag):
         it = QTreeWidgetItemIterator(self._files_list)
@@ -201,23 +251,28 @@ class BatchUploader(window.Window, object):
         :return:
         """
 
-        all_items = list(self._all_items())
-        self._progress.setVisible(True)
-        self._progress.setMinimum(0)
-        self._progress.setMaximum(len(all_items)-1)
-        self._progress_lbl.setText('Checking file versions ... Please wait!')
-        for i, item in enumerate(all_items):
-            self._progress.setValue(i)
-            self._progress_lbl.setText('Checking version for: {}'.format(item.text(1)))
-            current_version = artella.get_file_current_working_version(item.path)
-            if current_version == 0:
-                item.setText(2, '0 (Local Only)')
-            else:
-                item.setText(2, str(current_version))
-            item.setText(3, str(current_version + 1))
-        self._progress.setValue(0)
-        self._progress_lbl.setText('')
-        self._progress.setVisible(False)
+        try:
+            all_items = list(self._all_items())
+            self._progress.setVisible(True)
+            self._progress.setMinimum(0)
+            self._progress.setMaximum(len(all_items)-1)
+            self._progress_lbl.setText('Checking file versions ... Please wait!')
+            for i, item in enumerate(all_items):
+                self._progress.setValue(i)
+                self._progress_lbl.setText('Checking version for: {}'.format(item.text(1)))
+                current_version = artella.get_file_current_working_version(item.path)
+                if current_version == 0:
+                    item.setText(2, '0 (Local Only)')
+                else:
+                    item.setText(2, str(current_version))
+                item.setText(3, str(current_version + 1))
+        except Exception as e:
+            sys.solstice.logger.error(str(e))
+            sys.solstice.logger.error(traceback.format_exc())
+        finally:
+            self._progress.setValue(0)
+            self._progress_lbl.setText('')
+            self._progress.setVisible(False)
 
     def _on_lock(self):
         items_to_lock = list()

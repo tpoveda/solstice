@@ -197,5 +197,12 @@
     "Fixed important error that does not allowing to sync assets/sequences on clean computers",
     "Now LightRig Tool references the light rigs when pressing a Light Rig button",
     "Important refactor on Solstice Outliner Tool. Increased stability a lot. We keep working on it"
+  ],
+  "16.0":
+  [
+    "First sync for newcomers to the project now has proper feedback in Solstice Pipelinizer",
+    "Added shortcut to access Soltice Artella webpage through Solstice shelf",
+    "Added first version of Solstice Artella Batcher Uploader Tool",
+    "Different fixes in Solstice Artella functions"
   ]
 }

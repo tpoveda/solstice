@@ -43,11 +43,11 @@
                 "label": "Pipelinizer",
                 "dcc": ["maya", "houdini"]
             },
-            {
-                "icon": "upload_publish",
-                "command": "import solstice.pipeline as sp; sp.run_publisher()",
-                "annotation": "Runs Solstice Publisher Tool",
-                "label": "Solstice Publisher",
+                {
+                "icon": "artella_upload.png",
+                "command": "from solstice.pipeline.tools.batchuploader import batchuploader;batchuploader.run();",
+                "annotation": "Artella Upload Batcher",
+                "label": "Upload Batcher",
                 "dcc": ["maya", "houdini"]
             },
             {
@@ -64,17 +64,24 @@
                 "label": ""
             },
             {
+                "icon": "solstice_save",
+                "command": "import solstice.pipeline as sp; sp.solstice_save(notify=True)",
+                "annotation": "Save, remove invalid nodes and clean student license from file",
+                "label": "Solstice Save",
+                "dcc": ["maya", "houdini"]
+            },
+            {
                 "icon": "lock_file",
                 "command": "import solstice.pipeline as sp; sp.lock_file(notify=True)",
                 "annotation": "Locks current file in Artella server",
                 "label": "Lock File",
                 "dcc": ["maya", "houdini"]
             },
-            {
-                "icon": "solstice_save",
-                "command": "import solstice.pipeline as sp; sp.solstice_save(notify=True)",
-                "annotation": "Save, remove invalid nodes and clean student license from file",
-                "label": "Solstice Save",
+                        {
+                "icon": "unlock_file",
+                "command": "import solstice.pipeline as sp; sp.unlock_file(notify=True)",
+                "annotation": "Unlocks current file in Artella server",
+                "label": "Unlock File",
                 "dcc": ["maya", "houdini"]
             },
             {
@@ -84,11 +91,11 @@
                 "label": "New Working Version",
                 "dcc": ["maya", "houdini"]
             },
-            {
-                "icon": "unlock_file",
-                "command": "import solstice.pipeline as sp; sp.unlock_file(notify=True)",
-                "annotation": "Unlocks current file in Artella server",
-                "label": "Unlock File",
+                        {
+                "icon": "upload_publish",
+                "command": "import solstice.pipeline as sp; sp.run_publisher()",
+                "annotation": "Runs Solstice Publisher Tool",
+                "label": "Solstice Publisher",
                 "dcc": ["maya", "houdini"]
             },
             {

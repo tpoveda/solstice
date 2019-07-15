@@ -17,6 +17,7 @@ import sys
 import collections
 
 import solstice.pipeline as sp
+from solstice.pipeline.utils import browserutils
 
 
 class ArtellaHeaderMetaData(object):
@@ -165,7 +166,7 @@ class ArtellaAssetMetaData(object):
 class ArtellaReferencesMetaData(object):
     def __init__(self, ref_name, ref_path, ref_dict):
         self._name = ref_name.split('/')[-1]
-        self._path = os.path.join(ref_path, ref_name)
+        self._path = browserutils.clean_path(os.path.join(ref_path, self._name))
 
         self._maximum_version_deleted = ref_dict['maximum_version_deleted'] if 'maximum_version_deleted' in ref_dict else False
         self._is_directory = ref_dict['is_directory'] if 'is_directory' in ref_dict else False
