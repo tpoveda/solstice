@@ -1178,10 +1178,12 @@ def lock_file(file_path=None, notify=False):
     return True
 
 
-def unlock_file(file_path=None, notify=False):
+def unlock_file(file_path=None, notify=False, warn_user=True):
     """
     Unlocks current file in Artella
-    :param file_path:
+    :param file_path: str
+    :param notify: bool
+    :param notify: bool
     """
 
     from solstice.pipeline.utils import artellautils
@@ -1196,14 +1198,15 @@ def unlock_file(file_path=None, notify=False):
         sys.solstice.logger.error('File {} cannot be locked because it does not exists!'.format(file_path))
         return False
 
-    msg = 'If changes in file: \n\n{}\n\n are not submitted to Artella yet, submit them before unlocking the file please. \n\n Do you want to continue?'.format(file_path)
-    res = sys.solstice.dcc.confirm_dialog(title='Solstice Tools - Unlock File', message=msg, button=['Yes', 'No'], cancel_button='No', dismiss_string='No')
-    if is_houdini():
-        if res != QMessageBox.StandardButton.Yes:
-            return
-    else:
-        if res != 'Yes':
-            return False
+    if warn_user:
+        msg = 'If changes in file: \n\n{}\n\n are not submitted to Artella yet, submit them before unlocking the file please. \n\n Do you want to continue?'.format(file_path)
+        res = sys.solstice.dcc.confirm_dialog(title='Solstice Tools - Unlock File', message=msg, button=['Yes', 'No'], cancel_button='No', dismiss_string='No')
+        if is_houdini():
+            if res != QMessageBox.StandardButton.Yes:
+                return
+        else:
+            if res != 'Yes':
+                return False
 
     artellautils.unlock_file(file_path=file_path)
     if notify:
@@ -1212,7 +1215,7 @@ def unlock_file(file_path=None, notify=False):
     return True
 
 
-def upload_working_version(file_path=None, skip_saving=False, notify=False):
+def upload_working_version(file_path=None, skip_saving=False, notify=False, comment=None):
     """
     Uploads a new version of the given file
     :param file_path: str
@@ -1244,10 +1247,14 @@ def upload_working_version(file_path=None, skip_saving=False, notify=False):
                 current_version = int(v[0])
         current_version += 1
 
-    try:
-        comment, res = QInputDialog.getMultiLineText(sys.solstice.dcc.get_main_window(), 'Make New Version ({}) : {}'.format(current_version, short_path), 'Comment')
-    except Exception:
-        comment, res = QInputDialog.getText(sys.solstice.dcc.get_main_window(), 'Make New Version ({}) : {}'.format(current_version, short_path), 'Comment')
+    if comment:
+        comment = str(comment)
+        res = True
+    else:
+        try:
+            comment, res = QInputDialog.getMultiLineText(sys.solstice.dcc.get_main_window(), 'Make New Version ({}) : {}'.format(current_version, short_path), 'Comment')
+        except Exception:
+            comment, res = QInputDialog.getText(sys.solstice.dcc.get_main_window(), 'Make New Version ({}) : {}'.format(current_version, short_path), 'Comment')
 
     if res and comment:
         artellautils.upload_new_asset_version(file_path=file_path, comment=comment, skip_saving=skip_saving)

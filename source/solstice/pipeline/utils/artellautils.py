@@ -1012,6 +1012,29 @@ def publish_asset(asset_path, comment, selected_versions, version_name):
     return rsp
 
 
+def get_file_current_working_version(file_path):
+    """
+    Returns current working version of the given file in Artella server
+    :param file_path: str
+    :return: int
+    """
+
+    if not file_path or not os.path.isfile(file_path):
+        return -1
+
+    history = get_asset_history(file_path)
+    file_versions = history.versions
+    if not file_versions:
+        current_version = 0
+    else:
+        current_version = 0
+        for v in file_versions:
+            if int(v[0]) > current_version:
+                current_version = int(v[0])
+
+    return current_version
+
+
 def within_artella_scene():
     """
     Returns True if the current Maya scene corresponds to a Artella Maya scene
