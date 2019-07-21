@@ -1,10 +1,11 @@
 import zipfile
 from functools import partial
 
+import os
 # for path in sp.os.sys.path:
 #     if 'solstice' in path:
 #         sp.os.sys.path.remove(path)
-# sp.os.sys.path.insert(0, "C:\\Users\\enriq\\dev\\solstice\\source")
+os.sys.path.insert(0, "C:\\Users\\enriq\\dev\\solstice\\source")
 
 import sys
 from shiboken2 import wrapInstance
@@ -15,13 +16,14 @@ import pymel.core as pm
 import solstice.pipeline as sp
 from solstice.pipeline.externals.solstice_qt import QtWidgets, QtCore, QtGui
 from solstice.pipeline import tools
+from solstice.pipeline.gui import dialog, animations
 
 import xgenm as xg
 import xgenm.XgExternalAPI as xge
 import xgenm.xgGlobal as xgg
 
 
-class ControlXgenUi(QtWidgets.QDialog):
+class ControlXgenUi(dialog.Dialog):
     name = 'xgen_window'  # Do not change or UI load'll fail and Maya'll crash painfully
     title = 'Solstice Tools - XGen Handle'
     version = '1.0'
@@ -215,4 +217,5 @@ def maya_main_window():
 
 
 myWin = ControlXgenUi(parent=maya_main_window())
+myWin.custom_ui()
 myWin.show()
