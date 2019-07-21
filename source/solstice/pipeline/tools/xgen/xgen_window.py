@@ -1,43 +1,49 @@
-import json
-import os
-import shutil
 import zipfile
 from functools import partial
 
-# for path in os.sys.path:
+# for path in sp.os.sys.path:
 #     if 'solstice' in path:
-#         os.sys.path.remove(path)
-# os.sys.path.insert(0, "C:\\Users\\enriq\\dev\\solstice\\source")
+#         sp.os.sys.path.remove(path)
+# sp.os.sys.path.insert(0, "C:\\Users\\enriq\\dev\\solstice\\source")
 
 import sys
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as omui
 import maya.cmds as mc
-import xgenm as xg
 import pymel.core as pm
+
+import solstice.pipeline as sp
 from solstice.pipeline.externals.solstice_qt import QtWidgets, QtCore, QtGui
-from solstice.pipeline.gui import xgen_ui
+from solstice.pipeline import tools
+
+import xgenm as xg
 import xgenm.XgExternalAPI as xge
 import xgenm.xgGlobal as xgg
 
 
 class ControlXgenUi(QtWidgets.QDialog):
+    name = 'xgen_window'  # Do not change or UI load'll fail and Maya'll crash painfully
+    title = 'Solstice Tools - XGen Handle'
+    version = '1.0'
+    docked = False
 
-    def __init__(self, parent=None):
-        super(ControlXgenUi, self).__init__(parent)
+    def __init__(self, **kwargs):
+        super(ControlXgenUi, self).__init__(**kwargs)
         # class variables
         self.shaders_dict = dict()
         self.scalpts_list = list()
         self.collection_name = None
 
-        self.setObjectName('XGEN UI')
-        self.ui = xgen_ui.Ui_xgen_widget()
-        self.ui.setupUi(self)
+    def custom_ui(self):
+        super(ControlXgenUi, self).custom_ui()
 
+        self.resize(500, 400)
+        self.setObjectName('XGEN UI')
+        self.ui = tools.load_tool_ui(self.name)
+        self.main_layout.addWidget(self.ui)
         self.populate_data()
         self.connect_componets_to_actions()
 
-        self.resize(500, 400)
         self.show()
 
     def populate_data(self):
@@ -79,11 +85,11 @@ class ControlXgenUi(QtWidgets.QDialog):
         # Export objects into file and compress it
         # copy maps
         export_path_folder = export_path.replace('.zip', '')
-        os.makedirs(export_path_folder)
+        sp.os.makedirs(export_path_folder)
         if '${PROJECT}' in ptx_folder:
             project_path = str(mc.workspace(fullName=True, q=True))
-            ptx_folder = os.path.join(project_path, ptx_folder.replace('${PROJECT}', ''))
-        shutil.copytree(ptx_folder, os.path.join(export_path_folder, self.collection_name))
+            ptx_folder = sp.os.path.join(project_path, ptx_folder.replace('${PROJECT}', ''))
+        sp.shutil.copytree(ptx_folder, sp.os.path.join(export_path_folder, self.collection_name))
 
         # export xgen
         xg.exportPalette(palette=str(self.collection_name),
@@ -91,25 +97,25 @@ class ControlXgenUi(QtWidgets.QDialog):
 
         # export sculpts
         mc.select(self.scalpts_list, replace=True)
-        mc.file(rename=os.path.join(export_path_folder, 'sculpts.ma'))
+        mc.file(rename=sp.os.path.join(export_path_folder, 'sculpts.ma'))
         mc.file(es=True, type='mayaAscii')
         mc.select(cl=True)
 
         # export material
         mc.select(self.shaders_dict.values(), replace=True)
-        mc.file(rename=os.path.join(export_path_folder, 'shader.ma'))
+        mc.file(rename=sp.os.path.join(export_path_folder, 'shader.ma'))
         mc.file(es=True, type='mayaAscii')
         mc.select(cl=True)
 
         # export mapping
-        with open(os.path.join(export_path_folder, 'shader.json'), 'w') as fp:
-            json.dump(self.shaders_dict, fp)
+        with open(sp.os.path.join(export_path_folder, 'shader.json'), 'w') as fp:
+            sp.json.dump(self.shaders_dict, fp)
 
         # close
-        shutil.make_archive(export_path_folder, 'zip', export_path_folder)
+        sp.shutil.make_archive(export_path_folder, 'zip', export_path_folder)
 
         # clean up
-        shutil.rmtree(export_path_folder, ignore_errors=True)
+        sp.shutil.rmtree(export_path_folder, ignore_errors=True)
 
     def do_import(self):
         import_folder = self.ui.groom_package_txf.text()
@@ -130,15 +136,15 @@ class ControlXgenUi(QtWidgets.QDialog):
             print('Done!')
 
         import_path_folder = import_folder.replace('.zip', '')
-        _, groom_asset = os.path.split(import_path_folder)
-        xgen_file = [f for f in os.listdir(import_path_folder) if f.endswith('.xgen')][-1]
-        map_folder = [os.path.join(import_path_folder, d) for d in os.listdir(import_path_folder) if
-                      os.path.isdir(os.path.join(import_path_folder, d))][0]
+        _, groom_asset = sp.os.path.split(import_path_folder)
+        xgen_file = [f for f in sp.os.listdir(import_path_folder) if f.endswith('.xgen')][-1]
+        map_folder = [sp.os.path.join(import_path_folder, d) for d in sp.os.listdir(import_path_folder) if
+                      sp.os.path.isdir(sp.os.path.join(import_path_folder, d))][0]
 
         # import maya scenes
-        mc.file(os.path.join(import_folder, 'scalps.ma'), i=True, type="mayaAscii", ignoreVersion=True,
+        mc.file(sp.os.path.join(import_folder, 'scalps.ma'), i=True, type="mayaAscii", ignoreVersion=True,
                 mergeNamespacesOnClash=False, gl=True, namespace=groom_asset, options="v=0", groupReference=False)
-        mc.file(os.path.join(import_folder, 'shader.ma'), i=True, type="mayaAscii", ignoreVersion=True,
+        mc.file(sp.os.path.join(import_folder, 'shader.ma'), i=True, type="mayaAscii", ignoreVersion=True,
                 mergeNamespacesOnClash=False, gl=True, namespace=groom_asset, options="v=0", groupReference=False)
         # import xgen
         try:
@@ -173,11 +179,11 @@ class ControlXgenUi(QtWidgets.QDialog):
         qt_object.setText(text_to_add)
 
     def open_file(self):
-        file_path, _ext = QtWidgets.QFileDialog.getOpenFileName(self, dir=os.environ['home'], filter='Zip File(*.zip)')
+        file_path, _ext = QtWidgets.QFileDialog.getOpenFileName(self, dir=sp.os.environ['home'], filter='Zip File(*.zip)')
         self.ui.groom_package_txf.setText(str(file_path))
 
     def save_file(self):
-        file_path, _ext = QtWidgets.QFileDialog.getSaveFileName(self, dir=os.environ['home'], filter='Zip File(*.zip)')
+        file_path, _ext = QtWidgets.QFileDialog.getSaveFileName(self, dir=sp.os.environ['home'], filter='Zip File(*.zip)')
         self.ui.path_txf.setText(str(file_path))
 
     def add_file_to_artella(self):
