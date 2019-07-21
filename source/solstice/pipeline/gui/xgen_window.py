@@ -4,10 +4,10 @@ import shutil
 import zipfile
 from functools import partial
 
-for path in os.sys.path:
-    if 'solstice' in path:
-        os.sys.path.remove(path)
-os.sys.path.insert(0, "C:\\Users\\enriq\\dev\\solstice\\source")
+# for path in os.sys.path:
+#     if 'solstice' in path:
+#         os.sys.path.remove(path)
+# os.sys.path.insert(0, "C:\\Users\\enriq\\dev\\solstice\\source")
 
 import sys
 from shiboken2 import wrapInstance
