@@ -1,13 +1,12 @@
 import zipfile
 from functools import partial
 
-import os
-# for path in sp.os.sys.path:
-#     if 'solstice' in path:
-#         sp.os.sys.path.remove(path)
-os.sys.path.insert(0, "C:\\Users\\enriq\\dev\\solstice\\source")
+# import os
+# # for path in sp.os.sys.path:
+# #     if 'solstice' in path:
+# #         sp.os.sys.path.remove(path)
+# os.sys.path.insert(0, "C:\\Users\\enriq\\dev\\solstice\\source")
 
-import sys
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as omui
 import maya.cmds as mc
@@ -40,7 +39,6 @@ class ControlXgenUi(dialog.Dialog):
         super(ControlXgenUi, self).custom_ui()
 
         self.resize(500, 400)
-        self.setObjectName('XGEN UI')
         self.ui = tools.load_tool_ui(self.name)
         self.main_layout.addWidget(self.ui)
         self.populate_data()
