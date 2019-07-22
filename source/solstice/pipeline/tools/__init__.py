@@ -1,4 +1,5 @@
 import os
+import sys
 
 import solstice.pipeline as sp
 from solstice.pipeline.utils import qtutils
