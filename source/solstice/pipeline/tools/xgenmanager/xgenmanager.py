@@ -110,27 +110,32 @@ class ControlXgenUi(window.Window):
         if '${PROJECT}' in ptx_folder:
             project_path = str(mc.workspace(fullName=True, q=True))
             ptx_folder = sp.os.path.join(project_path, ptx_folder.replace('${PROJECT}', ''))
+        self.ui.progress_lbl.setText("Exporting Files (PTX)")
         sp.shutil.copytree(ptx_folder, sp.os.path.join(self.export_path_folder, self.collection_name))
 
         # export xgen
         xg.exportPalette(palette=str(self.collection_name),
                          fileName=str("{}/{}.xgen".format(self.export_path_folder, self.collection_name)))
+        self.ui.progress_lbl.setText("Exporting Files (.XGEN)")
 
         # export sculpts
         mc.select(self.scalpts_list, replace=True)
         mc.file(rename=sp.os.path.join(self.export_path_folder, 'sculpts.ma'))
         mc.file(es=True, type='mayaAscii')
         mc.select(cl=True)
+        self.ui.progress_lbl.setText("Exporting Sculpts (.MA)")
 
         # export material
         mc.select(self.shaders_dict.values(), replace=True)
         mc.file(rename=sp.os.path.join(self.export_path_folder, 'shader.ma'))
         mc.file(es=True, type='mayaAscii')
         mc.select(cl=True)
+        self.ui.progress_lbl.setText("Exporting Material (.MA)")
 
         # export mapping
         with open(sp.os.path.join(self.export_path_folder, 'shader.json'), 'w') as fp:
             sp.json.dump(self.shaders_dict, fp)
+        self.ui.progress_lbl.setText("Exporting Mapping (.JSON)")
 
         if comment:
             self.add_file_to_artella(file_path_global=self.export_path_folder, comment=comment)
@@ -198,6 +203,7 @@ class ControlXgenUi(window.Window):
         self.ui.path_txf.setText(str(file_path))
 
     def add_file_to_artella(self, file_path_global, comment):
+        self.ui.progress_lbl.setText("Uploading Files")
         i = 0
         for root, dirs, files in sp.os.walk(file_path_global):
             for file in files:
