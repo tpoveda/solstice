@@ -29,7 +29,7 @@
       <item>
        <widget class="QTabWidget" name="grom_tabw">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="exporter_tab">
          <attribute name="title">
@@ -55,31 +55,46 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="QLineEdit" name="path_txf"/>
-             </item>
-             <item>
-              <widget class="QPushButton" name="path_browse_btn">
-               <property name="text">
-                <string>Browse</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="Line" name="line">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="import_character_lbl">
-               <property name="text">
-                <string>Character</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="import_character_cbx"/>
+              <layout class="QVBoxLayout" name="verticalLayout_10">
+               <item>
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>If the character is set, path will be ignored</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                 <item>
+                  <widget class="QLineEdit" name="path_txf"/>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="path_browse_btn">
+                   <property name="text">
+                    <string>Browse</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="Line" name="line">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="import_character_lbl">
+                   <property name="text">
+                    <string>Character</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="import_character_cbx"/>
+                 </item>
+                </layout>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>
@@ -90,6 +105,13 @@
              <string>Comment</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_9">
+             <item>
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>If the comment not set, files won't be uploaded into artella</string>
+               </property>
+              </widget>
+             </item>
              <item>
               <widget class="QPlainTextEdit" name="comment_pte"/>
              </item>
@@ -138,6 +160,23 @@
                 <string>Browse</string>
                </property>
               </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Character</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="comboBox"/>
              </item>
             </layout>
            </widget>

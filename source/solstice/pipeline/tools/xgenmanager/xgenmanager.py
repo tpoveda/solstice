@@ -66,6 +66,7 @@ class ControlXgenUi(window.Window):
 
         characters_to_set = sp.os.listdir(sp.os.path.join(sp.get_solstice_assets_path(), "Characters"))
         characters_to_set.insert(0, "")
+        self.ui.export_character_cbx.addItems(characters_to_set)
         self.ui.import_character_cbx.addItems(characters_to_set)
 
     def connect_componets_to_actions(self):
@@ -75,6 +76,17 @@ class ControlXgenUi(window.Window):
         self.ui.groom_file_browser_btn.clicked.connect(self.open_file)
         self.ui.geometry_scalpt_grp_btn.clicked.connect(
             partial(self.load_selection_to_line, self.ui.geometry_scalpt_grp_txf))
+        self.ui.export_character_cbx.currentIndexChanged.connect(self.set_path)
+
+    def set_path(self):
+        asset_name = self.ui.export_character_cbx.currentText()
+        if asset_name:
+            save_path = sp.os.path.join(sp.get_solstice_assets_path(), "Characters", asset_name, "__working__",
+                                        "groom", "groom_package.groom")
+            self.ui.path_txf.setText(save_path)
+            return
+        self.ui.path_txf.setText("")
+
 
     def get_all_collections(self):
         collections_list = list()
@@ -90,7 +102,7 @@ class ControlXgenUi(window.Window):
         self.scalpts_list = self.get_scalpts()
         ptx_folder = self.get_root_folder()
         export_path = self.ui.path_txf.text()
-        self.character = self.ui.import_character_cbx.currentText()
+        self.character = self.ui.export_character_cbx.currentText()
         comment = self.ui.comment_pte.toPlainText()
 
         if not export_path:
@@ -106,6 +118,9 @@ class ControlXgenUi(window.Window):
         else:
             self.export_path_folder = sp.os.path.join(sp.get_solstice_assets_path(), "Characters", self.character,
                                                       "__working__", "groom", "groom_package.groom")
+        # if exists delete it
+        if sp.os.path.exists(self.export_path_folder) and sp.os.path.isdir(self.export_path_folder):
+            sp.shutil.rmtree(self.export_path_folder)
         sp.os.makedirs(self.export_path_folder)
         if '${PROJECT}' in ptx_folder:
             project_path = str(mc.workspace(fullName=True, q=True))
@@ -203,17 +218,20 @@ class ControlXgenUi(window.Window):
         self.ui.path_txf.setText(str(file_path))
 
     def add_file_to_artella(self, file_path_global, comment):
+        self.ui.progress_bar.setValue(0)
         self.ui.progress_lbl.setText("Uploading Files")
         i = 0
         for root, dirs, files in sp.os.walk(file_path_global):
             for file in files:
                 i += 1
         j = 0
+        self.ui.progress_bar.setMinimum(0)
+        self.ui.progress_bar.setMaximum(i - 1)
         for root, dirs, files in sp.os.walk(file_path_global):
             for file in files:
-                sp.upload_working_version(sp.os.path.join(root, file), comment=comment)
-                self.ui.progress_bar.setValue(int(j/i))
-                j+=1
+                sp.upload_working_version(sp.os.path.join(root, file), comment=comment, force=True)
+                self.ui.progress_bar.setValue((j / float(i))*100)
+                j += 1
 
     def get_shaders(self):
         material_dict = dict()
