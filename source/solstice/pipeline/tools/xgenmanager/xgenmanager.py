@@ -46,6 +46,8 @@ class ControlXgenUi(window.Window):
     def custom_ui(self):
         super(ControlXgenUi, self).custom_ui()
 
+        self.set_logo('solstice_xgen_manager')
+
         self.resize(500, 400)
         self.ui = tools.load_tool_ui(self.name)
         self.main_layout.addWidget(self.ui)
@@ -62,12 +64,17 @@ class ControlXgenUi(window.Window):
         self.ui.extra_depth_sbx.setValue(16)
         self.ui.extra_samples_sbx.setValue(0)
 
+        characters_to_set = sp.os.listdir(sp.os.path.join(sp.get_solstice_assets_path(), "Characters"))
+        characters_to_set.insert(0, "")
+        self.ui.import_character_cbx.addItems(characters_to_set)
+
     def connect_componets_to_actions(self):
         self.ui.export_go_btn.clicked.connect(self.do_export)
         self.ui.importer_go_btn.clicked.connect(self.do_import)
         self.ui.path_browse_btn.clicked.connect(self.save_file)
         self.ui.groom_file_browser_btn.clicked.connect(self.open_file)
-        self.ui.geometry_scalpt_grp_btn.clicked.connect(partial(self.load_selection_to_line, self.ui.geometry_scalpt_grp_txf))
+        self.ui.geometry_scalpt_grp_btn.clicked.connect(
+            partial(self.load_selection_to_line, self.ui.geometry_scalpt_grp_txf))
 
     def get_all_collections(self):
         collections_list = list()
@@ -83,44 +90,50 @@ class ControlXgenUi(window.Window):
         self.scalpts_list = self.get_scalpts()
         ptx_folder = self.get_root_folder()
         export_path = self.ui.path_txf.text()
+        self.character = self.ui.import_character_cbx.currentText()
+        comment = self.ui.comment_pte.toPlainText()
 
         if not export_path:
-            raise ValueError("export path must be specified")
+            if not self.character:
+                raise ValueError("export path must be specified")
 
         # Export objects into file and compress it
         # copy maps
-        export_path_folder = export_path.replace('.zip', '')
-        sp.os.makedirs(export_path_folder)
+        if export_path:
+            self.export_path_folder = export_path
+            if not '.groom' in export_path:
+                self.export_path_folder = export_path + '.groom'
+        else:
+            self.export_path_folder = sp.os.path.join(sp.get_solstice_assets_path(), "Characters", self.character,
+                                                      "__working__", "groom", "groom_package.groom")
+        sp.os.makedirs(self.export_path_folder)
         if '${PROJECT}' in ptx_folder:
             project_path = str(mc.workspace(fullName=True, q=True))
             ptx_folder = sp.os.path.join(project_path, ptx_folder.replace('${PROJECT}', ''))
-        sp.shutil.copytree(ptx_folder, sp.os.path.join(export_path_folder, self.collection_name))
+        sp.shutil.copytree(ptx_folder, sp.os.path.join(self.export_path_folder, self.collection_name))
 
         # export xgen
         xg.exportPalette(palette=str(self.collection_name),
-                         fileName=str("{}/{}.xgen".format(export_path_folder, self.collection_name)))
+                         fileName=str("{}/{}.xgen".format(self.export_path_folder, self.collection_name)))
 
         # export sculpts
         mc.select(self.scalpts_list, replace=True)
-        mc.file(rename=sp.os.path.join(export_path_folder, 'sculpts.ma'))
+        mc.file(rename=sp.os.path.join(self.export_path_folder, 'sculpts.ma'))
         mc.file(es=True, type='mayaAscii')
         mc.select(cl=True)
 
         # export material
         mc.select(self.shaders_dict.values(), replace=True)
-        mc.file(rename=sp.os.path.join(export_path_folder, 'shader.ma'))
+        mc.file(rename=sp.os.path.join(self.export_path_folder, 'shader.ma'))
         mc.file(es=True, type='mayaAscii')
         mc.select(cl=True)
 
         # export mapping
-        with open(sp.os.path.join(export_path_folder, 'shader.json'), 'w') as fp:
+        with open(sp.os.path.join(self.export_path_folder, 'shader.json'), 'w') as fp:
             sp.json.dump(self.shaders_dict, fp)
 
-        # close
-        sp.shutil.make_archive(export_path_folder, 'zip', export_path_folder)
-
-        # clean up
-        sp.shutil.rmtree(export_path_folder, ignore_errors=True)
+        if comment:
+            self.add_file_to_artella(file_path_global=self.export_path_folder, comment=comment)
 
     def do_import(self):
         import_folder = self.ui.groom_package_txf.text()
@@ -130,15 +143,6 @@ class ControlXgenUi(window.Window):
 
         # build scene
         mc.loadPlugin('xgenToolkit.mll')
-        # opening the zip file in READ mode
-        with zipfile.ZipFile(import_folder, 'r') as zip:
-            # printing all the contents of the zip file
-            zip.printdir()
-
-            # extracting all the files
-            print('Extracting all the files now...')
-            zip.extractall()
-            print('Done!')
 
         import_path_folder = import_folder.replace('.zip', '')
         _, groom_asset = sp.os.path.split(import_path_folder)
@@ -184,15 +188,26 @@ class ControlXgenUi(window.Window):
         qt_object.setText(text_to_add)
 
     def open_file(self):
-        file_path, _ext = QtWidgets.QFileDialog.getOpenFileName(self, dir=sp.os.environ['home'], filter='Zip File(*.zip)')
+        file_path, _ext = QtWidgets.QFileDialog.getOpenFileName(self, dir=sp.os.environ['home'],
+                                                                filter='Folder(.groom)')
         self.ui.groom_package_txf.setText(str(file_path))
 
     def save_file(self):
-        file_path, _ext = QtWidgets.QFileDialog.getSaveFileName(self, dir=sp.os.environ['home'], filter='Zip File(*.zip)')
+        file_path, _ext = QtWidgets.QFileDialog.getSaveFileName(self, dir=sp.os.environ['home'],
+                                                                filter='Folder(.groom)')
         self.ui.path_txf.setText(str(file_path))
 
-    def add_file_to_artella(self):
-        pass
+    def add_file_to_artella(self, file_path_global, comment):
+        i = 0
+        for root, dirs, files in sp.os.walk(file_path_global):
+            for file in files:
+                i += 1
+        j = 0
+        for root, dirs, files in sp.os.walk(file_path_global):
+            for file in files:
+                sp.upload_working_version(sp.os.path.join(root, file), comment=comment)
+                self.ui.progress_bar.setValue(int(j/i))
+                j+=1
 
     def get_shaders(self):
         material_dict = dict()
@@ -219,5 +234,3 @@ def run():
     myWin.show()
 
     return myWin
-
-
