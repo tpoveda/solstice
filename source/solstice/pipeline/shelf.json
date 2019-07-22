@@ -260,6 +260,13 @@
                 "annotation": "Solstice Alembic Manager",
                 "label": "Alembic Manager",
                 "dcc": ["maya", "houdini"]
+            },
+            {
+                "icon": "xgen_manager.png",
+                "command": "from solstice.pipeline.tools.xgenmanager import xgenmanager; xgenmanager.run();",
+                "annotation": "Solstice Xgen Manager",
+                "label": "XGen Manager",
+                "dcc": ["maya"]
             }
         ],
         "utils":
