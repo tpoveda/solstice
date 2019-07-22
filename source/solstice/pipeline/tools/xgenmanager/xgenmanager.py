@@ -1,39 +1,47 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Tool that allows to import/export XGen data
+"""
+
+from __future__ import print_function, division, absolute_import
+
+__author__ = "Enrique Velasco"
+__license__ = "MIT"
+__maintainer__ = "Enrique Velasco"
+__email__ = ""
+
+import sys
 import zipfile
 from functools import partial
 
-# import os
-# # for path in sp.os.sys.path:
-# #     if 'solstice' in path:
-# #         sp.os.sys.path.remove(path)
-# os.sys.path.insert(0, "C:\\Users\\enriq\\dev\\solstice\\source")
-
-from shiboken2 import wrapInstance
-import maya.OpenMayaUI as omui
 import maya.cmds as mc
 import pymel.core as pm
 
 import solstice.pipeline as sp
 from solstice.pipeline.externals.solstice_qt import QtWidgets, QtCore, QtGui
 from solstice.pipeline import tools
-from solstice.pipeline.gui import dialog, animations
+from solstice.pipeline.gui import window, animations
 
 import xgenm as xg
 import xgenm.XgExternalAPI as xge
 import xgenm.xgGlobal as xgg
 
 
-class ControlXgenUi(dialog.Dialog):
-    name = 'xgen_window'  # Do not change or UI load'll fail and Maya'll crash painfully
-    title = 'Solstice Tools - XGen Handle'
+class ControlXgenUi(window.Window):
+    name = 'xgenmanager'  # Do not change or UI load'll fail and Maya'll crash painfully
+    title = 'Solstice Tools - XGen Manager'
     version = '1.0'
     docked = False
 
     def __init__(self, **kwargs):
-        super(ControlXgenUi, self).__init__(**kwargs)
-        # class variables
+
         self.shaders_dict = dict()
         self.scalpts_list = list()
         self.collection_name = None
+
+        super(ControlXgenUi, self).__init__(**kwargs)
 
     def custom_ui(self):
         super(ControlXgenUi, self).custom_ui()
@@ -43,8 +51,6 @@ class ControlXgenUi(dialog.Dialog):
         self.main_layout.addWidget(self.ui)
         self.populate_data()
         self.connect_componets_to_actions()
-
-        self.show()
 
     def populate_data(self):
         self.ui.collection_cbx.addItems(self.get_all_collections())
@@ -61,8 +67,7 @@ class ControlXgenUi(dialog.Dialog):
         self.ui.importer_go_btn.clicked.connect(self.do_import)
         self.ui.path_browse_btn.clicked.connect(self.save_file)
         self.ui.groom_file_browser_btn.clicked.connect(self.open_file)
-        self.ui.geometry_scalpt_grp_btn.clicked.connect(partial(self.load_selection_to_line,
-                                                                self.ui.geometry_scalpt_grp_txf))
+        self.ui.geometry_scalpt_grp_btn.clicked.connect(partial(self.load_selection_to_line, self.ui.geometry_scalpt_grp_txf))
 
     def get_all_collections(self):
         collections_list = list()
@@ -209,11 +214,10 @@ class ControlXgenUi(dialog.Dialog):
         return scalpts
 
 
-def maya_main_window():
-    main_window_ptr = omui.MQtUtil.mainWindow()
-    return wrapInstance(long(main_window_ptr), QtWidgets.QWidget)
+def run():
+    myWin = ControlXgenUi()
+    myWin.show()
+
+    return myWin
 
 
-myWin = ControlXgenUi(parent=maya_main_window())
-myWin.custom_ui()
-myWin.show()
