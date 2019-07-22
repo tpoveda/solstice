@@ -29,7 +29,7 @@
       <item>
        <widget class="QTabWidget" name="grom_tabw">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="exporter_tab">
          <attribute name="title">
@@ -63,6 +63,23 @@
                 <string>Browse</string>
                </property>
               </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="import_character_lbl">
+               <property name="text">
+                <string>Character</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="import_character_cbx"/>
              </item>
             </layout>
            </widget>
@@ -274,6 +291,33 @@
              <string>Guides</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <item>
+                <widget class="QLabel" name="shot_lbl">
+                 <property name="text">
+                  <string>Shot</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="shot_cbx"/>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
              <item>
               <widget class="QPushButton" name="import_guides_btn">
                <property name="text">
