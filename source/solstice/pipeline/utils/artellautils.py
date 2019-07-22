@@ -944,7 +944,7 @@ def unlock_file(file_path):
     return True
 
 
-def upload_new_asset_version(file_path=None, comment='Published new version with Solstice Tools', skip_saving=False):
+def upload_new_asset_version(file_path=None, comment='Published new version with Solstice Tools', skip_saving=False, force=False):
     """
     Adds a new file to the Artella server
     :param file_path:
@@ -962,7 +962,7 @@ def upload_new_asset_version(file_path=None, comment='Published new version with
     sys.solstice.logger.info(msg)
     sp.message(msg)
     if file_path is not None and file_path != '':
-        valid_lock = lock_file(file_path=file_path)
+        valid_lock = lock_file(file_path=file_path, force=force)
         if not valid_lock:
             return False
 
