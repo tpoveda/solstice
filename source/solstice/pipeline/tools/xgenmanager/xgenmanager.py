@@ -10,10 +10,9 @@ from __future__ import print_function, division, absolute_import
 __author__ = "Enrique Velasco"
 __license__ = "MIT"
 __maintainer__ = "Enrique Velasco"
-__email__ = ""
+__email__ = "enriquevelmai@hotmail.com"
 
 import sys
-import zipfile
 from functools import partial
 
 import maya.cmds as mc
@@ -28,21 +27,30 @@ import xgenm as xg
 import xgenm.XgExternalAPI as xge
 import xgenm.xgGlobal as xgg
 
-
+########################################################################################################################
+# class definition
+########################################################################################################################
 class ControlXgenUi(window.Window):
+    # global class variables
     name = 'xgenmanager'  # Do not change or UI load'll fail and Maya'll crash painfully
     title = 'Solstice Tools - XGen Manager'
     version = '1.0'
     docked = False
 
+    ####################################################################################################################
+    # class constructor
+    ####################################################################################################################
     def __init__(self, **kwargs):
 
         self.shaders_dict = dict()
-        self.scalpts_list = list()
+        self.scalps_list = list()
         self.collection_name = None
 
         super(ControlXgenUi, self).__init__(**kwargs)
 
+    ####################################################################################################################
+    # ui definitions
+    ####################################################################################################################
     def custom_ui(self):
         super(ControlXgenUi, self).custom_ui()
 
@@ -51,11 +59,11 @@ class ControlXgenUi(window.Window):
         self.resize(500, 400)
         self.ui = tools.load_tool_ui(self.name)
         self.main_layout.addWidget(self.ui)
-        self.populate_data()
-        self.connect_componets_to_actions()
+        self._populate_data()
+        self._connect_componets_to_actions()
 
-    def populate_data(self):
-        self.ui.collection_cbx.addItems(self.get_all_collections())
+    def _populate_data(self):
+        self.ui.collection_cbx.addItems(self._get_all_collections())
         self.ui.renderer_cbx.addItems(["None", "Arnold Renderer"])
         self.ui.renderer_cbx.setCurrentIndex(1)
         self.ui.renderer_mode_cbx.addItems(["Live", "Batch Render"])
@@ -69,16 +77,22 @@ class ControlXgenUi(window.Window):
         self.ui.export_character_cbx.addItems(characters_to_set)
         self.ui.import_character_cbx.addItems(characters_to_set)
 
-    def connect_componets_to_actions(self):
-        self.ui.export_go_btn.clicked.connect(self.do_export)
-        self.ui.importer_go_btn.clicked.connect(self.do_import)
-        self.ui.path_browse_btn.clicked.connect(self.save_file)
-        self.ui.groom_file_browser_btn.clicked.connect(self.open_file)
+    def _connect_componets_to_actions(self):
+        self.ui.export_go_btn.clicked.connect(self._do_export)
+        self.ui.importer_go_btn.clicked.connect(self._do_import)
+        self.ui.path_browse_btn.clicked.connect(self._save_file)
+        self.ui.groom_file_browser_btn.clicked.connect(self._open_file)
         self.ui.geometry_scalpt_grp_btn.clicked.connect(
-            partial(self.load_selection_to_line, self.ui.geometry_scalpt_grp_txf))
-        self.ui.export_character_cbx.currentIndexChanged.connect(self.set_path)
+            partial(self._load_selection_to_line, self.ui.geometry_scalpt_grp_txf))
+        self.ui.export_character_cbx.currentIndexChanged.connect(self._set_path)
 
-    def set_path(self):
+    ####################################################################################################################
+    # UI functions set
+    ####################################################################################################################
+    def _set_path(self):
+        """
+        Sets path to the text widget
+        """
         asset_name = self.ui.export_character_cbx.currentText()
         if asset_name:
             save_path = sp.os.path.join(sp.get_solstice_assets_path(), "Characters", asset_name, "__working__",
@@ -87,30 +101,74 @@ class ControlXgenUi(window.Window):
             return
         self.ui.path_txf.setText("")
 
+    def _load_selection_to_line(self, qt_object):
+        """
+        Load selection into the given texfiled
+        :param qt_object: QTexField object where to set the selected items
+        """
+        # set the string to load
+        selection = mc.ls(sl=True)
+        text_to_add = '"{}"'.format(selection[0])
+        if len(selection) > 1:
+            for obj in selection[1:]:
+                text_to_add += ';"{}"'.format(obj)
 
-    def get_all_collections(self):
+        # set text to the object
+        qt_object.setText(text_to_add)
+
+    def _get_all_collections(self):
+        """
+        Get all collections in the maya scene
+        :return: list, with the collection names
+        """
         collections_list = list()
         for item in xg.palettes():
             collections_list.append(item)
         return collections_list
 
-    def do_export(self):
+    def _open_file(self):
+        """
+        Open file dialog, and sets the path to the QTexField
+        """
+        file_path, _ext = QtWidgets.QFileDialog.getOpenFileName(self, dir=sp.os.environ['home'],
+                                                                filter='Folder(.groom)')
+        self.ui.groom_package_txf.setText(str(file_path))
 
-        # Get Data
+    def _save_file(self):
+        """
+        Save file dialog, and sets the path to the QTexField
+        :return:
+        """
+        file_path, _ext = QtWidgets.QFileDialog.getSaveFileName(self, dir=sp.os.environ['home'],
+                                                                filter='Folder(.groom)')
+        self.ui.path_txf.setText(str(file_path))
+
+    ####################################################################################################################
+    # class core functions
+    ####################################################################################################################
+    def _do_export(self):
+        """
+        Executes the export of the choose collection
+        """
+
+        # Get data from ui
         self.collection_name = self.ui.collection_cbx.currentText()
-        self.shaders_dict = self.get_shaders()
-        self.scalpts_list = self.get_scalpts()
-        ptx_folder = self.get_root_folder()
+        self.shaders_dict = self._get_shaders()
+        self.scalps_list = self._get_scalps()
+        ptx_folder = self._get_root_folder()
         export_path = self.ui.path_txf.text()
         self.character = self.ui.export_character_cbx.currentText()
         comment = self.ui.comment_pte.toPlainText()
 
+        # analise if there is an export folder
         if not export_path:
             if not self.character:
                 raise ValueError("export path must be specified")
 
-        # Export objects into file and compress it
-        # copy maps
+        ################################################################################################################
+        # Export objects into a .groom folder
+        ################################################################################################################
+        # generate export path
         if export_path:
             self.export_path_folder = export_path
             if not '.groom' in export_path:
@@ -118,27 +176,35 @@ class ControlXgenUi(window.Window):
         else:
             self.export_path_folder = sp.os.path.join(sp.get_solstice_assets_path(), "Characters", self.character,
                                                       "__working__", "groom", "groom_package.groom")
-        # if exists delete it
+
+        # if the folder already exists delete it, and create a new one
         if sp.os.path.exists(self.export_path_folder) and sp.os.path.isdir(self.export_path_folder):
-            sp.shutil.rmtree(self.export_path_folder)
+            sp.shutil.rmtree(self.export_path_folder, onerror=sp.on_rm_error)
         sp.os.makedirs(self.export_path_folder)
+
+        # get the ptx path
         if '${PROJECT}' in ptx_folder:
             project_path = str(mc.workspace(fullName=True, q=True))
             ptx_folder = sp.os.path.join(project_path, ptx_folder.replace('${PROJECT}', ''))
+        sys.solstice.logger.debug("XGEN || All data parsed")
         self.ui.progress_lbl.setText("Exporting Files (PTX)")
+        # copy the ptx files
         sp.shutil.copytree(ptx_folder, sp.os.path.join(self.export_path_folder, self.collection_name))
+        sys.solstice.logger.debug("XGEN || PTEX files exported")
 
-        # export xgen
+        # export xgen file
         xg.exportPalette(palette=str(self.collection_name),
                          fileName=str("{}/{}.xgen".format(self.export_path_folder, self.collection_name)))
         self.ui.progress_lbl.setText("Exporting Files (.XGEN)")
+        sys.solstice.logger.debug("XGEN || Collection file exported")
 
         # export sculpts
-        mc.select(self.scalpts_list, replace=True)
+        mc.select(self.scalps_list, replace=True)
         mc.file(rename=sp.os.path.join(self.export_path_folder, 'sculpts.ma'))
         mc.file(es=True, type='mayaAscii')
         mc.select(cl=True)
         self.ui.progress_lbl.setText("Exporting Sculpts (.MA)")
+        sys.solstice.logger.debug("XGEN || Sculpts Exported")
 
         # export material
         mc.select(self.shaders_dict.values(), replace=True)
@@ -146,16 +212,25 @@ class ControlXgenUi(window.Window):
         mc.file(es=True, type='mayaAscii')
         mc.select(cl=True)
         self.ui.progress_lbl.setText("Exporting Material (.MA)")
+        sys.solstice.logger.debug("XGEN || Material Exported")
 
         # export mapping
         with open(sp.os.path.join(self.export_path_folder, 'shader.json'), 'w') as fp:
             sp.json.dump(self.shaders_dict, fp)
         self.ui.progress_lbl.setText("Exporting Mapping (.JSON)")
+        sys.solstice.logger.debug("XGEN || Mapping Exported")
 
+        # add file to artella
         if comment:
-            self.add_file_to_artella(file_path_global=self.export_path_folder, comment=comment)
+            self._add_file_to_artella(file_path_global=self.export_path_folder, comment=comment)
+            sys.solstice.logger.debug("XGEN || Files added to artella")
+        else:
+            sys.solstice.logger.warning("XGEN || Files are not been loaded to Artella. Do it manually")
 
-    def do_import(self):
+    def _do_import(self):
+        """
+        Imports the grom into the scene        
+        """
         import_folder = self.ui.groom_package_txf.text()
 
         if not import_folder:
@@ -193,31 +268,19 @@ class ControlXgenUi(window.Window):
         # Do a full UI refresh
         de.refresh("Full")
 
-    def get_root_folder(self):
+    def _get_root_folder(self):
+        """
+        Gets the xgen root folder
+        :return: String with the xgen folder path
+        """
         return xg.getAttr('xgDataPath', str(self.collection_name))
 
-    def load_selection_to_line(self, qt_object):
-        # set the string to load
-        selection = mc.ls(sl=True)
-        text_to_add = '"{}"'.format(selection[0])
-        if len(selection) > 1:
-            for obj in selection[1:]:
-                text_to_add += ';"{}"'.format(obj)
-
-        # set text to the object
-        qt_object.setText(text_to_add)
-
-    def open_file(self):
-        file_path, _ext = QtWidgets.QFileDialog.getOpenFileName(self, dir=sp.os.environ['home'],
-                                                                filter='Folder(.groom)')
-        self.ui.groom_package_txf.setText(str(file_path))
-
-    def save_file(self):
-        file_path, _ext = QtWidgets.QFileDialog.getSaveFileName(self, dir=sp.os.environ['home'],
-                                                                filter='Folder(.groom)')
-        self.ui.path_txf.setText(str(file_path))
-
-    def add_file_to_artella(self, file_path_global, comment):
+    def _add_file_to_artella(self, file_path_global, comment):
+        """
+        Method that adds all the files of a given path to the artella system
+        :param file_path_global: String with the base path to ad
+        :param comment: String with the comment to add
+        """
         self.ui.progress_bar.setValue(0)
         self.ui.progress_lbl.setText("Uploading Files")
         i = 0
@@ -230,10 +293,15 @@ class ControlXgenUi(window.Window):
         for root, dirs, files in sp.os.walk(file_path_global):
             for file in files:
                 sp.upload_working_version(sp.os.path.join(root, file), comment=comment, force=True)
-                self.ui.progress_bar.setValue((j / float(i))*100)
+                self.ui.progress_bar.setValue((j / float(i)) * 100)
+                sys.solstice.logger.debug("XGEN || {} file added".format(file))
                 j += 1
 
-    def get_shaders(self):
+    def _get_shaders(self):
+        """
+        Gets a dictionary with the used materials for each description
+        :return: Dictionary with the shader --> description mapping
+        """
         material_dict = dict()
         for description in xg.descriptions(str(self.collection_name)):
             pm.select(description)
@@ -243,17 +311,25 @@ class ControlXgenUi(window.Window):
                     material_dict[description] = shd.name()
         return material_dict
 
-    def get_scalpts(self):
-        scalpts = list()
+    def _get_scalps(self):
+        """
+        Gets a list with the used scalps in the descriptions
+        :return: List with the scalps names
+        """
+        scalps = list()
         for description in xg.descriptions(str(self.collection_name)):
             scalpt = xg.boundGeometry(str(self.collection_name), str(description))[0]
-            if scalpt not in scalpts:
-                scalpts.append(scalpt)
+            if scalpt not in scalps:
+                scalps.append(scalpt)
 
-        return scalpts
+        return scalps
 
 
 def run():
+    """
+    Runs the Xgen manager GUI
+    :return: QWindow object
+    """
     myWin = ControlXgenUi()
     myWin.show()
 

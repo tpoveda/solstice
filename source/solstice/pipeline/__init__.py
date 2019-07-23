@@ -7,6 +7,8 @@ Solstice Tools
 
 from __future__ import print_function, division, absolute_import
 
+import stat
+
 __author__ = "Tomas Poveda"
 __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
@@ -1274,3 +1276,9 @@ def run_publisher():
     """
 
     print('Executing publisher tool ...')
+
+def on_rm_error( func, path, exc_info):
+    # path contains the path of the file that couldn't be removed
+    # let's just assume that it's read-only and unlink it.
+    os.chmod( path, stat.S_IWRITE )
+    os.unlink( path )
