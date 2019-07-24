@@ -27,6 +27,7 @@ import xgenm as xg
 import xgenm.XgExternalAPI as xge
 import xgenm.xgGlobal as xgg
 
+
 ########################################################################################################################
 # class definition
 ########################################################################################################################
@@ -178,8 +179,7 @@ class ControlXgenUi(window.Window):
                                                       "__working__", "groom", "groom_package.groom")
 
         # if the folder already exists delete it, and create a new one
-        if sp.os.path.exists(self.export_path_folder) and sp.os.path.isdir(self.export_path_folder):
-            sp.shutil.rmtree(self.export_path_folder, onerror=sp.on_rm_error)
+        self.delete_artella_folder(self.export_path_folder)
         sp.os.makedirs(self.export_path_folder)
 
         # get the ptx path
@@ -274,6 +274,27 @@ class ControlXgenUi(window.Window):
         :return: String with the xgen folder path
         """
         return xg.getAttr('xgDataPath', str(self.collection_name))
+
+    def delete_artella_folder(self, p):
+        self.ui.progress_bar.setValue(0)
+        self.ui.progress_lbl.setText("Locking Files")
+        i = 0
+        for root, dirs, files in sp.os.walk(p):
+            for file in files:
+                i += 1
+        if i == 0:
+            return
+        j = 0
+        self.ui.progress_bar.setMinimum(0)
+        self.ui.progress_bar.setMaximum(i - 1)
+        for root, dirs, files in sp.os.walk(p):
+            for file in files:
+                sp.lock_file(file_path=sp.os.path.join(root, file))
+                self.ui.progress_bar.setValue((j / float(i)) * 100)
+                sys.solstice.logger.debug("XGEN || {} file locked".format(file))
+                j += 1
+        sp.shutil.rmtree(p, onerror=sp.on_rm_error)
+        sys.solstice.logger.debug("XGEN || {} path deleted".format(p))
 
     def _add_file_to_artella(self, file_path_global, comment):
         """
