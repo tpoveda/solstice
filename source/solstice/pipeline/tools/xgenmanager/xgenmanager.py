@@ -7,6 +7,8 @@ Tool that allows to import/export XGen data
 
 from __future__ import print_function, division, absolute_import
 
+from solstice.pipeline.tools.shaderlibrary import shaderlibrary
+
 __author__ = "Enrique Velasco"
 __license__ = "MIT"
 __maintainer__ = "Enrique Velasco"
@@ -207,11 +209,10 @@ class ControlXgenUi(window.Window):
         sys.solstice.logger.debug("XGEN || Sculpts Exported")
 
         # export material
-        mc.select(self.shaders_dict.values(), replace=True)
-        mc.file(rename=sp.os.path.join(self.export_path_folder, 'shader.ma'))
-        mc.file(es=True, type='mayaAscii')
-        mc.select(cl=True)
-        self.ui.progress_lbl.setText("Exporting Material (.MA)")
+        exporter = shaderlibrary.ShaderExporter(shaders=self.shaders_dict.values(), parent=self)
+        exporter.export_shaders(publish=comment)
+
+        self.ui.progress_lbl.setText("Exporting Material (.sshader)")
         sys.solstice.logger.debug("XGEN || Material Exported")
 
         # export mapping
