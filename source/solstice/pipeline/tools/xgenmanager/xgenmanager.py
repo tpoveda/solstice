@@ -232,6 +232,7 @@ class ControlXgenUi(window.Window):
         """
         Imports the grom into the scene        
         """
+        # todo: query if is it the last version
         import_folder = self.ui.groom_package_txf.text()
 
         if not import_folder:
@@ -249,8 +250,6 @@ class ControlXgenUi(window.Window):
         # import maya scenes
         mc.file(sp.os.path.join(import_folder, 'scalps.ma'), i=True, type="mayaAscii", ignoreVersion=True,
                 mergeNamespacesOnClash=False, gl=True, namespace=groom_asset, options="v=0", groupReference=False)
-        mc.file(sp.os.path.join(import_folder, 'shader.ma'), i=True, type="mayaAscii", ignoreVersion=True,
-                mergeNamespacesOnClash=False, gl=True, namespace=groom_asset, options="v=0", groupReference=False)
         # import xgen
         try:
             xg.importPalette(fileName=str(xgen_file), deltas=[])
@@ -258,6 +257,8 @@ class ControlXgenUi(window.Window):
             mc.warning('Not found maps folder')
         # set path to xgen
         xg.setAttr('xgDataPath', str(map_folder), xg.palettes()[0])
+
+        # todo: remember shader is not imported, it will be imported by the shader import tool
 
         # Get the description editor first.
         # Changes in the groom itself, guides, and so on
@@ -268,6 +269,12 @@ class ControlXgenUi(window.Window):
         #
         # Do a full UI refresh
         de.refresh("Full")
+
+        # place anim
+        # todo: if there is any scalp group, create a blendshape
+        # scalp_grp = self.ui.geometry_scalpt_grp_txf.text()
+        # if scalp_grp:
+        #     mc.blendShape(scalp_grp, )
 
     def _get_root_folder(self):
         """
