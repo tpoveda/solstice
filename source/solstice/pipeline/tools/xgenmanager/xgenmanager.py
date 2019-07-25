@@ -87,22 +87,23 @@ class ControlXgenUi(window.Window):
         self.ui.groom_file_browser_btn.clicked.connect(self._open_file)
         self.ui.geometry_scalpt_grp_btn.clicked.connect(
             partial(self._load_selection_to_line, self.ui.geometry_scalpt_grp_txf))
-        self.ui.export_character_cbx.currentIndexChanged.connect(self._set_path)
+        self.ui.export_character_cbx.currentIndexChanged.connect(partial(self._set_path, self.ui.export_character_cbx, self.ui.path_txf))
+        self.ui.import_character_cbx.currentIndexChanged.connect(partial(self._set_path, self.ui.import_character_cbx, self.ui.groom_package_txf))
 
     ####################################################################################################################
     # UI functions set
     ####################################################################################################################
-    def _set_path(self):
+    def _set_path(self, driver, setter, k):
         """
         Sets path to the text widget
         """
-        asset_name = self.ui.export_character_cbx.currentText()
+        asset_name = driver.currentText()
         if asset_name:
             save_path = sp.os.path.join(sp.get_solstice_assets_path(), "Characters", asset_name, "__working__",
                                         "groom", "groom_package.groom")
-            self.ui.path_txf.setText(save_path)
+            setter.setText(save_path)
             return
-        self.ui.path_txf.setText("")
+        setter.setText("")
 
     def _load_selection_to_line(self, qt_object):
         """
@@ -202,10 +203,10 @@ class ControlXgenUi(window.Window):
 
         # export sculpts
         mc.select(self.scalps_list, replace=True)
-        mc.file(rename=sp.os.path.join(self.export_path_folder, 'sculpts.ma'))
+        mc.file(rename=sp.os.path.join(self.export_path_folder, 'scalps.ma'))
         mc.file(es=True, type='mayaAscii')
         mc.select(cl=True)
-        self.ui.progress_lbl.setText("Exporting Sculpts (.MA)")
+        self.ui.progress_lbl.setText("Exporting Scalps (.MA)")
         sys.solstice.logger.debug("XGEN || Sculpts Exported")
 
         # export material
@@ -230,10 +231,11 @@ class ControlXgenUi(window.Window):
 
     def _do_import(self):
         """
-        Imports the grom into the scene        
+        Imports the groom into the scene
         """
         # todo: query if is it the last version
         import_folder = self.ui.groom_package_txf.text()
+        self.character = self.ui.import_character_cbx.currentText()
 
         if not import_folder:
             raise ValueError("Import path must be specified")
@@ -244,15 +246,17 @@ class ControlXgenUi(window.Window):
         import_path_folder = import_folder.replace('.zip', '')
         _, groom_asset = sp.os.path.split(import_path_folder)
         xgen_file = [f for f in sp.os.listdir(import_path_folder) if f.endswith('.xgen')][-1]
+        xgen_file = sp.os.path.join(import_path_folder, xgen_file).replace('\\', '/')
         map_folder = [sp.os.path.join(import_path_folder, d) for d in sp.os.listdir(import_path_folder) if
                       sp.os.path.isdir(sp.os.path.join(import_path_folder, d))][0]
 
         # import maya scenes
         mc.file(sp.os.path.join(import_folder, 'scalps.ma'), i=True, type="mayaAscii", ignoreVersion=True,
-                mergeNamespacesOnClash=False, gl=True, namespace=groom_asset, options="v=0", groupReference=False)
+                mergeNamespacesOnClash=False, gl=True, namespace=self.character, options="v=0", groupReference=False)
+
         # import xgen
         try:
-            xg.importPalette(fileName=str(xgen_file), deltas=[])
+            xg.importPalette(fileName=str(xgen_file), deltas=[], nameSpace=str(self.character))
         except:
             mc.warning('Not found maps folder')
         # set path to xgen
