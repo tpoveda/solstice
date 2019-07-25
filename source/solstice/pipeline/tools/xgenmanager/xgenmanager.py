@@ -133,7 +133,7 @@ class ControlXgenUi(window.Window):
         """
         Open file dialog, and sets the path to the QTexField
         """
-        file_path, _ext = QtWidgets.QFileDialog.getOpenFileName(self, dir=sp.os.environ['home'],
+        file_path, _ext = QtWidgets.QFileDialog.getOpenFileName(self, dir=sp.os.environ['HOME'],
                                                                 filter='Folder(.groom)')
         self.ui.groom_package_txf.setText(str(file_path))
 
@@ -142,7 +142,7 @@ class ControlXgenUi(window.Window):
         Save file dialog, and sets the path to the QTexField
         :return:
         """
-        file_path, _ext = QtWidgets.QFileDialog.getSaveFileName(self, dir=sp.os.environ['home'],
+        file_path, _ext = QtWidgets.QFileDialog.getSaveFileName(self, dir=sp.os.environ['HOME'],
                                                                 filter='Folder(.groom)')
         self.ui.path_txf.setText(str(file_path))
 
