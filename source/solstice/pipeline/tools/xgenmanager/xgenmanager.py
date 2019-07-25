@@ -254,6 +254,11 @@ class ControlXgenUi(window.Window):
         mc.file(sp.os.path.join(import_folder, 'scalps.ma'), i=True, type="mayaAscii", ignoreVersion=True,
                 mergeNamespacesOnClash=False, gl=True, namespace=self.character, options="v=0", groupReference=False)
 
+        # load mapping
+        in_data = dict()
+        with open(sp.os.path.join(import_path_folder, 'mapping.json'), 'r') as fp:
+            in_data = sp.json.load(fp)
+
         # import xgen
         try:
             xg.importPalette(fileName=str(xgen_file), deltas=[], nameSpace=str(self.character))
