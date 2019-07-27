@@ -7,6 +7,8 @@ Solstice Tools
 
 from __future__ import print_function, division, absolute_import
 
+import stat
+
 __author__ = "Tomas Poveda"
 __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
@@ -1215,7 +1217,7 @@ def unlock_file(file_path=None, notify=False, warn_user=True):
     return True
 
 
-def upload_working_version(file_path=None, skip_saving=False, notify=False, comment=None):
+def upload_working_version(file_path=None, skip_saving=False, notify=False, comment=None, force=False):
     """
     Uploads a new version of the given file
     :param file_path: str
@@ -1257,7 +1259,7 @@ def upload_working_version(file_path=None, skip_saving=False, notify=False, comm
             comment, res = QInputDialog.getText(sys.solstice.dcc.get_main_window(), 'Make New Version ({}) : {}'.format(current_version, short_path), 'Comment')
 
     if res and comment:
-        artellautils.upload_new_asset_version(file_path=file_path, comment=comment, skip_saving=skip_saving)
+        artellautils.upload_new_asset_version(file_path=file_path, comment=comment, skip_saving=skip_saving, force=force)
 
         if notify:
             sys.solstice.tray.show_message(title='New Working Version', msg='New Working version {} uploaded to Artella server succesfully!'.format(current_version))
@@ -1274,3 +1276,9 @@ def run_publisher():
     """
 
     print('Executing publisher tool ...')
+
+def on_rm_error( func, path, exc_info):
+    # path contains the path of the file that couldn't be removed
+    # let's just assume that it's read-only and unlink it.
+    os.chmod( path, stat.S_IWRITE )
+    os.unlink( path )
