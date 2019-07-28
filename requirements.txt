@@ -1,3 +1,6 @@
-win32gui
-https://github.com/mhammond/pywin32/releases
-https://github.com/mhammond/pywin32/releases/download/b224/pywin32-224.win-amd64-py2.7.exe
+# ===================================================================
+# solstice requirements file
+# ===================================================================
+artellalauncher
+artellapipe
+tpMayaLib

@@ -1478,7 +1478,7 @@ class CheckRigTag(check.SanityCheckTask, object):
         rig_path = self._asset().get_asset_file(file_type='rig', status=self._status)
         if rig_path is None or not os.path.isfile(rig_path):
             return False
-        if sys.solstice.dcc.scene_name() != rig_path:
+        if sys.solstice.dcc.scene_path() != rig_path:
             sys.solstice.dcc.open_file(rig_path)
 
         # Check that model file has a main group with valid name
@@ -1536,10 +1536,10 @@ class UpdateTag(check.SanityCheckTask, object):
             file_path = self._asset().get_asset_file(file_type=self._file_type, status=self._status)
             if file_path is None or not os.path.isfile(file_path):
                 return False
-            if sys.solstice.dcc.scene_name() != file_path:
+            if sys.solstice.dcc.scene_path() != file_path:
                 sys.solstice.dcc.open_file(file_path)
         else:
-            file_path = sys.solstice.dcc.scene_name()
+            file_path = sys.solstice.dcc.scene_path()
 
         # Check that model file has a main group with valid name
         self.write('Checking if asset main group has a valid nomenclature: {}'.format(self._asset().name))

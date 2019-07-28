@@ -68,7 +68,6 @@ class TreeWidget(QTreeWidget, object):
             self.selectionModel().setCurrentIndex(index, QItemSelectionModel.Select)
 
 
-
 class BaseExportList(base.BaseWidget, object):
 
     ExportType = 'EXPORT'

@@ -1,0 +1,4 @@
+include source/solstice/resources/icons/*.*
+include source/solstice/resources/icons/color/*.*
+include source/solstice/resources/images/*.*
+include source/solstice/*.json

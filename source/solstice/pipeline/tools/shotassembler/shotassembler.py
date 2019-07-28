@@ -16,6 +16,7 @@ import os
 import sys
 import json
 import string
+from collections import OrderedDict
 
 from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 from solstice.pipeline.externals.solstice_qt.QtCore import *
@@ -242,10 +243,11 @@ class NodeAsset(AbstractItemWidget, object):
     clicked = Signal(QObject, QEvent)
     contextRequested = Signal(QObject, QAction)
 
-    def __init__(self, uuid, name, path, params, parent=None):
+    def __init__(self, uuid, name, path, params, layout_file, parent=None):
         self.name = name
         self._uuid = uuid
         self._params = params
+        self._layout_file = layout_file
 
         self.node = None
         if path:
@@ -271,6 +273,9 @@ class NodeAsset(AbstractItemWidget, object):
 
         return self.node.asset_path
 
+    def get_layout_file(self):
+        return self._layout_file
+
     def get_attributes(self):
         if not self.node:
             return {}
@@ -282,11 +287,17 @@ class NodeAsset(AbstractItemWidget, object):
 
         return self.node.get_icon()
 
-    def reference_alembic(self):
+    def reference_alembic(self, namespace=None):
         if not self.node:
             return
 
-        self.node.reference_alembic_file()
+        self.node.reference_alembic_file(namespace=namespace)
+
+    def import_alembic(self):
+        if not self.node:
+            return
+
+        self.node.import_alembic_file()
 
 
 class AnimAsset(AbstractItemWidget, object):
@@ -433,12 +444,13 @@ class ShotHierarchy(QWidget, object):
 
         return asset
 
-    def add_layout(self, node_id, node_name, node_path, node_params):
+    def add_layout(self, node_id, node_name, node_path, node_params, layout_file):
         new_layout = NodeAsset(
             uuid=node_id,
             name=node_name,
             path=node_path,
-            params=node_params
+            params=node_params,
+            layout_file=layout_file
         )
 
         return self.add_asset(new_layout)
@@ -686,9 +698,6 @@ class ShotProps(QFrame, object):
         self.main_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
 
 
-
-
-
 class ShotAssembler(window.Window, object):
     name = 'SolsticeShotAssembler'
     title = 'Solstice Tools - Shot Assembler'
@@ -757,6 +766,7 @@ class ShotAssembler(window.Window, object):
             asset_path = asset.asset
             if not os.path.isfile(asset_path):
                 continue
+
             # TODO: Instead of using the extension we should check the asset object type
             if asset_path.endswith('.layout'):
                 self._add_layout_asset(asset, shot_asset)
@@ -787,12 +797,21 @@ class ShotAssembler(window.Window, object):
             sys.solstice.logger.warning('Layout Asset File {} was exported with an older version. Please contact TD!'.format(asset_path))
             return
 
+        layout_data = dict()
         for node_id, node_info in asset_data['assets'].items():
+            node_name = node_info['name']
+            layout_data[node_name] = dict()
+            layout_data[node_name]['id'] = node_id
+            layout_data[node_name]['data'] = node_info
+        ordered_data = OrderedDict(sorted(layout_data.items(), reverse=True))
+
+        for node_info in ordered_data.values():
             self.shot_hierarchy.add_layout(
-                node_id=node_id,
-                node_name=node_info['name'],
-                node_path=node_info['path'],
-                node_params=node_info['attrs']
+                node_id=node_info['id'],
+                node_name=node_info['data']['name'],
+                node_path=node_info['data']['path'],
+                node_params=node_info['data']['attrs'],
+                layout_file=shot_asset.asset
             )
 
     def _add_animation_asset(self, asset, shot_asset):
@@ -878,7 +897,8 @@ class ShotAssembler(window.Window, object):
             track.load()
 
             if isinstance(node_asset, NodeAsset):
-                node_asset.reference_alembic()
+                namespace = os.path.basename(node_asset.get_layout_file()).split('.')[0]
+                node_asset.reference_alembic(namespace=namespace)
             elif isinstance(node_asset, AnimAsset):
                 node_asset.reference_animation()
 

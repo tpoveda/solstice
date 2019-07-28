@@ -1,0 +1,24 @@
+{
+  "Pipeline" :
+  [
+  ],
+  "Modeling" :
+  [
+  ],
+  "Texturing" :
+  [
+  ],
+  "Animation" :
+  [
+    {
+      "label" : "Hello World",
+      "command" : "print('hello world');"
+    }
+  ],
+  "Utilities" :
+  [
+  ],
+  "Help" :
+  [
+  ]
+}

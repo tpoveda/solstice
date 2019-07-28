@@ -24,7 +24,7 @@ class BaseExporter(base.BaseWidget, object):
     def __init__(self, parent=None):
         super(BaseExporter, self).__init__(parent=parent)
 
-        self.export_list.update_ui()
+        self.export_list.init_ui()
 
     def custom_ui(self):
         super(BaseExporter, self).custom_ui()

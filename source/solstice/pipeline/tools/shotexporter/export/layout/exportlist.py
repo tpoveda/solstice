@@ -34,8 +34,7 @@ class LayoutExportList(exportlist.BaseExportList, object):
             tag_data_node = asset.get_tag_data_node()
             if not tag_data_node:
                 continue
-            tag_types = tag_data_node.get_types()
-            print(tag_types)
+            # tag_types = tag_data_node.get_types()
             exporter_asset = assetitem.ExporterAssetItem(asset)
             asset_item = QTreeWidgetItem(self.assets_list, [asset.name])
             asset_item.asset = exporter_asset

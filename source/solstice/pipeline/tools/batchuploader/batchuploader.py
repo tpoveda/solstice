@@ -345,7 +345,7 @@ class BatchUploader(window.Window, object):
         try:
             comment, res = QInputDialog.getMultiLineText(sys.solstice.dcc.get_main_window(), 'Make New Versions', 'Comment')
         except Exception:
-            comment, res = QInputDialog.getText(sys.solstice.dcc.get_main_window(),'Make New Versions', 'Comment')
+            comment, res = QInputDialog.getText(sys.solstice.dcc.get_main_window(), 'Make New Versions', 'Comment')
 
         if res and comment:
             self._progress.setVisible(True)

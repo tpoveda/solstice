@@ -12,98 +12,51 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
-from collections import defaultdict
-
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
-from solstice.pipeline.externals.solstice_qt.QtGui import *
-
 import solstice.pipeline as sp
 from solstice.pipeline.gui import window
+from solstice.pipeline.utils import decorators, outliner as utils
+
+if sp.is_maya():
+    from solstice.pipeline.utils import mayautils
+    undo_decorator = mayautils.undo
+else:
+    undo_decorator = decorators.empty
 
 
-class AssetOutlinerItem(QWidget, object):
-    clicked = Signal(QObject, QEvent)
-
+class OutlinerAssetItem(utils.OutlinerAssetItem, object):
     def __init__(self, asset, parent=None):
-        super(AssetOutlinerItem, self).__init__(parent)
-
-        self.setMouseTracking(True)
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-
-        self.asset = asset
-        self.parent = parent
-        self.name = asset.get_short_name()
-        self.block_callbacks = False
-
-        self.custom_ui()
-        self.setup_signals()
-
-    def custom_ui(self):
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
-        self.setLayout(self.main_layout)
-
-        self.item_widget = QFrame()
-        self.item_layout = QGridLayout()
-        self.item_layout.setContentsMargins(0, 0, 0, 0)
-        self.item_widget.setLayout(self.item_layout)
-        self.main_layout.addWidget(self.item_widget)
-
-        self.asset_lbl = QLabel(self.name)
-        self.item_layout.addWidget(self.asset_lbl, 0, 3, 1, 1)
-
-        self.item_layout.setColumnStretch(1, 5)
-        self.item_layout.setAlignment(Qt.AlignLeft)
-
-    def setup_signals(self):
-        pass
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.clicked.emit(self, event)
+        super(OutlinerAssetItem, self).__init__(asset=asset, parent=parent)
 
 
-class AssetOutliner(QWidget, object):
+class SolsticeBaseOutliner(utils.BaseOutliner, object):
     def __init__(self, parent=None):
-        super(AssetOutliner, self).__init__(parent=parent)
+        super(SolsticeBaseOutliner, self).__init__(parent=parent)
 
-        self.widget_tree = defaultdict(list)
-        self.widgets = list()
-        self.setMouseTracking(True)
-        self.custom_ui()
-        self.update_ui()
+    @staticmethod
+    def get_file_widget_by_category(category, parent=None):
+        return None
 
-    def custom_ui(self):
-        self.main_layout = QGridLayout()
-        self.main_layout.setSpacing(2)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.main_layout)
-
-        scroll_widget = QWidget()
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet('QScrollArea { background-color: rgb(57,57,57);}')
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        scroll_area.setWidget(scroll_widget)
-
-        self.outliner_layout = QVBoxLayout()
-        self.outliner_layout.setContentsMargins(1, 1, 1, 1)
-        self.outliner_layout.setSpacing(0)
-        self.outliner_layout.addStretch()
-        scroll_widget.setLayout(self.outliner_layout)
-        self.main_layout.addWidget(scroll_area, 1, 0, 1, 4)
-
-    def update_ui(self):
-        assets = sp.get_assets()
+    def init_ui(self):
+        allowed_types = self.allowed_types()
+        assets = sp.get_assets(allowed_types=allowed_types)
         for asset in assets:
-            asset_widget = AssetOutlinerItem(asset)
+            asset_widget = OutlinerAssetItem(asset)
             self.append_widget(asset_widget)
+            self.widget_tree[asset_widget] = list()
 
-    def append_widget(self, asset):
-        self.widgets.append(asset)
-        self.outliner_layout.insertWidget(0, asset)
+            asset_widget.clicked.connect(self._on_item_clicked)
+
+
+class SolsticeAssetsOutliner(SolsticeBaseOutliner, object):
+
+    def __init__(self, parent=None):
+        super(SolsticeAssetsOutliner, self).__init__(parent=parent)
+
+    def allowed_types(self):
+        return ['prop']
+
+    def add_callbacks(self):
+        pass
 
 
 class AssetSyncer(window.Window, object):
@@ -122,8 +75,9 @@ class AssetSyncer(window.Window, object):
 
         self.resize(400, 600)
 
-        self.outliner = AssetOutliner(self)
+        self.outliner = SolsticeAssetsOutliner(self)
         self.main_layout.addWidget(self.outliner)
+        self.outliner.refresh_outliner()
 
 def run():
     AssetSyncer().show()

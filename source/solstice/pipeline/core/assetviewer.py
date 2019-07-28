@@ -20,6 +20,7 @@ from solstice.pipeline.externals.solstice_qt.QtWidgets import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.gui import grid
+from solstice.pipeline.utils import pythonutils
 
 
 class AssetViewer(grid.GridWidget, object):
@@ -114,6 +115,8 @@ class AssetViewer(grid.GridWidget, object):
 
         if not all_assets:
             return
+
+        all_assets = pythonutils.force_list(all_assets)
 
         for asset in all_assets:
 

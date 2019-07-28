@@ -350,7 +350,7 @@ def fix_path_by_project(path, fullpath=False):
     return new_path
 
 
-def get_metadata():
+def get_metadata(as_json=False):
     """
     Returns Artella App MetaData
     :return: ArtellaMetaData
@@ -360,6 +360,9 @@ def get_metadata():
     rsp = spigot.execute(command_action='do', command_name='getMetaData', payload='{}')
     sys.solstice.logger.debug(rsp)
     rsp = json.loads(rsp)
+
+    if as_json:
+        return rsp
 
     metadata = classes.ArtellaAppMetaData(
         cms_web_root=rsp['cms_web_root'],
@@ -1089,7 +1092,9 @@ def get_user_avatar(user_id):
     auth = urllib2.HTTPBasicAuthHandler(manager)
     opener = urllib2.build_opener(auth)
     urllib2.install_opener(opener)
-    response = urllib2.urlopen('{0}/profile/{1}/avatarfull.img'.format(artella_cms_url, user_id))
+    avatar_url = '{0}/profile/{1}/avatarfull.img'.format(artella_cms_url, user_id)
+    print('Getting: {}'.format(avatar_url))
+    response = urllib2.urlopen(avatar_url)
 
     return response
 

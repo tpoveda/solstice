@@ -537,7 +537,7 @@ def get_solstice_assets_path():
         sys.solstice.logger.debug('Asset Path does not exists!: {0}'.format(assets_path))
 
         from solstice.pipeline.utils import qtutils
-        qtutils.show_info(None, 'Asset Path does not exists!}', 'Assets Folder is going to be synced from Artella server. Be patience during the process, the process can take quite a long time')
+        qtutils.show_info(None, 'Asset Path does not exists!', 'Assets Folder is going to be synced from Artella server. Be patience during the process, the process can take quite a long time')
 
         sys.solstice.logger.debug('Trying to synchronize it ...')
         try:

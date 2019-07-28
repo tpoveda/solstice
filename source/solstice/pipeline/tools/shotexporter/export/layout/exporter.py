@@ -102,13 +102,13 @@ class LayoutExporter(base_exporter.BaseExporter, object):
             sys.solstice.logger.warning('Shot Export only works for Maya!')
             return
 
-        scene_name = sys.solstice.dcc.scene_name()
+        scene_name = sys.solstice.dcc.scene_path()
         if not scene_name:
             scene_name = 'undefined'
         else:
             scene_name = os.path.basename(scene_name)
 
-        export_path = sys.solstice.dcc.select_folder_dial(title='Select Layout Export Path', start_directory=sp.get_solstice_project_path())
+        export_path = sys.solstice.dcc.select_folder_dialog(title='Select Layout Export Path', start_directory=sp.get_solstice_project_path())
         if not export_path:
             return
 

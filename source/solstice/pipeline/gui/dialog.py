@@ -38,10 +38,7 @@ class Dialog(QDialog, object):
     def __init__(self, parent=None):
 
         if parent is None:
-            if sp.is_maya():
-                parent = mayautils.get_maya_window()
-            elif sp.is_houdini():
-                parent = houdiniutils.get_houdini_window()
+            parent = sys.solstice.dcc.get_main_window()
 
         super(Dialog, self).__init__(parent=parent)
 
