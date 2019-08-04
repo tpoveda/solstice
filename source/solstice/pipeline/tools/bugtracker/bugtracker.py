@@ -86,7 +86,7 @@ class BugTracker(dialog.Dialog, object):
 
     def update_capture(self):
         self.screen_pixmap = QApplication.primaryScreen().grabWindow(QApplication.desktop().winId())
-        self.capture_lbl.setPixmap(self.screen_pixmap.scaled(850, 338, Qt.KeepAspectRatio))
+        self.capture_lbl.setPixmap(self.screen_pixmap.scaled(425, 169, Qt.KeepAspectRatio))
         self.update_ui()
 
     def set_trace(self, trace):

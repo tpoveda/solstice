@@ -27,7 +27,7 @@ paths_to_add = [
 ]
 for p in paths_to_add:
     if p not in sys.path:
-        if not os.path.exists(p):
+        if not os.path.isdir(p):
             continue
         sys.path.append(p)
 

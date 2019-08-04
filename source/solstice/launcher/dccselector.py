@@ -13,7 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
 import solstice
-from artellalauncher.widgets import dccselector
+from artellalauncher.core import dccselector
 
 
 class SolsticeDCCSelector(dccselector.DCCSelector, object):
