@@ -4,6 +4,6 @@
   "REPOSITORY_URL": "https://github.com/tpoveda/solstice/",
   "REPOSITORY_FOLDER": "source",
   "VERSION_FILE_NAME": "__version__.py",
-  "PROGRESS_BAR_COLOR_0": "58, 92, 84",
-  "PROGRESS_BAR_COLOR_1": "213, 173, 0"
+  "PROGRESS_BAR_COLOR_0": "245, 180, 148",
+  "PROGRESS_BAR_COLOR_1": "75, 70, 170"
 }

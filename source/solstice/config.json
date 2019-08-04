@@ -5,14 +5,17 @@
   "TRAY_ICON": "solstice",
   "PROJECT_NUMBER": "2",
   "PROJECT_ID": "2252d6c8-407d-4419-a186-cf90760c9967",
+  "PROJECT_ICON": "solstice",
   "PROJECT_VERSION_FILE": "version.json",
+  "PROJECT_URL": "https://www.solsticeshortfilm.com/",
   "ASSET_TYPES": ["Props", "Background Elements", "Characters"],
   "ASSET_FILES": ["textures", "model", "shading", "rig", "groom"],
   "ASSET_MUST_FILES": ["textures", "model", "shading", "rig"],
   "ASSET_WIP_STATUS": "working",
   "ASSET_PUBLISH_STATUS": "published",
   "PATHS_TO_REGISTER": ["solstice/externals", "solstice/pipeline"],
-  "PROJECT_URL": "https://www.solsticeshortfilm.com/",
+  "PROGRESS_BAR_COLOR_0": "245, 180, 148",
+  "PROGRESS_BAR_COLOR_1": "75, 70, 170",
   "PROJECT_DOCUMENTATION_URL": "https://tpoveda.github.io/solstice/",
   "EMAILS": ["tpovedatd@gmail.com"]
 }

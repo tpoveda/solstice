@@ -1,5 +1,0 @@
-// Configuration file for Solstice Pipeline
-
-{
-  "tempPath": "{temp}/solstice/pipeline/{user}"
-}
