@@ -16,7 +16,7 @@ import os
 import sys
 import json
 
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtWidgets import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.gui import messagebox, thumbnailcapture

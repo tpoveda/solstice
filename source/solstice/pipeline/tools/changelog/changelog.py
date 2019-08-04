@@ -17,8 +17,8 @@ import json
 from collections import OrderedDict
 
 import solstice.pipeline as sp
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
 
 from solstice.pipeline.gui import dialog, accordion
 

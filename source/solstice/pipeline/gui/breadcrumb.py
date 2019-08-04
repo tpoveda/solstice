@@ -15,7 +15,7 @@ __email__ = "tpoveda@cgart3d.com"
 
 import os
 
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtWidgets import *
 
 from solstice.pipeline.gui import label
 from solstice.pipeline.utils import pythonutils as utils

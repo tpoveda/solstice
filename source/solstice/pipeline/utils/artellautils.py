@@ -24,7 +24,7 @@ try:
 except:
     pass
 
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtWidgets import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.utils import artellaclasses as classes

@@ -16,8 +16,8 @@ import sys
 
 import maya.cmds as cmds
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
 
 from solstice.pipeline.gui import window
 from solstice.pipeline.gui import splitters

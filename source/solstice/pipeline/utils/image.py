@@ -15,8 +15,8 @@ __email__ = "tpoveda@cgart3d.com"
 import os
 import base64
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtGui import *
+from Qt.QtCore import *
+from Qt.QtGui import *
 
 
 def image_to_base64(image_path, image_format='PNG'):

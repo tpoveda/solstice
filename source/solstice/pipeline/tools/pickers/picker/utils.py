@@ -15,8 +15,8 @@ __email__ = "tpoveda@cgart3d.com"
 import os
 import sys
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
 try:
     from shiboken2 import wrapInstance
 except ImportError:

@@ -13,8 +13,8 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
 
 
 def property_animation(start=[0, 0], end=[30, 0], duration=300, object=None, property='iconSize', on_finished=None):

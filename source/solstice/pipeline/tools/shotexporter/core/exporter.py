@@ -14,8 +14,8 @@ __email__ = "tpoveda@cgart3d.com"
 
 import sys
 
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
-from solstice.pipeline.externals.solstice_qt.QtCore import *
+from Qt.QtWidgets import *
+from Qt.QtCore import *
 
 from solstice.pipeline.gui import base, splitters
 

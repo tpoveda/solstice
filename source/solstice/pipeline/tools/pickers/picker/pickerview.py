@@ -12,10 +12,10 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
-from solstice.pipeline.externals.solstice_qt.QtGui import *
-from solstice.pipeline.externals.solstice_qt.QtSvg import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
+from Qt.QtGui import *
+from Qt.QtSvg import *
 
 from solstice.pipeline.tools.pickers.picker import scene
 

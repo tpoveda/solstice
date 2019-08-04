@@ -16,8 +16,8 @@ import os
 
 from maya import cmds, OpenMayaUI
 
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
-from solstice.pipeline.externals.solstice_qt.QtGui import *
+from Qt.QtWidgets import *
+from Qt.QtGui import *
 try:
     from shiboken import wrapInstance
 except ImportError:

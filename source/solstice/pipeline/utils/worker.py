@@ -15,7 +15,7 @@ __email__ = "tpoveda@cgart3d.com"
 import uuid
 from threading import Lock, Condition
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
+from Qt.QtCore import *
 
 
 class Worker(QThread, object):

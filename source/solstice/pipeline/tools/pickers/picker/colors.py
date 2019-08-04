@@ -12,7 +12,7 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
-from solstice.pipeline.externals.solstice_qt.QtGui import *
+from Qt.QtGui import *
 
 black = QColor(50, 50, 50, 255)
 white = QColor(255, 255, 255, 200)

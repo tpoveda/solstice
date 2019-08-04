@@ -25,9 +25,9 @@ import contextlib
 from functools import partial
 from collections import OrderedDict
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
-from solstice.pipeline.externals.solstice_qt.QtGui import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
+from Qt.QtGui import *
 
 import maya.cmds as cmds
 import maya.mel as mel

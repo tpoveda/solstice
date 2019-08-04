@@ -15,8 +15,8 @@ __email__ = "tpoveda@cgart3d.com"
 import hou
 import hdefereval
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.dcc.core import dcc

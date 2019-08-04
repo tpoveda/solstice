@@ -16,7 +16,7 @@ import os
 import json
 from copy import deepcopy
 
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtWidgets import *
 
 import maya.cmds as cmds
 

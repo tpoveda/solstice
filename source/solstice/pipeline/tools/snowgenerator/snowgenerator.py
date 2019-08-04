@@ -12,7 +12,7 @@ __license__ = "MIT"
 __maintainer__ = ["Tomas Poveda", "Javier Gonzalez"]
 __email__ = "tpoveda@cgart3d.com"
 
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtWidgets import *
 
 import maya.cmds as cmds
 import maya.mel as mel

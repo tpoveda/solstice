@@ -31,8 +31,8 @@ import importlib
 import webbrowser
 
 from solstice.pipeline.externals import solstice_six
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
 
 from solstice.pipeline.resources import solstice_resources
 from solstice.pipeline.dcc.core import dcc as abstractdcc, node as dccnode

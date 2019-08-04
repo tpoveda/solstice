@@ -21,9 +21,9 @@ import webbrowser
 from functools import partial
 from collections import OrderedDict
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
-from solstice.pipeline.externals.solstice_qt.QtGui import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
+from Qt.QtGui import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.core import syncdialog, node

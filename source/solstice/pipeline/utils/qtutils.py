@@ -17,10 +17,10 @@ import re
 import sys
 import subprocess
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
-from solstice.pipeline.externals.solstice_qt.QtGui import *
-from solstice.pipeline.externals.solstice_qt import QtCompat
+from Qt.QtCore import *
+from Qt.QtWidgets import *
+from Qt.QtGui import *
+from Qt import QtCompat
 try:
     import shiboken
     from shiboken import wrapInstance
@@ -128,7 +128,7 @@ def create_python_qrc_file(qrc_file, py_file):
         raise RuntimeError('command {0} returned with error (code: {1}): {2}'.format(e.cmd, e.returncode, e.output))
     if not os.path.isfile(py_file):
         return
-    pythonutils.replace(py_file, "from PySide import QtCore", "from solstice.pipeline.externals.solstice_qt import QtCore")
+    pythonutils.replace(py_file, "from PySide import QtCore", "from Qt import QtCore")
 
 
 def create_qrc_file(src_paths, dst_file):

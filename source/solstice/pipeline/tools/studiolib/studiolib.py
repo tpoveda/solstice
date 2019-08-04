@@ -17,7 +17,7 @@ import os
 
 import maya.cmds as cmds
 
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtWidgets import *
 
 import solstice_studiolibrarymaya
 solstice_studiolibrarymaya.registerItems()

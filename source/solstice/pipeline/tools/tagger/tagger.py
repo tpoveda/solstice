@@ -16,8 +16,8 @@ import os
 import sys
 from functools import partial
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.gui import window, grid, label

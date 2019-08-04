@@ -13,8 +13,8 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
 
 from solstice.pipeline.gui import label
 from solstice.pipeline.resources import resource

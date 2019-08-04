@@ -20,8 +20,8 @@ import urllib2
 import tempfile
 
 import solstice.pipeline as sp
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
 
 from solstice.pipeline.gui import base, window, splitters, buttons, stack, accordion, console, messagehandler
 from solstice.pipeline.utils import browserutils, pipelineutils, rigutils, artellautils as artella, slackutils as slack

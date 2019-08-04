@@ -21,7 +21,7 @@ import maya.cmds as mc
 import pymel.core as pm
 
 import solstice.pipeline as sp
-from solstice.pipeline.externals.solstice_qt import QtWidgets, QtCore, QtGui
+from Qt import QtWidgets, QtCore, QtGui
 from solstice.pipeline import tools
 from solstice.pipeline.gui import window, animations
 

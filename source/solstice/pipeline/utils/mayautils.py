@@ -34,7 +34,7 @@ except ImportError:
     import shiboken as shiboken
     from shiboken import wrapInstance
 
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtWidgets import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.utils import pythonutils as python

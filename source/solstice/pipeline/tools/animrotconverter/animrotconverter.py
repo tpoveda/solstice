@@ -12,7 +12,7 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpoveda@cgart3d.com"
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
+from Qt.QtCore import *
 from solstice.pipeline.externals.ml_tools import ml_convertRotationOrder
 
 from solstice.pipeline.gui import window

@@ -14,8 +14,8 @@ __email__ = "tpoveda@cgart3d.com"
 
 import sys
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya

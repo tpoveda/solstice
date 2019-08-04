@@ -20,9 +20,9 @@ from functools import partial
 
 import maya.cmds as cmds
 
-from solstice.pipeline.externals.solstice_qt.QtCore import *
-from solstice.pipeline.externals.solstice_qt.QtWidgets import *
-from solstice.pipeline.externals.solstice_qt.QtGui import *
+from Qt.QtCore import *
+from Qt.QtWidgets import *
+from Qt.QtGui import *
 
 import solstice.pipeline as sp
 from solstice.pipeline.core import syncdialog, assetviewer
