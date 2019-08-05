@@ -22,12 +22,14 @@ from artellapipe.core import project as artella_project
 
 import solstice
 from solstice.launcher import tray
+from solstice.core import asset
 
 
 class Solstice(artella_project.ArtellaProject):
 
     PROJECT_PATH = solstice.get_project_path()
     TRAY_CLASS = tray.SolsticeTray
+    ASSET_CLASS = asset.SolsticeAsset
     PROJECT_CONFIG_PATH = solstice.get_project_config_path()
     PROJECT_SHELF_FILE_PATH = solstice.get_project_shelf_path()
     PROJECT_MENU_FILE_PATH = solstice.get_project_menu_path()
@@ -36,11 +38,14 @@ class Solstice(artella_project.ArtellaProject):
 
         self._project_url = None
         self._documentation_url = None
-        self._emails = list()
 
         super(Solstice, self).__init__(resource=resource)
 
     def init_config(self):
+        """
+       Overrides base ArtellaProject init_config function to load extra attributes from configuration file
+       """
+
         super(Solstice, self).init_config()
 
         project_config_data = self.get_config_data()
@@ -49,7 +54,7 @@ class Solstice(artella_project.ArtellaProject):
 
         self._project_url = project_config_data.get('PROJECT_URL', None)
         self._documentation_url = project_config_data.get('PROJECT_DOCUMENTATION_URL', None)
-        self._emails = project_config_data.get('EMAILS', list())
+        self._asset_data_filename = project_config_data.get('PROJECT_ASSET_DATA_FILENAME', None)
 
     @property
     def project_url(self):
@@ -68,15 +73,6 @@ class Solstice(artella_project.ArtellaProject):
         """
 
         return self._documentation_url
-
-    @property
-    def emails(self):
-        """
-        Returns list of emails that will be used when sending an email
-        :return: list(str)
-        """
-
-        return self._emails
 
     def open_webpage(self):
         """
@@ -97,13 +93,3 @@ class Solstice(artella_project.ArtellaProject):
             return
 
         webbrowser.open(self._documentation_url)
-
-    def send_email(self, title=None):
-        """
-        Opens email application with proper info
-        """
-
-        if not title:
-            title = self.name.title()
-
-        webbrowser.open("mailto:%s?subject=%s" % (','.join(self._emails), quote(title)))
