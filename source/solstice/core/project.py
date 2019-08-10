@@ -34,12 +34,12 @@ class Solstice(artella_project.ArtellaProject):
     PROJECT_SHELF_FILE_PATH = solstice.get_project_shelf_path()
     PROJECT_MENU_FILE_PATH = solstice.get_project_menu_path()
 
-    def __init__(self, resource=None):
+    def __init__(self, resource, naming_file):
 
         self._project_url = None
         self._documentation_url = None
 
-        super(Solstice, self).__init__(resource=resource)
+        super(Solstice, self).__init__(resource=resource, naming_file=naming_file)
 
     def init_config(self):
         """
@@ -93,3 +93,17 @@ class Solstice(artella_project.ArtellaProject):
             return
 
         webbrowser.open(self._documentation_url)
+
+    def _register_asset_classes(self):
+        """
+        Overrides base ArtellaProject _register_asset_classes function
+        Internal function that can be override to register specific project asset classes
+        """
+
+        from solstice.pipeline.tools.assetsmanager.assets import propasset, backgroundelementasset, characterasset
+
+        self.register_asset_class(propasset.SolsticePropAsset)
+        self.register_asset_class(backgroundelementasset.SolsticeBackgroundElementAsset)
+        self.register_asset_class(characterasset.SolsticeCharacterAsset)
+
+        super(Solstice, self)._register_asset_classes()

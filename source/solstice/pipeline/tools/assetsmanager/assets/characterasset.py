@@ -13,12 +13,20 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
 import artellapipe
-from solstice.core import asset
+
+from solstice.core import defines, asset
 
 
-class CharacterAsset(asset.SolsticeAssetWidget, object):
-    def __init__(self, asset, parent=None):
-        super(CharacterAsset, self).__init__(asset=asset, parent=parent)
+class SolsticeCharacterAsset(asset.SolsticeAsset, object):
 
+    ASSET_TYPE = defines.SOLSTICE_CHARACTERS_ASSETS
+    ASSET_FILES = {
+        defines.SOLSTICE_TEXTURES_ASSET_TYPE: artellapipe.resource.icon(defines.SOLSTICE_TEXTURES_ASSET_TYPE),
+        defines.SOLSTICE_MODEL_ASSET_TYPE: artellapipe.resource.icon(defines.SOLSTICE_MODEL_ASSET_TYPE),
+        defines.SOLSTICE_SHADING_ASSET_TYPE: artellapipe.resource.icon(defines.SOLSTICE_SHADING_ASSET_TYPE),
+        defines.SOLSTICE_RIG_ASSET_TYPE: artellapipe.resource.icon(defines.SOLSTICE_RIG_ASSET_TYPE),
+        defines.SOLSTICE_GROOM_ASSET_TYPE: artellapipe.resource.icon(defines.SOLSTICE_GROOM_ASSET_TYPE)
+    }
 
-# artellapipe.solstice.register_asset(CharacterAsset)
+    def __init__(self, project, asset_data):
+        super(SolsticeCharacterAsset, self).__init__(project=project, asset_data=asset_data)

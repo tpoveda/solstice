@@ -72,6 +72,8 @@ def init(do_reload=False, import_libs=True):
         tpDccLib.init(do_reload=do_reload)
         import tpQtLib
         tpQtLib.init(do_reload=do_reload)
+        import tpNameIt
+        tpNameIt.init(do_reload=do_reload)
         import artellapipe
         artellapipe.init(do_reload=do_reload)
 
@@ -86,7 +88,9 @@ def init(do_reload=False, import_libs=True):
 
     solstice_importer.import_modules()
 
-    artella.set_project(project.Solstice, resource)
+    naming_file = path_utils.clean_path(os.path.join(os.path.dirname(inspect.getframeinfo(inspect.currentframe()).filename), 'naming.json'))
+
+    artella.set_project(project.Solstice, resource, naming_file)
 
 
 def get_project_path():
