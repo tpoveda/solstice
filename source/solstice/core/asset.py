@@ -76,6 +76,31 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
         else:
             super(SolsticeAsset, self).open_file(file_type=file_type, status=status)
 
+    def reference_file_by_extension(self, extension=None):
+        """
+        Implements base AbstractAsset reference_file_by_extension function
+        References asset file with the given extension
+        :param extension: str
+        """
+
+        if extension == defines.SOLSTICE_ALEMBIC_EXTENSION:
+            self.reference_alembic_file()
+        elif extension == defines.SOLSTICE_STANDIN_EXTENSION:
+            self.reference_standin_file()
+        elif extension == defines.SOLSTICE_RIG_ASSET_TYPE:
+            self.reference_rig_file()
+
+    def reference_alembic_file(self, namespace=None, unresolve_path=True):
+        pass
+
+    def reference_standin_file(self):
+        pass
+
+    def reference_rig_file(self):
+        pass
+
+
+
 
 class SolsticeAssetWidget(artella_asset.ArtellaAssetWidget, object):
     def __init__(self, asset, parent=None):

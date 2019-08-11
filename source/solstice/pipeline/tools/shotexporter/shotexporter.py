@@ -41,6 +41,7 @@ class ShotExporterTab(QTabWidget, object):
     def __init__(self, parent=None):
         super(ShotExporterTab, self).__init__(parent)
 
+
 def run(project):
     win = ShotExporter(project=project)
     win.show()

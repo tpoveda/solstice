@@ -12,6 +12,11 @@
   "ASSET_TYPES": ["Props", "Background Elements", "Characters"],
   "ASSET_FILES": ["textures", "model", "shading", "rig", "groom"],
   "ASSET_IGNORED_PATHS": ["PIPELINE", "lighting", "Light Rigs", "S_CH_02_summer_scripts"],
+  "ASSETS_LIBRARY_SUPPORTED_FILES": {
+    "rig": ".ma",
+    "alembic": ".abc",
+    "standin": ".ass"
+  },
   "ASSET_MUST_FILES": ["textures", "model", "shading", "rig"],
   "ASSET_WIP_STATUS": "working",
   "ASSET_PUBLISH_STATUS": "published",
