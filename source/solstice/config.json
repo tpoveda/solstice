@@ -24,5 +24,13 @@
   "PROGRESS_BAR_COLOR_0": "245, 180, 148",
   "PROGRESS_BAR_COLOR_1": "75, 70, 170",
   "PROJECT_DOCUMENTATION_URL": "https://tpoveda.github.io/solstice/",
-  "EMAILS": ["tpovedatd@gmail.com"]
+  "EMAILS": ["tpovedatd@gmail.com"],
+  "TAG_TYPES": ["Scene", "Prop", "Character", "Background Element", "Light Rig", "Model", "Animation", "Cloth", "Groom", "Camera"],
+  "OUTLINER_CATEGORIES": {
+    "Props":  ["Prop"],
+    "Characters": ["Character"],
+    "Cameras": ["Camera"],
+    "Lights":  ["Light Rig"],
+    "FX": ["Cloth", "Groom"]
+  }
 }

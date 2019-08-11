@@ -132,12 +132,3 @@ def get_project_menu_path():
     """
 
     return path_utils.clean_path(os.path.join(get_project_path(), artella_defines.ARTELLA_PROJECT_SHELF_FILE_NAME))
-
-
-def get_tagger_path():
-    """
-    Returns path where Solstice project tagger file is located
-    :return: str
-    """
-
-    return path_utils.clean_path(os.path.join(get_project_path(), defines.SOLSTICE_TAGGER_FILE_NAME))
