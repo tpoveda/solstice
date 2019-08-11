@@ -1,0 +1,53 @@
+{
+  "types":
+  [
+     {
+      "name":"Scene",
+      "image":"",
+      "type":"scene"
+    },
+    {
+      "name":"Prop",
+      "image":"",
+      "type":"prop"
+    },
+    {
+      "name":"Background Element",
+      "image":"",
+      "type":"background_element"
+    },
+    {
+      "name":"Character",
+      "image":"",
+      "type":"character"
+    },
+    {
+      "name":"Light Rig",
+      "image":"",
+      "type":"light_rig"
+    }
+  ],
+  "selections":
+  [
+    {
+      "name":"Model",
+      "image": "",
+      "type": "model"
+    },
+    {
+      "name":"Animation",
+      "image":"",
+      "type":"animation"
+    },
+    {
+      "name":"Cloth",
+      "image":"",
+      "type":"cloth_simulation"
+    },
+    {
+      "name":"Groom",
+      "image":"",
+      "type":"groom_simulation"
+    }
+  ]
+}

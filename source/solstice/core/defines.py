@@ -15,6 +15,9 @@ __email__ = "tpovedatd@gmail.com"
 from artellapipe.core import defines
 
 
+# Defines the file name of the Solstice Tagger file
+SOLSTICE_TAGGER_FILE_NAME = 'tagger.json'
+
 # Defines the asset type used for Props
 SOLSTICE_PROP_ASSETS = 'Props'
 

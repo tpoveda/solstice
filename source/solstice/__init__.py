@@ -19,7 +19,9 @@ from tpPyUtils import importer, path as path_utils
 from tpQtLib.core import resource as resource_utils
 
 import artellapipe as artella
-from artellapipe.core import defines
+from artellapipe.core import defines as artella_defines
+
+from solstice.core import defines
 
 
 # =================================================================================
@@ -34,7 +36,7 @@ class SolsticeResource(resource_utils.Resource, object):
     RESOURCES_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources')
 
 
-class Solstice(importer.SimpleImporter, object):
+class Solstice(importer.Importer, object):
     def __init__(self):
         super(Solstice, self).__init__(module_name='solstice')
 
@@ -87,6 +89,9 @@ def init(do_reload=False, import_libs=True):
     resource = SolsticeResource
 
     solstice_importer.import_modules()
+    solstice_importer.import_packages(only_packages=True, order=['solstice.launcher'])
+    if do_reload:
+        solstice_importer.reload_all()
 
     naming_file = path_utils.clean_path(os.path.join(os.path.dirname(inspect.getframeinfo(inspect.currentframe()).filename), 'naming.json'))
 
@@ -108,7 +113,7 @@ def get_project_config_path():
     :return: str
     """
 
-    return path_utils.clean_path(os.path.join(get_project_path(), defines.ARTELLA_PROJECT_CONFIG_FILE_NAME))
+    return path_utils.clean_path(os.path.join(get_project_path(), artella_defines.ARTELLA_PROJECT_CONFIG_FILE_NAME))
 
 
 def get_project_shelf_path():
@@ -117,7 +122,7 @@ def get_project_shelf_path():
     :return: str
     """
 
-    return path_utils.clean_path(os.path.join(get_project_path(), defines.ARTELLA_PROJECT_SHELF_FILE_NAME))
+    return path_utils.clean_path(os.path.join(get_project_path(), artella_defines.ARTELLA_PROJECT_SHELF_FILE_NAME))
 
 
 def get_project_menu_path():
@@ -126,4 +131,13 @@ def get_project_menu_path():
     :return: str
     """
 
-    return path_utils.clean_path(os.path.join(get_project_path(), defines.ARTELLA_PROJECT_SHELF_FILE_NAME))
+    return path_utils.clean_path(os.path.join(get_project_path(), artella_defines.ARTELLA_PROJECT_SHELF_FILE_NAME))
+
+
+def get_tagger_path():
+    """
+    Returns path where Solstice project tagger file is located
+    :return: str
+    """
+
+    return path_utils.clean_path(os.path.join(get_project_path(), defines.SOLSTICE_TAGGER_FILE_NAME))

@@ -14,6 +14,7 @@ __email__ = "tpovedatd@gmail.com"
 
 import os
 import sys
+import json
 from functools import partial
 
 from Qt.QtCore import *
@@ -207,7 +208,7 @@ class AlembicImporter(base.BaseWidget, object):
             sys.solstice.logger.warning('No Alembic Info file found! Take into account that imported Alembic is not supported by our current pipeline!')
             valid_tag_info = False
 
-        if sp.is_houdini():
+        if tp.Dcc.is_houdini():
             import hou
             n = hou.node('obj')
             parent = n.createNode('alembicarchive')
