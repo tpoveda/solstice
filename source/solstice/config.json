@@ -32,5 +32,6 @@
     "Cameras": ["Camera"],
     "Lights":  ["Light Rig"],
     "FX": ["Cloth", "Groom"]
-  }
+  },
+  "SHOT_REGEX": "(\\A[^_]+_\\d{2,2}_\\d{2,3})"
 }

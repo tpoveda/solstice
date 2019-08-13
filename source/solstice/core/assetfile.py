@@ -17,9 +17,9 @@ import os
 import tpDccLib as tp
 
 from artellapipe.core import assetfile, artellalib
+from artellapipe.tools.alembicmanager import alembicmanager
 
 from solstice.core import defines
-from solstice.pipeline.tools.alembicmanager import alembicmanager
 
 
 class TexturesAssetFile(assetfile.ArtellaAssetType, object):
