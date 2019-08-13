@@ -22,7 +22,7 @@ from artellapipe.core import project as artella_project
 
 import solstice
 from solstice.launcher import tray
-from solstice.core import asset
+from solstice.core import asset, node
 
 
 class Solstice(artella_project.ArtellaProject):
@@ -30,6 +30,8 @@ class Solstice(artella_project.ArtellaProject):
     PROJECT_PATH = solstice.get_project_path()
     TRAY_CLASS = tray.SolsticeTray
     ASSET_CLASS = asset.SolsticeAsset
+    ASSET_NODE_CLASS = node.SolsticeAssetNode
+    TAG_NODE_CLASS = asset.SolsticeTagNode
     PROJECT_CONFIG_PATH = solstice.get_project_config_path()
     PROJECT_SHELF_FILE_PATH = solstice.get_project_shelf_path()
     PROJECT_MENU_FILE_PATH = solstice.get_project_menu_path()
@@ -107,3 +109,21 @@ class Solstice(artella_project.ArtellaProject):
         self.register_asset_class(characterasset.SolsticeCharacterAsset)
 
         super(Solstice, self)._register_asset_classes()
+
+    def _register_asset_file_types(self):
+        """
+        Overrides base ArtellaProject _register_asset_file_types function
+        Internal function that can be override to register specific project file type classes
+        """
+
+        from solstice.core import assetfile
+
+        self.register_asset_file_type(assetfile.TexturesAssetFile)
+        self.register_asset_file_type(assetfile.ModelAssetFile)
+        self.register_asset_file_type(assetfile.ShadingAssetFile)
+        self.register_asset_file_type(assetfile.RigAssetFile)
+        self.register_asset_file_type(assetfile.GroomAssetFile)
+        self.register_asset_file_type(assetfile.AlembicAssetFile)
+        self.register_asset_file_type(assetfile.StandinAssetFile)
+
+        super(Solstice, self)._register_asset_file_types()

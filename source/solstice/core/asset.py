@@ -16,6 +16,8 @@ import os
 
 from tpPyUtils import path as path_utils
 
+import tpDccLib as tp
+
 import artellapipe
 from artellapipe.core import artellalib, defines as artella_defines, asset as artella_asset
 
@@ -23,16 +25,17 @@ from solstice.core import defines
 
 
 class SolsticeAsset(artella_asset.ArtellaAsset, object):
-    def __init__(self, project, asset_data):
-        super(SolsticeAsset, self).__init__(project=project, asset_data=asset_data)
+    def __init__(self, project, asset_data, node=None):
+        super(SolsticeAsset, self).__init__(project=project, asset_data=asset_data, node=node)
 
-    def get_file(self, file_type, status, extension=None):
+    def get_file(self, file_type, status, extension=None, resolve_path=False):
         """
         Overrides base ArtellaAsset get_file function
         Returns file path of the given file type and status
         :param file_type: str
         :param status: str
         :param extension: str
+        :param resolve_path: bool
         """
 
         if not extension:
@@ -56,6 +59,9 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
                 file_path = path_utils.clean_path(os.path.join(self.get_path(), artella_defines.ARTELLA_WORKING_FOLDER, file_type, file_name))
         else:
             raise NotImplementedError('Open Published Assets is not implemented yet!')
+
+        if resolve_path:
+            file_path = self._project.resolve_path(file_path)
 
         return file_path
 
@@ -87,21 +93,60 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
             self.reference_alembic_file()
         elif extension == defines.SOLSTICE_STANDIN_EXTENSION:
             self.reference_standin_file()
-        elif extension == defines.SOLSTICE_RIG_ASSET_TYPE:
+        elif extension == defines.SOLSTICE_RIG_EXTENSION:
             self.reference_rig_file()
-
-    def reference_alembic_file(self, namespace=None, unresolve_path=True):
-        pass
-
-    def reference_standin_file(self):
-        pass
+        else:
+            self._project.logger.error('Extension "{}" is not supported in {}!'.format(extension, self._project.name.title()))
 
     def reference_rig_file(self):
-        pass
+        """
+        References rig file of the current asset
+        """
 
+        self.reference_file(file_type=defines.SOLSTICE_RIG_ASSET_TYPE, status=artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS)
 
+    def reference_standin_file(self):
+        """
+        References Standin file of the current asset
+        :return: str
+        """
+        print('Referencing Standin ...')
+
+    def reference_alembic_file(self, namespace=None, resolve_path=True):
+        """
+        References Alembic file of the current asset
+        :param namespace: str
+        :param resolve_path: bool
+        """
+
+        alembic_name = self.get_name() + defines.SOLSTICE_ALEMBIC_EXTENSION
+        model_file_type = self.get_file_type(defines.SOLSTICE_MODEL_ASSET_TYPE)
+        latest_published_local_versions = model_file_type.get_latest_local_published_version()
+        if not latest_published_local_versions:
+            artellapipe.solstice.logger.warning('Asset {} has not model files synced!'.format(self.get_name()))
+            return
+
+        alembic_file_type = self.get_file_type(defines.SOLSTICE_MODEL_ASSET_TYPE, extension=defines.SOLSTICE_ALEMBIC_EXTENSION)
+        if not alembic_file_type:
+            artellapipe.solstice.logger.warning('Asset {} has not Alembic File published!')
+            return
+
+        alembic_file_type.reference_file(artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS)
 
 
 class SolsticeAssetWidget(artella_asset.ArtellaAssetWidget, object):
     def __init__(self, asset, parent=None):
         super(SolsticeAssetWidget, self).__init__(asset=asset, parent=parent)
+
+
+class SolsticeTagNode(artella_asset.ArtellaTagNode, object):
+    def __init__(self, project, node, tag_info):
+        super(SolsticeTagNode, self).__init__(project=project, node=node, tag_info=tag_info)
+
+    def get_types(self):
+        """
+        Returns a list of types for the current asset
+        :return: list(str)
+        """
+
+        return self._get_attribute('types')

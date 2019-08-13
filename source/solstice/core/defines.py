@@ -42,11 +42,20 @@ SOLSTICE_RIG_ASSET_TYPE = defines.ARTELLA_RIG_ASSET_TYPE
 # Defines of groom asset type for Solstice
 SOLSTICE_GROOM_ASSET_TYPE = defines.ARTELLA_GROOM_ASSET_TYPE
 
-# Defines Alembic extension used by Sosltice
+# Defines Alembic extension used by Solstice
 SOLSTICE_ALEMBIC_EXTENSION = '.abc'
 
-# Defines Alembic extension used by Sosltice
+# Defines Alembic extension used by Solstice
+SOLSTICE_MODEL_EXTENSION = '.ma'
+
+# Defines Texture extensions used by Solstice
+SOLSTICE_TEXTURE_EXTENSIONS = ['.tx', '.png', '.jpg', '.jpeg']
+
+# Defines Alembic extension used by Solstice
+SOLSTICE_SHADING_EXTENSION = '.ma'
+
+# Defines Alembic extension used by Solstice
 SOLSTICE_RIG_EXTENSION = '.ma'
 
-# Defines Standin extension used by Sosltice
+# Defines Standin extension used by Solstice
 SOLSTICE_STANDIN_EXTENSION = '.ass'

@@ -89,7 +89,9 @@ def init(do_reload=False, import_libs=True):
     resource = SolsticeResource
 
     solstice_importer.import_modules()
-    solstice_importer.import_packages(only_packages=True, order=['solstice.launcher'])
+    solstice_importer.import_packages(only_packages=True, order=[
+        'solstice.launcher', 'solstice.core', 'solstice.core.tagnode'
+    ])
     if do_reload:
         solstice_importer.reload_all()
 
