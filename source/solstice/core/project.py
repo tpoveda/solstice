@@ -22,13 +22,14 @@ from artellapipe.core import project as artella_project
 
 import solstice
 from solstice.launcher import tray
-from solstice.core import asset, node
+from solstice.core import asset, node, shelf
 
 
 class Solstice(artella_project.ArtellaProject):
 
     PROJECT_PATH = solstice.get_project_path()
     TRAY_CLASS = tray.SolsticeTray
+    SHELF_CLASS = shelf.SolsticeShelf
     ASSET_CLASS = asset.SolsticeAsset
     ASSET_NODE_CLASS = node.SolsticeAssetNode
     TAG_NODE_CLASS = asset.SolsticeTagNode
