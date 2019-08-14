@@ -82,6 +82,22 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
         else:
             super(SolsticeAsset, self).open_file(file_type=file_type, status=status)
 
+    def import_file_by_extension(self, extension=None):
+        """
+        Implements base AbstractAsset reference_file_by_extension function
+        References asset file with the given extension
+        :param extension: str
+        """
+
+        if extension == defines.SOLSTICE_ALEMBIC_EXTENSION:
+            self.import_alembic_file()
+        elif extension == defines.SOLSTICE_STANDIN_EXTENSION:
+            self.import_standin_file()
+        elif extension == defines.SOLSTICE_RIG_EXTENSION:
+            self.import_rig_file()
+        else:
+            self._project.logger.error('Extension "{}" is not supported in {}!'.format(extension, self._project.name.title()))
+
     def reference_file_by_extension(self, extension=None):
         """
         Implements base AbstractAsset reference_file_by_extension function
@@ -98,6 +114,13 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
         else:
             self._project.logger.error('Extension "{}" is not supported in {}!'.format(extension, self._project.name.title()))
 
+    def import_rig_file(self):
+        """
+        Imports rig file of the current asset
+        """
+
+        self.import_file(file_type=defines.SOLSTICE_RIG_ASSET_TYPE, status=artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS)
+
     def reference_rig_file(self):
         """
         References rig file of the current asset
@@ -105,12 +128,52 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
 
         self.reference_file(file_type=defines.SOLSTICE_RIG_ASSET_TYPE, status=artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS)
 
+    def import_standin_file(self):
+        """
+        Imports Standin file of the current asset
+        :return: str
+        """
+
+        model_file_type = self.get_file_type(defines.SOLSTICE_MODEL_ASSET_TYPE)
+        latest_published_local_versions = model_file_type.get_latest_local_published_version()
+        if not latest_published_local_versions:
+            artellapipe.solstice.logger.warning('Asset {} has not model files synced!'.format(self.get_name()))
+            return
+
+        standin_file_type = self.get_file_type(defines.SOLSTICE_MODEL_ASSET_TYPE, extension=defines.SOLSTICE_STANDIN_EXTENSION)
+        if not standin_file_type:
+            artellapipe.solstice.logger.warning('Asset {} has not Alembic File published!')
+            return
+
+        standin_file_type.import_file(artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS)
+
     def reference_standin_file(self):
         """
         References Standin file of the current asset
         :return: str
         """
-        print('Referencing Standin ...')
+
+        self.import_standin_file()
+
+    def import_alembic_file(self, namespace=None, resolve_path=True):
+        """
+        Imports Alembic file of the current asset
+        :param namespace: str
+        :param resolve_path: bool
+        """
+
+        model_file_type = self.get_file_type(defines.SOLSTICE_MODEL_ASSET_TYPE)
+        latest_published_local_versions = model_file_type.get_latest_local_published_version()
+        if not latest_published_local_versions:
+            artellapipe.solstice.logger.warning('Asset {} has not model files synced!'.format(self.get_name()))
+            return
+
+        alembic_file_type = self.get_file_type(defines.SOLSTICE_MODEL_ASSET_TYPE, extension=defines.SOLSTICE_ALEMBIC_EXTENSION)
+        if not alembic_file_type:
+            artellapipe.solstice.logger.warning('Asset {} has not Alembic File published!')
+            return
+
+        alembic_file_type.import_file(artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS)
 
     def reference_alembic_file(self, namespace=None, resolve_path=True):
         """
@@ -119,7 +182,6 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
         :param resolve_path: bool
         """
 
-        alembic_name = self.get_name() + defines.SOLSTICE_ALEMBIC_EXTENSION
         model_file_type = self.get_file_type(defines.SOLSTICE_MODEL_ASSET_TYPE)
         latest_published_local_versions = model_file_type.get_latest_local_published_version()
         if not latest_published_local_versions:

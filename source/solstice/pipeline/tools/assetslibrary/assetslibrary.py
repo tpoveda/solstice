@@ -21,11 +21,10 @@ from Qt.QtWidgets import *
 import tpDccLib as tp
 
 import artellapipe
-from artellapipe.gui import window
+from artellapipe.gui import window, button
 from artellapipe.tools.assetslibrary import assetslibrary
 
 from solstice.core import defines
-from solstice.pipeline.tools.assetslibrary.widgets import syncbutton
 
 
 class SolsticeAssetsLibraryWidget(assetslibrary.ArtellaAssetsLibraryWidget, object):
@@ -64,7 +63,7 @@ class SolsticeAssetsLibraryWidget(assetslibrary.ArtellaAssetsLibraryWidget, obje
 
         sync_icon = artellapipe.solstice.resource.icon('sync')
         sync_hover_icon = artellapipe.solstice.resource.icon('sync_hover')
-        sync_btn = syncbutton.SyncButton(icon=sync_icon, icon_hover=sync_hover_icon, icon_min_size=50)
+        sync_btn = button.IconButton(icon=sync_icon, icon_hover=sync_hover_icon, icon_min_size=50)
         sync_btn.setIconSize(QSize(50, 50))
         sync_btn.move(item.width() * 0.5 - sync_btn.width() * 0.5, item.height() * 0.5 - sync_btn.height() * 0.5)
         sync_btn.setParent(item.containedWidget)
@@ -79,7 +78,11 @@ class SolsticeAssetsLibraryWidget(assetslibrary.ArtellaAssetsLibraryWidget, obje
         asset_widget = item.containedWidget
         sync_btn.clicked.connect(partial(asset_widget.asset.sync_latest_published_files, None, True))
 
+
 class SolsticeAssetsLibrary(assetslibrary.ArtellaAssetsLibrary, object):
+
+    LIBRARY_WIDGET = SolsticeAssetsLibraryWidget
+
     def __init__(self, project, parent=None):
         super(SolsticeAssetsLibrary, self).__init__(project=project, parent=parent)
 

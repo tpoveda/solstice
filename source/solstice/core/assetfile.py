@@ -18,6 +18,7 @@ import tpDccLib as tp
 
 from artellapipe.core import assetfile, artellalib
 from artellapipe.tools.alembicmanager import alembicmanager
+from artellapipe.tools.standinmanager import standinmanager
 
 from solstice.core import defines
 
@@ -140,16 +141,26 @@ class AlembicAssetFile(assetfile.ArtellaAssetType, object):
     FILE_TYPE = defines.SOLSTICE_MODEL_ASSET_TYPE
     FILE_EXTENSIONS = [defines.SOLSTICE_ALEMBIC_EXTENSION]
 
-    def _reference_file(self, path):
+    def _import_file(self, path, fix_path=True):
+        """
+        Internal function that imports current file in DCC
+        :param fix_path: bool
+        :param path: str
+        """
+
+        alembicmanager.importer.import_alembic(project=self.get_project(), alembic_path=path, fix_path=fix_path)
+
+    def _reference_file(self, path, fix_path=True):
         """
         Internal function that references current file in DCC
+        :param fix_path: bool
         :param path: str
         """
 
         if tp.is_houdini():
-            pass
+            alembicmanager.importer.import_alembic(project=self.get_project(), alembic_path=path, fix_path=fix_path)
         else:
-            print('Referencing Alembic: {}'.format(path))
+            alembicmanager.importer.reference_alembic(project=self.get_project(), alembic_path=path, fix_path=fix_path)
 
 
 class StandinAssetFile(assetfile.ArtellaAssetType, object):
@@ -157,3 +168,20 @@ class StandinAssetFile(assetfile.ArtellaAssetType, object):
     FILE_TYPE = defines.SOLSTICE_MODEL_ASSET_TYPE
     FILE_EXTENSIONS = [defines.SOLSTICE_STANDIN_EXTENSION]
 
+    def _import_file(self, path, fix_path=True):
+        """
+        Internal function that references current file in DCC
+        :param fix_path: bool
+        :param path: str
+        """
+
+        standinmanager.importer.import_standin(project=self.get_project(), standin_path=path, fix_path=fix_path)
+
+    def _reference_file(self, path, fix_path=True):
+        """
+        Internal function that references current file in DCC
+        :param fix_path: bool
+        :param path: str
+        """
+
+        self._import_file(path=path, fix_path=fix_path)
