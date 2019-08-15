@@ -80,7 +80,7 @@ class ShadersEditor(taggereditor.TaggerEditor, object):
             tp.Dcc.add_string_attribute(node=tag_data_node, attribute_name='shaders')
 
         asset_groups = tp.Dcc.list_nodes(node_name='*_grp', node_type='transform')
-        if not asset_groups or len(asset_groups <= 0):
+        if not asset_groups or len(asset_groups) <= 0:
             return
 
         # all_shading_groups = list()
