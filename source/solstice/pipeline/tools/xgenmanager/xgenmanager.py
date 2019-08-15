@@ -7,7 +7,7 @@ Tool that allows to import/export XGen data
 
 from __future__ import print_function, division, absolute_import
 
-from artellapipe.tools.shadermanager import shadermanager
+from artellapipe.tools.shadermanager.widgets import shaderexporter
 
 __author__ = "Enrique Velasco"
 __license__ = "MIT"
@@ -23,7 +23,6 @@ from functools import partial
 from Qt.QtWidgets import *
 
 import maya.cmds as mc
-import pymel.core as pm
 
 import xgenm as xg
 import xgenm.XgExternalAPI as xge
@@ -209,7 +208,7 @@ class ControlXgenUi(window.ArtellaWindow, object):
         self.project.logger.debug("XGEN || Sculpts Exported")
 
         # export material
-        exporter = shaderlibrary.ShaderExporter(shaders=self.shaders_dict.values(), parent=self)
+        exporter = shaderexporter.ShaderExporter(shaders=self.shaders_dict.values(), parent=self)
         exporter.export_shaders(publish=comment)
 
         self.qtui.progress_lbl.setText("Exporting Material (.sshader)")
@@ -339,6 +338,7 @@ class ControlXgenUi(window.ArtellaWindow, object):
         Gets a dictionary with the used materials for each description
         :return: Dictionary with the shader --> description mapping
         """
+        import pymel.core as pm
         material_dict = dict()
         for description in xg.descriptions(str(self.collection_name)):
             pm.select(description)
