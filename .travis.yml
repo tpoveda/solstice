@@ -21,14 +21,14 @@ before_deploy:
 deploy:
   - provider: pages
     skip_cleanup: true
-    github_token: "$GITHUB_TOKEN"
+    github_token: $GITHUB_TOKEN
     local_dir: site
     on:
       branch: master
   - provider: releases
     skip_cleanup: true
-    api_key: "$GITHUB_TOKEN"
-    file: "${TRAVIS_BUILD_DIR}${REPO}-${TRAVIS_TAG}.tar.gz"
+    api_key: $GITHUB_TOKEN
+    file: ${TRAVIS_BUILD_DIR}${REPO}-${TRAVIS_TAG}.tar.gz
     on:
       branch: master
       tags: true
