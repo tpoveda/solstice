@@ -116,6 +116,15 @@ class Solstice(artella_project.ArtellaProject):
 
         return publisher_plugin_paths
 
+    def get_shaders_path(self):
+        """
+        Overrides base ArtellaProject get_shaders_path function
+        Returns path where shareds are located in the project
+        :return: str
+        """
+
+        return path_utils.clean_path(os.path.join(self.get_assets_path(), 'Scripts', 'PIPELINE', '__working__', 'ShadersLibrary'))
+
     def _register_asset_classes(self):
         """
         Overrides base ArtellaProject _register_asset_classes function

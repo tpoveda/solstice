@@ -7,17 +7,18 @@
   "PROJECT_ID": "2252d6c8-407d-4419-a186-cf90760c9967",
   "PROJECT_ICON": "solstice",
   "PROJECT_VERSION_FILE": "version.json",
+  "PROJECT_NAMING_FILE": "naming.json",
   "PROJECT_URL": "https://www.solsticeshortfilm.com/",
   "PROJECT_ASSET_DATA_FILENAME": "data.json",
   "ASSET_TYPES": ["Props", "Background Elements", "Characters"],
   "ASSET_FILES": ["textures", "model", "shading", "rig", "groom"],
+  "ASSET_MUST_FILES": ["textures", "model", "shading", "rig"],
   "ASSET_IGNORED_PATHS": ["PIPELINE", "lighting", "Light Rigs", "S_CH_02_summer_scripts"],
   "ASSETS_LIBRARY_SUPPORTED_FILES": {
     "rig": ".ma",
     "alembic": ".abc",
     "standin": ".ass"
   },
-  "ASSET_MUST_FILES": ["textures", "model", "shading", "rig"],
   "ASSET_WIP_STATUS": "working",
   "ASSET_PUBLISH_STATUS": "published",
   "PATHS_TO_REGISTER": ["solstice/externals", "solstice/pipeline"],
@@ -33,5 +34,6 @@
     "Lights":  ["Light Rig"],
     "FX": ["Cloth", "Groom"]
   },
-  "SHOT_REGEX": "(\\A[^_]+_\\d{2,2}_\\d{2,3})"
+  "SHOT_REGEX": "(\\A[^_]+_\\d{2,2}_\\d{2,3})",
+  "SHADERS_EXTENSION": ".sshader"
 }
