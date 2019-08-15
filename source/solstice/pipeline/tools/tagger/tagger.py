@@ -26,21 +26,14 @@ class SolsticeTagger(tagger.ArtellaTagger, object):
         Overrides to add custom editors
         """
 
-        from solstice.pipeline.tools.tagger.editors import nameeditor
-        from solstice.pipeline.tools.tagger.editors import descriptioneditor
-        from solstice.pipeline.tools.tagger.editors import typeeditor
+        super(SolsticeTagger, self)._create_editors()
+
         from solstice.pipeline.tools.tagger.editors import highproxyeditor
         from solstice.pipeline.tools.tagger.editors import shaderseditor
 
-        name_editor = nameeditor.NameEditor(project=self._project)
-        description_editor = descriptioneditor.DescriptionEditor(project=self._project)
-        type_editor = typeeditor.TypeEditor(project=self._project)
         high_proxy_editor = highproxyeditor.HighProxyEditor(project=self._project)
         shader_editor = shaderseditor.ShadersEditor(project=self._project)
 
-        self.add_editor(name_editor)
-        self.add_editor(description_editor)
-        self.add_editor(type_editor)
         self.add_editor(high_proxy_editor)
         self.add_editor(shader_editor)
 

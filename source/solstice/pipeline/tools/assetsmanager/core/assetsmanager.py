@@ -13,7 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
 import artellapipe
-from artellapipe.tools.assetsmanager import assetsmanager
+from artellapipe.tools.assetsmanager.core import assetsmanager
 
 from solstice.pipeline.tools.assetsmanager.widgets import assetswidgets
 

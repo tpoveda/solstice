@@ -14,9 +14,11 @@ __email__ = "tpovedatd@gmail.com"
 
 import os
 
+from tpPyUtils import path as path_utils
+
 import tpDccLib as tp
 
-from artellapipe.core import assetfile, artellalib
+from artellapipe.core import assetfile, artellalib, defines as artella_defines
 from artellapipe.tools.alembicmanager import alembicmanager
 from artellapipe.tools.standinmanager import standinmanager
 
@@ -71,6 +73,17 @@ class ShadingAssetFile(assetfile.ArtellaAssetType, object):
     def __init__(self, asset):
         super(ShadingAssetFile, self).__init__(asset=asset)
 
+    def _get_working_path(self, asset_name, asset_path):
+        """
+        Overrides base ArtellaAssetType _get_working_path function
+        Internal function that returns working path of the current asset file
+        :param asset_name: str
+        :param asset_path: str
+        :return: str
+        """
+
+        return path_utils.clean_path(os.path.join(asset_path, artella_defines.ARTELLA_WORKING_FOLDER, self.FILE_TYPE, asset_name+'_SHD'+self.FILE_EXTENSIONS[0]))
+
     def _get_published_path(self, asset_name, asset_path, version_folder):
         """
         Overrides base ArtellaAssetType _get_published_path function
@@ -81,7 +94,7 @@ class ShadingAssetFile(assetfile.ArtellaAssetType, object):
         :return: str
         """
 
-        return os.path.join(asset_path, version_folder, self.FILE_TYPE, asset_name+'_SHD'+self.FILE_EXTENSIONS[0])
+        return path_utils.clean_path(os.path.join(asset_path, version_folder, self.FILE_TYPE, asset_name+'_SHD'+self.FILE_EXTENSIONS[0]))
 
     def _get_working_server_versions(self, working_path, artella_data, force_update=False):
         """
@@ -115,6 +128,17 @@ class RigAssetFile(assetfile.ArtellaAssetType, object):
     def __init__(self, asset):
         super(RigAssetFile, self).__init__(asset=asset)
 
+    def _get_working_path(self, asset_name, asset_path):
+        """
+        Overrides base ArtellaAssetType _get_working_path function
+        Internal function that returns working path of the current asset file
+        :param asset_name: str
+        :param asset_path: str
+        :return: str
+        """
+
+        return path_utils.clean_path(os.path.join(asset_path, artella_defines.ARTELLA_WORKING_FOLDER, self.FILE_TYPE, asset_name+'_RIG'+self.FILE_EXTENSIONS[0]))
+
     def _get_published_path(self, asset_name, asset_path, version_folder):
         """
         Overrides base ArtellaAssetType _get_published_path function
@@ -125,7 +149,7 @@ class RigAssetFile(assetfile.ArtellaAssetType, object):
         :return: str
         """
 
-        return os.path.join(asset_path, version_folder, self.FILE_TYPE, asset_name+'_RIG'+self.FILE_EXTENSIONS[0])
+        return path_utils.clean_path(os.path.join(asset_path, version_folder, self.FILE_TYPE, asset_name+'_RIG'+self.FILE_EXTENSIONS[0]))
 
 
 class GroomAssetFile(assetfile.ArtellaAssetType, object):

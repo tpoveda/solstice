@@ -16,8 +16,6 @@ import os
 
 from tpPyUtils import path as path_utils
 
-import tpDccLib as tp
-
 import artellapipe
 from artellapipe.core import artellalib, defines as artella_defines, asset as artella_asset
 
@@ -47,7 +45,7 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
             return None
 
         if file_type in [defines.SOLSTICE_MODEL_ASSET_TYPE, defines.SOLSTICE_TEXTURES_ASSET_TYPE]:
-            file_name = self.get_short_name()
+            file_name = self.get_name()
             file_name += extension
         else:
             return super(SolsticeAsset, self).get_file(file_type=file_type, status=status)
@@ -202,7 +200,7 @@ class SolsticeAssetWidget(artella_asset.ArtellaAssetWidget, object):
 
 
 class SolsticeTagNode(artella_asset.ArtellaTagNode, object):
-    def __init__(self, project, node, tag_info):
+    def __init__(self, project, node, tag_info=None):
         super(SolsticeTagNode, self).__init__(project=project, node=node, tag_info=tag_info)
 
     def get_types(self):

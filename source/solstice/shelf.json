@@ -1,6 +1,46 @@
 {
   "main":
   [
-
+    {
+      "icon": "setproject.png",
+      "command": "import artellapipe; artellapipe.solstice.update_project();",
+      "annotation": "Auto Setup Solstice Project",
+      "label": "",
+      "dcc": ["maya"]
+    },
+    {
+      "icon": "artella.png",
+      "command": "import artellapipe; artellapipe.solstice.open_artella_project_url()",
+      "annotation": "Solstice Artella Project",
+      "label": "",
+      "dcc": ["maya", "houdini", "nuke"]
+    },
+    {
+      "icon": "",
+      "command": "",
+      "annotation": "separator",
+      "label": ""
+    },
+    {
+      "icon": "assetviewer.png",
+      "command": "from solstice.pipeline.tools.assetslibrary import assetslibrary; assetslibrary.run();",
+      "annotation": "Solstice Asset Library",
+      "label": "",
+      "dcc": ["maya", "houdini"]
+    },
+    {
+      "icon": "pipeline.png",
+      "command": "from solstice.pipeline.tools.assetsmanager import assetsmanager; assetsmanager.run();",
+      "annotation": "Solstice Assets Manager",
+      "label": "",
+      "dcc": ["maya", "houdini"]
+    },
+    {
+      "icon": "artella.png",
+      "command": "import artellapipe; from artellapipe.tools.artellamanager import artellamanager; artellamanager.run(artellapipe.solstice, 'all');",
+      "annotation": "Solstice Artella Manager",
+      "label": "",
+      "dcc": ["maya"]
+    }
   ]
 }

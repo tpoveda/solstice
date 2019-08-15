@@ -18,6 +18,10 @@ try:
 except ImportError:
     from urllib2 import quote
 
+import os
+
+from tpPyUtils import path as path_utils
+
 from artellapipe.core import project as artella_project
 
 import solstice
@@ -97,6 +101,20 @@ class Solstice(artella_project.ArtellaProject):
             return
 
         webbrowser.open(self._documentation_url)
+
+    def get_publisher_plugin_paths(self):
+        """
+        Overrides base ArtellaProject get_publisher_plugin_paths function
+        Function that registers all plugins available for Artella Publisher
+        """
+
+        publisher_plugin_paths = super(Solstice, self).get_publisher_plugin_paths()
+
+        publisher_plugin_paths.append(
+            path_utils.clean_path(os.path.join(solstice.get_project_path(), 'pipeline', 'tools', 'publisher', 'plugins'))
+        )
+
+        return publisher_plugin_paths
 
     def _register_asset_classes(self):
         """
