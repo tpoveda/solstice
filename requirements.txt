@@ -4,3 +4,4 @@
 artellalauncher
 artellapipe
 tpMayaLib
+tpHoudiniLib
