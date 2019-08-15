@@ -41,6 +41,27 @@
       "annotation": "Solstice Artella Manager",
       "label": "",
       "dcc": ["maya"]
+    },
+    {
+      "icon": "artella_upload.png",
+      "command": "from artellapipe.tools.artellauploader import artellauploader;batchuploader.run(artellapipe.solstice);",
+      "annotation": "Artella Upload Batcher",
+      "label": "Upload Batcher",
+      "dcc": ["maya", "houdini"]
+    },
+    {
+      "icon": "tagger.png",
+      "command": "from solstice.pipeline.tools import tagger; tagger.run();",
+      "annotation": "Solstice Artella Manager",
+      "label": "",
+      "dcc": ["maya"]
+    },
+    {
+      "icon": "outline.png",
+      "command": "from solstice.pipeline.tools.outliner import outliner; outliner.run();",
+      "annotation": "Solstice Outliner Tool",
+      "label": "",
+      "dcc": ["maya"]
     }
   ]
 }

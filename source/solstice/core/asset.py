@@ -39,6 +39,9 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
         if not extension:
             extension = artella_defines.ARTELLA_DEFAULT_ASSET_FILES_EXTENSION
 
+        if hasattr(file_type, 'FILE_TYPE'):
+            file_type = file_type.FILE_TYPE
+
         if file_type not in self.project.asset_files:
             return None
         if not artella_asset.ArtellaAssetFileStatus.is_valid(status):
@@ -95,6 +98,15 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
             self.import_rig_file()
         else:
             self._project.logger.error('Extension "{}" is not supported in {}!'.format(extension, self._project.name.title()))
+
+    def get_shading_type(self):
+        """
+        Implements base ArtellaAsset get_shading_type function
+        Returns the asset file type of the shading file for the project
+        :return: str
+        """
+
+        return defines.SOLSTICE_SHADING_ASSET_TYPE
 
     def reference_file_by_extension(self, extension=None):
         """
