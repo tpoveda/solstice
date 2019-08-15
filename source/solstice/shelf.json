@@ -1,0 +1,101 @@
+{
+  "main":
+  [
+    {
+      "icon": "setproject.png",
+      "command": "import artellapipe; artellapipe.solstice.update_project();",
+      "annotation": "Auto Setup Solstice Project",
+      "label": "",
+      "dcc": ["maya"]
+    },
+    {
+      "icon": "artella.png",
+      "command": "import artellapipe; artellapipe.solstice.open_artella_project_url()",
+      "annotation": "Solstice Artella Project",
+      "label": "",
+      "dcc": ["maya", "houdini", "nuke"]
+    },
+    {
+      "icon": "",
+      "command": "",
+      "annotation": "separator",
+      "label": ""
+    },
+    {
+      "icon": "assetviewer.png",
+      "command": "from solstice.pipeline.tools.assetslibrary import assetslibrary; assetslibrary.run();",
+      "annotation": "Solstice Asset Library",
+      "label": "",
+      "dcc": ["maya", "houdini"]
+    },
+    {
+      "icon": "pipeline.png",
+      "command": "from solstice.pipeline.tools.assetsmanager import assetsmanager; assetsmanager.run();",
+      "annotation": "Solstice Assets Manager",
+      "label": "",
+      "dcc": ["maya", "houdini"]
+    },
+    {
+      "icon": "artella.png",
+      "command": "import artellapipe; from artellapipe.tools.artellamanager import artellamanager; artellamanager.run(artellapipe.solstice, 'all');",
+      "annotation": "Solstice Artella Manager",
+      "label": "",
+      "dcc": ["maya"]
+    },
+    {
+      "icon": "artella_upload.png",
+      "command": "from artellapipe.tools.artellauploader import artellauploader;artellauploader.run(artellapipe.solstice);",
+      "annotation": "Artella Upload Batcher",
+      "label": "",
+      "dcc": ["maya", "houdini"]
+    },
+    {
+      "icon": "tagger.png",
+      "command": "from solstice.pipeline.tools.tagger import tagger; tagger.run();",
+      "annotation": "Solstice Tagger",
+      "label": "",
+      "dcc": ["maya"]
+    },
+    {
+      "icon": "outline.png",
+      "command": "from solstice.pipeline.tools.outliner import outliner; outliner.run();",
+      "annotation": "Solstice Outliner Tool",
+      "label": "",
+      "dcc": ["maya"]
+    },
+    {
+    "icon": "",
+    "command": "",
+    "annotation": "separator",
+    "label": ""
+    },
+    {
+        "icon": "solstice_save",
+        "command": "import artellapipe; artellapipe.solstice.save_scene(notify=True);",
+        "annotation": "Save, remove invalid nodes and clean student license from file",
+        "label": "",
+        "dcc": ["maya", "houdini"]
+    },
+    {
+        "icon": "lock_file",
+        "command": "import artellapipe; artellapipe.solstice.lock_file(notify=True);",
+        "annotation": "Locks current file in Artella server",
+        "label": "",
+        "dcc": ["maya", "houdini"]
+    },
+    {
+        "icon": "unlock_file",
+        "command": "import artellapipe; artellapipe.solstice.unlock_file(notify=True);",
+        "annotation": "Unlocks current file in Artella server",
+        "label": "",
+        "dcc": ["maya", "houdini"]
+    },
+    {
+        "icon": "upload_wip",
+        "command": "import artellapipe; artellapipe.solstice.upload_working_version(notify=True);",
+        "annotation": "Upload new working version of the current file",
+        "label": "",
+        "dcc": ["maya", "houdini"]
+    }
+  ]
+}

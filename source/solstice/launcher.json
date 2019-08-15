@@ -1,0 +1,54 @@
+{
+  "LAUNCHER_NAME": "Solstice",
+  "LAUNCHER_VERSION": "0.0.1",
+  "DCCS":
+  {
+    "MAYA":
+    {
+      "enabled": "True",
+      "icon": "color/maya",
+      "supported_versions": ["2019"],
+      "default_version": "2019",
+      "departments": ["modeling", "shading", "fx", "lighting", "comp", "grooming", "rigging", "layout"],
+      "plugins":
+      {
+        "ARNOLD":
+        {
+          "version": ""
+        }
+      }
+    },
+    "NUKE":
+    {
+      "enabled": "True",
+      "icon": "color/nuke",
+      "supported_versions": ["11.3v3"],
+      "default_version": "11.3v3",
+      "departments": ["lighting", "comp"]
+    },
+    "HOUDINI":
+    {
+      "enabled": "True",
+      "icon": "color/houdini",
+      "supported_versions": ["17.5.173"],
+      "default_version": "17.5.173",
+      "departments": ["fx"]
+    },
+    "PHOTOSHOP":
+    {
+      "enabled": "True",
+      "icon": "color/photoshop",
+      "supported_versions": ["2017", "2019"],
+      "default_version": "2019",
+      "departments": ["lighting", "comp", "grooming"]
+    },
+    "ZBRUSH":
+    {
+      "enabled": "True",
+      "icon": "color/zbrush",
+      "supported_versions": ["4R8"],
+      "default_version": "4R8",
+      "departments": ["modeling"]
+    }
+  }
+}

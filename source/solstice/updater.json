@@ -1,0 +1,9 @@
+{
+  "UPDATER_VERSION": "0.0.1",
+  "RELEASE_EXTENSION": "tar.gz",
+  "REPOSITORY_URL": "https://github.com/tpoveda/solstice/",
+  "REPOSITORY_FOLDER": "source",
+  "VERSION_FILE_NAME": "__version__.py",
+  "PROGRESS_BAR_COLOR_0": "245, 180, 148",
+  "PROGRESS_BAR_COLOR_1": "75, 70, 170"
+}

@@ -1,0 +1,3 @@
+order = [
+    'solstice.core.shelf'
+]

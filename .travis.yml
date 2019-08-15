@@ -2,13 +2,41 @@ language: python
 install:
 - pip install mkdocs
 - pip install mkdocs-material
+- pip install pathlib
+- pip install mkdocs-markdownextradata-plugin
+- pip install -r requirements.txt
+- python setup.py install
 script:
 - mkdocs build --config-file=docs/mkdocs.yml --verbose --clean
 - mv docs/site .
+- pytest
+before_deploy:
+  - pip install -r requirements_git.txt -t source/solstice/externals
+  - rm -r source/solstice/externals/PySide2
+  - rm -r source/solstice/externals/pyside2uic
+  - rm -r source/solstice/externals/shiboken2
+  - rm -r source/solstice/externals/bin
+  - find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
+  - tar -zcf ${TRAVIS_BUILD_DIR}${REPO}-${TRAVIS_TAG}.tar.gz source/solstice
 deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN
-  local_dir: site
-on:
-  branch: master
+  - provider: pages
+    skip_cleanup: true
+    github_token: "$GITHUB_TOKEN"
+    local_dir: site
+    on:
+      branch: master
+  - provider: releases
+    skip_cleanup: true
+    api_key: "$GITHUB_TOKEN"
+    file: "${TRAVIS_BUILD_DIR}${REPO}-${TRAVIS_TAG}.tar.gz"
+    on:
+      branch: master
+      tags: true
+  - provider: pypi
+    skip_cleanup: true
+    user: tpoveda
+    password:
+      secure: DZDCBmAa1LGalyCDtMm/oopMvUdJONX/G+0USNlJK0IloD6AVt59TYJuhVG5FUKWNGwqunFHbjrJW7ONP76j0G9erQ0xuHPz7UmKYl1kh3kkfeVOtpGWiigp0pGwAF8qqaziMNXX4okuKJwNZ1KCqhIhdMig69WhSfnnyz+AvHVy3n0Q4WIhkw0MZmsZoBEV8Car5Lf2861LJNZ86ZG0S6wWewZjftAXTfgZsIXAELKtmp4HX4uzUQhu2WZb2LxmKb3UIN2/1f8egHxjV5F/+zS37Qe6xLvBoMXyPZL7VV/Wv6tpd0sCEjZxNFJsxaT3zN4IZsBYu8uAGrrdC0MQJBa/CoK71xxgz8ATK8RZOND4aPJtKXDUhDoyS3y+DB+AJMiW6e06Lr21UZEcKwEadbKwrwt5k+bOp2QhrmZf6q6zVl5kFCLKLfdel0EX9mGqiFSH5pQxJIQSzzJJM+XvT13va+kGHIMCYts/maJwf6UZhh4w0ZQiV4ouOlAG96bLCIc1lG8Z0WMkEJJJ+q0GPXnVLtsHCdtCHTe1lpYymrbbN7iqquA+HMKs+RUHgq19rAST7aM9Q031UfVH3YpC7FpoZyUja8csXlQMmP7H80WodSo/pogd0wjjeO5VwRD5ysBomb3sDDJWSMC/7IRDFDuHYO+H9do5+Gupbws+Oh4=
+    on:
+      branch: master
+      tags: true

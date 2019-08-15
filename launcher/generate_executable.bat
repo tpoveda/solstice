@@ -1,1 +1,0 @@
-pyinstaller --onefile --windowed --icon=solstice_icon_launcher.ico solstice_launcher.pyw
