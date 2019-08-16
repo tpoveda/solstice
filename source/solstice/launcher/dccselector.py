@@ -24,7 +24,7 @@ class SolsticeDCCSelector(dccselector.DCCSelector, object):
         super(SolsticeDCCSelector, self).ui()
 
         selector_logo = solstice.resource.pixmap(name='launcher_logo', extension='png')
-        self.add_logo(selector_logo)
+        self.add_logo(selector_logo, 930, 0)
 
     def _get_title_pixmap(self):
-        return solstice.resource.pixmap(name='solstice_title', extension='png')
+        return solstice.resource.pixmap(name='title_background', extension='png')

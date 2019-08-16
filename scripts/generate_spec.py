@@ -21,18 +21,13 @@ import traceback
 import subprocess
 
 import tpPyUtils
-tpPyUtils.init()
 import tpDccLib
-tpDccLib.init()
 import tpQtLib
-tpQtLib.init()
 
 from tpPyUtils import path as path_utils
 
 import artellapipe
-artellapipe.init()
 import artellalauncher
-artellalauncher.init()
 
 paths_to_add = [
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'source')
@@ -53,7 +48,7 @@ launcher_name = config_data.get('LAUNCHER_NAME')
 project_mod = importlib.import_module(project_name)
 if not hasattr(project_mod, 'init'):
     raise RuntimeError('Module {} does not implement init function!'.format(project_mod))
-project_mod.init()
+# project_mod.init()
 
 
 def retrieve_hidden_imports():
@@ -109,7 +104,7 @@ def retrieve_data():
     # Retrieve resource files
     data_files = list()
 
-    for mod in [project_mod, artellapipe, artellalauncher, tpQtLib]:
+    for mod in [artellapipe, artellalauncher, tpQtLib]:
         mod_path = os.path.dirname(os.path.abspath(mod.__file__))
         resources_path = path_utils.clean_path(os.path.join(mod_path, resources_folder_name))
         for root, dirs, files in os.walk(resources_path):

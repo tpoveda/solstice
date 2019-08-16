@@ -29,7 +29,7 @@ for p in paths_to_add:
         sys.path.append(p)
 
 
-def cleanup():
+def cleanup(onefile):
     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
     with open(json_path, 'r') as f:
         config_data = json.loads(f.read())
@@ -53,21 +53,22 @@ def cleanup():
             os.rename(exe_file, new_exe_file)
             exe_file = new_exe_file
 
-    # Move exe file to the root
-    exe_file = os.path.join(root_dir, 'dist', '{}.exe'.format(launcher_name))
-    if os.path.isfile(exe_file):
-        to_dir = root_dir
-        if os.path.isfile(os.path.join(to_dir, '{}.exe'.format(launcher_name))):
-            print('Removing Current Generated {} Launcher EXE file'.format(project_name))
-            os.remove(os.path.join(to_dir, '{}.exe'.format(launcher_name)))
-        print('Moving {} Launcher EXE file from: {} to {}'.format(project_name, exe_file, to_dir))
-        shutil.move(exe_file, to_dir)
+    if onefile:
+        # Move exe file to the root
+        exe_file = os.path.join(root_dir, 'dist', '{}.exe'.format(launcher_name))
+        if os.path.isfile(exe_file):
+            to_dir = root_dir
+            if os.path.isfile(os.path.join(to_dir, '{}.exe'.format(launcher_name))):
+                print('Removing Current Generated {} Launcher EXE file'.format(project_name))
+                os.remove(os.path.join(to_dir, '{}.exe'.format(launcher_name)))
+            print('Moving {} Launcher EXE file from: {} to {}'.format(project_name, exe_file, to_dir))
+            shutil.move(exe_file, to_dir)
 
-    # Remove PyInstaller dist folder
-    dist_folder = os.path.join(root_dir, 'dist')
-    if os.path.exists(dist_folder):
-        print('Removing PyInstaller dist folder: {}'.format(dist_folder))
-        shutil.rmtree(dist_folder)
+        # Remove PyInstaller dist folder
+        dist_folder = os.path.join(root_dir, 'dist')
+        if os.path.exists(dist_folder):
+            print('Removing PyInstaller dist folder: {}'.format(dist_folder))
+            shutil.rmtree(dist_folder)
 
     # Remove __pycache__ folder (generated when using Python 3)
     pycache_folder = os.path.join(root_dir, '__pycache__')
@@ -114,4 +115,4 @@ if __name__ == '__main__':
     process = subprocess.Popen(pyinstaller_cmd)
     process.wait()
 
-    cleanup()
+    cleanup(bool(args.onefile))

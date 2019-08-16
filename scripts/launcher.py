@@ -13,31 +13,44 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
 import sys
+import contextlib
 
-import tpPyUtils
-tpPyUtils.init()
-import tpDccLib
-tpDccLib.init()
-import tpQtLib
-tpQtLib.init()
+from Qt.QtWidgets import QApplication
 
-from PySide.QtGui import *
+@contextlib.contextmanager
+def application():
+    app = QApplication.instance()
 
-import artellapipe
-artellapipe.init()
-import artellalauncher
-artellalauncher.init()
-
-import solstice
-solstice.init(import_libs=False)
-
-from solstice.launcher import launcher
+    if not app:
+        app = QApplication(sys.argv)
+        yield app
+        app.exec_()
+    else:
+        yield app
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
 
-    launcher = launcher.SolsticeLauncher(project=artellapipe.solstice, resource=solstice.resource)
-    launcher.init()
-    app.exec_()
+    with application() as app:
 
+        import tpPyUtils
+        tpPyUtils.init()
+        import tpDccLib
+        tpDccLib.init()
+        import tpQtLib
+        tpQtLib.init()
+
+        from PySide.QtGui import *
+
+        import artellapipe
+        artellapipe.init()
+        import artellalauncher
+        artellalauncher.init()
+
+        import solstice
+        solstice.init(import_libs=False)
+
+        from solstice.launcher import launcher
+
+        launcher = launcher.SolsticeLauncher(project=artellapipe.solstice, resource=solstice.resource)
+        launcher.init()

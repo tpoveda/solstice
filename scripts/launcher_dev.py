@@ -14,6 +14,7 @@ __email__ = "tpovedatd@gmail.com"
 
 import os
 import sys
+import contextlib
 
 paths_to_add = [
     'D://tomi//deps',
@@ -21,6 +22,8 @@ paths_to_add = [
     'D://tomi//tpQtLib//source',
     'D://tomi//tpDccLib//source',
     'D://tomi//tpMayaLib//source',
+    'D://tomi//tpHoudiniLib//source',
+    'D://tomi//tpNameIt//source',
     'D://artellapipe//source',
     'D://artellalauncher//source',
     'D://solstice//source'
@@ -31,30 +34,42 @@ for p in paths_to_add:
             continue
         sys.path.append(p)
 
-import tpPyUtils
-tpPyUtils.init()
-import tpDccLib
-tpDccLib.init()
-import tpQtLib
-tpQtLib.init()
+from Qt.QtWidgets import QApplication
 
-from PySide.QtGui import *
+@contextlib.contextmanager
+def application():
+    app = QApplication.instance()
 
-import artellapipe
-artellapipe.init()
-import artellalauncher
-artellalauncher.init()
-
-import solstice
-solstice.init()
-
-from solstice.launcher import launcher
+    if not app:
+        app = QApplication(sys.argv)
+        yield app
+        app.exec_()
+    else:
+        yield app
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
 
-    launcher = launcher.SolsticeLauncher(project=artellapipe.solstice, resource=solstice.resource)
-    launcher.init()
-    app.exec_()
+    with application() as app:
 
+        import tpPyUtils
+        tpPyUtils.init()
+        import tpDccLib
+        tpDccLib.init()
+        import tpQtLib
+        tpQtLib.init()
+
+        from PySide.QtGui import *
+
+        import artellapipe
+        artellapipe.init()
+        import artellalauncher
+        artellalauncher.init()
+
+        import solstice
+        solstice.init()
+
+        from solstice.launcher import launcher
+
+        launcher = launcher.SolsticeLauncher(project=artellapipe.solstice, resource=solstice.resource)
+        launcher.init()
