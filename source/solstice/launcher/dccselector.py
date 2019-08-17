@@ -26,5 +26,7 @@ class SolsticeDCCSelector(dccselector.DCCSelector, object):
         selector_logo = solstice.resource.pixmap(name='launcher_logo', extension='png')
         self.add_logo(selector_logo, 930, 0)
 
+        self.set_info_url('https://tpoveda.github.io/solstice/pipeline/launcher/usage/')
+
     def _get_title_pixmap(self):
         return solstice.resource.pixmap(name='title_background', extension='png')

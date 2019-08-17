@@ -104,7 +104,7 @@ def retrieve_data():
     # Retrieve resource files
     data_files = list()
 
-    for mod in [artellapipe, artellalauncher, tpQtLib]:
+    for mod in [project_mod, artellapipe, artellalauncher, tpQtLib]:
         mod_path = os.path.dirname(os.path.abspath(mod.__file__))
         resources_path = path_utils.clean_path(os.path.join(mod_path, resources_folder_name))
         for root, dirs, files in os.walk(resources_path):
@@ -114,6 +114,10 @@ def retrieve_data():
                     # We only include necessary icons from tpQtLib
                     if mod == tpQtLib:
                         if os.path.basename(f) not in qtlib_resources:
+                            continue
+
+                    if mod == project_mod:
+                        if 'title_background' not in f and 'launcher_logo' not in f and 'splash' not in f:
                             continue
 
                     for supported_format in supported_formats:
@@ -199,6 +203,7 @@ if __name__ == '__main__':
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     spec_cmd = generate_spec(one_file=args.onefile, windowed=args.windowed)
+    print(spec_cmd)
 
     try:
         process = subprocess.Popen(spec_cmd)
