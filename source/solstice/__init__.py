@@ -91,7 +91,7 @@ def init(do_reload=False, import_libs=True):
     solstice_importer.import_modules()
     solstice_importer.import_packages(
         only_packages=True,
-        order=['solstice.launcher', 'solstice.core', 'solstice.core.tagnode'],
+        order=['solstice.launcher', 'solstice.core'],
         skip_modules=['solstice.pipeline.userSetup']
     )
     if do_reload:
@@ -145,3 +145,12 @@ def get_project_menu_path():
     """
 
     return path_utils.clean_path(os.path.join(get_project_path(), artella_defines.ARTELLA_PROJECT_SHELF_FILE_NAME))
+
+
+def get_project_version_path():
+    """
+    Returns path where version file is located
+    :return: str
+    """
+
+    return path_utils.clean_path(os.path.join(get_project_path(), artella_defines.ARTELLA_PROJECT_DEFAULT_VERSION_FILE_NAME))

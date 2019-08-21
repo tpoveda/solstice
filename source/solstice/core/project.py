@@ -41,6 +41,7 @@ class Solstice(artella_project.ArtellaProject):
     PROJECT_CHANGELOG_PATH = solstice.get_project_changelog_path()
     PROJECT_SHELF_FILE_PATH = solstice.get_project_shelf_path()
     PROJECT_MENU_FILE_PATH = solstice.get_project_menu_path()
+    PROJECT_VERSION_FILE_PATH = solstice.get_project_version_path()
 
     def __init__(self, resource, naming_file):
 

@@ -30,7 +30,7 @@
     },
     {
       "icon": "pipeline.png",
-      "command": "from solstice.pipeline.tools.assetsmanager import assetsmanager; assetsmanager.run();",
+      "command": "from solstice.pipeline.tools.assetsmanager.core import assetsmanager; assetsmanager.run();",
       "annotation": "Solstice Assets Manager",
       "label": "Assets Manager",
       "dcc": ["maya", "houdini"]
