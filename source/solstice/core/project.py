@@ -26,7 +26,7 @@ from artellapipe.core import project as artella_project
 
 import solstice
 from solstice.launcher import tray
-from solstice.core import asset, node, shelf
+from solstice.core import defines, asset, node, shelf
 
 
 class Solstice(artella_project.ArtellaProject):
@@ -42,6 +42,18 @@ class Solstice(artella_project.ArtellaProject):
     PROJECT_SHELF_FILE_PATH = solstice.get_project_shelf_path()
     PROJECT_MENU_FILE_PATH = solstice.get_project_menu_path()
     PROJECT_VERSION_FILE_PATH = solstice.get_project_version_path()
+
+    class DataVersions(object):
+        LAYOUT = '0.0.1'
+        ANIM = '0.0.1'
+        FX = '0.0.1'
+        LIGHTING = '0.0.1'
+
+    class DataExtensions(object):
+        LAYOUT = defines.SOLSTICE_LAYOUT_EXTENSION
+        ANIM = defines.SOLSTICE_ANIMATION_EXTENSION
+        FX = defines.SOLSTICE_FX_EXTENSION
+        LIGHTING = defines.SOLSTICE_LIGHTING_EXTENSION
 
     def __init__(self, resource, naming_file):
 

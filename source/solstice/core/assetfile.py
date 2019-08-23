@@ -172,7 +172,8 @@ class AlembicAssetFile(assetfile.ArtellaAssetType, object):
         :param path: str
         """
 
-        alembicmanager.importer.import_alembic(project=self.get_project(), alembic_path=path, fix_path=fix_path)
+        asset_name = self._asset.get_name()
+        alembicmanager.importer.import_alembic(project=self.get_project(), alembic_path=path, parent=asset_name, fix_path=fix_path)
 
     def _reference_file(self, path, fix_path=True):
         """

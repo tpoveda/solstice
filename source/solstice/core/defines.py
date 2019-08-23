@@ -59,3 +59,60 @@ SOLSTICE_RIG_EXTENSION = '.ma'
 
 # Defines Standin extension used by Solstice
 SOLSTICE_STANDIN_EXTENSION = '.ass'
+
+# Defines the extension used for layout files
+SOLSTICE_LAYOUT_EXTENSION = '.layout'
+
+# Defines the extension used for animation files
+SOLSTICE_ANIMATION_EXTENSION = '.anim'
+
+# Defines the extension used for fx files
+SOLSTICE_FX_EXTENSION = '.fx'
+
+# Defines the extension used for lighting files
+SOLSTICE_LIGHTING_EXTENSION = '.light'
+
+# Defines tag type used to define scenes
+SOLSTICE_SCENE_TAG_TYPE = 'Scene'
+
+# Defines tag type used to define props
+SOLSTICE_PROP_TAG_TYPE = 'Prop'
+
+# Defines tag type used to define characters
+SOLSTICE_CHARACTER_TAG_TYPE = 'Character'
+
+# Defines tag type used to define background elements
+SOLSTICE_BACKGROUND_ELEMENT_TAG_TYPE = 'Background Element'
+
+# Defines tag type used to define light rigs
+SOLSTICE_LIGHT_RIG_TAG_TYPE = 'Light Rig'
+
+# Defines tag type used to define models
+SOLSTICE_MODEL_TAG_TYPE = 'Model'
+
+# Defines tag type used to define animations
+SOLSTICE_ANIMATION_TAG_TYPE = 'Animation'
+
+# Defines tag type used to define shading
+SOLSTICE_SHADING_TAG_TYPE = 'Shading'
+
+# Defines tag type used to define cloth
+SOLSTICE_CLOTH_TAG_TYPE = 'Cloth'
+
+# Defines tag type used to define grooming
+SOLSTICE_GROOM_TAG_TYPE = 'Groom'
+
+# Defines tag type used to define cameras
+SOLSTICE_CAMERA_TAG_TYPE = 'Camera'
+
+# Defines shot asset type used for layout
+SOLSTICE_LAYOUT_SHOT_FILE_TYPE = 'Layout'
+
+# Defines shot asset type used for layout
+SOLSTICE_ANIMATION_SHOT_FILE_TYPE = 'Animation'
+
+# Defines shot asset type used for layout
+SOLSTICE_FX_SHOT_FILE_TYPE = 'FX'
+
+# Defines shot asset type used for layout
+SOLSTICE_LIGHTING_SHOT_FILE_TYPE = 'Lighting'

@@ -17,6 +17,9 @@ from artellapipe.tools.tagger import tagger
 
 
 class SolsticeTagger(tagger.ArtellaTagger, object):
+
+    VERSION = '0.0.1'
+
     def __init__(self, project):
         super(SolsticeTagger, self).__init__(project=project)
 

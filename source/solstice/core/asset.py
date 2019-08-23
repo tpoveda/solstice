@@ -14,7 +14,7 @@ __email__ = "tpovedatd@gmail.com"
 
 import os
 
-from tpPyUtils import path as path_utils
+from tpPyUtils import python, path as path_utils
 
 import artellapipe
 from artellapipe.core import artellalib, defines as artella_defines, asset as artella_asset
@@ -221,4 +221,4 @@ class SolsticeTagNode(artella_asset.ArtellaTagNode, object):
         :return: list(str)
         """
 
-        return self._get_attribute('types')
+        return python.force_list(self._get_attribute('types'))

@@ -35,5 +35,13 @@
     "FX": ["Cloth", "Groom"]
   },
   "SHOT_REGEX": "(\\A[^_]+_\\d{2,2}_\\d{2,3})",
-  "SHADERS_EXTENSION": ".sshader"
+  "SHOT_FILE_TYPES": [
+    "Layout",
+    "Animation",
+    "FX",
+    "Lighting"
+  ],
+  "SHADERS_EXTENSION": ".sshader",
+  "PLAYBLAST_PRESETS_URL": "Assets/Scripts/PIPELINE/__working__/PlayblastPresets"
+
 }
