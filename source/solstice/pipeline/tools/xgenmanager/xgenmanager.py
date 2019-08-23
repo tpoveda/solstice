@@ -100,7 +100,7 @@ class ControlXgenUi(window.ArtellaWindow, object):
         """
         asset_name = driver.currentText()
         if asset_name:
-            save_path = os.path.join(self.project.get_solstice_assets_path(), "Characters", asset_name, "__working__",
+            save_path = os.path.join(self.project.get_assets_path(), "Characters", asset_name, "__working__",
                                         "groom", "groom_package.groom")
             setter.setText(save_path)
             return
@@ -208,7 +208,7 @@ class ControlXgenUi(window.ArtellaWindow, object):
         self.project.logger.debug("XGEN || Sculpts Exported")
 
         # export material
-        exporter = shaderexporter.ShaderExporter(shaders=self.shaders_dict.values(), parent=self)
+        exporter = shaderexporter.ShaderExporter(project=self._project, shaders=self.shaders_dict.values(), parent=self)
         exporter.export_shaders(publish=comment)
 
         self.qtui.progress_lbl.setText("Exporting Material (.sshader)")
@@ -260,8 +260,8 @@ class ControlXgenUi(window.ArtellaWindow, object):
         # import xgen
         try:
             xg.importPalette(fileName=str(xgen_file), deltas=[], nameSpace=str(self.character))
-        except:
-            mc.warning('Not found maps folder')
+        except Exception:
+            artellapipe.solstice.logger.warning('Not found maps folder')
         # set path to xgen
         xg.setAttr('xgDataPath', str(map_folder), xg.palettes()[0])
 
