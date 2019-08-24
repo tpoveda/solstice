@@ -43,13 +43,13 @@ class Solstice(artella_project.ArtellaProject):
     PROJECT_MENU_FILE_PATH = solstice.get_project_menu_path()
     PROJECT_VERSION_FILE_PATH = solstice.get_project_version_path()
 
-    class DataVersions(object):
+    class DataVersions(artella_project.ArtellaProject.DataVersions):
         LAYOUT = '0.0.1'
         ANIM = '0.0.1'
         FX = '0.0.1'
         LIGHTING = '0.0.1'
 
-    class DataExtensions(object):
+    class DataExtensions(artella_project.ArtellaProject.DataVersions):
         LAYOUT = defines.SOLSTICE_LAYOUT_EXTENSION
         ANIM = defines.SOLSTICE_ANIMATION_EXTENSION
         FX = defines.SOLSTICE_FX_EXTENSION
@@ -137,6 +137,14 @@ class Solstice(artella_project.ArtellaProject):
         """
 
         return path_utils.clean_path(os.path.join(self.get_assets_path(), 'Scripts', 'PIPELINE', '__working__', 'ShadersLibrary'))
+
+    def get_light_rigs_path(self):
+        """
+        Returns path where light rigs are located in the project
+        :return: str
+        """
+
+        return path_utils.clean_path(os.path.join(self.get_assets_path(), 'lighting', 'Light Rigs'))
 
     def _register_asset_classes(self):
         """

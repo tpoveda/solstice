@@ -13,8 +13,11 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
 import os
+import ast
 
 from tpPyUtils import python, path as path_utils
+
+import tpDccLib as tp
 
 import artellapipe
 from artellapipe.core import artellalib, defines as artella_defines, asset as artella_asset
@@ -165,10 +168,10 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
 
         self.import_standin_file()
 
-    def import_alembic_file(self, namespace=None, resolve_path=True):
+    def import_alembic_file(self, parent_name=None, resolve_path=True):
         """
         Imports Alembic file of the current asset
-        :param namespace: str
+        :param parent_name: str
         :param resolve_path: bool
         """
 
@@ -183,7 +186,7 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
             artellapipe.solstice.logger.warning('Asset {} has not Alembic File published!')
             return
 
-        alembic_file_type.import_file(artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS)
+        alembic_file_type.import_file(artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS, parent=parent_name)
 
     def reference_alembic_file(self, namespace=None, resolve_path=True):
         """
@@ -222,3 +225,71 @@ class SolsticeTagNode(artella_asset.ArtellaTagNode, object):
         """
 
         return python.force_list(self._get_attribute('types'))
+
+    def get_proxy_group(self):
+        if not self._node or not tp.Dcc.object_exists(self._node):
+            return None
+
+        if self._tag_info_dict:
+            return self._node
+        else:
+            if not tp.Dcc.attribute_exists(node=self._node, attribute_name='proxy'):
+                return None
+
+            connections = tp.Dcc.list_connections(node=self._node, attribute_name='proxy')
+            if connections:
+                node = connections[0]
+                if tp.Dcc.object_exists(node):
+                    return node
+
+        return None
+
+    def get_hires_group(self):
+        if not self._node or not tp.Dcc.object_exists(self._node):
+            return None
+
+        if self._tag_info_dict:
+            return self._node
+        else:
+            if not tp.Dcc.attribute_exists(node=self._node, attribute_name='hires'):
+                return None
+
+            connections = tp.Dcc.list_connections(node=self._node, attribute_name='hires')
+            if connections:
+                node = connections[0]
+                if tp.Dcc.object_exists(node):
+                    return node
+
+        return None
+
+
+    def get_shaders(self):
+        if not self._node or not tp.Dcc.object_exists(self._node):
+            return None
+
+        if self._tag_info_dict:
+            shaders_info = self._tag_info_dict.get('shaders', None)
+            if not shaders_info:
+                artellapipe.solstice.logger.warning('Impossible retrieve shaders info of node: {}'.format(self._node))
+                return
+            shaders_info_fixed = shaders_info.replace("'", "\"")
+            shaders_dict = ast.literal_eval(shaders_info_fixed)
+            if type(shaders_dict) != dict:
+                artellapipe.solstice.logger.error('Impossible to get dictionary from shaders info. Maybe shaders are not set up properly. Please contact TD!')
+            else:
+                return shaders_dict
+        else:
+            if not tp.Dcc.attribute_exists(node=self._node, attribute_name='shaders'):
+                return None
+
+            shaders_attr = tp.Dcc.get_attribute_value(node=self._node, attribute_name='shaders')
+            shaders_attr_fixed = shaders_attr.replace("'", "\"")
+            shaders_dict = ast.literal_eval(shaders_attr_fixed)
+            if type(shaders_dict) != dict:
+                artellapipe.solstice.logger.error('Impossible to get dictionary from shaders attribute. Maybe shaders are not set up properly. Please contact TD!')
+            else:
+                return shaders_dict
+
+            return shaders_attr
+
+        return None

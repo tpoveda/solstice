@@ -165,15 +165,16 @@ class AlembicAssetFile(assetfile.ArtellaAssetType, object):
     FILE_TYPE = defines.SOLSTICE_MODEL_ASSET_TYPE
     FILE_EXTENSIONS = [defines.SOLSTICE_ALEMBIC_EXTENSION]
 
-    def _import_file(self, path, fix_path=True):
+    def _import_file(self, path, fix_path=True, *args, **kwargs):
         """
         Internal function that imports current file in DCC
         :param fix_path: bool
         :param path: str
         """
 
-        asset_name = self._asset.get_name()
-        alembicmanager.importer.import_alembic(project=self.get_project(), alembic_path=path, parent=asset_name, fix_path=fix_path)
+        parent = kwargs.get('parent', None)
+
+        alembicmanager.importer.import_alembic(project=self.get_project(), alembic_path=path, parent=parent, fix_path=fix_path)
 
     def _reference_file(self, path, fix_path=True):
         """

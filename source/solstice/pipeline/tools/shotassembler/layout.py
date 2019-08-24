@@ -53,11 +53,18 @@ class NodeAsset(assetitem.ShotAssetItem, object):
             artellapipe.solstice.logger.warning('NodeAsset only can be loaded in Maya!')
             return
 
-        track = maya_scene.TrackNodes(full_path=True)
+        track = maya_scene.TrackNodes(full_path=False)
         track.load()
-        namespace = os.path.basename(self.layout_file).split('.')[0]
-        self.import_alembic(namespace=namespace)
+        # namespace = os.path.basename(self.layout_file).split('.')[0]
+        self.import_alembic()
         res = track.get_delta()
+
+        if self._name not in res:
+            artellapipe.logger.warning('Node "{}" is not loaded!'.format(self._name))
+            return
+
+        for attr, attr_value in self.get_attributes().items():
+            self.set_attribute(attr, attr_value)
 
         return res
 
@@ -109,6 +116,19 @@ class NodeAsset(assetitem.ShotAssetItem, object):
             return {}
         return self._params
 
+    def set_attribute(self, name, value):
+        """
+        Sets the attribute to the given name and value
+        :param name: str
+        :param value: str
+        """
+
+        if type(value) is float:
+            tp.Dcc.set_float_attribute_value(node=self._name, attribute_name=name, attribute_value=value)
+        else:
+            artellapipe.logger.warning('Attributes of type "{}" are not supported yet! Skipping:\n\t {} | {}\n'.format(type(value), name, value))
+            return
+
     def get_icon(self):
         """
         Returns the icon of the node
@@ -133,7 +153,7 @@ class NodeAsset(assetitem.ShotAssetItem, object):
 
         self._asset.reference_alembic_file(namespace=namespace)
 
-    def import_alembic(self, namespace=None):
+    def import_alembic(self):
         """
         Imports into current DCC scene wrapped node Alembic file
         :param namespace:
@@ -144,7 +164,7 @@ class NodeAsset(assetitem.ShotAssetItem, object):
             artellapipe.logger.warning('Impossible to reference layout node: {}'.format(self._name))
             return
 
-        self._asset.import_alembic_file(namespace=namespace)
+        self._asset.import_alembic_file(parent_name=self._name)
 
 
 class LayoutShotFile(assetitem.ShotAssetFileItem, object):
@@ -153,11 +173,11 @@ class LayoutShotFile(assetitem.ShotAssetFileItem, object):
     FILE_ICON = artellapipe.solstice.resource.icon('layout')
     FILE_EXTENSION = solstice_defines.SOLSTICE_LAYOUT_EXTENSION
 
-    def __init__(self, asset_file, parent=None):
+    def __init__(self, asset_file, asset_data=None, extra_data=None, parent=None):
 
         self._assets = dict()
 
-        super(LayoutShotFile, self).__init__(asset_file=asset_file, parent=parent)
+        super(LayoutShotFile, self).__init__(asset_file=asset_file, asset_data=asset_data, extra_data=extra_data, parent=parent)
 
     def set_assets(self, assets):
         """
@@ -174,7 +194,10 @@ class LayoutShotFile(assetitem.ShotAssetFileItem, object):
         :return: dict
         """
 
-        asset_data = super(LayoutShotFile, self).get_data()
+        if self._asset_data:
+            asset_data = self._asset_data
+        else:
+            asset_data = super(LayoutShotFile, self).get_data()
         if not asset_data:
             return asset_data
 
@@ -190,7 +213,7 @@ class LayoutShotFile(assetitem.ShotAssetFileItem, object):
         layout_data = dict()
         for node_name, node_info in asset_data['assets'].items():
             layout_data[node_name] = dict()
-            layout_data[node_name]['data'] = node_info
+            layout_data[node_name] = node_info
         ordered_data = OrderedDict(sorted(layout_data.items(), reverse=True))
 
         return ordered_data
@@ -206,14 +229,28 @@ class LayoutShotFile(assetitem.ShotAssetFileItem, object):
         if not data:
             return
 
-        nodes = list()
-
         if not self._assets:
             self._update_assets()
             if not self._assets:
                 artellapipe.logger.warning('No Assets Found!')
                 return
 
+        data_nodes = self._get_nodes_form_data(data=data)
+
+        if self._extra_data:
+            extra_nodes = self._get_nodes_form_data(data=self._extra_data)
+            data_nodes.extend(extra_nodes)
+
+        return data_nodes
+
+    def _get_nodes_form_data(self, data):
+        """
+        Internal function that returns asset nodes from given data
+        :param data: dict
+        :return: list
+        """
+
+        nodes = list()
         for node_name, node_data in data.items():
             clean_name = node_name.rstrip(string.digits)
             if clean_name not in self._assets:
@@ -225,8 +262,8 @@ class LayoutShotFile(assetitem.ShotAssetFileItem, object):
             new_node = NodeAsset(
                 asset=node_asset,
                 name=node_name,
-                path=node_data['data']['path'],
-                params=node_data['data']['attrs'],
+                path=node_data['path'],
+                params=node_data['attrs'],
                 layout_file=self._asset_file
             )
             nodes.append(new_node)

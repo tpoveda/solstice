@@ -108,6 +108,16 @@
       "dcc": ["maya", "houdini"]
     }
   ],
+  "light":
+  [
+  {
+      "icon": "lightrigs.png",
+      "command": "import artellapipe; from artellapipe.tools.lightrigsmanager import lightrigsmanager; lightrigsmanager.run(artellapipe.solstice);",
+      "annotation": "Solstice Light Rigs Tool",
+      "label": "Light Rigs",
+      "dcc": ["maya"]
+    }
+  ],
   "fx":
   [
     {
