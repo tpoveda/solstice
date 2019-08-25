@@ -12,10 +12,10 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
-from artellapipe.tools.outliner.widgets import baseoutliner
+from solstice.pipeline.tools.outliner.widgets import baseoutliner
 
 
-class SolsticeAssetsOutliner(baseoutliner.BaseOutliner, object):
+class SolsticeAssetsOutliner(baseoutliner.SolsticeBaseOutliner, object):
 
     ALLOWED_TYPES = ['prop']
 
