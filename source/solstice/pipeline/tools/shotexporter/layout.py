@@ -51,15 +51,15 @@ class LayoutExportList(exportlist.BaseExportList, object):
         unknown_icon = artellapipe.resource.icon('question')
 
         assets = self._project.get_scene_assets()
-        for asset in assets:
-            tag_data_node = asset.get_tag_node()
+        for asset_node in assets:
+            tag_data_node = asset_node.get_tag_node()
             if not tag_data_node:
                 continue
             tag_types = tag_data_node.get_types()
             for supported_type in self.SUPPORTED_TYPES:
                 if supported_type in tag_types:
-                    exporter_asset = assetitem.ExporterAssetItem(asset)
-                    asset_item = QTreeWidgetItem(self._assets_list, [asset.get_short_name()])
+                    exporter_asset = assetitem.ExporterAssetItem(asset_node)
+                    asset_item = QTreeWidgetItem(self._assets_list, [asset_node.get_short_name()])
                     asset_item.asset = exporter_asset
                     if supported_type == self.SUPPORTED_TYPES[0]:
                         asset_item.setIcon(0, prop_icon)
@@ -156,17 +156,17 @@ class LayoutExporter(exporter.BaseExporter, object):
         self._progress.set_text('Exporting Layout File ...')
 
         for i in range(self._export_list.count()):
-            asset = self._export_list.asset_at(i)
-            print(asset)
-            asset_name = asset.short_name
-            asset_path = os.path.relpath(asset.path, self._project.get_path())
+            exporter_asset_item = self._export_list.asset_at(i)
+            asset_name = exporter_asset_item.short_name
+            asset_path = os.path.relpath(exporter_asset_item.path, self._project.get_path())
             self._progress.set_value(i+1)
             self._progress.set_text('Storing: {}'.format(asset_name))
             layout_info['assets'][asset_name] = dict()
             layout_info['assets'][asset_name]['path'] = asset_path
             layout_info['assets'][asset_name]['attrs'] = dict()
+            layout_info['assets'][asset_name]['type'] = exporter_asset_item.asset.get_current_extension()
 
-            for attr, flag in asset.attrs.items():
+            for attr, flag in exporter_asset_item.attrs.items():
                 if not flag and attr not in defines.MUST_ATTRS:
                     continue
                 attr_value = tp.Dcc.get_attribute_value(node=asset_name, attribute_name=attr)

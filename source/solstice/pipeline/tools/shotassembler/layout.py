@@ -29,9 +29,10 @@ if tp.is_maya():
 
 class NodeAsset(assetitem.ShotAssetItem, object):
 
-    def __init__(self, asset, name, path, params, layout_file, parent=None):
+    def __init__(self, asset, name, path, type, params, layout_file, parent=None):
         self._asset = asset
         self._name = name
+        self._path = path
         self._params = params
         self._layout_file = layout_file
 
@@ -39,9 +40,12 @@ class NodeAsset(assetitem.ShotAssetItem, object):
         if path:
             self._node = node.SolsticeAssetNode(project=artellapipe.solstice, name=os.path.basename(path))
 
-        super(NodeAsset, self).__init__(name, parent)
+        super(NodeAsset, self).__init__(asset_file=name, type=type, parent=parent)
 
-        self.set_icon(artellapipe.resource.icon('teapot'))
+        if self._asset:
+            self.set_icon(self._asset.get_icon())
+        else:
+            self.set_icon(artellapipe.resource.icon('teapot'))
 
     def load(self):
         """
@@ -129,17 +133,6 @@ class NodeAsset(assetitem.ShotAssetItem, object):
             artellapipe.logger.warning('Attributes of type "{}" are not supported yet! Skipping:\n\t {} | {}\n'.format(type(value), name, value))
             return
 
-    def get_icon(self):
-        """
-        Returns the icon of the node
-        :return: QIcon
-        """
-
-        if not self.node:
-            return
-
-        return self.node.get_icon()
-
     def reference_alembic(self, namespace=None):
         """
         References into current DCC scene wrapped node Alembic file
@@ -165,6 +158,21 @@ class NodeAsset(assetitem.ShotAssetItem, object):
             return
 
         self._asset.import_alembic_file(parent_name=self._name)
+
+    def _get_type_icon(self):
+        """
+        Overrides base ShotAssetItem _get_type_icon function
+        Internal function that returns the icon depending of the asset file type being used
+        :return: QIcon
+        """
+
+        current_extension = self._type
+        if current_extension == solstice_defines.SOLSTICE_RIG_EXTENSION:
+            return artellapipe.solstice.resource.icon('rig')
+        elif current_extension == solstice_defines.SOLSTICE_ALEMBIC_EXTENSION:
+            return artellapipe.solstice.resource.icon('alembic')
+        else:
+            return artellapipe.solstice.resource.icon('standin')
 
 
 class LayoutShotFile(assetitem.ShotAssetFileItem, object):
@@ -263,6 +271,7 @@ class LayoutShotFile(assetitem.ShotAssetFileItem, object):
                 asset=node_asset,
                 name=node_name,
                 path=node_data['path'],
+                type=node_data['type'],
                 params=node_data['attrs'],
                 layout_file=self._asset_file
             )
