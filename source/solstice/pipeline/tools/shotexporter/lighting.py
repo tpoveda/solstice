@@ -17,6 +17,7 @@ import artellapipe
 from artellapipe.tools.shotmanager.core import exporter, shotexporter
 from artellapipe.tools.shotmanager.widgets import exportlist, exportpropertieslist
 
+import solstice
 from solstice.core import defines as solstice_defines
 
 
@@ -39,7 +40,7 @@ class LightingPropertiesWidget(exportpropertieslist.BasePropertiesListWidget, ob
 class LightingExporter(exporter.BaseExporter, object):
 
     EXPORTER_NAME = 'Lighting'
-    EXPORTER_ICON = artellapipe.solstice.resource.icon('lighting')
+    EXPORTER_ICON = solstice.resource.icon('lighting')
     EXPORTER_FILE = solstice_defines.SOLSTICE_ANIMATION_SHOT_FILE_TYPE
     EXPORTER_EXTENSION = solstice_defines.SOLSTICE_ANIMATION_EXTENSION
     EXPORT_BUTTON_TEXT = 'SAVE LIGHTING'

@@ -17,7 +17,7 @@ from solstice.pipeline.tools.outliner.widgets import baseoutliner
 
 class SolsticeAssetsOutliner(baseoutliner.SolsticeBaseOutliner, object):
 
-    ALLOWED_TYPES = ['prop']
+    ALLOWED_TYPES = ['prop', 'background_element']
 
     def __init__(self, project, parent=None):
         super(SolsticeAssetsOutliner, self).__init__(project=project, parent=parent)

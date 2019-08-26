@@ -88,6 +88,8 @@ def init(do_reload=False, import_libs=True):
     logger = solstice_importer.logger
     resource = SolsticeResource
 
+    naming_file = path_utils.clean_path(os.path.join(os.path.dirname(inspect.getframeinfo(inspect.currentframe()).filename), 'naming.json'))
+
     solstice_importer.import_modules()
     solstice_importer.import_packages(
         only_packages=True,
@@ -96,8 +98,6 @@ def init(do_reload=False, import_libs=True):
     )
     if do_reload:
         solstice_importer.reload_all()
-
-    naming_file = path_utils.clean_path(os.path.join(os.path.dirname(inspect.getframeinfo(inspect.currentframe()).filename), 'naming.json'))
 
     artella.set_project(project.Solstice, resource, naming_file)
 

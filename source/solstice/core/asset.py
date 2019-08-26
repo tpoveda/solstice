@@ -29,14 +29,14 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
     def __init__(self, project, asset_data, node=None):
         super(SolsticeAsset, self).__init__(project=project, asset_data=asset_data, node=node)
 
-    def get_file(self, file_type, status, extension=None, resolve_path=False):
+    def get_file(self, file_type, status, extension=None, fix_path=False):
         """
         Overrides base ArtellaAsset get_file function
         Returns file path of the given file type and status
         :param file_type: str
         :param status: str
         :param extension: str
-        :param resolve_path: bool
+        :param fix_path: bool
         """
 
         if not extension:
@@ -64,8 +64,8 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
         else:
             raise NotImplementedError('Open Published Assets is not implemented yet!')
 
-        if resolve_path:
-            file_path = self._project.resolve_path(file_path)
+        if fix_path:
+            file_path = self._project.fix_path(file_path)
 
         return file_path
 
@@ -168,11 +168,11 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
 
         self.import_standin_file()
 
-    def import_alembic_file(self, parent_name=None, resolve_path=True):
+    def import_alembic_file(self, parent_name=None, fix_path=True):
         """
         Imports Alembic file of the current asset
         :param parent_name: str
-        :param resolve_path: bool
+        :param fix_path: bool
         """
 
         model_file_type = self.get_file_type(defines.SOLSTICE_MODEL_ASSET_TYPE)
@@ -188,11 +188,11 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
 
         alembic_file_type.import_file(artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS, parent=parent_name)
 
-    def reference_alembic_file(self, namespace=None, resolve_path=True):
+    def reference_alembic_file(self, namespace=None, fix_path=True):
         """
         References Alembic file of the current asset
         :param namespace: str
-        :param resolve_path: bool
+        :param fix_path: bool
         """
 
         model_file_type = self.get_file_type(defines.SOLSTICE_MODEL_ASSET_TYPE)

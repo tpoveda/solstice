@@ -21,6 +21,7 @@ import tpDccLib as tp
 import artellapipe
 from artellapipe.tools.shotmanager.core import assetitem, shotassembler, shotexporter
 
+import solstice
 from solstice.core import defines as solstice_defines, node
 
 if tp.is_maya():
@@ -130,7 +131,8 @@ class NodeAsset(assetitem.ShotAssetItem, object):
         if type(value) is float:
             tp.Dcc.set_float_attribute_value(node=self._name, attribute_name=name, attribute_value=value)
         else:
-            artellapipe.logger.warning('Attributes of type "{}" are not supported yet! Skipping:\n\t {} | {}\n'.format(type(value), name, value))
+            # artellapipe.logger.warning('Attributes of type "{}" are not supported yet! Skipping:\n\t {} | {}\n'.format(type(value), name, value))
+            # artellapipe.logger.warning('Attributes of type "{}" are not supported yet! Skipping:\n\t {} | {}\n'.format(type(value), name, value))
             return
 
     def reference_alembic(self, namespace=None):
@@ -178,7 +180,7 @@ class NodeAsset(assetitem.ShotAssetItem, object):
 class LayoutShotFile(assetitem.ShotAssetFileItem, object):
 
     FILE_TYPE = solstice_defines.SOLSTICE_LAYOUT_SHOT_FILE_TYPE
-    FILE_ICON = artellapipe.solstice.resource.icon('layout')
+    FILE_ICON = solstice.resource.icon('layout')
     FILE_EXTENSION = solstice_defines.SOLSTICE_LAYOUT_EXTENSION
 
     def __init__(self, asset_file, asset_data=None, extra_data=None, parent=None):
@@ -243,15 +245,15 @@ class LayoutShotFile(assetitem.ShotAssetFileItem, object):
                 artellapipe.logger.warning('No Assets Found!')
                 return
 
-        data_nodes = self._get_nodes_form_data(data=data)
+        data_nodes = self._get_nodes_from_data(data=data)
 
         if self._extra_data:
-            extra_nodes = self._get_nodes_form_data(data=self._extra_data)
+            extra_nodes = self._get_nodes_from_data(data=self._extra_data)
             data_nodes.extend(extra_nodes)
 
         return data_nodes
 
-    def _get_nodes_form_data(self, data):
+    def _get_nodes_from_data(self, data):
         """
         Internal function that returns asset nodes from given data
         :param data: dict

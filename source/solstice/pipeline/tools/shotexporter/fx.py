@@ -17,6 +17,7 @@ import artellapipe
 from artellapipe.tools.shotmanager.core import exporter, shotexporter
 from artellapipe.tools.shotmanager.widgets import exportlist, exportpropertieslist
 
+import solstice
 from solstice.core import defines as solstice_defines
 
 
@@ -39,7 +40,7 @@ class FXPropertiesWidget(exportpropertieslist.BasePropertiesListWidget, object):
 class FXExporter(exporter.BaseExporter, object):
 
     EXPORTER_NAME = 'FX'
-    EXPORTER_ICON = artellapipe.solstice.resource.icon('fx')
+    EXPORTER_ICON = solstice.resource.icon('fx')
     EXPORTER_FILE = solstice_defines.SOLSTICE_FX_SHOT_FILE_TYPE
     EXPORTER_EXTENSION = solstice_defines.SOLSTICE_FX_EXTENSION
     EXPORT_BUTTON_TEXT = 'SAVE FX'

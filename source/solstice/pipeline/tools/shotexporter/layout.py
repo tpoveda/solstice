@@ -25,10 +25,11 @@ import tpDccLib as tp
 from tpQtLib.core import qtutils, image
 
 import artellapipe
-
+from artellapipe.core import defines as artella_defines
 from artellapipe.tools.shotmanager.core import defines, assetitem, exporter, shotexporter
 from artellapipe.tools.shotmanager.widgets import exportlist, exportpropertieslist
 
+import solstice
 from solstice.core import defines as solstice_defines
 
 if tp.is_maya():
@@ -39,7 +40,7 @@ class LayoutExportList(exportlist.BaseExportList, object):
 
     SUPPORTED_TYPES = [
         solstice_defines.SOLSTICE_PROP_TAG_TYPE.strip().lower(),
-        solstice_defines.SOLSTICE_BACKGROUND_ELEMENT_TAG_TYPE.strip().lower().replace(' ', '')
+        solstice_defines.SOLSTICE_BACKGROUND_ELEMENT_TAG_TYPE.strip().lower().replace(' ', '_')
     ]
 
     def __init__(self, project, parent=None):
@@ -60,7 +61,7 @@ class LayoutExportList(exportlist.BaseExportList, object):
                 if supported_type in tag_types:
                     exporter_asset = assetitem.ExporterAssetItem(asset_node)
                     asset_item = QTreeWidgetItem(self._assets_list, [asset_node.get_short_name()])
-                    asset_item.asset = exporter_asset
+                    asset_item.asset_item = exporter_asset
                     if supported_type == self.SUPPORTED_TYPES[0]:
                         asset_item.setIcon(0, prop_icon)
                     elif supported_type == self.SUPPORTED_TYPES[1]:
@@ -84,7 +85,7 @@ class LayoutPropertiesWidget(exportpropertieslist.BasePropertiesListWidget, obje
 class LayoutExporter(exporter.BaseExporter, object):
 
     EXPORTER_NAME = 'Layout'
-    EXPORTER_ICON = artellapipe.solstice.resource.icon('layout')
+    EXPORTER_ICON = solstice.resource.icon('layout')
     EXPORTER_FILE = solstice_defines.SOLSTICE_LAYOUT_SHOT_FILE_TYPE
     EXPORTER_EXTENSION = solstice_defines.SOLSTICE_LAYOUT_EXTENSION
     EXPORT_BUTTON_TEXT = 'SAVE LAYOUT'
@@ -164,7 +165,11 @@ class LayoutExporter(exporter.BaseExporter, object):
             layout_info['assets'][asset_name] = dict()
             layout_info['assets'][asset_name]['path'] = asset_path
             layout_info['assets'][asset_name]['attrs'] = dict()
-            layout_info['assets'][asset_name]['type'] = exporter_asset_item.asset.get_current_extension()
+            layout_info['assets'][asset_name]['type'] = exporter_asset_item.asset_node.get_current_extension()
+            versions = exporter_asset_item.asset_node.asset.get_latest_local_versions(
+                status=artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS
+            )
+            layout_info['assets'][asset_name]['versions'] = versions
 
             for attr, flag in exporter_asset_item.attrs.items():
                 if not flag and attr not in defines.MUST_ATTRS:

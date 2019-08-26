@@ -116,3 +116,6 @@ SOLSTICE_FX_SHOT_FILE_TYPE = 'FX'
 
 # Defines shot asset type used for layout
 SOLSTICE_LIGHTING_SHOT_FILE_TYPE = 'Lighting'
+
+# Defines the extension used for transform shot overrides
+SOLSTICE_TRANSFORM_OVERRIDE_EXTENSION = '.ovxform'
