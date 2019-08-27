@@ -22,5 +22,10 @@ class SolsticeShelf(tpDccLib.Shelf, object):
     ICONS_PATHS = artellapipe.resource.RESOURCES_FOLDER
 
     def __init__(self, name='SolsticeShelf', label_background=(0, 0, 0, 0), label_color=(0.9, 0.9, 0.9), category_icon=None):
-        super(SolsticeShelf, self).__init__(name=name, label_background=label_background, label_color=label_color, category_icon=category_icon)
+
+        enable_labels = False
+        if tpDccLib.is_houdini():
+            enable_labels = True
+
+        super(SolsticeShelf, self).__init__(name=name, label_background=label_background, label_color=label_color, category_icon=category_icon, enable_labels=enable_labels)
 

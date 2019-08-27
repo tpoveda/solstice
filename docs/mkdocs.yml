@@ -7,55 +7,32 @@ nav:
       - 'NDA': 'nda.md'
       - 'Shading Test': 'shadingtest.md'
     - Artella App:
-      - What's Artella App?: solsticepipeline/artella/app.md
-      - Installing Artella App: solsticepipeline/artella/installing.md
-      - Managing the Artella App: solsticepipeline/artella/managing.md
+        - What's Artella App?: pipeline/artella/app.md
+        - Installing Artella App: pipeline/artella/installing.md
+        - Managing the Artella App: pipeline/artella/managing.md
     - Solstice Launcher:
-      - What's Solstice Launcher?: solsticepipeline/solsticelauncher/app.md
-      - Installing Solstice Launcher: solsticepipeline/solsticelauncher/installation.md
-      - Using Solstice Launcher: solsticepipeline/solsticelauncher/usage.md
-      - Uninstalling Solstice Launcher: solsticepipeline/solsticelauncher/uninstall.md
+        - What's Solstice Launcher?: pipeline/launcher/app.md
+        - Installing Solstice Launcher: pipeline/launcher/installation.md
+        - Using Solstice Launcher: pipeline/launcher/usage.md
+        - Uninstalling Solstice Launcher: pipeline/launcher/uninstall.md
     - Solstice Pipeline:
-      - Software:
-        - Software Versions: solsticepipeline/software/versions.md
-        - Software Installation:
-          - Installing Maya: solsticepipeline/software/installingmaya.md
-          - Installing Arnold: solsticepipeline/software/installingarnold.md
-          - Installing Yeti: solsticepipeline/software/installingyeti.md
-      - Solstice Pipeline:
-        - Versions: solsticepipeline/versions.md
-        - Asset: solsticepipeline/asset.md
-        - Sequence: solsticepipeline/sequence.md
-        - Shot: solsticepipeline/shot.md
-      - Solstice Tools:
-        - Solstice Tray: solsticepipeline/solsticetools/solsticetray.md
-        - Solstice Shelf: solsticepipeline/solsticetools/solsticeshelf.md
-        - Solstice Toolbar: solsticepipeline/solsticetools/solsticetoolbar.md
-        - Solstice Changelog: solsticepipeline/solsticetools/solsticechangelog.md
-        - Solstice Pipelinizer:
-          - Main UI: solsticepipeline/solsticetools/pipelinizer/tool.md
-          - Assets Manager: solsticepipeline/solsticetools/pipelinizer/assetmanager.md
-          - Sequences Manager: solsticepipeline/solsticetools/pipelinizer/sequencesmanager.md
-        - Solstice Publisher: solsticepipeline/solsticetools/solsticepublisher.md
-        - Solstice Pickers: solsticepipeline/solsticetools/solsticepickers.md
-        - Solstice Alembic Manager: solsticepipeline/solsticetools/solsticealembicmanager.md
-        - Solstice Light Rigs Manager: solsticepipeline/solsticetools/solsticelightrigmanager.md
-      - Departments:
-        - Layout:
-          - Rough Layout: solsticepipeline/departments/layout/rough.md
-          - Final Layout: solsticepipeline/departments/layout/final.md
-        - Animation: solsticepipeline/departments/animation.md
-      - FAQ:
-          - How to create new working versions of an asset file?:
-            - Shading Files: solsticepipeline/faq/workingversion/shading.md
-            - Textures Files: solsticepipeline/faq/workingversion/textures.md
-            - Model/Rig Files: solsticepipeline/faq/workingversion/model.md
-          - How to publish an asset file?:
-            - Shading Files: solsticepipeline/faq/publish/shading.md
-            - Textures Files: solsticepipeline/faq/publish/textures.md
-            - Model/Rig Files: solsticepipeline/faq/publish/model.md
-    - Slack: 'slack.md'
-    - About: 'about.md'
+        - Software:
+            - Versions: pipeline/software/versions.md
+            - Installation:
+                - Maya: pipeline/software/installingmaya.md
+                - Arnold: pipeline/software/installingarnold.md
+                - Yeti: pipeline/software/installingyeti.md
+        - Tools:
+            - Welcome: pipeline/tools/welcome.md
+            - Tray: pipeline/tools/tray.md
+            - Shelf: pipeline/tools/shelf.md
+            - Changelog: pipeline/tools/changelog.md
+            - Assets Manager: pipeline/tools/assetsmanager.md
+            - Artella Manager: pipeline/tools/artellamanager.md
+            - Artella Uploader: pipeline/tools/artellauploader.md
+            - Pickers: pipeline/tools/pickers.md
+            -  Alembic Manager: pipeline/tools/alembicmanager.md
+            - Light Rigs Manager: pipeline/tools/lightrigmanager.md
 theme:
   name: 'material'
   logo: 'img/solstice_avatar.png'
@@ -67,5 +44,11 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.emoji
   - pymdownx.tasklist
+plugins:
+  - markdownextradata: {}
+extra:
+  project:
+    name: "Solstice"
+    exe: "solstice_launcher.exe"
 extra_css:
   - 'stylesheets/solstice.css'

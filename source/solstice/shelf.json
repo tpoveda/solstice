@@ -16,6 +16,20 @@
       "dcc": ["maya", "houdini", "nuke"]
     },
     {
+      "icon": "solstice_manual.png",
+      "command": "import artellapipe; artellapipe.solstice.open_documentation()",
+      "annotation": "Open Solstice Tools Documentation",
+      "label": "",
+      "dcc": ["maya"]
+    },
+    {
+      "icon": "solstice_changelog.png",
+      "command": "import artellapipe; from artellapipe.tools.changelog import changelog; changelog.run(artellapipe.solstice);",
+      "annotation": "Open Solstice Tools Changelog",
+      "label": "",
+      "dcc": ["maya"]
+    },
+    {
       "icon": "",
       "command": "",
       "annotation": "separator",

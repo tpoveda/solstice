@@ -203,7 +203,6 @@ if __name__ == '__main__':
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     spec_cmd = generate_spec(one_file=args.onefile, windowed=args.windowed)
-    print(spec_cmd)
 
     try:
         process = subprocess.Popen(spec_cmd)
