@@ -117,7 +117,7 @@ def retrieve_data():
                             continue
 
                     if mod == project_mod:
-                        if 'title_background' not in f and 'launcher_logo' not in f and 'splash' not in f:
+                        if 'title_background' not in f and 'launcher_logo' not in f and 'solstice' not in f and 'splash' not in f:
                             continue
 
                     for supported_format in supported_formats:
