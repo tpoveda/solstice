@@ -84,6 +84,26 @@
     "label": ""
     },
     {
+      "icon": "shotexporter.png",
+      "command": "import artellapipe; from artellapipe.tools.shotmanager.core import shotexporter; shotexporter.run(artellapipe.solstice);",
+      "annotation": "Solstice Shot Exporter Tool",
+      "label": "Shot Exporter",
+      "dcc": ["maya"]
+    },
+    {
+      "icon": "shotassembler.png",
+      "command": "import artellapipe; from artellapipe.tools.shotmanager.core import shotassembler; shotassembler.run(artellapipe.solstice);",
+      "annotation": "Solstice Shot Assembler Tool",
+      "label": "Shot Assembler",
+      "dcc": ["maya"]
+    },
+    {
+      "icon": "",
+      "command": "",
+      "annotation": "separator",
+      "label": ""
+    },
+    {
         "icon": "solstice_save.png",
         "command": "import artellapipe; artellapipe.solstice.save_scene(notify=True);",
         "annotation": "Save, remove invalid nodes and clean student license from file",

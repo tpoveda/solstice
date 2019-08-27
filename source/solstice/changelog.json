@@ -167,5 +167,15 @@
   "0.0.3":
   [
     "First released version"
+  ],
+ "0.0.4":
+  [
+   "Solstice Tools Versions are now managed properly",
+   "Added first version of the Shot Assembler Tool",
+   "Added first version of the Shot Exporter Tool",
+   "Small fixes on XGen Manager Tool",
+   "Added Light Rigs Manager Tool",
+   "Added Overrides Support to Solstice Outliner Tool",
+   "Updated Solstice Documentation"
   ]
 }
