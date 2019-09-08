@@ -2,16 +2,16 @@
   "nameit": {
     "rules": [
       {
-        "iterator_format": "@", 
         "expression": "{project}_{asset_type}_{asset_id}_{description}", 
         "description": "Rule used to rename asset files", 
-        "name": "asset"
+        "name": "asset", 
+        "iterator_format": "@"
       }, 
       {
+        "iterator_format": "@", 
         "expression": "{asset_name}_{asset_file_type}", 
         "description": "", 
-        "name": "asset_file", 
-        "iterator_format": "@"
+        "name": "asset_file"
       }
     ], 
     "tokens": [
@@ -19,8 +19,8 @@
         "default": 0, 
         "override_value": "", 
         "values": {
-          "key": [], 
-          "value": []
+          "value": [], 
+          "key": []
         }, 
         "name": "description", 
         "description": "Description of the asset"
@@ -29,11 +29,11 @@
         "default": 0, 
         "override_value": "", 
         "values": {
-          "value": [
-            "#"
-          ], 
           "key": [
             "iterator"
+          ], 
+          "value": [
+            "#"
           ]
         }, 
         "name": "id", 
@@ -43,8 +43,8 @@
         "default": 0, 
         "override_value": "", 
         "values": {
-          "value": [], 
-          "key": []
+          "key": [], 
+          "value": []
         }, 
         "name": "shot", 
         "description": "Shot the file belongs to"
@@ -53,8 +53,8 @@
         "default": 0, 
         "override_value": "", 
         "values": {
-          "key": [], 
-          "value": []
+          "value": [], 
+          "key": []
         }, 
         "name": "sequence", 
         "description": "Sequence the file belongs to"
@@ -63,15 +63,15 @@
         "default": 0, 
         "override_value": "", 
         "values": {
-          "value": [
-            "PRP", 
-            "BGE", 
-            "CHR"
-          ], 
           "key": [
             "props", 
             "backgroundelements", 
             "characters"
+          ], 
+          "value": [
+            "PRP", 
+            "BGE", 
+            "CHR"
           ]
         }, 
         "name": "asset_type", 
@@ -81,8 +81,8 @@
         "default": 0, 
         "override_value": "", 
         "values": {
-          "key": [], 
-          "value": []
+          "value": [], 
+          "key": []
         }, 
         "name": "project", 
         "description": "Short name of the current project"
@@ -91,8 +91,8 @@
         "default": 0, 
         "override_value": "", 
         "values": {
-          "key": [], 
-          "value": []
+          "value": [], 
+          "key": []
         }, 
         "name": "asset_id", 
         "description": "Unique number for each one of the assets inside a category"
@@ -101,13 +101,13 @@
         "default": 0, 
         "override_value": "", 
         "values": {
-          "value": [
-            "SHD", 
-            "RIG"
-          ], 
           "key": [
             "shading", 
             "rig"
+          ], 
+          "value": [
+            "SHD", 
+            "RIG"
           ]
         }, 
         "name": "asset_file_type", 
@@ -117,8 +117,8 @@
         "default": 0, 
         "override_value": "", 
         "values": {
-          "value": [], 
-          "key": []
+          "key": [], 
+          "value": []
         }, 
         "name": "asset_name", 
         "description": "Complete name of the asset"
@@ -127,11 +127,65 @@
         "default": 0, 
         "override_value": "", 
         "values": {
-          "value": [], 
-          "key": []
+          "key": [], 
+          "value": []
         }, 
         "name": "extension", 
         "description": ""
+      }
+    ], 
+    "template_tokens": {
+      "asset_name": {
+        "description": "Name of the asset"
+      },
+      "asset_type": {
+        "description": "Type of the asset"
+      },
+      "version_folder": {
+        "description": "Version folder of the file"
+      }, 
+      "file_type": {
+        "description": "Type of the file"
+      },
+      "file_extension": {
+        "description": "Extension of the file"
+      },
+      "texture_name": {
+        "description": "Name of the texture"
+      }
+    }, 
+    "templates": [
+      {
+        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/model/{asset_name}.ma",
+        "name": "prop_model"
+      },
+      {
+        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/rig/{asset_name}_RIG.ma",
+        "name": "prop_rig"
+      },
+      {
+        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/shading/{asset_name}_SHD.ma",
+        "name": "prop_shading"
+      },
+      {
+        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/textures/{texture_name}.{file_extension}",
+        "name": "prop_textures"
+      },
+      {
+        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/model/{asset_name}.ma",
+        "name": "backgroundelement_model"
+      },
+      {
+        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/rig/{asset_name}_RIG.ma",
+        "name": "backgroundelement_rig"
+      },
+      {
+        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/shading/{asset_name}_SHD.ma",
+        "name": "backgroundelement_shading"
+      },
+      {
+        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/textures/{texture_name}.{file_extension}",
+        "name": "backgroundelement_textures"
       }
     ]
   }
