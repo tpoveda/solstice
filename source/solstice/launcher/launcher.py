@@ -16,10 +16,12 @@ import os
 
 from tpPyUtils import path as path_utils
 
+import artellapipe
+
 from artellalauncher.core import defines, launcher
 
 import solstice
-from solstice.launcher import updater, dccselector
+from solstice.launcher import updater
 
 
 def get_launcher_config_path():
@@ -33,11 +35,17 @@ def get_launcher_config_path():
 
 class SolsticeLauncher(launcher.ArtellaLauncher, object):
 
-    DCC_SELECTOR_CLASS = dccselector.SolsticeDCCSelector
+    # DCC_SELECTOR_CLASS = dccselector.SolsticeDCCSelector
     UPDATER_CLASS = updater.SolsticeUpdater
     LAUNCHER_CONFIG_PATH = get_launcher_config_path()
 
-    def __init__(self, project, resource):
-        super(SolsticeLauncher, self).__init__(project=project, resource=resource)
+    def __init__(self, project):
+        super(SolsticeLauncher, self).__init__(project=project)
 
+
+def run():
+    win = SolsticeLauncher(project=artellapipe.solstice)
+    win.show()
+
+    return win
 

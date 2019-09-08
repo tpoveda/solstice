@@ -111,6 +111,15 @@ def get_project_path():
     return path_utils.clean_path(os.path.dirname(__file__))
 
 
+def get_launcher_plugins_path():
+    """
+    Returns path where Solstice Launcher plugins are located
+    :return: str
+    """
+
+    return path_utils.clean_path(os.path.join(get_project_path(), 'launcher', 'plugins'))
+
+
 def get_project_config_path():
     """
     Returns path where default Solstice project config is located

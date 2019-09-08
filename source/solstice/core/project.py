@@ -37,6 +37,7 @@ class Solstice(artella_project.ArtellaProject):
     ASSET_CLASS = asset.SolsticeAsset
     ASSET_NODE_CLASS = node.SolsticeAssetNode
     TAG_NODE_CLASS = asset.SolsticeTagNode
+    LAUNCHER_PLUGINS_PATH = solstice.get_launcher_plugins_path()
     PROJECT_CONFIG_PATH = solstice.get_project_config_path()
     PROJECT_CHANGELOG_PATH = solstice.get_project_changelog_path()
     PROJECT_SHELF_FILE_PATH = solstice.get_project_shelf_path()

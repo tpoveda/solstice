@@ -70,6 +70,9 @@ if __name__ == '__main__':
         solstice.init()
 
         from solstice.launcher import launcher
+        launcher.run()
 
-        launcher = launcher.SolsticeLauncher(project=artellapipe.solstice, resource=solstice.resource)
-        launcher.init()
+
+
+        # launcher = launcher.SolsticeLauncher(project=artellapipe.solstice)
+
