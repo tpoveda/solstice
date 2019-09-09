@@ -156,19 +156,19 @@
     }, 
     "templates": [
       {
-        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/model/{asset_name}.ma",
+        "pattern": "Assets/Props/{asset_name}/{version_folder}/model/{asset_name}.ma",
         "name": "prop_model"
       },
       {
-        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/rig/{asset_name}_RIG.ma",
+        "pattern": "Assets/Props/{asset_name}/{version_folder}/rig/{asset_name}_RIG.ma",
         "name": "prop_rig"
       },
       {
-        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/shading/{asset_name}_SHD.ma",
+        "pattern": "Assets/Props/{asset_name}/{version_folder}/shading/{asset_name}_SHD.ma",
         "name": "prop_shading"
       },
       {
-        "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/textures/{texture_name}.{file_extension}",
+        "pattern": "Assets/Props/{asset_name}/{version_folder}/textures/{texture_name}.{file_extension}",
         "name": "prop_textures"
       },
       {
