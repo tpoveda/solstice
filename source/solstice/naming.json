@@ -152,6 +152,9 @@
       },
       "texture_name": {
         "description": "Name of the texture"
+      },
+      "sequence_name": {
+        "description": "Name of the sequence. This name must be unique."
       }
     }, 
     "templates": [
@@ -186,6 +189,26 @@
       {
         "pattern": "Assets/BackgroundElements/{asset_name}/{version_folder}/textures/{texture_name}.{file_extension}",
         "name": "backgroundelement_textures"
+      },
+      {
+      "pattern": "{sequence_name}_{sequence_index}",
+      "name": "sequence_name"
+      },
+      {
+        "pattern": "Production/{sequence_name}_{sequence_index}",
+        "name": "sequence"
+      },
+      {
+        "pattern": "Production/{sequence_name}_{sequence_index}/_master_layout",
+        "name": "master_layout_folder"
+      },
+      {
+        "pattern": "Production/{sequence_name}_{sequence_index}/_master_layout/__working__/seq_layout",
+        "name": "master_layout_working_folder"
+      },
+      {
+        "pattern": "Production/{sequence_name}_{sequence_index}/_master_layout/seq_layout/_seq_master_layout.ma",
+        "name": "master_layout_file"
       }
     ]
   }
