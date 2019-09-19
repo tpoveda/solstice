@@ -184,9 +184,9 @@ class AlembicAssetFile(assetfile.ArtellaAssetType, object):
         """
 
         if tp.is_houdini():
-            alembicmanager.importer.import_alembic(project=self.get_project(), alembic_path=path, fix_path=fix_path)
+            return alembicmanager.importer.import_alembic(project=self.get_project(), alembic_path=path, fix_path=fix_path)
         else:
-            alembicmanager.importer.reference_alembic(project=self.get_project(), alembic_path=path, fix_path=fix_path)
+            return alembicmanager.importer.reference_alembic(project=self.get_project(), alembic_path=path, fix_path=fix_path)
 
 
 class StandinAssetFile(assetfile.ArtellaAssetType, object):

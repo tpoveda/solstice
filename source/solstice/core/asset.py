@@ -227,6 +227,11 @@ class SolsticeTagNode(artella_asset.ArtellaTagNode, object):
         return python.force_list(self._get_attribute('types'))
 
     def get_proxy_group(self):
+        """
+        Returns proxy group linked to tag node
+        :return: str
+        """
+
         if not self._node or not tp.Dcc.object_exists(self._node):
             return None
 
@@ -245,6 +250,11 @@ class SolsticeTagNode(artella_asset.ArtellaTagNode, object):
         return None
 
     def get_hires_group(self):
+        """
+        Returns hires group linked to tag node
+        :return: str
+        """
+
         if not self._node or not tp.Dcc.object_exists(self._node):
             return None
 
@@ -262,8 +272,12 @@ class SolsticeTagNode(artella_asset.ArtellaTagNode, object):
 
         return None
 
-
     def get_shaders(self):
+        """
+        Returns shaders info linked to this node
+        :return: dict
+        """
+
         if not self._node or not tp.Dcc.object_exists(self._node):
             return None
 
