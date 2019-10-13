@@ -1,42 +1,30 @@
 language: python
+before_install:
+  - pip install pycodestyle
 install:
-- pip install mkdocs
-- pip install mkdocs-material
-- pip install pathlib
-- pip install mkdocs-markdownextradata-plugin
-- pip install -r requirements.txt
-- python setup.py install
+  - pip install -r requirements.txt
+  - python setup.py install
 script:
-- mkdocs build --config-file=docs/mkdocs.yml --verbose --clean
-- mv docs/site .
-- pytest
-before_deploy:
-  - pip install -r requirements_git.txt -t source/solstice/externals
-  - rm -r source/solstice/externals/PySide2
-  - rm -r source/solstice/externals/pyside2uic
-  - rm -r source/solstice/externals/shiboken2
-  - rm -r source/solstice/externals/bin
-  - find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
-  - tar -zcf ${TRAVIS_BUILD_DIR}${REPO}-${TRAVIS_TAG}.tar.gz source/solstice
+  - find . -name \*.py -exec pycodestyle --max-line-length=120 --ignore=E402 {} +
+  - pytest --cov=solstice
+  - sphinx-apidoc -f -e -o docs/sphinx solstice
+  - sphinx-build -M html ./docs/sphinx ./
+after_success:
+  - coveralls
+  - cd html && touch .nojekyll && cd ../
 deploy:
   - provider: pages
     skip_cleanup: true
     github_token: $GITHUB_TOKEN
-    local_dir: site
+    keep_history: true
+    local_dir: html
     on:
       branch: master
-  - provider: releases
-    skip_cleanup: true
-    api_key: $GITHUB_TOKEN
-    file: ${TRAVIS_BUILD_DIR}${REPO}-${TRAVIS_TAG}.tar.gz
-    on:
-      branch: master
-      tags: true
   - provider: pypi
     skip_cleanup: true
     user: tpoveda
     password:
-      secure: lLX/L026TD0F4JHJKuTRnrmXSww36OUzrIqPQ8JSZ+zC3NX5COVvBOaPbZ6AFiA2i3T9QTWQyFLgB8u+WzYu1lv/41BBBocOaHYUNlvkyhawJ1mrte/AEGySs3xrfY4BBvAR9BvKSDn+SRpyGbrkfB7h6qyiVJ9a8jqfbC7EdeBlDycoOa1/XJuPpYaLa5mHZvXD/kPynlmRC0YFVl7+4ohmeqJnToipsW/GPHh8DsCEqn0kMyBphT6wAzojtMTPyvZPBJEkNXWqcMSgwb/ykDld0xnQgs8SApEnN2isVjKqMKp15ritFIOild9hPzquuypPENg9K/4gCBY2zGdhpuJ+WrAtOEcaKIEWzDwhcpbvZHYzRWLFVbgcM1KETJRrUaScFRVce6dCo+lhP1LEiNmwQowXU7rBCjTmWg+C/Ng9j6ORwBk2sM+8iNoQL3d/GQ47WZTtI7RwOMw7YbC/i2Qau+MdvQZtlFggpBWTGpa5wjTBbT4TGaCufBZnQSan0QEdbB7IxHInfHW4nD/+fuwAVv+HGReHcGjbohG5UCTkO0Y9yW2e09P6jeHqn8GHDj7vvrvc6sxj1zhNzDQ/EanUH+9Shv55uLYAPrm+tyEg5aZ8K4n2+wnH3kxApX0kfoVO39sQIicDR3CHbz0O6PKL8ZnLEpHhA8AawaHkoOM=
+      secure: hKbZ9LyfnDyFbTFEbmh3iKhsU9DuSXwJs8DRAGmBtDGpYnTmdcnLmqvDIMjVMuowSqGIa4EFJzdo9PKBt5AHcfio6N3VE5KQTVmWj8BQkJxwftLAD8AAt0aA8HesOy+ujJpyBtOiU/xdsVAAILrzwZeKMnJiDprgbPcVUbXreB9h+gQd7QNimMvpYedFhPfitm+X+Vto9shU99nBYpvm4Jr0o7sh1LjTdMiszhGFRmE44kEVY70nm1BLlE9gTzppGRyAGoGaglEzDShpCdmpN2hhYTQEYuud+Gie0dSjv2K0u45zgNGfaCfmOip7xUtEl0AnXOEqFLDJhlH7CZROmyofWEFMQSMdI+eNnJFyY83Ssi1yeFox/ZClDWxmf+HYCMnl5IHkMatl+df9/53dI5se7sJuqywxPEREMDuly7h8ij5dOx8s6YHVijLI0dIOjZ3iFN6yeesVb5ZoUNlafUQJ7N9n4bTFlW44RZENEG//klQzuOszdsV3jAlT4bYSfQjsHB1781t2IB25nwg30DNHY9n4R9WOZ4eClRMuLSjvYe8mc6ud2zKWd1NlDLraLHrwCzbyWdGrgKpELoWZvzMZxY4JbbB0KtlBazkuGe/QPLyZS4Saqvgd9qcyZcH0CBttnoImDYdNGyaJffTirbrIdC4VZkOAahzDrKya0QQ=
     on:
       branch: master
       tags: true

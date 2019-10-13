@@ -1,6 +1,0 @@
-# ===================================================================
-# solstice requirements file for GitHub release
-# ===================================================================
-artellapipe
-tpMayaLib
-tpHoudiniLib

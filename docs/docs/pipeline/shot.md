@@ -1,3 +1,0 @@
-# **Shot**
-
-**Work in Progress**

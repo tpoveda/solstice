@@ -1,0 +1,15 @@
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=120
+
+[TYPECHECK]
+
+generated-members=artellapipe.*, solstice.*
+
+[IMPORTS]
+
+ignored-modules=maya.cmds, sentry_sdk, Qt
+
+[MISCELLANEOUS]
+notes=

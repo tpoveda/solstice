@@ -1,7 +1,10 @@
 # ===================================================================
-# solstice requirements file
+# solstice-core requirements file
 # ===================================================================
-artellalauncher
-artellapipe
-tpMayaLib
-tpHoudiniLib
+Qt.py
+sentry-sdk==0.12.2
+tpPyUtils
+tpDccLib
+artellapipe-utils
+artellapipe-core
+artellapipe-gui

@@ -1,6 +1,6 @@
-include source/solstice/resources/icons/*.*
-include source/solstice/resources/icons/color/*.*
-include source/solstice/resources/images/*.*
-include source/solstice/*.json
-include source/solstice/pipeline/dcc/houdini/houdini_bootstrap.bat
-include source/solstice/pipeline/dcc/houdini/OPMenu.xml
+include solstice/core/__logging__.ini
+include solstice/resources/icons/color/*.*
+include solstice/resources/icons/logos/*.*
+include solstice/resources/icons/shelf/*.*
+include solstice/resources/icons/lightrigs/*.*
+include solstice/resources/images/*.*
