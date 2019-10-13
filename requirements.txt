@@ -2,7 +2,13 @@
 # solstice-core requirements file
 # ===================================================================
 Qt.py
-sentry-sdk==0.12.2
+pytest
+pytest-cov
+coveralls
+sphinx
+sphinx_rtd_theme
+python-json-logger
 tpPyUtils
 tpDccLib
 artellapipe
+sentry-sdk==0.12.2
