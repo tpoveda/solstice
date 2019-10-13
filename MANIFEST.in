@@ -1,4 +1,4 @@
-include solstice/core/__logging__.ini
+include solstice/__logging__.ini
 include solstice/resources/icons/color/*.*
 include solstice/resources/icons/logos/*.*
 include solstice/resources/icons/shelf/*.*

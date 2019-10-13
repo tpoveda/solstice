@@ -25,7 +25,10 @@ def init(do_reload=False, import_libs=True):
 
     # Without default_integrations=False, PyInstaller fails during launcher generation
     import sentry_sdk
-    sentry_sdk.init("https://c75c06d8349449a1a829c04732ba3e5c@sentry.io/1761556", default_integrations=False)
+    try:
+        sentry_sdk.init("https://c75c06d8349449a1a829c04732ba3e5c@sentry.io/1761556")
+    except RuntimeError:
+        sentry_sdk.init("https://c75c06d8349449a1a829c04732ba3e5c@sentry.io/1761556", default_integrations=False)
 
     from tpPyUtils import importer
 
