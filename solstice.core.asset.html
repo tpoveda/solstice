@@ -169,8 +169,146 @@
 
            <div itemprop="articleBody">
             
-  <div class="section" id="solstice-core-asset-module">
-<h1>solstice.core.asset module<a class="headerlink" href="#solstice-core-asset-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-solstice.core.asset">
+<span id="solstice-core-asset-module"></span><h1>solstice.core.asset module<a class="headerlink" href="#module-solstice.core.asset" title="Permalink to this headline">¶</a></h1>
+<p>Module that contains definitions for asset in Solstice</p>
+<dl class="class">
+<dt id="solstice.core.asset.SolsticeAsset">
+<em class="property">class </em><code class="sig-prename descclassname">solstice.core.asset.</code><code class="sig-name descname">SolsticeAsset</code><span class="sig-paren">(</span><em class="sig-param">project</em>, <em class="sig-param">asset_data</em>, <em class="sig-param">node=None</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">artellapipe.core.asset.ArtellaAsset</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.get_file">
+<code class="sig-name descname">get_file</code><span class="sig-paren">(</span><em class="sig-param">file_type</em>, <em class="sig-param">status</em>, <em class="sig-param">extension=None</em>, <em class="sig-param">fix_path=False</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.get_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides base ArtellaAsset get_file function
+Returns file path of the given file type and status
+:param file_type: str
+:param status: str
+:param extension: str
+:param fix_path: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.get_shading_type">
+<code class="sig-name descname">get_shading_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.get_shading_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implements base ArtellaAsset get_shading_type function
+Returns the asset file type of the shading file for the project
+:return: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.import_alembic_file">
+<code class="sig-name descname">import_alembic_file</code><span class="sig-paren">(</span><em class="sig-param">parent_name=None</em>, <em class="sig-param">fix_path=True</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.import_alembic_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imports Alembic file of the current asset
+:param parent_name: str
+:param fix_path: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.import_file_by_extension">
+<code class="sig-name descname">import_file_by_extension</code><span class="sig-paren">(</span><em class="sig-param">extension=None</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.import_file_by_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implements base AbstractAsset reference_file_by_extension function
+References asset file with the given extension
+:param extension: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.import_rig_file">
+<code class="sig-name descname">import_rig_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.import_rig_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imports rig file of the current asset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.import_standin_file">
+<code class="sig-name descname">import_standin_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.import_standin_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imports Standin file of the current asset
+:return: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.open_file">
+<code class="sig-name descname">open_file</code><span class="sig-paren">(</span><em class="sig-param">file_type</em>, <em class="sig-param">status</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.open_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides base ArtellaAsset open_file function
+Opens asset file with the given type and status (if exists)
+:param file_type: str
+:param status: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.reference_alembic_file">
+<code class="sig-name descname">reference_alembic_file</code><span class="sig-paren">(</span><em class="sig-param">namespace=None</em>, <em class="sig-param">fix_path=True</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.reference_alembic_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>References Alembic file of the current asset
+:param namespace: str
+:param fix_path: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.reference_file_by_extension">
+<code class="sig-name descname">reference_file_by_extension</code><span class="sig-paren">(</span><em class="sig-param">extension=None</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.reference_file_by_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implements base AbstractAsset reference_file_by_extension function
+References asset file with the given extension
+:param extension: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.reference_rig_file">
+<code class="sig-name descname">reference_rig_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.reference_rig_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>References rig file of the current asset</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeAsset.reference_standin_file">
+<code class="sig-name descname">reference_standin_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAsset.reference_standin_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>References Standin file of the current asset
+:return: str</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="solstice.core.asset.SolsticeAssetWidget">
+<em class="property">class </em><code class="sig-prename descclassname">solstice.core.asset.</code><code class="sig-name descname">SolsticeAssetWidget</code><span class="sig-paren">(</span><em class="sig-param">asset</em>, <em class="sig-param">parent=None</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeAssetWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">artellapipe.core.asset.ArtellaAssetWidget</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="solstice.core.asset.SolsticeAssetWidget.staticMetaObject">
+<code class="sig-name descname">staticMetaObject</code><em class="property"> = &lt;PySide2.QtCore.QMetaObject object&gt;</em><a class="headerlink" href="#solstice.core.asset.SolsticeAssetWidget.staticMetaObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="solstice.core.asset.SolsticeTagNode">
+<em class="property">class </em><code class="sig-prename descclassname">solstice.core.asset.</code><code class="sig-name descname">SolsticeTagNode</code><span class="sig-paren">(</span><em class="sig-param">project</em>, <em class="sig-param">node</em>, <em class="sig-param">tag_info=None</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeTagNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">artellapipe.core.asset.ArtellaTagNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeTagNode.get_hires_group">
+<code class="sig-name descname">get_hires_group</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeTagNode.get_hires_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns hires group linked to tag node
+:return: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeTagNode.get_proxy_group">
+<code class="sig-name descname">get_proxy_group</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeTagNode.get_proxy_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns proxy group linked to tag node
+:return: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeTagNode.get_shaders">
+<code class="sig-name descname">get_shaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeTagNode.get_shaders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns shaders info linked to this node
+:return: dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.asset.SolsticeTagNode.get_types">
+<code class="sig-name descname">get_types</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.asset.SolsticeTagNode.get_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of types for the current asset
+:return: list(str)</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
