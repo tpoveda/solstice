@@ -1,21 +1,21 @@
 language: python
 before_install:
-  - pip install pycodestyle
+- pip install pycodestyle
 install:
-  - pip install -r requirements.txt
-  - python setup.py install
+- pip install -r requirements.txt
+- python setup.py install
 script:
-  - find . -name \*.py -exec pycodestyle --max-line-length=120 --ignore=E402 {} +
-  - pytest --cov=solstice
-  - sphinx-apidoc -f -e -o docs/sphinx solstice
-  - sphinx-build -M html ./docs/sphinx ./
+- find . -name \*.py -exec pycodestyle --max-line-length=120 --ignore=E402 {} +
+- pytest --cov=solstice
+- sphinx-apidoc -f -e -o docs/sphinx solstice
+- sphinx-build -M html ./docs/sphinx ./
 after_success:
-  - coveralls
-  - cd html && touch .nojekyll && cd ../
+- coveralls
+- cd html && touch .nojekyll && cd ../
 deploy:
   - provider: pages
     skip_cleanup: true
-    github_token: $GITHUB_TOKEN
+    github_token: "$GITHUB_TOKEN"
     keep_history: true
     local_dir: html
     on:
@@ -24,7 +24,7 @@ deploy:
     skip_cleanup: true
     user: tpoveda
     password:
-      secure: hKbZ9LyfnDyFbTFEbmh3iKhsU9DuSXwJs8DRAGmBtDGpYnTmdcnLmqvDIMjVMuowSqGIa4EFJzdo9PKBt5AHcfio6N3VE5KQTVmWj8BQkJxwftLAD8AAt0aA8HesOy+ujJpyBtOiU/xdsVAAILrzwZeKMnJiDprgbPcVUbXreB9h+gQd7QNimMvpYedFhPfitm+X+Vto9shU99nBYpvm4Jr0o7sh1LjTdMiszhGFRmE44kEVY70nm1BLlE9gTzppGRyAGoGaglEzDShpCdmpN2hhYTQEYuud+Gie0dSjv2K0u45zgNGfaCfmOip7xUtEl0AnXOEqFLDJhlH7CZROmyofWEFMQSMdI+eNnJFyY83Ssi1yeFox/ZClDWxmf+HYCMnl5IHkMatl+df9/53dI5se7sJuqywxPEREMDuly7h8ij5dOx8s6YHVijLI0dIOjZ3iFN6yeesVb5ZoUNlafUQJ7N9n4bTFlW44RZENEG//klQzuOszdsV3jAlT4bYSfQjsHB1781t2IB25nwg30DNHY9n4R9WOZ4eClRMuLSjvYe8mc6ud2zKWd1NlDLraLHrwCzbyWdGrgKpELoWZvzMZxY4JbbB0KtlBazkuGe/QPLyZS4Saqvgd9qcyZcH0CBttnoImDYdNGyaJffTirbrIdC4VZkOAahzDrKya0QQ=
+      secure: Sxlz8Xf1ieITBEuWWVa/f9SkPlo6C/xRmPx2/K1FqUhTyRh8iJNSiVbJt7dLKH0BIPLpNtQnXHvbGafWfC3v5Hs+8P3jhBRR618ZO2K4MYfv+YYte3KRee3VIzeFDuLj4/jB3v7wGKdLcptHC6KhtxiIp84Indtbi6ojKbPhjTR+EEd23DX6C+Z89GKp6dYUbJenUgIjkE/Lzcu8cYR/rg4Z8W8Tq28YixnOaWmjtMLlQYxY/qihd1fzH4CIIxyOwpmXjhYS54IHpqFqpcNWRZy4dERRH70TumBj66f4DXTDyW3VIqYm79TXmnCKP/yeS0q+I2rW7vo8BH0Eemakp8HpZwITBs3tpx66T8x6js2/Vfxk+KilA6iHFYrIWPKnjJXAst2sK/eeVd3ndn7kBHuGy+HW2lrYWSpenggMqYUCmGt1eG5kCohjhbOIZfdwg7FWtXgA8PCxV3Gawxbf93vL5qUvd1O9Xl2c9uqAacZDguDzArTAwG21trdDo7Wf5Y/Ky3V98AWcSnBGPSgMNvrS75+d3MmQ878cJDCHg9ePMAljU7iKrjbQ2IEGtt3wepdcWno7T6x7sWEx0C3ILnNrJIfjSK+eFXP+TaXPPB5XZrUGOzYjf99YjUplFeeAsnXqTKdkMYv1CirooBlLh+l+ycLeSFUBQ1zI+zNuXHs=
     on:
       branch: master
       tags: true
