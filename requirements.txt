@@ -12,3 +12,8 @@ tpPyUtils
 tpDccLib
 artellapipe
 sentry-sdk
+tpPyUtils
+tpDccLib
+tpQtLib
+tpMayaLib
+tpHoudiniLib
