@@ -1,0 +1,24 @@
+solstice package
+================
+
+Subpackages
+-----------
+
+.. toctree::
+
+   solstice.core
+
+Submodules
+----------
+
+.. toctree::
+
+   solstice.loader
+
+Module contents
+---------------
+
+.. automodule:: solstice
+   :members:
+   :undoc-members:
+   :show-inheritance:

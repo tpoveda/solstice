@@ -1,0 +1,7 @@
+solstice.core.asset module
+==========================
+
+.. automodule:: solstice.core.asset
+   :members:
+   :undoc-members:
+   :show-inheritance:

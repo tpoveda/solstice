@@ -1,0 +1,7 @@
+solstice.core.shelf module
+==========================
+
+.. automodule:: solstice.core.shelf
+   :members:
+   :undoc-members:
+   :show-inheritance:

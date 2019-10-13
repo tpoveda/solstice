@@ -1,0 +1,24 @@
+solstice.core package
+=====================
+
+Submodules
+----------
+
+.. toctree::
+
+   solstice.core.asset
+   solstice.core.assetfile
+   solstice.core.assetsviewer
+   solstice.core.defines
+   solstice.core.node
+   solstice.core.project
+   solstice.core.shelf
+   solstice.core.tray
+
+Module contents
+---------------
+
+.. automodule:: solstice.core
+   :members:
+   :undoc-members:
+   :show-inheritance:
