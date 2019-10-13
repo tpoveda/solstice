@@ -11,4 +11,4 @@ python-json-logger
 tpPyUtils
 tpDccLib
 artellapipe
-sentry-sdk==0.12.2
+sentry-sdk
