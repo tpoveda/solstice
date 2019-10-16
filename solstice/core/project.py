@@ -57,7 +57,7 @@ class Solstice(artella_project.ArtellaProject):
         self._project_url = None
         self._documentation_url = None
 
-        super(Solstice, self).__init__()
+        super(Solstice, self).__init__(name='Solstice')
 
     def get_configurations_folder(self):
         """
@@ -125,16 +125,16 @@ class Solstice(artella_project.ArtellaProject):
         return path_utils.clean_path(os.path.join(
             self.get_configurations_folder(), artella_defines.ARTELLA_PROJECT_DEFAULT_VERSION_FILE_NAME))
 
-    def init_config(self):
+    def init_config(self, project_name):
         """
        Overrides base ArtellaProject init_config function to load extra attributes from configuration file
        """
 
-        super(Solstice, self).init_config()
+        super(Solstice, self).init_config(project_name=project_name)
 
-        project_config_data = self.get_config_data()
+        project_config_data = self.get_config_data(project_name=project_name)
         if not project_config_data:
-            return
+            return False
 
         self._project_url = project_config_data.get('PROJECT_URL', None)
         self._documentation_url = project_config_data.get('PROJECT_DOCUMENTATION_URL', None)
