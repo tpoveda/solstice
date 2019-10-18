@@ -13,6 +13,7 @@ __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
 from artellapipe.gui import tray
+from artellapipe.utils import resource
 
 from Qt.QtWidgets import *
 
@@ -26,10 +27,10 @@ class SolsticeTray(tray.ArtellaTray, object):
 
         project_name = self._project.name.title()
 
-        documentation_icon = self._project.resource.icon('manual')
-        project_icon = self._project.resource.icon('solstice', theme='logos')
-        artella_icon = self._project.resource.icon('artella', theme='logos')
-        email_icon = self._project.resource.icon('message')
+        documentation_icon = resource.icon('manual')
+        project_icon = resource.ResourceManager().icon('solstice', theme='logos')
+        artella_icon = resource.ResourceManager().icon('artella', theme='logos')
+        email_icon = resource.ResourceManager().icon('message')
 
         doc_action = QAction(
             documentation_icon,
