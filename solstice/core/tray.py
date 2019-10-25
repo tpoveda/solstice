@@ -27,7 +27,7 @@ class SolsticeTray(tray.ArtellaTray, object):
 
         project_name = self._project.name.title()
 
-        documentation_icon = resource.icon('manual')
+        documentation_icon = resource.ResourceManager().icon('manual')
         project_icon = resource.ResourceManager().icon('solstice', theme='logos')
         artella_icon = resource.ResourceManager().icon('artella', theme='logos')
         email_icon = resource.ResourceManager().icon('message')

@@ -23,6 +23,9 @@ def init(do_reload=False, import_libs=True):
     Initializes Solstice library
     """
 
+    # Load logger configuration
+    logging.config.fileConfig(get_logging_config(), disable_existing_loggers=False)
+
     # Without default_integrations=False, PyInstaller fails during launcher generation
     import sentry_sdk
     try:
@@ -127,7 +130,3 @@ def get_logging_level():
         return os.environ.get('SOLSTICE_LOG_LEVEL')
 
     return os.environ.get('SOLSTICE_LOG_LEVEL', 'WARNING')
-
-
-# Load logger configuration
-logging.config.fileConfig(get_logging_config(), disable_existing_loggers=False)
