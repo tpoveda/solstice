@@ -1,7 +1,0 @@
-solstice.core.tray module
-=========================
-
-.. automodule:: solstice.core.tray
-   :members:
-   :undoc-members:
-   :show-inheritance:
