@@ -82,7 +82,7 @@ def init(do_reload=False, import_libs=True, dev=False):
     solstice_core_importer.import_packages(
         only_packages=False,
         order=packages_order,
-        skip_modules=['solstice.pipeline.userSetup']
+        skip_modules=['solstice.bootstrap']
     )
     if do_reload:
         solstice_core_importer.reload_all()
