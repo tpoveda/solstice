@@ -1,0 +1,7 @@
+solstice.files.standin module
+=============================
+
+.. automodule:: solstice.files.standin
+   :members:
+   :undoc-members:
+   :show-inheritance:

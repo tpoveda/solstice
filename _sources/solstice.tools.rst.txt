@@ -1,0 +1,10 @@
+solstice.tools package
+======================
+
+Module contents
+---------------
+
+.. automodule:: solstice.tools
+   :members:
+   :undoc-members:
+   :show-inheritance:

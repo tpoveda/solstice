@@ -1,0 +1,7 @@
+solstice.files.model module
+===========================
+
+.. automodule:: solstice.files.model
+   :members:
+   :undoc-members:
+   :show-inheritance:

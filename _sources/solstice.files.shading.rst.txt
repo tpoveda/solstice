@@ -1,0 +1,7 @@
+solstice.files.shading module
+=============================
+
+.. automodule:: solstice.files.shading
+   :members:
+   :undoc-members:
+   :show-inheritance:

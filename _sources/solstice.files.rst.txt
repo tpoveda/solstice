@@ -1,0 +1,23 @@
+solstice.files package
+======================
+
+Submodules
+----------
+
+.. toctree::
+
+   solstice.files.alembic
+   solstice.files.groom
+   solstice.files.model
+   solstice.files.rig
+   solstice.files.shading
+   solstice.files.standin
+   solstice.files.texture
+
+Module contents
+---------------
+
+.. automodule:: solstice.files
+   :members:
+   :undoc-members:
+   :show-inheritance:

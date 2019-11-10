@@ -1,0 +1,7 @@
+solstice.files.rig module
+=========================
+
+.. automodule:: solstice.files.rig
+   :members:
+   :undoc-members:
+   :show-inheritance:

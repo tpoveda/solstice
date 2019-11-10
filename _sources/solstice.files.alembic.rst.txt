@@ -1,0 +1,7 @@
+solstice.files.alembic module
+=============================
+
+.. automodule:: solstice.files.alembic
+   :members:
+   :undoc-members:
+   :show-inheritance:

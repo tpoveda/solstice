@@ -1,0 +1,7 @@
+solstice.files.groom module
+===========================
+
+.. automodule:: solstice.files.groom
+   :members:
+   :undoc-members:
+   :show-inheritance:
