@@ -18,7 +18,7 @@ import inspect
 import logging.config
 
 
-def init(do_reload=False, import_libs=True):
+def init(do_reload=False, import_libs=True, dev=False):
     """
     Initializes Solstice library
     """
@@ -27,11 +27,12 @@ def init(do_reload=False, import_libs=True):
     logging.config.fileConfig(get_logging_config(), disable_existing_loggers=False)
 
     # Without default_integrations=False, PyInstaller fails during launcher generation
-    import sentry_sdk
-    try:
-        sentry_sdk.init("https://c75c06d8349449a1a829c04732ba3e5c@sentry.io/1761556")
-    except (RuntimeError, ImportError):
-        sentry_sdk.init("https://c75c06d8349449a1a829c04732ba3e5c@sentry.io/1761556", default_integrations=False)
+    if not dev:
+        import sentry_sdk
+        try:
+            sentry_sdk.init("https://c75c06d8349449a1a829c04732ba3e5c@sentry.io/1761556")
+        except (RuntimeError, ImportError):
+            sentry_sdk.init("https://c75c06d8349449a1a829c04732ba3e5c@sentry.io/1761556", default_integrations=False)
 
     from tpPyUtils import importer
 
@@ -60,9 +61,7 @@ def init(do_reload=False, import_libs=True):
             return mod_dir
 
     packages_order = [
-        'solstice.core.shelf',
-        'solstice.core.tray',
-        'solstice.core.asset'
+        'solstice.core'
     ]
 
     if import_libs:
@@ -75,7 +74,7 @@ def init(do_reload=False, import_libs=True):
         import tpNameIt
         tpNameIt.init(do_reload=do_reload)
         import artellapipe.loader
-        artellapipe.loader.init(do_reload=do_reload)
+        artellapipe.loader.init(do_reload=do_reload, dev=dev)
 
     from solstice.core import project
 
@@ -96,7 +95,7 @@ def init(do_reload=False, import_libs=True):
     resource.ResourceManager().register_resource(os.path.join(resources_path, 'icons', 'shelf'), 'shelf')
 
     import artellapipe.loader
-    artellapipe.loader.set_project(project.Solstice)
+    artellapipe.loader.set_project(project.Solstice, do_reload=do_reload)
 
 
 def create_logger_directory():
