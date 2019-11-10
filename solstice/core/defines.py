@@ -12,7 +12,6 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
-from artellapipe.core import defines
 
 # Defines environment variable name that can setup to define folder where configuration files are located
 SOLSTICE_CONFIGURATION_ENV = 'SOLSTICE_PROJECT_CONFIGURATIONS_FOLDER'
@@ -29,20 +28,20 @@ SOLSTICE_BACKGROUND_ELEMENTS_ASSETS = 'Background Elements'
 # Defines the asset type used for Characters
 SOLSTICE_CHARACTERS_ASSETS = 'Characters'
 
-# Defines of textures asset type for Solstice
-SOLSTICE_TEXTURES_ASSET_TYPE = defines.ARTELLA_TEXTURES_ASSET_TYPE
-
-# Defines of model asset type for Solstice
-SOLSTICE_MODEL_ASSET_TYPE = defines.ARTELLA_MODEL_ASSET_TYPE
-
-# Defines of shading asset type for Solstice
-SOLSTICE_SHADING_ASSET_TYPE = defines.ARTELLA_SHADING_ASSET_TYPE
-
-# Defines of rig asset type for Solstice
-SOLSTICE_RIG_ASSET_TYPE = defines.ARTELLA_RIG_ASSET_TYPE
-
-# Defines of groom asset type for Solstice
-SOLSTICE_GROOM_ASSET_TYPE = defines.ARTELLA_GROOM_ASSET_TYPE
+# # Defines of textures asset type for Solstice
+# SOLSTICE_TEXTURES_ASSET_TYPE = defines.ARTELLA_TEXTURES_ASSET_TYPE
+#
+# # Defines of model asset type for Solstice
+# SOLSTICE_MODEL_ASSET_TYPE = defines.ARTELLA_MODEL_ASSET_TYPE
+#
+# # Defines of shading asset type for Solstice
+# SOLSTICE_SHADING_ASSET_TYPE = defines.ARTELLA_SHADING_ASSET_TYPE
+#
+# # Defines of rig asset type for Solstice
+# SOLSTICE_RIG_ASSET_TYPE = defines.ARTELLA_RIG_ASSET_TYPE
+#
+# # Defines of groom asset type for Solstice
+# SOLSTICE_GROOM_ASSET_TYPE = defines.ARTELLA_GROOM_ASSET_TYPE
 
 # Defines Alembic extension used by Solstice
 SOLSTICE_ALEMBIC_EXTENSION = '.abc'
