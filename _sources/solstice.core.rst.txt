@@ -8,7 +8,6 @@ Submodules
 
    solstice.core.asset
    solstice.core.assetfile
-   solstice.core.assetsviewer
    solstice.core.defines
    solstice.core.node
    solstice.core.project

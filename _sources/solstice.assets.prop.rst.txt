@@ -1,0 +1,7 @@
+solstice.assets.prop module
+===========================
+
+.. automodule:: solstice.assets.prop
+   :members:
+   :undoc-members:
+   :show-inheritance:

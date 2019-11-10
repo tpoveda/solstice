@@ -1,0 +1,7 @@
+solstice.assets.backgroundelement module
+========================================
+
+.. automodule:: solstice.assets.backgroundelement
+   :members:
+   :undoc-members:
+   :show-inheritance:

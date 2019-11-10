@@ -1,0 +1,7 @@
+solstice.assets.character module
+================================
+
+.. automodule:: solstice.assets.character
+   :members:
+   :undoc-members:
+   :show-inheritance:

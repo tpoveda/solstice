@@ -1,0 +1,19 @@
+solstice.assets package
+=======================
+
+Submodules
+----------
+
+.. toctree::
+
+   solstice.assets.backgroundelement
+   solstice.assets.character
+   solstice.assets.prop
+
+Module contents
+---------------
+
+.. automodule:: solstice.assets
+   :members:
+   :undoc-members:
+   :show-inheritance:

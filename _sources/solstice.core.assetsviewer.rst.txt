@@ -1,7 +1,0 @@
-solstice.core.assetsviewer module
-=================================
-
-.. automodule:: solstice.core.assetsviewer
-   :members:
-   :undoc-members:
-   :show-inheritance:
