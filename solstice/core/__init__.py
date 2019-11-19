@@ -7,6 +7,5 @@ Initialization module for solstice-core
 
 order = [
     'solstice.core.shelf',
-    'solstice.core.tray',
     'solstice.core.asset'
 ]
