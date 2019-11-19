@@ -42,7 +42,7 @@ def init(do_reload=False, import_libs=True, dev=False):
 
         def get_module_path(self):
             """
-            Returns path where tpNameIt module is stored
+            Returns path where solstice module is stored
             :return: str
             """
 

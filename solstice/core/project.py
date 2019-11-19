@@ -27,7 +27,7 @@ from artellapipe.core import project as artella_project, defines as artella_defi
 from solstice.core import defines, asset, node, shelf
 
 
-class Solstice(artella_project.ArtellaProject):
+class Solstice(artella_project.ArtellaProject, object):
 
     SHELF_CLASS = shelf.SolsticeShelf
     ASSET_CLASS = asset.SolsticeAsset

@@ -22,7 +22,7 @@ import tpDccLib as tp
 
 import artellapipe.register
 from artellapipe.libs.artella.core import artellalib
-from artellapipe.core import defines as artella_defines, asset as artella_asset
+from artellapipe.core import config, defines as artella_defines, asset as artella_asset
 
 from solstice.core import defines
 
@@ -183,28 +183,38 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
     #         return
     #
     #     alembic_file_type.import_file(artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS, parent=parent_name)
-    #
-    # def reference_alembic_file(self, namespace=None, fix_path=True):
-    #     """
-    #     References Alembic file of the current asset
-    #     :param namespace: str
-    #     :param fix_path: bool
-    #     """
-    #
-    #     model_file_type = self.get_file_type(defines.SOLSTICE_MODEL_ASSET_TYPE)
-    #     latest_published_local_versions = model_file_type.get_latest_local_published_version()
-    #     if not latest_published_local_versions:
-    #         LOGGER.warning('Asset {} has not model files synced!'.format(self.get_name()))
-    #         return
-    #
-    #     alembic_file_type = self.get_file_type(
-    #         defines.SOLSTICE_MODEL_ASSET_TYPE, extension=defines.SOLSTICE_ALEMBIC_EXTENSION)
-    #     if not alembic_file_type:
-    #         LOGGER.warning('Asset {} has not Alembic File published!')
-    #         return
-    #
-    #     alembic_file_type.reference_file(artella_defines.ARTELLA_SYNC_PUBLISHED_ASSET_STATUS)
-    #
+
+    def reference_alembic_file(self, file_type, model_type, sync=False):
+        """
+        References Alembic file of the current asset
+        :param namespace: str
+        :param fix_path: bool
+        """
+
+        model_file_type = self.get_file_type(model_type)
+        latest_published_local_versions = model_file_type.get_latest_local_published_version()
+        if not latest_published_local_versions:
+            LOGGER.warning('Asset {} has not model publsihed files synced!'.format(self.get_name()))
+            return None
+
+        file_type_extensions = artellapipe.AssetsMgr().get_file_type_extensions(file_type)
+        if not file_type_extensions:
+            LOGGER.warning('Impossible to retrieve registered extensions from file type: "{}"'.format(file_type))
+            return None
+        abc_extension = file_type_extensions[0]
+
+        alembic_file_type = self.get_file_type(model_type, abc_extension)
+        if not alembic_file_type:
+            LOGGER.warning('Asset {} has not Alembic File published!')
+            return None
+
+        self.reference_file(
+            file_type=model_type, namespace=self.get_id(), extension=abc_extension,
+            status=artella_asset.ArtellaAssetFileStatus.PUBLISHED, sync=sync)
+
+        # alembic_file_type.reference_file(
+        #     namespace=self.get_id(), status=artella_asset.ArtellaAssetFileStatus.PUBLISHED, sync=sync)
+
 
 # class SolsticeAssetWidget(artella_asset.ArtellaAssetWidget, object):
 #     def __init__(self, asset, parent=None):
