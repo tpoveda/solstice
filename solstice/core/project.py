@@ -26,7 +26,6 @@ class Solstice(artella_project.ArtellaProject, object):
 
     ASSET_CLASS = asset.SolsticeAsset
     ASSET_NODE_CLASS = node.SolsticeAssetNode
-    TAG_NODE_CLASS = asset.SolsticeTagNode
 
     def __init__(self):
         super(Solstice, self).__init__(name='Solstice')
