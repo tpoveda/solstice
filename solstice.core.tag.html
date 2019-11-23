@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>solstice.core.shelf module &mdash; solstice-core 0.0.l documentation</title>
+  <title>solstice.core.tag module &mdash; solstice-core 0.0.l documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="solstice.core.tag module" href="solstice.core.tag.html" />
-    <link rel="prev" title="solstice.core.project module" href="solstice.core.project.html" /> 
+    <link rel="next" title="solstice.files package" href="solstice.files.html" />
+    <link rel="prev" title="solstice.core.shelf module" href="solstice.core.shelf.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -153,13 +153,13 @@
         
           <li><a href="solstice.core.html">solstice.core package</a> &raquo;</li>
         
-      <li>solstice.core.shelf module</li>
+      <li>solstice.core.tag module</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/solstice.core.shelf.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/solstice.core.tag.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -173,8 +173,43 @@
 
            <div itemprop="articleBody">
             
-  <div class="section" id="solstice-core-shelf-module">
-<h1>solstice.core.shelf module<a class="headerlink" href="#solstice-core-shelf-module" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-solstice.core.tag">
+<span id="solstice-core-tag-module"></span><h1>solstice.core.tag module<a class="headerlink" href="#module-solstice.core.tag" title="Permalink to this headline">¶</a></h1>
+<p>Module that contains definitions for tags in Solstice</p>
+<dl class="class">
+<dt id="solstice.core.tag.SolsticeTagNode">
+<em class="property">class </em><code class="sig-prename descclassname">solstice.core.tag.</code><code class="sig-name descname">SolsticeTagNode</code><span class="sig-paren">(</span><em class="sig-param">project</em>, <em class="sig-param">node</em>, <em class="sig-param">tag_info=None</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.tag.SolsticeTagNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">artellapipe.core.tag.ArtellaTagNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="solstice.core.tag.SolsticeTagNode.get_hires_group">
+<code class="sig-name descname">get_hires_group</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.tag.SolsticeTagNode.get_hires_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns hires group linked to tag node
+:return: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.tag.SolsticeTagNode.get_proxy_group">
+<code class="sig-name descname">get_proxy_group</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.tag.SolsticeTagNode.get_proxy_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns proxy group linked to tag node
+:return: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.tag.SolsticeTagNode.get_shaders">
+<code class="sig-name descname">get_shaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.tag.SolsticeTagNode.get_shaders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns shaders info linked to this node
+:return: dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="solstice.core.tag.SolsticeTagNode.get_types">
+<code class="sig-name descname">get_types</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.tag.SolsticeTagNode.get_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of types for the current asset
+:return: list(str)</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -189,10 +224,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="solstice.core.tag.html" class="btn btn-neutral float-right" title="solstice.core.tag module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="solstice.files.html" class="btn btn-neutral float-right" title="solstice.files package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="solstice.core.project.html" class="btn btn-neutral float-left" title="solstice.core.project module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="solstice.core.shelf.html" class="btn btn-neutral float-left" title="solstice.core.shelf module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

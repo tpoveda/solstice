@@ -12,6 +12,7 @@ Submodules
    solstice.core.node
    solstice.core.project
    solstice.core.shelf
+   solstice.core.tag
 
 Module contents
 ---------------
