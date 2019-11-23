@@ -1,0 +1,7 @@
+solstice.tagger.editors.shaderseditor module
+============================================
+
+.. automodule:: solstice.tagger.editors.shaderseditor
+   :members:
+   :undoc-members:
+   :show-inheritance:

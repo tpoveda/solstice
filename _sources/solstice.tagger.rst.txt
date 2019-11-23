@@ -1,0 +1,17 @@
+solstice.tagger package
+=======================
+
+Subpackages
+-----------
+
+.. toctree::
+
+   solstice.tagger.editors
+
+Module contents
+---------------
+
+.. automodule:: solstice.tagger
+   :members:
+   :undoc-members:
+   :show-inheritance:

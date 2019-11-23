@@ -1,0 +1,18 @@
+solstice.tagger.editors package
+===============================
+
+Submodules
+----------
+
+.. toctree::
+
+   solstice.tagger.editors.highproxyeditor
+   solstice.tagger.editors.shaderseditor
+
+Module contents
+---------------
+
+.. automodule:: solstice.tagger.editors
+   :members:
+   :undoc-members:
+   :show-inheritance:

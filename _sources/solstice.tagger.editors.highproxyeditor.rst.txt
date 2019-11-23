@@ -1,0 +1,7 @@
+solstice.tagger.editors.highproxyeditor module
+==============================================
+
+.. automodule:: solstice.tagger.editors.highproxyeditor
+   :members:
+   :undoc-members:
+   :show-inheritance:

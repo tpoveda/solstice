@@ -9,6 +9,7 @@ Subpackages
    solstice.assets
    solstice.core
    solstice.files
+   solstice.tagger
    solstice.tools
 
 Submodules
