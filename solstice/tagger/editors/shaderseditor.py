@@ -105,8 +105,6 @@ class ShadersEditor(taggereditor.TaggerEditor, object):
         #                 shading_grp_mat = cmds.ls(cmds.listConnections(shading_grp), materials=True)
         #                 json_data[grp][shape][shading_grp] = shading_grp_mat
 
-
-
         # cmds.setAttr(tag_data_node + '.description', lock=False)
         # cmds.setAttr(tag_data_node + '.description', self._description_text.toPlainText(), type='string')
         # cmds.setAttr(tag_data_node + '.description', lock=True)
