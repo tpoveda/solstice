@@ -1,0 +1,7 @@
+solstice.files.lightrig module
+==============================
+
+.. automodule:: solstice.files.lightrig
+   :members:
+   :undoc-members:
+   :show-inheritance:
