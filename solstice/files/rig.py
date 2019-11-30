@@ -22,10 +22,10 @@ from artellapipe.core import assetfile
 
 
 class SolsticeRigAssetFile(assetfile.ArtellaAssetFile, object):
-    def __init__(self, asset):
+    def __init__(self, asset=None):
         super(SolsticeRigAssetFile, self).__init__(file_asset=asset)
 
-    def _reference_file(self, file_path, sync=False, *args, **kwargs):
+    def _reference_file(self, file_path, *args, **kwargs):
 
         namespace = self.asset.get_id()
 

@@ -16,5 +16,5 @@ from artellapipe.core import assetfile
 
 
 class SolsticeStandinAssetFile(assetfile.ArtellaAssetFile, object):
-    def __init__(self, asset):
+    def __init__(self, asset=None):
         super(SolsticeStandinAssetFile, self).__init__(file_asset=asset)
