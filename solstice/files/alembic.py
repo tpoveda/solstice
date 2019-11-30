@@ -41,5 +41,6 @@ class SolsticeGpuAlembicAssetFile(assetfile.ArtellaAssetFile, object):
             gpu_node_parent = tp.Dcc.node_parent(node=gpu_node)
             return gpu_node_parent
         else:
-            LOGGER.warning('GPU Cache is not supported in "{}" DCC. Importer standard Alembic!'.format(tp.Dcc.get_name()))
+            LOGGER.warning(
+                'GPU Cache is not supported in "{}" DCC. Importer standard Alembic!'.format(tp.Dcc.get_name()))
             return artellapipe.Alembic().import_alembic(file_path, namespace=namespace)
