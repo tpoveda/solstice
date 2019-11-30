@@ -12,19 +12,10 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
-import os
-import ast
 import logging
 
-from tpPyUtils import python, path as path_utils
-
-import tpDccLib as tp
-
 import artellapipe.register
-from artellapipe.libs.artella.core import artellalib
-from artellapipe.core import config, defines as artella_defines, asset as artella_asset
-
-from solstice.core import defines
+from artellapipe.core import defines, asset as artella_asset
 
 LOGGER = logging.getLogger()
 
@@ -133,7 +124,7 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
 
         return self.reference_file(
             file_type=file_type, namespace=self.get_id(),
-            status=artella_asset.ArtellaAssetFileStatus.PUBLISHED, sync=sync)
+            status=defines.ArtellaFileStatus.PUBLISHED, sync=sync)
 
     # def import_standin_file(self):
     #     """
@@ -210,7 +201,7 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
 
         self.reference_file(
             file_type=model_type, namespace=self.get_id(), extension=abc_extension,
-            status=artella_asset.ArtellaAssetFileStatus.PUBLISHED, sync=sync)
+            status=defines.ArtellaFileStatus.PUBLISHED, sync=sync)
 
         # alembic_file_type.reference_file(
         #     namespace=self.get_id(), status=artella_asset.ArtellaAssetFileStatus.PUBLISHED, sync=sync)
