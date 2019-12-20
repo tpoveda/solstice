@@ -207,9 +207,4 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
         #     namespace=self.get_id(), status=artella_asset.ArtellaAssetFileStatus.PUBLISHED, sync=sync)
 
 
-# class SolsticeAssetWidget(artella_asset.ArtellaAssetWidget, object):
-#     def __init__(self, asset, parent=None):
-#         super(SolsticeAssetWidget, self).__init__(asset=asset, parent=parent)
-
-
 artellapipe.register.register_class('Asset', SolsticeAsset)
