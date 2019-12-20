@@ -37,8 +37,8 @@ def init(do_reload=False, import_libs=True, dev=False):
     from tpPyUtils import importer
 
     class SolsticeCore(importer.Importer, object):
-        def __init__(self):
-            super(SolsticeCore, self).__init__(module_name='solstice')
+        def __init__(self, debug=False):
+            super(SolsticeCore, self).__init__(module_name='solstice', debug=debug)
 
         def get_module_path(self):
             """
@@ -78,7 +78,7 @@ def init(do_reload=False, import_libs=True, dev=False):
 
     from solstice.core import project
 
-    solstice_core_importer = importer.init_importer(importer_class=SolsticeCore, do_reload=False)
+    solstice_core_importer = importer.init_importer(importer_class=SolsticeCore, do_reload=False, debug=dev)
     solstice_core_importer.import_packages(
         only_packages=False,
         order=packages_order,
