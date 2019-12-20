@@ -11,6 +11,7 @@ Submodules
    solstice.files.lightrig
    solstice.files.model
    solstice.files.rig
+   solstice.files.shader
    solstice.files.shading
    solstice.files.standin
    solstice.files.texture
