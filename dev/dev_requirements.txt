@@ -1,0 +1,51 @@
+-e D:/tomi/tpPyUtils
+-e D:/tomi/tpDccLib
+-e D:/tomi/tpQtLib
+-e D:/tomi/tpMayaLib
+-e D:/tomi/tpHoudiniLib
+-e D:/tomi/tpNameIt
+-e D:/dev/artellapipe/artellapipe
+-e D:/dev/artellapipe/artellapipe-config
+-e D:/dev/artellapipe/artellapipe-libs-alembic
+-e D:/dev/artellapipe/artellapipe-libs-naming
+-e D:/dev/artellapipe/artellapipe-libs-artella
+-e D:/dev/artellapipe/artellapipe-libs-drive
+-e D:/dev/artellapipe/artellapipe-libs-pyblish
+-e D:/dev/artellapipe/artellapipe-libs-ffmpeg
+-e D:/dev/artellapipe/artellapipe-dccs-maya
+-e D:/dev/artellapipe/artellapipe-dccs-houdini
+-e D:/dev/artellapipe/artellapipe-launcher
+-e D:/dev/artellapipe/artellapipe-launcher-plugins-dccselector
+-e D:/dev/artellapipe/artellapipe-launcher-plugins-artellamanager
+-e D:/dev/artellapipe/artellapipe-tools-welcome
+-e D:/dev/artellapipe/artellapipe-tools-changelog
+-e D:/dev/artellapipe/artellapipe-tools-bugtracker
+-e D:/dev/artellapipe/artellapipe-tools-alembicmanager
+-e D:/dev/artellapipe/artellapipe-tools-artellamanager
+-e D:/dev/artellapipe/artellapipe-tools-artellauploader
+-e D:/dev/artellapipe/artellapipe-tools-assetslibrary
+-e D:/dev/artellapipe/artellapipe-tools-assetsmanager
+-e D:/dev/artellapipe/artellapipe-tools-shadersmanager
+-e D:/dev/artellapipe/artellapipe-tools-lightrigsmanager
+-e D:/dev/artellapipe/artellapipe-tools-namemanager
+-e D:/dev/artellapipe/artellapipe-tools-playblastmanager
+-e D:/dev/artellapipe/artellapipe-tools-outliner
+-e D:/dev/artellapipe/artellapipe-tools-tagger
+-e D:/dev/artellapipe/artellapipe-tools-toolbox
+-e D:/dev/artellapipe/artellapipe-tools-modelchecker
+-e D:/dev/artellapipe/artellapipe-tools-assetspublisher
+-e D:/dev/artellapipe/artellapipe-tools-dependenciesmanager
+-e D:/dev/solstice/solstice
+-e D:/dev/solstice/solstice-config
+-e D:/dev/solstice/solstice-bootstrap
+-e D:/dev/solstice/solstice-tools-snowgenerator
+-e D:/dev/solstice/solstice-tools-xgenmanager
+appdirs
+backports.tempfile
+py-cpuinfo
+gputil
+gspread
+oauth2client
+yamlordereddictloader
+Qt.py
+aenum
