@@ -1,0 +1,47 @@
+-e /Users/tomi/Documents/projects/dev/tomi/tpPyUtils
+-e /Users/tomi/Documents/projects/dev/tomi/tpDccLib
+-e /Users/tomi/Documents/projects/dev/tomi/tpQtLib
+-e /Users/tomi/Documents/projects/dev/tomi/tpMayaLib
+-e /Users/tomi/Documents/projects/dev/tomi/tpHoudiniLib
+-e /Users/tomi/Documents/projects/dev/tomi/tpNameIt
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-config
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-libs-alembic
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-libs-naming
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-libs-artella
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-libs-drive
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-libs-pyblish
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-libs-ffmpeg
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-dccs-maya
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-dccs-houdini
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-launcher
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-launcher-plugins-dccselector
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-launcher-plugins-artellamanager
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-welcome
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-changelog
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-bugtracker
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-alembicmanager
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-artellamanager
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-artellauploader
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-assetslibrary
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-assetsmanager
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-shadersmanager
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-lightrigsmanager
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-namemanager
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-playblastmanager
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-outliner
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-tagger
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-modelchecker
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-assetspublisher
+-e /Users/tomi/Documents/projects/dev/artellapipe/artellapipe-tools-dependenciesmanager
+-e /Users/tomi/Documents/projects/dev/solstice/solstice
+-e /Users/tomi/Documents/projects/dev/solstice/solstice-config
+-e /Users/tomi/Documents/projects/dev/solstice/solstice-bootstrap
+-e /Users/tomi/Documents/projects/dev/solstice/solstice-tools-snowgenerator
+-e /Users/tomi/Documents/projects/dev/solstice/solstice-tools-xgenmanager
+backports.tempfile
+py-cpuinfo
+gputil
+gspread
+oauth2client
+yamlordereddictloader
