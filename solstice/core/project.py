@@ -12,20 +12,10 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
-try:
-    from urllib.parse import quote
-except ImportError:
-    from urllib2 import quote
-
 from artellapipe.core import project as artella_project
-
-from solstice.core import asset, node
 
 
 class Solstice(artella_project.ArtellaProject, object):
-
-    ASSET_CLASS = asset.SolsticeAsset
-    ASSET_NODE_CLASS = node.SolsticeAssetNode
 
     def __init__(self):
         super(Solstice, self).__init__(name='Solstice')

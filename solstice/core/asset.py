@@ -14,6 +14,8 @@ __email__ = "tpovedatd@gmail.com"
 
 import logging
 
+from tpPyUtils import python
+
 import artellapipe.register
 from artellapipe.core import defines, asset as artella_asset
 
@@ -23,6 +25,26 @@ LOGGER = logging.getLogger()
 class SolsticeAsset(artella_asset.ArtellaAsset, object):
     def __init__(self, project, asset_data, node=None):
         super(SolsticeAsset, self).__init__(project=project, asset_data=asset_data, node=node)
+
+    def get_tags(self):
+        """
+        Returns tags of the asset
+        Overrides ArtellaAsset get_tags function
+        :return: list(str)
+        """
+
+        asset_metadata = self.data or dict()
+        kitsu_asset = asset_metadata.get('asset', None)
+        if not kitsu_asset:
+            tags = list()
+        else:
+            kitsu_data = kitsu_asset.data or dict()
+            tags = kitsu_data.get('tags', list())
+
+        tags = python.force_list(tags)
+
+        return tags
+
 
     # def get_file(self, file_type, status, extension=None, fix_path=False):
     #     """
@@ -99,15 +121,6 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
     #     else:
     #         self._project.logger.error(
     #             'Extension "{}" is not supported in {}!'.format(extension, self._project.name.title()))
-    #
-    # def get_shading_type(self):
-    #     """
-    #     Implements base ArtellaAsset get_shading_type function
-    #     Returns the asset file type of the shading file for the project
-    #     :return: str
-    #     """
-    #
-    #     return defines.SOLSTICE_SHADING_ASSET_TYPE
 
     # def import_rig_file(self):
     #     """
