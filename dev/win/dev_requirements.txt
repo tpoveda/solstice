@@ -9,7 +9,7 @@
 -e D:/dev/artellapipe/artellapipe-libs-alembic
 -e D:/dev/artellapipe/artellapipe-libs-naming
 -e D:/dev/artellapipe/artellapipe-libs-artella
--e D:/dev/artellapipe/artellapipe-libs-drive
+-e D:/dev/artellapipe/artellapipe-libs-kitsu
 -e D:/dev/artellapipe/artellapipe-libs-pyblish
 -e D:/dev/artellapipe/artellapipe-libs-ffmpeg
 -e D:/dev/artellapipe/artellapipe-dccs-maya
@@ -38,6 +38,7 @@
 -e D:/dev/solstice/solstice
 -e D:/dev/solstice/solstice-config
 -e D:/dev/solstice/solstice-bootstrap
+-e D:/dev/solstice/solstice-tools-outliner
 -e D:/dev/solstice/solstice-tools-snowgenerator
 -e D:/dev/solstice/solstice-tools-xgenmanager
 appdirs
