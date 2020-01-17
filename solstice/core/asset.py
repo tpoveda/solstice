@@ -45,7 +45,6 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
 
         return tags
 
-
     # def get_file(self, file_type, status, extension=None, fix_path=False):
     #     """
     #     Overrides base ArtellaAsset get_file function
