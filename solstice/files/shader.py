@@ -18,10 +18,13 @@ import logging
 import traceback
 
 from Qt.QtCore import *
+from Qt.QtWidgets import *
 from Qt.QtGui import *
 
 import tpDccLib as tp
+from tpQtLib.core import qtutils
 
+import artellapipe
 from artellapipe.core import file, assetfile
 from artellapipe.utils import shader
 
@@ -37,13 +40,14 @@ class SolsticeShaderFile(file.ArtellaFile, object):
         super(SolsticeShaderFile, self).__init__(
             project=project, file_name=file_name, file_path=file_path, file_extension=file_extension)
 
-    def get_template_dict(self):
+    def get_template_dict(self, **kwargs):
         """
         Implements get_template_dict() function
         :return: dict
         """
 
         return {
+            'project_path': self._project.get_path(),
             'shaders_path': self._file_path,
             'shader_name': self.name
         }
@@ -173,3 +177,34 @@ class SolsticeShaderMappingAssetFile(assetfile.ArtellaAssetFile, object):
 
         with open(self._file_path, 'r') as f:
             return json.load(f)
+
+    def _export_file(self, file_path, *args, **kwargs):
+        if not tp.is_maya():
+            LOGGER.warning('Shaders export is only supported in Maya!')
+            return
+
+        shaders_to_export = artellapipe.ShadersMgr().get_asset_shaders_to_export(
+            asset=self._asset, return_only_shaders=False)
+
+        locked_file = False
+        if os.path.isfile(file_path):
+            res = qtutils.show_question(
+                None, 'Exporting Shaders Mapping File',
+                'Shaders Mapping File "{}" already exists. Do you want to overwrite it?'.format(file_path))
+            if res == QMessageBox.No:
+                return
+
+            artellapipe.FilesMgr().lock_file(file_path)
+            locked_file = True
+
+        try:
+            with open(file_path, 'w') as fp:
+                json.dump(shaders_to_export, fp)
+        except Exception as exc:
+            LOGGER.error('Error while exporting Shaders Mapping File "{}" | {}'.format(file_path, exc))
+        finally:
+            if locked_file:
+                artellapipe.FilesMgr().unlock_file(file_path)
+
+        if os.path.isfile(file_path):
+            return file_path

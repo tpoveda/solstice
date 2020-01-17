@@ -32,12 +32,16 @@ class SolsticeGpuAlembicAssetFile(assetfile.ArtellaAssetFile, object):
         super(SolsticeGpuAlembicAssetFile, self).__init__(file_asset=asset)
 
     def _import_file(self, file_path, *args, **kwargs):
-        namespace = self.asset.get_id()
-        if tp.Dcc.namespace_exists(namespace):
-            namespace = tp.Dcc.unique_namespace(namespace)
+        namespace = kwargs.get('namespace', None)
+        unique_namespace = kwargs.get('unique_namespace', True)
+        if not namespace:
+            namespace = self.asset.get_id()
+            if tp.Dcc.namespace_exists(namespace) and unique_namespace:
+                namespace = tp.Dcc.unique_namespace(namespace)
 
         if tp.is_maya():
-            gpu_node = artellapipe.Alembic().import_alembic(file_path, namespace=namespace, as_gpu_cache=True)
+            gpu_node = artellapipe.Alembic().import_alembic(
+                file_path, namespace=namespace, as_gpu_cache=True, unique_namespace=unique_namespace)
             gpu_node_parent = tp.Dcc.node_parent(node=gpu_node)
             return gpu_node_parent
         else:

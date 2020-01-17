@@ -27,7 +27,7 @@ class SolsticeLightRigFile(file.ArtellaFile, object):
         super(SolsticeLightRigFile, self).__init__(
             project=project, file_name=file_name, file_path=file_path, file_extension=file_extension)
 
-    def get_template_dict(self):
+    def get_template_dict(self, **kwargs):
         """
         Implements get_template_dict() function
         :return: dict

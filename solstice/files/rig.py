@@ -27,7 +27,10 @@ class SolsticeRigAssetFile(assetfile.ArtellaAssetFile, object):
 
     def _reference_file(self, file_path, *args, **kwargs):
 
-        namespace = self.asset.get_id()
+        namespace = kwargs.get('namespace', None)
+        unique_namespace = kwargs.get('unique_namespace', True)
+        if not namespace:
+            namespace = self.asset.get_id()
 
         if tp.is_maya():
             if not namespace:
@@ -37,8 +40,8 @@ class SolsticeRigAssetFile(assetfile.ArtellaAssetFile, object):
                 else:
                     filename = os.path.basename(file_path)
                     namespace, _ = os.path.splitext(filename)
-            if tp.Dcc.namespace_exists(namespace):
+            if tp.Dcc.namespace_exists(namespace) and unique_namespace:
                 namespace = tp.Dcc.unique_namespace(namespace)
-            return tp.Dcc.reference_file(file_path=file_path, namespace=namespace)
+            return tp.Dcc.reference_file(file_path=file_path, namespace=namespace, unique_namespace=unique_namespace)
         else:
             return tp.Dcc.reference_file(file_path=file_path)
