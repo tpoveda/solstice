@@ -9,6 +9,7 @@ Submodules
    solstice.files.alembic
    solstice.files.groom
    solstice.files.lightrig
+   solstice.files.masterlayout
    solstice.files.model
    solstice.files.rig
    solstice.files.shader

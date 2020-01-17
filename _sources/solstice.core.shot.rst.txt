@@ -1,0 +1,7 @@
+solstice.core.shot module
+=========================
+
+.. automodule:: solstice.core.shot
+   :members:
+   :undoc-members:
+   :show-inheritance:

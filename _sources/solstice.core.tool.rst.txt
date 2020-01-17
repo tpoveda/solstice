@@ -1,0 +1,7 @@
+solstice.core.tool module
+=========================
+
+.. automodule:: solstice.core.tool
+   :members:
+   :undoc-members:
+   :show-inheritance:

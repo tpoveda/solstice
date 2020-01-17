@@ -1,0 +1,7 @@
+solstice.core.sequence module
+=============================
+
+.. automodule:: solstice.core.sequence
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,17 @@
+solstice.widgets package
+========================
+
+Submodules
+----------
+
+.. toctree::
+
+   solstice.widgets.window
+
+Module contents
+---------------
+
+.. automodule:: solstice.widgets
+   :members:
+   :undoc-members:
+   :show-inheritance:

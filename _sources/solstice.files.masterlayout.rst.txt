@@ -1,0 +1,7 @@
+solstice.files.masterlayout module
+==================================
+
+.. automodule:: solstice.files.masterlayout
+   :members:
+   :undoc-members:
+   :show-inheritance:

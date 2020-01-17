@@ -11,8 +11,12 @@ Submodules
    solstice.core.defines
    solstice.core.node
    solstice.core.project
+   solstice.core.sequence
    solstice.core.shelf
+   solstice.core.shot
    solstice.core.tag
+   solstice.core.tool
+   solstice.core.utils
 
 Module contents
 ---------------

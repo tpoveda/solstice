@@ -9,6 +9,7 @@ Submodules
    solstice.assets.backgroundelement
    solstice.assets.character
    solstice.assets.prop
+   solstice.assets.set
 
 Module contents
 ---------------

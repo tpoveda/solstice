@@ -1,0 +1,17 @@
+solstice.managers package
+=========================
+
+Submodules
+----------
+
+.. toctree::
+
+   solstice.managers.menu
+
+Module contents
+---------------
+
+.. automodule:: solstice.managers
+   :members:
+   :undoc-members:
+   :show-inheritance:
