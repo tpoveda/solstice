@@ -12,51 +12,50 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
-import logging
 import webbrowser
 
 from Qt.QtWidgets import *
 
-from tpPyUtils import decorators
+import tpDcc
+from tpDcc.libs.python import decorators
+from tpDcc.libs.qt.core import qtutils
 
+import artellapipe
 import artellapipe.register
-from artellapipe.utils import resource
+from artellapipe.managers import menus
 import artellapipe.libs.kitsu as kitsu_lib
 
-LOGGER = logging.getLogger()
 
-
-class SolsticeMenu(artellapipe.Menu, object):
+class SolsticeMenu(menus.ArtellaMenusManager, object):
     def __init__(self):
-
-        self._kitsu_action_object_name = None
 
         super(SolsticeMenu, self).__init__()
 
-    def set_project(self, project):
-        self._kitsu_action_object_name = '{}_kitsu'.format(self._menu_name)
-        super(SolsticeMenu, self).set_project(project)
-
-    def create_menus(self):
-        valid_creation = super(SolsticeMenu, self).create_menus()
+    def create_menus(self, package_name, project):
+        valid_creation = super(SolsticeMenu, self).create_menus(package_name=package_name, project=project)
         if not valid_creation:
-            LOGGER.warning('Something went wrong during the creation of SolsticeMenu Menu')
+            artellapipe.logger.warning('Something went wrong during the creation of SolsticeMenu Menu')
             return False
 
         return self.create_kitsu_menu()
 
-    def get_menu_names(self):
-        menu_names = super(SolsticeMenu, self).get_menu_names()
-        if self._kitsu_action_object_name not in menu_names:
-            menu_names.append(self._kitsu_action_object_name)
-
-        return menu_names
-
     def create_kitsu_menu(self):
+
+        parent_menu_bar = qtutils.get_window_menu_bar(tpDcc.Dcc.get_main_window())
+        if not parent_menu_bar:
+            return
+
+        kitsu_menu_name = 'kitsu_menu'
+
+        # Remove previous created menu
+        for child_widget in parent_menu_bar.children():
+            if child_widget.objectName() == kitsu_menu_name:
+                child_widget.deleteLater()
+
         self._kitsu_action = QAction(self._parent.menuBar())
-        self._kitsu_action.setIcon(resource.ResourceManager().icon('kitsu'))
+        self._kitsu_action.setIcon(tpDcc.ResourcesMgr().icon('kitsu'))
         self._parent.menuBar().addAction(self._kitsu_action)
-        self._kitsu_action.setObjectName(self._kitsu_action_object_name)
+        self._kitsu_action.setObjectName(kitsu_menu_name)
         self._kitsu_action.triggered.connect(self._on_kitsu_open)
 
         return True
@@ -79,4 +78,4 @@ class SolsticeMenuManagerSingleton(SolsticeMenu, object):
         SolsticeMenu.__init__(self)
 
 
-artellapipe.register.register_class('MenuMgr', SolsticeMenuManagerSingleton)
+artellapipe.register.register_class('MenusMgr', SolsticeMenuManagerSingleton)
