@@ -23,9 +23,6 @@ def init(do_reload=False, import_libs=True, dev=False):
     Initializes Solstice library
     """
 
-    # Load logger configuration
-    logging.config.fileConfig(get_logging_config(), disable_existing_loggers=False)
-
     # Without default_integrations=False, PyInstaller fails during launcher generation
     if not dev:
         import sentry_sdk
@@ -34,7 +31,11 @@ def init(do_reload=False, import_libs=True, dev=False):
         except (RuntimeError, ImportError):
             sentry_sdk.init("https://c75c06d8349449a1a829c04732ba3e5c@sentry.io/1761556", default_integrations=False)
 
-    from tpPyUtils import importer
+    from tpDcc.libs.python import importer
+    from solstice import register
+
+    logger = create_logger()
+    register.register_class('logger', logger)
 
     class SolsticeCore(importer.Importer, object):
         def __init__(self, debug=False):
@@ -53,8 +54,8 @@ def init(do_reload=False, import_libs=True, dev=False):
                     mod_dir = os.path.dirname(__file__)
                 except Exception:
                     try:
-                        import tpDccLib
-                        mod_dir = tpDccLib.__path__[0]
+                        import solstice
+                        mod_dir = solstice.__path__[0]
                     except Exception:
                         return None
 
@@ -65,16 +66,8 @@ def init(do_reload=False, import_libs=True, dev=False):
     ]
 
     if import_libs:
-        import tpPyUtils
-        tpPyUtils.init(do_reload=do_reload)
-        import tpDccLib
-        tpDccLib.init(do_reload=do_reload)
-        import tpQtLib
-        tpQtLib.init(do_reload=do_reload)
-        import tpNameIt
-        tpNameIt.init(do_reload=do_reload)
         import artellapipe.loader
-        artellapipe.loader.init(do_reload=do_reload, dev=dev)
+        artellapipe.loader.init(do_reload=do_reload, import_libs=True, dev=dev)
 
     from solstice.core import project
 
@@ -87,15 +80,19 @@ def init(do_reload=False, import_libs=True, dev=False):
     if do_reload:
         solstice_core_importer.reload_all()
 
-    create_logger_directory()
-
-    from artellapipe.utils import resource
-    resources_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources')
-    resource.ResourceManager().register_resource(resources_path, 'project')
-    resource.ResourceManager().register_resource(os.path.join(resources_path, 'icons', 'shelf'), 'shelf')
-
     import artellapipe.loader
     artellapipe.loader.set_project(project.Solstice, do_reload=do_reload)
+
+
+def create_logger():
+    """
+    Returns logger of current module
+    """
+
+    logging.config.fileConfig(get_logging_config(), disable_existing_loggers=False)
+    logger = logging.getLogger('solstice')
+
+    return logger
 
 
 def create_logger_directory():
