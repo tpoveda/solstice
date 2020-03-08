@@ -15,7 +15,7 @@ __email__ = "tpovedatd@gmail.com"
 import logging
 
 import artellapipe.register
-from artellapipe.core import sequence
+from artellapipe.core import defines, sequence
 
 LOGGER = logging.getLogger()
 
@@ -26,6 +26,20 @@ class SolsticeSequence(sequence.ArtellaSequence, object):
         self._name_dict = dict()
 
         super(SolsticeSequence, self).__init__(project=project, sequence_data=sequence_data)
+
+    def open_master_layout(self):
+        """
+        Function that opens mater layout file of this sequence in current DCC
+        :return: bool
+        """
+
+        file_type = self.get_file_type('master')
+        if not file_type:
+            return False
+
+        valid_open = file_type.open_file(status=defines.ArtellaFileStatus.WORKING)
+
+        return valid_open
 
 
 artellapipe.register.register_class('Sequence', SolsticeSequence)

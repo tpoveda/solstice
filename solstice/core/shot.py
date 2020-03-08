@@ -18,6 +18,7 @@ import artellapipe.register
 from artellapipe.core import shot
 
 from artellapipe.libs.kitsu.core import kitsulib
+from artellapipe.libs.naming.core import naminglib
 
 LOGGER = logging.getLogger()
 
@@ -29,9 +30,50 @@ class SolsticeShot(shot.ArtellaShot, object):
 
         super(SolsticeShot, self).__init__(project=project, shot_data=shot_data)
 
+    def get_path(self):
+        """
+        Implements base shot.ArtellaShot get_path function
+        :return: str
+        """
+
+        shot_file_class = artellapipe.FilesMgr().get_file_class('rough')
+        if not shot_file_class:
+            LOGGER.warning('Impossible to retrieve Shot File for "{}"'.format(self.get_name()))
+            return None
+
+        file_type = self.get_file_type('rough')
+        print(file_type)
+
+    def get_number(self):
+        """
+        Override base shot.ArtellaShot get_sequence function
+        Returns the number of the shot
+        :return: str
+        """
+
+        shot_rule_name = artellapipe.ShotsMgr().config.get('data', 'shot_rule')
+        rule = naminglib.ArtellaNameLib().get_rule(shot_rule_name)
+        if not rule:
+            LOGGER.warning('No Rule found with name: "{}"'.format(shot_rule_name))
+
+        current_rule = None
+        try:
+            current_rule = naminglib.ArtellaNameLib().active_rule()
+            naminglib.ArtellaNameLib().set_active_rule(shot_rule_name)
+            parsed_rule = naminglib.ArtellaNameLib().parse(self.get_name())
+        finally:
+            if current_rule:
+                naminglib.ArtellaNameLib().set_active_rule(current_rule)
+
+        if not parsed_rule:
+            LOGGER.warning('Impossible to retrieve rule number from shot name: {}'.format(self.get_name()))
+            return None
+
+        return parsed_rule.get('shot_number', None)
+
     def get_sequence(self):
         """
-        Override base shot.ArtellaShot get_sequence_function
+        Override base shot.ArtellaShot get_sequence function
         Returns the name of the sequence this shot belongs to
         :return: str
         """
