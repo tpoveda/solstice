@@ -15,8 +15,8 @@ __email__ = "tpovedatd@gmail.com"
 import ast
 import logging
 
-import tpDccLib as tp
-from tpPyUtils import python
+import tpDcc as tp
+from tpDcc.libs.python import python
 
 import artellapipe.register
 from artellapipe.core import tag

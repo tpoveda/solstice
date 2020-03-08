@@ -14,7 +14,7 @@ __email__ = "tpovedatd@gmail.com"
 
 import logging
 
-from tpPyUtils import python
+from tpDcc.libs.python import python
 
 import artellapipe.register
 from artellapipe.core import defines, asset as artella_asset

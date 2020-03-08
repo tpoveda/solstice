@@ -14,7 +14,7 @@ __email__ = "tpovedatd@gmail.com"
 
 import logging
 
-import tpDccLib as tp
+import tpDcc as tp
 
 from artellapipe.core import file
 
@@ -34,7 +34,8 @@ class SolsticeLightRigFile(file.ArtellaFile, object):
         """
 
         return {
-            'project_path': self._project.get_path(),
+            'project_id': self._project.id,
+            'project_id_number': self._project.id_number,
             'light_rig_name': self._original_name
         }
 

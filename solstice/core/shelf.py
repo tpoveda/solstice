@@ -12,14 +12,12 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
-import tpDccLib
-
-from artellapipe.utils import resource
+import tpDcc
 
 
-class SolsticeShelf(tpDccLib.Shelf, object):
+class SolsticeShelf(tpDcc.Shelf, object):
 
-    ICONS_PATHS = resource.ResourceManager().get_resources_paths()
+    ICONS_PATHS = tpDcc.ResourcesMgr().get_resources_paths()
 
     def __init__(self,
                  name='SolsticeShelf',
@@ -28,7 +26,7 @@ class SolsticeShelf(tpDccLib.Shelf, object):
                  category_icon=None):
 
         enable_labels = False
-        if tpDccLib.is_houdini():
+        if tpDcc.is_houdini():
             enable_labels = True
 
         super(SolsticeShelf, self).__init__(

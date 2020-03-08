@@ -14,9 +14,9 @@ __email__ = "tpovedatd@gmail.com"
 
 import os
 
-from tpPyUtils import path as path_utils
+from tpDcc.libs.python import path as path_utils
 
-import tpDccLib as tp
+import tpDcc as tp
 
 # from artellapipe.libs.artella.core import artellalib
 # from artellapipe.core import assetfile, defines as artella_defines

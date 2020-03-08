@@ -14,9 +14,9 @@ __email__ = "tpovedatd@gmail.com"
 
 import os
 
-import tpDccLib as tp
+import tpDcc as tp
 if tp.is_maya():
-    import tpMayaLib as maya
+    import tpDcc.dccs.maya as maya
 
 from artellapipe.core import assetfile
 

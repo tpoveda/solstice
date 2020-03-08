@@ -17,9 +17,9 @@ from functools import partial
 
 from Qt.QtWidgets import *
 
-import tpDccLib as tp
+import tpDcc as tp
 
-from tpQtLib.widgets import label
+from tpDcc.libs.qt.widgets import label
 
 import artellapipe
 from artellapipe.tools.tagger.widgets import taggereditor
