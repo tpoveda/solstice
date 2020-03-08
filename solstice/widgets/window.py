@@ -12,7 +12,7 @@ __license__ = "MIT"
 __maintainer__ = "Tomas Poveda"
 __email__ = "tpovedatd@gmail.com"
 
-from tpQtLib.core import dragger
+from tpDcc.libs.qt.core import dragger
 
 import artellapipe.register
 from artellapipe.widgets import window
@@ -20,12 +20,11 @@ from artellapipe.libs.kitsu.widgets import userinfo
 
 
 class SolsticeWindowDragger(dragger.WindowDragger, object):
-    def __init__(self, parent=None, on_close=None):
+    def __init__(self, window=None, on_close=None):
         self._user_info = None
-        super(SolsticeWindowDragger, self).__init__(parent=parent, on_close=on_close)
+        super(SolsticeWindowDragger, self).__init__(window=window, on_close=on_close)
 
     def set_project(self, project):
-        pass
         if self._user_info:
             self._user_info.set_project(project)
         else:
@@ -55,12 +54,13 @@ class SolsticeWindow(window.ArtellaWindow, object):
     def __init__(self, *args, **kwargs):
         super(SolsticeWindow, self).__init__(*args, **kwargs)
 
-        if not self._tool:
-            return
+    def ui(self):
+        super(SolsticeWindow, self).ui()
 
-        kitsu_login = self._tool.config.get('kitsu_login', default=True)
+        kitsu_login = self._config.get('kitsu_login', default=True)
         if kitsu_login:
             self._dragger.set_project(self._project)
+            self.try_kitsu_login()
 
     def try_kitsu_login(self):
         """
@@ -68,10 +68,7 @@ class SolsticeWindow(window.ArtellaWindow, object):
         :return: bool
         """
 
-        if not self._tool:
-            return
-
-        kitsu_login = self._tool.config.get('kitsu_login', default=True)
+        kitsu_login = self._config.get('kitsu_login', default=True)
         if kitsu_login:
             return self._dragger.try_kitsu_login()
 
