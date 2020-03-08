@@ -31,4 +31,3 @@ class SolsticeMasterLayoutSequenceFile(sequencefile.ArtellaSequenceFile, object)
             tp.Dcc.open_file(file_path)
 
         return True
-
