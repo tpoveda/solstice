@@ -14,7 +14,7 @@ __email__ = "tpovedatd@gmail.com"
 
 import logging
 
-import tpDccLib as tp
+import tpDcc as tp
 
 import artellapipe
 
@@ -55,6 +55,38 @@ class SolsticeAssetNode(artellapipe.AssetNode, object):
     #     else:
     #         return resource.ResourceManager().icon('standin')
 
+    def switch_to_proxy(self):
+        if self.is_rig():
+            if not tp.Dcc.attribute_exists(self._node, 'type'):
+                LOGGER.warning('Rig for "{}" is not ready to switch between proxy/high models'.format(self.id))
+                return
+            tp.Dcc.set_integer_attribute_value(self._node, 'type', 0)
+        elif self.is_gpu_cache():
+            asset_shape_operator = self.get_shape_operator()
+            if not asset_shape_operator:
+                asset_shape_operator = self.create_shape_operator()
+            if not asset_shape_operator:
+                LOGGER.warning('Impossible to switch proxy for GPU Cache "{}"'.format(self.id))
+                return
+            self.remove_shape_operator_assignment('subdiv_type')
+            self.remove_shape_operator_assignment('subdiv_iterations')
+
+    def switch_to_hires(self):
+        if self.is_rig():
+            if not tp.Dcc.attribute_exists(self._node, 'type'):
+                LOGGER.warning('Rig for "{}" is not ready to switch between proxy/high models'.format(self.id))
+                return
+            tp.Dcc.set_integer_attribute_value(self._node, 'type', 1)
+        elif self.is_gpu_cache():
+            asset_shape_operator = self.get_shape_operator()
+            if not asset_shape_operator:
+                asset_shape_operator = self.create_shape_operator()
+            if not asset_shape_operator:
+                LOGGER.warning('Impossible to switch proxy for GPU Cache "{}"'.format(self.id))
+                return
+            self.add_shape_operator_assignment("subdiv_type = 'catclark'")
+            self.add_shape_operator_assignment('subdiv_iterations = 2')
+
     def is_rig(self):
         """
         Returns whether current asset is a rig or not
@@ -80,6 +112,23 @@ class SolsticeAssetNode(artellapipe.AssetNode, object):
         for shape in shapes:
             shape_type = tp.Dcc.node_type(shape)
             if shape_type == 'gpuCache':
+                return True
+
+        return False
+
+    def is_standin(self):
+        """
+        Returns whether current asset is a Standin or not
+        :return: bool
+        """
+
+        shapes = tp.Dcc.list_shapes(self._node)
+        if not shapes:
+            return False
+
+        for shape in shapes:
+            shape_type = tp.Dcc.node_type(shape)
+            if shape_type == 'aiStandIn':
                 return True
 
         return False
@@ -180,20 +229,27 @@ class SolsticeAssetNode(artellapipe.AssetNode, object):
         if self.is_gpu_cache():
             return
 
-        main_ctrl = self.get_control(rig_control)
-        if not main_ctrl:
-            LOGGER.warning('No Main Control found for Asset Node: {}'.format(self.node))
-            return False
-
-        node_namespace = tp.Dcc.node_namespace(main_ctrl, clean=True)
-        main_world_translate = tp.Dcc.node_world_space_translation(main_ctrl)
-        main_world_rotation = tp.Dcc.node_world_space_rotation(main_ctrl)
-        main_world_scale = tp.Dcc.node_world_space_scale(main_ctrl)
-        parent_node = tp.Dcc.node_parent(self.node)
+        if self.is_rig():
+            main_ctrl = self.get_control(rig_control)
+            if not main_ctrl:
+                LOGGER.warning('No Main Control found for Asset Node: {}'.format(self.node))
+                return False
+            node_namespace = tp.Dcc.node_namespace(main_ctrl, clean=True)
+            main_world_translate = tp.Dcc.node_world_space_translation(main_ctrl)
+            main_world_rotation = tp.Dcc.node_world_space_rotation(main_ctrl)
+            main_world_scale = tp.Dcc.node_world_space_scale(main_ctrl)
+            parent_node = tp.Dcc.node_parent(self.node)
+        else:
+            node_namespace = tp.Dcc.node_namespace(self.node, clean=True)
+            main_world_translate = tp.Dcc.node_world_space_translation(self.node)
+            main_world_rotation = tp.Dcc.node_world_space_rotation(self.node)
+            main_world_scale = tp.Dcc.node_world_space_scale(self.node)
+            parent_node = tp.Dcc.node_parent(self.node)
 
         gpu_cache_file_class = artellapipe.FilesMgr().get_file_class('gpualembic')
         if not gpu_cache_file_class:
-            LOGGER.warning('Impossible to import gpu cache file because Rig File Class (rig) was not found!')
+            LOGGER.warning(
+                'Impossible to import gpu cache file because GpuAlembic File Class (gpualembic) was not found!')
             return False
 
         self.remove()
@@ -217,21 +273,61 @@ class SolsticeAssetNode(artellapipe.AssetNode, object):
 
         return True
 
-    # def is_alembic(self):
-    #     """
-    #     Returns whether current asset is an alembic or not
-    #     :return: bool
-    #     """
-    #
-    #     valid_tag_data = False
-    #     attrs = tp.Dcc.list_user_attributes(node=self._node)
-    #     if attrs and type(attrs) == list:
-    #         for attr in attrs:
-    #             if attr == 'tag_info':
-    #                 valid_tag_data = True
-    #                 break
-    #
-    #     return valid_tag_data
+    def replace_by_standin(self, rig_control=None):
+        """
+        Replaces current asset by its standin file
+        :param rig_control: str
+        :return:
+        """
+
+        if not rig_control:
+            rig_control = 'root_ctrl'
+
+        if self.is_standin():
+            return
+
+        if self.is_rig():
+            main_ctrl = self.get_control(rig_control)
+            if not main_ctrl:
+                LOGGER.warning('No Main Control found for Asset Node: {}'.format(self.node))
+                return False
+            node_namespace = tp.Dcc.node_namespace(main_ctrl, clean=True)
+            main_world_translate = tp.Dcc.node_world_space_translation(main_ctrl)
+            main_world_rotation = tp.Dcc.node_world_space_rotation(main_ctrl)
+            main_world_scale = tp.Dcc.node_world_space_scale(main_ctrl)
+            parent_node = tp.Dcc.node_parent(self.node)
+        else:
+            node_namespace = tp.Dcc.node_namespace(self.node, clean=True)
+            main_world_translate = tp.Dcc.node_world_space_translation(self.node)
+            main_world_rotation = tp.Dcc.node_world_space_rotation(self.node)
+            main_world_scale = tp.Dcc.node_world_space_scale(self.node)
+            parent_node = tp.Dcc.node_parent(self.node)
+
+        standin_file_class = artellapipe.FilesMgr().get_file_class('standin')
+        if not standin_file_class:
+            LOGGER.warning('Impossible to import standin file because Standin File Class (standin) was not found!')
+            return False
+
+        self.remove()
+
+        standin_file = standin_file_class(self.asset)
+        ref_nodes = standin_file.import_file(namespace=node_namespace, unique_namespace=False)
+        if not ref_nodes:
+            LOGGER.warning('No nodes imported into current scene for standin file!')
+            return False
+
+        if isinstance(ref_nodes, (list, tuple)):
+            gpu_cache_node = ref_nodes[0]
+        else:
+            gpu_cache_node = ref_nodes
+
+        tp.Dcc.translate_node_in_world_space(gpu_cache_node, main_world_translate)
+        tp.Dcc.rotate_node_in_world_space(gpu_cache_node, main_world_rotation)
+        tp.Dcc.scale_node_in_world_space(gpu_cache_node, main_world_scale)
+        if parent_node and tp.Dcc.object_exists(parent_node):
+            tp.Dcc.set_parent(gpu_cache_node, parent_node)
+
+        return True
 
 
 artellapipe.register.register_class('AssetNode', SolsticeAssetNode)
