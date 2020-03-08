@@ -1,0 +1,7 @@
+solstice.managers.media module
+==============================
+
+.. automodule:: solstice.managers.media
+   :members:
+   :undoc-members:
+   :show-inheritance:

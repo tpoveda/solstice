@@ -15,7 +15,6 @@ Submodules
    solstice.core.shelf
    solstice.core.shot
    solstice.core.tag
-   solstice.core.tool
    solstice.core.utils
 
 Module contents

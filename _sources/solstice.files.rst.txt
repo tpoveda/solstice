@@ -14,6 +14,7 @@ Submodules
    solstice.files.rig
    solstice.files.shader
    solstice.files.shading
+   solstice.files.shotlayout
    solstice.files.standin
    solstice.files.texture
 

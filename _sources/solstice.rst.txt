@@ -12,6 +12,7 @@ Subpackages
    solstice.managers
    solstice.tagger
    solstice.tools
+   solstice.toolsets
    solstice.widgets
 
 Submodules
@@ -20,6 +21,7 @@ Submodules
 .. toctree::
 
    solstice.loader
+   solstice.register
 
 Module contents
 ---------------

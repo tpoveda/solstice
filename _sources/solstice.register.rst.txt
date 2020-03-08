@@ -1,0 +1,7 @@
+solstice.register module
+========================
+
+.. automodule:: solstice.register
+   :members:
+   :undoc-members:
+   :show-inheritance:

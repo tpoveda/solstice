@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>solstice.core.tool module &mdash; solstice-core 0.0.l documentation</title>
+  <title>solstice.toolsets package &mdash; solstice-core 0.0.l documentation</title>
   
 
   
@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="solstice.core.utils module" href="solstice.core.utils.html" />
-    <link rel="prev" title="solstice.core.tag module" href="solstice.core.tag.html" /> 
+    <link rel="next" title="solstice.widgets package" href="solstice.widgets.html" />
+    <link rel="prev" title="solstice.tools package" href="solstice.tools.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,11 +90,12 @@
 <li class="toctree-l2 current"><a class="reference internal" href="solstice.html">solstice package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="solstice.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="solstice.assets.html">solstice.assets package</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="solstice.core.html">solstice.core package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="solstice.core.html">solstice.core package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solstice.files.html">solstice.files package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solstice.managers.html">solstice.managers package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solstice.tagger.html">solstice.tagger package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solstice.tools.html">solstice.tools package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">solstice.toolsets package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="solstice.widgets.html">solstice.widgets package</a></li>
 </ul>
 </li>
@@ -153,15 +154,13 @@
         
           <li><a href="solstice.html">solstice package</a> &raquo;</li>
         
-          <li><a href="solstice.core.html">solstice.core package</a> &raquo;</li>
-        
-      <li>solstice.core.tool module</li>
+      <li>solstice.toolsets package</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/solstice.core.tool.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/solstice.toolsets.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -175,25 +174,12 @@
 
            <div itemprop="articleBody">
             
-  <div class="section" id="module-solstice.core.tool">
-<span id="solstice-core-tool-module"></span><h1>solstice.core.tool module<a class="headerlink" href="#module-solstice.core.tool" title="Permalink to this headline">¶</a></h1>
-<p>Module that contains base tool class for Solstice</p>
-<dl class="class">
-<dt id="solstice.core.tool.SolsticeTool">
-<em class="property">class </em><code class="sig-prename descclassname">solstice.core.tool.</code><code class="sig-name descname">SolsticeTool</code><span class="sig-paren">(</span><em class="sig-param">project</em>, <em class="sig-param">config</em>, <em class="sig-param">parent=None</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.tool.SolsticeTool" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">artellapipe.core.tool.Tool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="method">
-<dt id="solstice.core.tool.SolsticeTool.set_attacher">
-<code class="sig-name descname">set_attacher</code><span class="sig-paren">(</span><em class="sig-param">attacher</em><span class="sig-paren">)</span><a class="headerlink" href="#solstice.core.tool.SolsticeTool.set_attacher" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="solstice.core.tool.SolsticeTool.staticMetaObject">
-<code class="sig-name descname">staticMetaObject</code><em class="property"> = &lt;PySide2.QtCore.QMetaObject object&gt;</em><a class="headerlink" href="#solstice.core.tool.SolsticeTool.staticMetaObject" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+  <div class="section" id="solstice-toolsets-package">
+<h1>solstice.toolsets package<a class="headerlink" href="#solstice-toolsets-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-solstice.toolsets">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-solstice.toolsets" title="Permalink to this headline">¶</a></h2>
+<p>Initialization module for solstice-toolsets</p>
+</div>
 </div>
 
 
@@ -208,10 +194,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="solstice.core.utils.html" class="btn btn-neutral float-right" title="solstice.core.utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="solstice.widgets.html" class="btn btn-neutral float-right" title="solstice.widgets package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="solstice.core.tag.html" class="btn btn-neutral float-left" title="solstice.core.tag module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="solstice.tools.html" class="btn btn-neutral float-left" title="solstice.tools package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
