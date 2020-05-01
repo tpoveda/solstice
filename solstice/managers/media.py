@@ -35,7 +35,7 @@ class SolsticeMediaManager(media.MediaManager, object):
         super(SolsticeMediaManager, self).__init__()
 
     def stamp_video(self, source, output, config_dict=None):
-        print('stamping video ...')
+        raise Exception('Stamp video functionality is not supported yet!')
 
     def stamp_image(self, source, output, config_dict=None):
         res_x = image.get_image_width(source)
@@ -72,7 +72,7 @@ class SolsticeMediaManager(media.MediaManager, object):
         camera = str(config_dict.get('camera', 'No camera'))
         start_frame = str(config_dict.get('start_frame', None))
         focal_length = None
-        if camera and tp.Dcc.object_exists(camera):
+        if camera and camera != 'No camera' and tp.Dcc.object_exists(camera):
             focal_length = tp.Dcc.get_camera_focal_length(camera)
 
         sequence = fileseq.findSequenceOnDisk(source)
@@ -152,9 +152,9 @@ class SolsticeMediaManager(media.MediaManager, object):
                 return
 
         video_file_path = self._get_temp_file_path(source, 'video')
-        if not video_file_path.endswith('.mov'):
+        if not video_file_path.endswith('.mp4'):
             video_file_path_split = os.path.splitext(video_file_path)
-            video_file_path = '{}.mov'.format(video_file_path_split[0])
+            video_file_path = '{}.mp4'.format(video_file_path_split[0])
         ffmpeglib.create_video_from_sequence_file(frame_paths[0], video_file_path)
         if not os.path.isfile(video_file_path):
             LOGGER.error('Error while stamping playblast video ...')

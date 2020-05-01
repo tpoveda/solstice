@@ -164,7 +164,7 @@ class SolsticeShotLayoutFile(shotfile.ArtellaShotFile, object):
                 break
         if root_node:
             for camera in all_cameras:
-                if not camera:
+                if not camera or not tp.Dcc.object_exists(camera):
                     continue
                 base_name = tp.Dcc.node_short_name(camera)
                 if base_name == camera_name:
