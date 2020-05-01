@@ -28,7 +28,6 @@ import artellapipe.libs.kitsu as kitsu_lib
 
 class SolsticeMenu(menus.ArtellaMenusManager, object):
     def __init__(self):
-
         super(SolsticeMenu, self).__init__()
 
     def create_menus(self, package_name, project):
@@ -41,7 +40,8 @@ class SolsticeMenu(menus.ArtellaMenusManager, object):
 
     def create_kitsu_menu(self):
 
-        parent_menu_bar = qtutils.get_window_menu_bar(tpDcc.Dcc.get_main_window())
+        main_win = tpDcc.Dcc.get_main_window()
+        parent_menu_bar = main_win.menuBar()
         if not parent_menu_bar:
             return
 

@@ -28,7 +28,7 @@ class SolsticeWindowDragger(dragger.WindowDragger, object):
         if self._user_info:
             self._user_info.set_project(project)
         else:
-            self._user_info = userinfo.KitsuUserInfo(project=project)
+            self._user_info = userinfo.KitsuUserInfo(project=project, window=self._window)
             self.buttons_layout.insertWidget(0, self._user_info)
 
     def try_kitsu_login(self):
