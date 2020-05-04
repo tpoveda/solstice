@@ -88,13 +88,13 @@ class SolsticeMediaManager(media.MediaManager, object):
         frame_outputs = dict()
         for i, (frame, empty_frame) in enumerate(frames_dict.items()):
             # Overlay playblast
-            stream = ffmpeglib.overlay_image_to_video(empty_frame, frame, y=top_band_height)
+            stream = ffmpeglib.overlay_inputs(empty_frame, frame, y=top_band_height)
 
             # Overlay top and bottom bands
             if top_band:
-                stream = ffmpeglib.overlay_image_to_video(stream, top_band)
+                stream = ffmpeglib.overlay_inputs(stream, top_band)
             if bottom_band:
-                stream = ffmpeglib.overlay_image_to_video(stream, bottom_band, y=res_y - bottom_band_height)
+                stream = ffmpeglib.overlay_inputs(stream, bottom_band, y=res_y - bottom_band_height)
 
             # Draw task and comment texts
             stream = ffmpeglib.draw_text(
@@ -159,6 +159,9 @@ class SolsticeMediaManager(media.MediaManager, object):
         if not os.path.isfile(video_file_path):
             LOGGER.error('Error while stamping playblast video ...')
             return
+
+        # scale = ffmpeglib.scale_video(video_file_path, 1920, 1080)
+        # ffmpeglib.save_to_file(scale, output, run_stream=True)
 
         draw_timestamp_stream = ffmpeglib.draw_timestamp_on_video(
             video_file_path, text='Time: ', x=40, y=res_y - font_height - text_margin_y - 20,
