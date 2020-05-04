@@ -5,3 +5,5 @@ include solstice/resources/icons/logos/*.*
 include solstice/resources/icons/shelf/*.*
 include solstice/resources/icons/lightrigs/*.*
 include solstice/resources/images/*.*
+include versioneer.py
+include solstice/_version.py
