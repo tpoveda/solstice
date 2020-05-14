@@ -45,6 +45,18 @@ class SolsticeAsset(artella_asset.ArtellaAsset, object):
 
         return tags
 
+    def is_published(self, file_type=None):
+        """
+         Returns whether or not current asset and given type is published
+         :param file_type: str, type of asset file. If None, True will be returned if any fiel type is published
+         :return: bool
+         """
+
+        asset_metadata = self.data or dict()
+        kitsu_asset_is_published = asset_metadata.get('is_published', False)
+
+        return kitsu_asset_is_published
+
     # def get_file(self, file_type, status, extension=None, fix_path=False):
     #     """
     #     Overrides base ArtellaAsset get_file function
