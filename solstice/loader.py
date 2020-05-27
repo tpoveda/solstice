@@ -14,8 +14,13 @@ __email__ = "tpovedatd@gmail.com"
 
 
 import os
-import inspect
 import logging.config
+
+# =================================================================================
+
+PACKAGE = 'solstice'
+
+# =================================================================================
 
 
 def init(do_reload=False, import_libs=True, dev=False):
@@ -32,55 +37,21 @@ def init(do_reload=False, import_libs=True, dev=False):
             sentry_sdk.init("https://c75c06d8349449a1a829c04732ba3e5c@sentry.io/1761556", default_integrations=False)
 
     from tpDcc.libs.python import importer
+    import artellapipe.loader
     from solstice import register
 
     logger = create_logger()
     register.register_class('logger', logger)
 
-    class SolsticeCore(importer.Importer, object):
-        def __init__(self, debug=False):
-            super(SolsticeCore, self).__init__(module_name='solstice', debug=debug)
-
-        def get_module_path(self):
-            """
-            Returns path where solstice module is stored
-            :return: str
-            """
-
-            try:
-                mod_dir = os.path.dirname(inspect.getframeinfo(inspect.currentframe()).filename)
-            except Exception:
-                try:
-                    mod_dir = os.path.dirname(__file__)
-                except Exception:
-                    try:
-                        import solstice
-                        mod_dir = solstice.__path__[0]
-                    except Exception:
-                        return None
-
-            return mod_dir
-
-    packages_order = [
-        'solstice.core'
-    ]
-
     if import_libs:
         import artellapipe.loader
-        artellapipe.loader.init(do_reload=do_reload, import_libs=True, dev=dev)
+        artellapipe.loader.init(import_libs=True, dev=dev)
 
     from solstice.core import project
 
-    solstice_core_importer = importer.init_importer(importer_class=SolsticeCore, do_reload=False, debug=dev)
-    solstice_core_importer.import_packages(
-        only_packages=False,
-        order=packages_order,
-        skip_modules=['solstice.bootstrap']
-    )
-    if do_reload:
-        solstice_core_importer.reload_all()
+    modules_to_skip = ['solstice.bootstrap']
+    importer.init_importer(package=PACKAGE, skip_modules=modules_to_skip)
 
-    import artellapipe.loader
     artellapipe.loader.set_project(project.Solstice, do_reload=do_reload)
 
 
