@@ -73,7 +73,7 @@ class SolsticeMediaManager(media.MediaManager, object):
         if artellapipe.Tracker().is_tracking_available():
             fps = artellapipe.Tracker().get_project_fps()
         else:
-            fps = 25
+            fps = 24
 
         camera = str(config_dict.get('camera', 'No camera'))
         start_frame = str(config_dict.get('start_frame', None))

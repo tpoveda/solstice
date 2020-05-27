@@ -17,13 +17,14 @@ import logging
 import tpDcc as tp
 
 import artellapipe
+from artellapipe.core import node
 
 from solstice.core import utils
 
 LOGGER = logging.getLogger()
 
 
-class SolsticeAssetNode(artellapipe.AssetNode, object):
+class SolsticeAssetNode(node.ArtellaAssetNode, object):
     def __init__(self, project, asset, node=None, **kwargs):
         super(SolsticeAssetNode, self).__init__(project=project, asset=asset, node=node, **kwargs)
 
