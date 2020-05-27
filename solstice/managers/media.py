@@ -43,7 +43,8 @@ class SolsticeMediaManager(media.MediaManager, object):
 
         top_band = config_dict.get('top_band', None)
         bottom_band = config_dict.get('bottom_band', None)
-        font_file = config_dict.get('text_font', 'Arial.ttf')
+        # font_file = config_dict.get('text_font', 'Arial.ttf')
+        font_file = 'Arial.ttf'
         font_family = config_dict.get('text_font_family', 'Regular')
         text_margin_x = config_dict.get('text_margin_x', 300)
         text_margin_y = config_dict.get('text_margin_y', 100)
@@ -68,7 +69,12 @@ class SolsticeMediaManager(media.MediaManager, object):
         shot_name = config_dict.get('shot_name', '') or ''
         task_name = config_dict.get('task_name', '') or ''
         task_comment = str(config_dict.get('task_comment', ''))
-        fps = artellapipe.Tracker().get_project_fps()
+
+        if artellapipe.Tracker().is_tracking_available():
+            fps = artellapipe.Tracker().get_project_fps()
+        else:
+            fps = 25
+
         camera = str(config_dict.get('camera', 'No camera'))
         start_frame = str(config_dict.get('start_frame', None))
         focal_length = None
