@@ -23,7 +23,7 @@ PACKAGE = 'solstice'
 # =================================================================================
 
 
-def init(do_reload=False, import_libs=True, dev=False):
+def init(import_libs=True, dev=False):
     """
     Initializes Solstice library
     """
@@ -52,7 +52,7 @@ def init(do_reload=False, import_libs=True, dev=False):
     modules_to_skip = ['solstice.bootstrap']
     importer.init_importer(package=PACKAGE, skip_modules=modules_to_skip)
 
-    artellapipe.loader.set_project(project.Solstice, do_reload=do_reload)
+    artellapipe.loader.set_project(project.Solstice)
 
 
 def create_logger():
